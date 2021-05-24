@@ -4,13 +4,14 @@
 # In[1]:
 
 
-from ipynb.fs.full.pyther_classes import *
+# from ipynb.fs.full.pyther_classes import *
 import numpy as np
 from scipy.stats import norm
 from scipy.stats import rankdata
 import pandas as pd
-import anndata 
+import anndata
 
+from pyther_classes import *
 
 # In[2]:
 
