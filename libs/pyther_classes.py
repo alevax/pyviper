@@ -1,15 +1,5 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 import pandas as pd
 import numpy as np
-
-
-# In[ ]:
-
 
 class Regulon:
     # class intialization
@@ -30,7 +20,7 @@ class Regulon:
         return len(self.icDict.keys())
     
     # returns the set of targets
-    def targets(self):
+    def get_targets(self):
         return list(self.icDict.keys())
     
     # returns the normalized wts (VIPER convention) as a dictionary
@@ -50,11 +40,6 @@ class Regulon:
         icP = sum(icP)**0.5
         return icP
         
-
-
-# In[1]:
-
-
 class Interactome:
     # class initialization
     def __init__(self, name, regDict=None):
@@ -75,17 +60,17 @@ class Interactome:
     def size(self):
         return len(self.regDict.keys())
 
-    def regulonNames(self):
+    def get_regulonNames(self):
         return self.regDict.keys()
     
     def addReg(self, regName, regObj):
         self.regDict[regName] = regObj
         
-    def getReg(self, regName):
+    def get_reg(self, regName):
         return self.regDict[regName]
     
     # generates the unified set of targets from all regulons
-    def targetSet(self):
+    def get_targetSet(self):
         targetVec = [r.targets() for r in self.regDict.values()]
         targetVec = set().union(*targetVec)
         return(targetVec)
@@ -120,18 +105,5 @@ class Interactome:
     def icpVec(self):
         icpVec = [r.icProportion() for r in self.regDict.values()]
         return icpVec
-
-        
-
-
-# In[2]:
-
-
-
-
-
-# In[ ]:
-
-
 
 

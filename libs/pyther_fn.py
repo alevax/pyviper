@@ -1,20 +1,9 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
-# from ipynb.fs.full.pyther_classes import *
+from pyther_classes import *
 import numpy as np
 from scipy.stats import norm
 from scipy.stats import rankdata
 import pandas as pd
 import anndata
-
-from pyther_classes import *
-
-# In[2]:
-
 
 def InteractomefromTSV(filePath, intName):
     # read file
@@ -34,10 +23,6 @@ def InteractomefromTSV(filePath, intName):
     # return
     return(intObj)
 
-
-# In[3]:
-
-
 def aREA(ges, intObj):
     gesMat = ges.X
     # transform the GES
@@ -53,7 +38,7 @@ def aREA(ges, intObj):
 
     # find the intersecting genes
     # TO DO: flag for not enough genes
-    targetSet = intObj.targetSet()
+    targetSet = intObj.get_targetSet()
     obsNames = ges.obs_names.to_list()
     intersectGenes = [value for value in targetSet if value in obsNames]
     targetInds = [obsNames.index(i) for i in intersectGenes]
@@ -72,22 +57,6 @@ def aREA(ges, intObj):
     return(nES)
 
 
-# In[4]:
-
-
-## load data
-#intObj = InteractomefromTSV('/mnt/c/Users/lvlah/linux/ac_lab/data/pyther_data/test-net.tsv', 'testNet')
-#gesDF = anndata.read_csv('/mnt/c/Users/lvlah/linux/ac_lab/data/pyther_data/gtex-aorta_ges.tsv', delimiter = '\t')
-#r = 'ENSG00000000003'
-
-
-# In[5]:
-
-
-#aREA(gesDF[:, 0:3], intObj)
-
-
-# In[ ]:
 
 
 
