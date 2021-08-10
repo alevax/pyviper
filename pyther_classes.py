@@ -71,16 +71,16 @@ class Interactome:
     
     # generates the unified set of targets from all regulons
     def get_targetSet(self):
-        targetVec = [r.targets() for r in self.regDict.values()]
+        targetVec = [r.get_targets() for r in self.regDict.values()]
         targetVec = set().union(*targetVec)
         return(targetVec)
     
     # generates IC matrix for VIPER
     def icMat(self):
-        targetVec = self.targetSet()
+        targetVec = self.get_targetSet()
         # make empty dataframe
         icMat = pd.DataFrame(np.zeros((len(targetVec), self.size())), 
-                             index = targetVec, columns = self.regulonNames())
+                             index = targetVec, columns = self.get_regulonNames())
         # fill w/ values from each regulon
         for r in list(self.regDict.values()):
             rNormIC = r.normIC()
@@ -90,10 +90,10 @@ class Interactome:
     
     # generates MoR matrix for VIPER
     def morMat(self):
-        targetVec = self.targetSet()
+        targetVec = self.get_targetSet()
         # make empty dataframe
         morMat = pd.DataFrame(np.zeros((len(targetVec), self.size())), 
-                             index = targetVec, columns = self.regulonNames())
+                             index = targetVec, columns = self.get_regulonNames())
         # fill w/ values from each regulon
         for r in list(self.regDict.values()):
             rMOR = r.morDict
