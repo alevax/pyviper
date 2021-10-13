@@ -23,8 +23,8 @@ def InteractomefromTSV(filePath, intName):
     # return
     return(intObj)
 
-def aREA(ges, intObj):
-    gesMat = ges.X
+def aREA(gesObj, intObj):
+    gesMat = gesObj.X
     
     # rank transform the GES
     rankMat = rankdata(gesMat, axis = 0)
