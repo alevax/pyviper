@@ -1,5 +1,11 @@
 data/*
 
+.spyproject/*
+__pycache__
+__pycache__/*
+libs/.ipynb_checkpoints
+libs/.ipynb_checkpoints/*
+
 # History files
 .Rhistory
 .Rapp.history
@@ -39,3 +45,6 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+*.Rproj
+*.pyc
+*.pyc
