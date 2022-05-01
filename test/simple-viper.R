@@ -8,9 +8,9 @@ str(regulon,1)
 
 # Step 1 - Filter the expression data.
 # 1.1 Get a list of all targets of every regulator in the network.
-tmp <- c(names(regulon), unlist(lapply(regulon, function(x) names(x$tfmode)), use.name = FALSE ))
+all_targets <- c(names(regulon), unlist(lapply(regulon, function(x) names(x$tfmode)), use.name = FALSE ))
 # 1.2 Remove expression data of all the genes which aren't in the list identified abov
-eset <- eset[rownames(eset) %in% unique(tmp),]
+eset <- eset[rownames(eset) %in% unique(all_targets),]
 # 1.3 Scale the expression matrix on rows [i.e. row = (row - mean(row)) / sd(row) ].
 tt <- t(scale(t(eset)))
 
@@ -31,6 +31,8 @@ regulon <- regulon[sapply(regulon, function(x) length(x$tfmode)) >= minsize] # a
 length(regulon)
 # nes <- simpleaREA(tt, regulon)
 
+regulon <- pruneRegulon(regulon,cutoff = 50,adaptive = F,eliminate = T)
+
 simpleaREA <- function (tt, regulon)
 {
 	## Step 1 - Create the 'Mode of Regulation' and 'Weights' matrices.
@@ -39,6 +41,10 @@ simpleaREA <- function (tt, regulon)
 	# 1.2 Create the Mode of Regulation matrix from the regulon object.
 	mor <- sapply(regulon, function(x, genes) { return(x$tfmode[match(genes, names(x$tfmode))])
 	}, genes = targets)
+	
+	dim(mor)
+	tmp <- ifelse(is.na(mor),0,mor)
+	colSums(tmp != 0)
 	
 	dim(mor)
 	head(rownames(mor),20)
@@ -52,6 +58,10 @@ simpleaREA <- function (tt, regulon)
 		tmp <- x$likelihood[match(genes, names(x$tfmode))]
 		tmp[is.na(match(genes, names(x$tfmode)))] <- NA
 		return(tmp/max(tmp, na.rm = T)) }, genes = targets)
+	
+	tmp <- ifelse(is.na(wts),0,wts)
+	colSums(tmp != 0)
+	
 	# 1.3 For each regulator, assign values of 0 to genes which are not listed as its targets
 	mor[is.na(mor)] <- 0 
 	wts[is.na(wts)] <- 0
@@ -66,8 +76,16 @@ simpleaREA <- function (tt, regulon)
 	t2 <- filterRowMatrix(t1, pos)
 	dim(t1)
 	dim(t2)
-	t2q <- qnorm(tmp) 
+	t2q <- qnorm(t2) 
 	dim(t2q)
+	
+	#genewise
+	plot(density(t2[1,]))
+	plot(density(t2q[1,]))
+	
+	#samplewise
+	plot(density(t2[,1]))
+	plot(density(t2q[,1]))
 	
 	tmp[1:5,1:5] # t2
 	t2q[1:5,1:5]
@@ -88,12 +106,10 @@ simpleaREA <- function (tt, regulon)
 	dim(wtss)
 	dim(t2q)
 	
-	dim(mor)
-	dim(wtss)
-	dim(t2q)
-	
 	sum(!is.na(rownames(mor)))
-	interactome_matrix <- t(mor * wtss)
+	interactome_matrix <- t(mor * wtss) # mode of action * likelihood
+	colSums(tmp != 0)
+	
 	ges_matrix <- t2q
 	
 	dim(interactome_matrix)
@@ -108,7 +124,8 @@ simpleaREA <- function (tt, regulon)
 	t1 <- abs(t2 - 0.5) * 2
 	t1 <- t1 + (1 - max(t1))/2
 	# 3.2 Get qnorm values
-	t1q <- qnorm(filterRowMatrix(t1, pos))
+	pos <- match(targets, rownames(t1))
+	t1q <- qnorm(filterRowMatrix(x = t1, filter = pos))
 	# 3.3 Matrix multiplication.
 	sum2 <- t((1 - abs(mor)) * wtss) %*% t1q
 	
@@ -125,4 +142,11 @@ simpleaREA <- function (tt, regulon)
 	nes <- sum3 * lwt
 }
 
+x <- simpleaREA(tt,regulon)
+
+# aREA_single(ges = ges, regulon = regulon$MYB)
+y <- aREA_single(ges = tt[,1], regulon = regulon$MYB)
+
+x["MYB",1:5]
+y$nes[1:5]
 
