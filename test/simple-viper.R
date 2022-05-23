@@ -1,6 +1,7 @@
 
 # 1.1 Load VIPER library
 library(viper) # 1.2 Load data
+# BiocManager::install("bcellViper")
 data(bcellViper, package="bcellViper",verbose = TRUE)
 # 1.3 Get expression matrix
 eset <- exprs(dset)
@@ -144,6 +145,7 @@ simpleaREA <- function (tt, regulon)
 
 x <- simpleaREA(tt,regulon)
 
+source("libs/area_fn.R")
 # aREA_single(ges = ges, regulon = regulon$MYB)
 y <- aREA_single(ges = tt[,1], regulon = regulon$MYB)
 

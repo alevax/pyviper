@@ -2,7 +2,6 @@
 # Test Functions for Enrichment Analysis in R
 # -------------------------------------------
 source("../vaxtools/R/gsea-plot.R")
-
 source("../pyther/libs/area_fn.R")
 library(viper)
 
@@ -118,8 +117,8 @@ my_area <- function(ges,interactome)
 	# 4.2 Combine the Two-tail and One-tail enrichment score matrices.
 	sum3 <- (abs(sum1) + sum2 * (sum2 > 0)) * ss # This should be the es, not yet nes
 	
-	sum3["FOXM1",1] 
-	sum3["FOXM1",1] * lwt["FOXM1"] # This is the final score AKA nes
+	# sum3["FOXM1",1] 
+	# sum3["FOXM1",1] * lwt["FOXM1"] # This is the final score AKA nes
 	
 	# Step 5 - Calculate the Normalized Enrichment Scores.
 	# 5.1 For each regulator, calculate an index proportional to the likelihood value # of all its regulatory interactions.
@@ -131,6 +130,8 @@ my_area <- function(ges,interactome)
 	
 }
 
+
+
 library(viper) # 1.2 Load data
 data(bcellViper, package="bcellViper",verbose = TRUE)
 # 1.3 Get expression matrix
@@ -141,6 +142,7 @@ ges <- t(scale(t(eset)))
 interactome <- pruneRegulon(regulon,cutoff = 50,adaptive = FALSE,eliminate = TRUE)
 
 my_vp <- my_area(ges,interactome)
+source("test/simple-viper.R")
 my_sa <- simpleaREA(ges,interactome)
 
 identical( round(my_vp,3) , round(my_sa,3) )
