@@ -145,3 +145,11 @@ aREA <- function (eset, regulon, method = c("auto", "matrix",
   })
   return(tmp)
 }
+filterRowMatrix <- function (x, filter) 
+{
+  if (is.logical(filter)) 
+    largo <- length(which(filter))
+  else largo <- length(filter)
+  matrix(x[filter, ], largo, ncol(x), dimnames = list(rownames(x)[filter], 
+                                                      colnames(x)))
+}
