@@ -59,6 +59,7 @@ def aREA(gesObj, intObj):
     # make NES
     nES = iES.mul(intObj.icpVec(), 0)
     nES = np.transpose(nES)
+    nES.index = gesObj.obs.index
     
     return(nES)
 
