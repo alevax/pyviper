@@ -63,8 +63,25 @@ def aREA(gesObj, intObj):
     
     return(nES)
 
+def Pipeline_Pyther(gesObj, intObj):
+    # aREA takes gesObj.X
+    nesMat = aREA(gesObj, intObj)
 
+    # Create obs dataframe
+    nesMat_sampleNames = pd.DataFrame(index=range(len(nesMat.index.values)),columns=range(0))
+    nesMat_sampleNames.index = nesMat.index.values
+    nesMat_sampleNames
 
+    # Create var dataframe
+    nesMat_proteins = pd.DataFrame(index=range(len(nesMat.columns.values)),columns=range(0))
+    nesMat_proteins.index = nesMat.columns.values
+    nesMat_proteins
 
+    # Convert the pandas dataframe from Pyther into a new Anndata object
+    pAct_adata = anndata.AnnData(X=nesMat,
+                                 obs=nesMat_sampleNames,
+                                 var=nesMat_proteins)
 
-
+    # Store the GExpr Anndata object in the PAct Anndata object
+    pAct_adata.gExpr = gesObj
+    return(pAct_adata)
