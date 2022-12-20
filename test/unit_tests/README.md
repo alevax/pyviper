@@ -24,9 +24,10 @@ R
 
 ### Running the test
 
-To execute the test after updating the permissions of the shell script, simply execute the shell script as follow.
+To execute the test after updating the permissions of the shell script, simply execute the shell script `pyther/test/unit_tests/pyther_funcs_test.sh` as follows.
 ```
-pyther/test/unit_tests/pyther_funcs_test.sh
+cd pyther/test/unit_tests/
+bash pyther_funcs_test.sh
 ```
 
 Three tests will be conducted using 3 separate sets of input files located in
