@@ -5,9 +5,13 @@ import pandas as pd
 import anndata
 import scanpy as sc
 from pyther_classes import *
+import pathlib
 
+def get_pyther_dir():
+    pyther_dir = str(pathlib.Path(__file__).parent.parent.resolve())
+    return(pyther_dir)
 
-def InteractomeFromTSV(filePath, intName):
+def interactome_from_tsv(filePath, intName):
     """\
     Allows the user to load an interactome object from a TSV file.
 
@@ -327,33 +331,60 @@ def nes_mat_to_anndata(nesMat):
 #     else:
 #         features_list = adata.var_names
 #     return(features_list)
-#
-# def load_TFs(path_to_tfs = "data/regulatorIDs/tfs-hugo.txt"):
-#     tfs_list = load_regulators(path_to_tfs)
-#     return(tfs_list)
-#
-# def load_coTFs(path_to_cotfs = "data/regulatorIDs/cotfs-hugo.txt"):
-#     cotfs_list = load_regulators(path_to_cotfs)
-#     return(cotfs_list)
-#
-# def load_sig(path_to_sig = "data/regulatorIDs/sig-hugo.txt"):
-#     sig_list = load_regulators(path_to_sig)
-#     return(sig_list)
-#
-# def load_surf(path_to_surf = "data/regulatorIDs/surf-hugo.txt"):
-#     surf_list = load_regulators(path_to_surf)
-#     return(surf_list)
-#
-# def load_regulators(path_to_txt):
-#     with open(path_to_txt) as temp_file:
-#         regulator_set = [line.rstrip('\n') for line in temp_file]
-#     return(regulator_set)
-#
-# # Python program to illustrate the intersection
-# # of two lists in most simple way
-# def intersection(lst1, lst2):
-#     lst3 = [value for value in lst1 if value in lst2]
-#     return lst3
+
+def load_TFs(path_to_tfs = None):
+    if path_to_tfs is None:
+        path_to_tfs = get_pyther_dir() + "/data/regulatorIDs/tfs-hugo.txt"
+    tfs_list = load_regulators(path_to_tfs)
+    return(tfs_list)
+
+def load_coTFs(path_to_cotfs = None):
+    if path_to_cotfs is None:
+        path_to_cotfs = get_pyther_dir() + "/data/regulatorIDs/cotfs-hugo.txt"
+    cotfs_list = load_regulators(path_to_cotfs)
+    return(cotfs_list)
+
+def load_sig(path_to_sig = None):
+    if path_to_sig is None:
+        path_to_sig = get_pyther_dir() + "/data/regulatorIDs/sig-hugo.txt"
+    sig_list = load_regulators(path_to_sig)
+    return(sig_list)
+
+def load_surf(path_to_surf = None):
+    if path_to_surf is None:
+        path_to_surf = get_pyther_dir() + "/data/regulatorIDs/surf-hugo.txt"
+    surf_list = load_regulators(path_to_surf)
+    return(surf_list)
+
+def load_regulators(path_to_txt):
+    with open(path_to_txt) as temp_file:
+        regulator_set = [line.rstrip('\n') for line in temp_file]
+    return(regulator_set)
+
+def load_msigdb_regulon(collection = "c2"):
+    reg = None
+    if(collection.lower() == "c2"):
+        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c2-as-regulon.tsv"
+        reg = interactome_from_tsv(reg_path, "MSigDB_C2")
+    elif(collection.lower() == "c5"):
+        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c5-as-regulon.tsv"
+        reg = interactome_from_tsv(reg_path, "MSigDB_C5")
+    elif(collection.lower() == "c6"):
+        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c6-as-regulon.tsv"
+        reg = interactome_from_tsv(reg_path, "MSigDB_C6")
+    elif(collection.lower() == "c7"):
+        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c7-as-regulon.tsv"
+        reg = interactome_from_tsv(reg_path, "MSigDB_C7")
+    elif(collection.lower() == "h"):
+        reg_path = get_pyther_dir() + "/data/regulons/msigdb-h-as-regulon.tsv"
+        reg = interactome_from_tsv(reg_path, "MSigDB_H")
+    return(reg)
+
+# Python program to illustrate the intersection
+# of two lists in most simple way
+def intersection(lst1, lst2):
+    lst3 = [value for value in lst1 if value in lst2]
+    return lst3
 
 def pl_umap(adata,
             *,
