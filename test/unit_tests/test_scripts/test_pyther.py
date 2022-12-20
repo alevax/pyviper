@@ -1,4 +1,3 @@
-
 print("Running test_Pyther.py...")
 # some_file.py
 import sys, os
@@ -65,7 +64,7 @@ vip_mat = pd.read_csv(options.viper, sep='\t')
 # load interactome
 print("Loading interactome...")
 # intObj = InteractomefromTSV(dirPath + 'data/stoch-10000_pruned.tsv', 's10k-net')
-intObj = InteractomefromTSV(options.interactome, options.out_project_name)
+intObj = InteractomeFromTSV(options.interactome, options.out_project_name)
 
 # load ges
 print("Loading gene expression signature...")

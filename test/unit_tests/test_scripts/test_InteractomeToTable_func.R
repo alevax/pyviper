@@ -2,8 +2,9 @@
 print("Running test_InteractomeToTable_func.R...")
 print("Loading optparse and viper libraries...")
 suppressMessages(suppressWarnings(library(optparse)))
+
 # suppressMessages(suppressWarnings(library(viper)))
-source("../../libs/InteractomeToTable.R")
+source("../../libs/r-helper.R")
 
 ## Options
 option_list <- list(
