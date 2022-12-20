@@ -22,7 +22,7 @@ Load your data as follows (presuming they are in the same directory as pyther co
 
 ```python
 gesObj = anndata.read_csv('ges.tsv', delimiter = '\t')
-intObj = InteractomefromTSV('network.tsv', 'network_name')
+intObj = interactome_from_tsv('network.tsv', 'network_name')
 
 ```
 

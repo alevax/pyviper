@@ -132,7 +132,7 @@ def pyther(gex_data, intObj, layer = None):
     # aREA takes gex_data.X
     nesMat = aREA(gex_data, intObj, layer)
     # Create an Anndata object from the nesMat
-    pax_data = nes_mat_to_anndata(nesMat)
+    pax_data = mat_to_anndata(nesMat)
     # Store the GExpr Anndata object in the PAct Anndata object
     pax_data.gex_data = gex_data
     return(pax_data)
@@ -160,7 +160,7 @@ def path_enr(adata, intObj, layer = None):
     # aREA takes the pathways interactome and the adata
     pathEnrMat = aREA(adata, intObj, layer)
     # Create a new Anndata object
-    pathEnrObj = nes_mat_to_anndata(pathEnrMat)
+    pathEnrObj = mat_to_anndata(pathEnrMat)
     # This means we did pathway enrichment on VIPER: adata is pax_data
     if adata.gex_data is not None:
         pathEnrObj.gex_data = adata.gex_data
@@ -171,166 +171,205 @@ def path_enr(adata, intObj, layer = None):
         pathEnrObj.gex_data = adata
     return(pathEnrObj)
 
-def nes_mat_to_anndata(nesMat):
+def mat_to_anndata(mat):
     # Helper function for *pyther* and *path_enr*
     # Create obs dataframe
-    nesMat_sampleNames = pd.DataFrame(index=range(len(nesMat.index.values)),columns=range(0))
-    nesMat_sampleNames.index = nesMat.index.values
-    nesMat_sampleNames
+    mat_sampleNames = pd.DataFrame(index=range(len(mat.index.values)),columns=range(0))
+    mat_sampleNames.index = mat.index.values
+    mat_sampleNames
 
     # Create var dataframe
-    nesMat_proteins = pd.DataFrame(index=range(len(nesMat.columns.values)),columns=range(0))
-    nesMat_proteins.index = nesMat.columns.values
-    nesMat_proteins
+    mat_features = pd.DataFrame(index=range(len(mat.columns.values)),columns=range(0))
+    mat_features.index = mat.columns.values
+    mat_features
 
     # Convert the pandas dataframe from Pyther into a new Anndata object
-    pax_data = anndata.AnnData(X=nesMat,
-                               obs=nesMat_sampleNames,
-                               var=nesMat_proteins)
+    pax_data = anndata.AnnData(X=mat,
+                               obs=mat_sampleNames,
+                               var=mat_features)
     return(pax_data)
 
-# def tl_pca(adata,
-#             *,
-#             feature_groups="all", #["TFs", "CoTFs", "sig", "surf"],
-#             path_to_tfs = "data/regulatorIDs/tfs-hugo.txt",
-#             path_to_cotfs = "data/regulatorIDs/cotfs-hugo.txt",
-#             path_to_sig = "data/regulatorIDs/sig-hugo.txt",
-#             path_to_surf = "data/regulatorIDs/surf-hugo.txt",
-#             **kwargs):
-#     adata = getAdataFilteredByFeatures(adata,
-#                            feature_groups,
-#                            path_to_tfs,
-#                            path_to_cotfs,
-#                            path_to_sig,
-#                            path_to_surf)
-#     sc.tl.pca(adata, **kwargs)
-#
-# def tl_tsne(adata,
-#             *,
-#             feature_groups="all", #["TFs", "CoTFs", "sig", "surf"],
-#             path_to_tfs = "data/regulatorIDs/tfs-hugo.txt",
-#             path_to_cotfs = "data/regulatorIDs/cotfs-hugo.txt",
-#             path_to_sig = "data/regulatorIDs/sig-hugo.txt",
-#             path_to_surf = "data/regulatorIDs/surf-hugo.txt",
-#             **kwargs):
-#     adata = getAdataFilteredByFeatures(adata,
-#                            feature_groups,
-#                            path_to_tfs,
-#                            path_to_cotfs,
-#                            path_to_sig,
-#                            path_to_surf)
-#     sc.tl.tsne(adata, **kwargs)
-#
-# def tl_umap(adata,
-#             *,
-#             feature_groups="all", #["TFs", "CoTFs", "sig", "surf"],
-#             path_to_tfs = "data/regulatorIDs/tfs-hugo.txt",
-#             path_to_cotfs = "data/regulatorIDs/cotfs-hugo.txt",
-#             path_to_sig = "data/regulatorIDs/sig-hugo.txt",
-#             path_to_surf = "data/regulatorIDs/surf-hugo.txt",
-#             **kwargs):
-#     adata = getAdataFilteredByFeatures(adata,
-#                            feature_groups,
-#                            path_to_tfs,
-#                            path_to_cotfs,
-#                            path_to_sig,
-#                            path_to_surf)
-#     sc.tl.umap(adata, **kwargs)
-#
-# def tl_draw_graph(adata,
-#             *,
-#             feature_groups="all", #["TFs", "CoTFs", "sig", "surf"],
-#             path_to_tfs = "data/regulatorIDs/tfs-hugo.txt",
-#             path_to_cotfs = "data/regulatorIDs/cotfs-hugo.txt",
-#             path_to_sig = "data/regulatorIDs/sig-hugo.txt",
-#             path_to_surf = "data/regulatorIDs/surf-hugo.txt",
-#             **kwargs):
-#     adata = getAdataFilteredByFeatures(adata,
-#                            feature_groups,
-#                            path_to_tfs,
-#                            path_to_cotfs,
-#                            path_to_sig,
-#                            path_to_surf)
-#     sc.tl.draw_graph(adata, **kwargs)
-#
-# def tl_diff_map(adata,
-#             *,
-#             feature_groups="all", #["TFs", "CoTFs", "sig", "surf"],
-#             path_to_tfs = "data/regulatorIDs/tfs-hugo.txt",
-#             path_to_cotfs = "data/regulatorIDs/cotfs-hugo.txt",
-#             path_to_sig = "data/regulatorIDs/sig-hugo.txt",
-#             path_to_surf = "data/regulatorIDs/surf-hugo.txt",
-#             **kwargs):
-#     adata = getAdataFilteredByFeatures(adata,
-#                            feature_groups,
-#                            path_to_tfs,
-#                            path_to_cotfs,
-#                            path_to_sig,
-#                            path_to_surf)
-#     sc.tl.diff_map(adata, **kwargs)
-#
-# def tl_embedding_density(adata,
-#             *,
-#             feature_groups="all", #["TFs", "CoTFs", "sig", "surf"],
-#             path_to_tfs = "data/regulatorIDs/tfs-hugo.txt",
-#             path_to_cotfs = "data/regulatorIDs/cotfs-hugo.txt",
-#             path_to_sig = "data/regulatorIDs/sig-hugo.txt",
-#             path_to_surf = "data/regulatorIDs/surf-hugo.txt",
-#             **kwargs):
-#     adata = getAdataFilteredByFeatures(adata,
-#                            feature_groups,
-#                            path_to_tfs,
-#                            path_to_cotfs,
-#                            path_to_sig,
-#                            path_to_surf)
-#     sc.tl.embedding_density(adata, **kwargs)
-#
-# def getAdataFilteredByFeatures(adata,
-#         feature_groups,
-#         path_to_tfs,
-#         path_to_cotfs,
-#         path_to_sig,
-#         path_to_surf):
-#     features_list = getFeaturesList(adata,
-#             feature_groups,
-#             path_to_tfs,
-#             path_to_cotfs,
-#             path_to_sig,
-#             path_to_surf)
-#     features_indices = getFeaturesIndices(adata, features_list)
-#     adata.X = adata.X[:,features_indices]
-#     adata.var_names = adata.var_names[features_indices,]
-#     return(adata)
-#
-# def getFeaturesIndices(adata, features_list):
-#     true_false_list = pd.Series(adata.var_names).isin(features_list).tolist()
-#     [i for i, x in enumerate(true_false_list) if x]
-#
-# def getFeaturesList(adata,
-#                     feature_groups,
-#                     path_to_tfs,
-#                     path_to_cotfs,
-#                     path_to_sig,
-#                     path_to_surf):
-#     if feature_groups != "all":
-#         feature_groups = [x.lower() for x in feature_groups]
-#         features_list = list()
-#         if "tfs" in feature_groups or "tf" in feature_groups:
-#             tfs = load_TFs(path_to_tfs)
-#             features_list.append(tfs)
-#         if "cotfs" in feature_groups or "cotf" in feature_groups:
-#             cotfs = load_coTFs(path_to_cotfs)
-#             features_list.append(cotfs)
-#         if "sigs" in feature_groups or "sig" in feature_groups:
-#             sig = load_sig(path_to_sig)
-#             features_list.append(sig)
-#         if "surfs" in feature_groups or "surf" in feature_groups:
-#             surf = load_surf(path_to_surf)
-#             features_list.append(surf)
-#         features_list = intersection(features_list, adata.var_names)
-#     else:
-#         features_list = adata.var_names
-#     return(features_list)
+def tl_pca(adata,
+            *,
+            filter_by_feature_groups=None, #["TFs", "CoTFs", "sig", "surf"],
+            path_to_tfs = None,
+            path_to_cotfs = None,
+            path_to_sig = None,
+            path_to_surf = None,
+            **kwargs):
+    if filter_by_feature_groups is None:
+        filter_by_feature_groups = "all"
+    adata_filt = get_anndata_filtered_by_feature_group(adata,
+                                                       filter_by_feature_groups,
+                                                       path_to_tfs,
+                                                       path_to_cotfs,
+                                                       path_to_sig,
+                                                       path_to_surf)
+    sc.tl.pca(adata_filt, **kwargs)
+    adata.obsm["X_pca"] = adata_filt.obsm["X_pca"]
+    return(adata)
+
+def tl_tsne(adata,
+            *,
+            filter_by_feature_groups=None, #["TFs", "CoTFs", "sig", "surf"],
+            path_to_tfs = None,
+            path_to_cotfs = None,
+            path_to_sig = None,
+            path_to_surf = None,
+            **kwargs):
+    if filter_by_feature_groups is None:
+        filter_by_feature_groups = "all"
+    adata_filt = get_anndata_filtered_by_feature_group(adata,
+                                                       filter_by_feature_groups,
+                                                       path_to_tfs,
+                                                       path_to_cotfs,
+                                                       path_to_sig,
+                                                       path_to_surf)
+    sc.tl.tsne(adata_filt, **kwargs)
+    adata.obsm["X_tsne"] = adata_filt.obsm["X_tsne"]
+    return(adata)
+
+def tl_umap(adata,
+            *,
+            filter_by_feature_groups=None, #["TFs", "CoTFs", "sig", "surf"],
+            path_to_tfs = None,
+            path_to_cotfs = None,
+            path_to_sig = None,
+            path_to_surf = None,
+            svd_solver='arpack',
+            n_neighbors=10,
+            n_pcs=40,
+            **kwargs):
+    if filter_by_feature_groups is None:
+        filter_by_feature_groups = "all"
+    # Create a second anndata object
+    adata_filt = get_anndata_filtered_by_feature_group(adata,
+                                                       filter_by_feature_groups,
+                                                       path_to_tfs,
+                                                       path_to_cotfs,
+                                                       path_to_sig,
+                                                       path_to_surf)
+    sc.tl.pca(adata_filt, svd_solver=svd_solver)
+    sc.pp.neighbors(adata_filt, n_neighbors=n_neighbors, n_pcs=n_pcs)
+    # Move sc.pp.neighbors results to adata_filt
+    # adata_filt.obsp["distances"] = adata.obsp["distances"]
+    # adata_filt.obsp["connectivities"] = adata.obsp["connectivities"]
+    # adata_filt.uns["neighbors"] = adata.uns["neighbors"]
+    # Compute the UMAP
+    sc.tl.umap(adata_filt, **kwargs)
+    # Give the UMAP from the second anndata object to the original
+    adata.obsm["X_umap"] = adata_filt.obsm["X_umap"]
+    return(adata)
+
+#KeyError: 'No "neighbors" in .uns'
+def tl_draw_graph(adata,
+            *,
+            filter_by_feature_groups=None, #["TFs", "CoTFs", "sig", "surf"],
+            path_to_tfs = None,
+            path_to_cotfs = None,
+            path_to_sig = None,
+            path_to_surf = None,
+            **kwargs):
+    if filter_by_feature_groups is None:
+        filter_by_feature_groups = "all"
+    adata_filt = get_anndata_filtered_by_feature_group(adata,
+                                                       filter_by_feature_groups,
+                                                       path_to_tfs,
+                                                       path_to_cotfs,
+                                                       path_to_sig,
+                                                       path_to_surf)
+    sc.tl.pca(adata_filt, svd_solver=svd_solver)
+    sc.pp.neighbors(adata_filt, n_neighbors=n_neighbors, n_pcs=n_pcs)
+    sc.tl.draw_graph(adata_filt, **kwargs)
+    if "X_draw_graph_fa" in list(pAct_adata.obsm.keys()):
+        adata.obsm["X_draw_graph_fa"] = adata_filt.obsm["X_draw_graph_fa"]
+    if "X_draw_graph_fr" in list(pAct_adata.obsm.keys()):
+        adata.obsm["X_draw_graph_fr"] = adata_filt.obsm["X_draw_graph_fr"]
+    return(adata)
+
+#ValueError: You need to run `pp.neighbors` first to compute a neighborhood graph.
+def tl_diffmap(adata,
+            *,
+            filter_by_feature_groups=None, #["TFs", "CoTFs", "sig", "surf"],
+            path_to_tfs = None,
+            path_to_cotfs = None,
+            path_to_sig = None,
+            path_to_surf = None,
+            **kwargs):
+    if filter_by_feature_groups is None:
+        filter_by_feature_groups = "all"
+    adata_filt = get_anndata_filtered_by_feature_group(adata,
+                                                       filter_by_feature_groups,
+                                                       path_to_tfs,
+                                                       path_to_cotfs,
+                                                       path_to_sig,
+                                                       path_to_surf)
+    sc.tl.pca(adata_filt, svd_solver=svd_solver)
+    sc.pp.neighbors(adata_filt, n_neighbors=n_neighbors, n_pcs=n_pcs)
+    sc.tl.diffmap(adata_filt, **kwargs)
+    adata.obsm["X_diffmap"] = adata_filt.obsm["X_diffmap"]
+    adata.uns['diffmap_evals'] = adata_filt.uns['diffmap_evals']
+    return(adata)
+
+def get_anndata_filtered_by_feature_group(adata,
+                               feature_groups="all", #["TFs", "CoTFs", "sig", "surf"],
+                               path_to_tfs = None,
+                               path_to_cotfs = None,
+                               path_to_sig = None,
+                               path_to_surf = None,):
+    features_list = get_features_list(adata,
+            feature_groups,
+            path_to_tfs,
+            path_to_cotfs,
+            path_to_sig,
+            path_to_surf)
+    adata_filt = get_anndata_filtered_by_feature_list(adata, features_list)
+    return(adata_filt)
+
+def get_anndata_filtered_by_feature_list(adata, features_list):
+    features_indices = get_features_indices(adata, features_list)
+    mat = get_mat_from_anndata(adata, features_indices)
+    adata_with_features_only = mat_to_anndata(mat)
+    return(adata_with_features_only)
+
+def get_mat_from_anndata(adata, features_indices):
+    mat = pd.DataFrame(adata.X[:,features_indices],
+                       index = list(adata.obs_names),
+                       columns = adata.var_names[features_indices,])
+    return(mat)
+
+def get_features_indices(adata, features_list):
+    true_false_list = pd.Series(adata.var_names).isin(features_list).tolist()
+    features_indices = [i for i, x in enumerate(true_false_list) if x]
+    return(features_indices)
+
+def get_features_list(adata,
+                    feature_groups="all",
+                    path_to_tfs = None,
+                    path_to_cotfs = None,
+                    path_to_sig = None,
+                    path_to_surf = None):
+    if(type(feature_groups) is str):
+        feature_groups = [feature_groups]
+    if "all" not in feature_groups:
+        feature_groups = [x.lower() for x in feature_groups]
+        features_list = list()
+        if "tfs" in feature_groups or "tf" in feature_groups:
+            tfs = load_TFs(path_to_tfs)
+            features_list.extend(tfs)
+        if "cotfs" in feature_groups or "cotf" in feature_groups:
+            cotfs = load_coTFs(path_to_cotfs)
+            features_list.extend(cotfs)
+        if "sigs" in feature_groups or "sig" in feature_groups:
+            sig = load_sig(path_to_sig)
+            features_list.extend(sig)
+        if "surfs" in feature_groups or "surf" in feature_groups:
+            surf = load_surf(path_to_surf)
+            features_list.extend(surf)
+        features_list = intersection(features_list, list(adata.var_names))
+    else:
+        features_list = adata.var_names
+    return(features_list)
 
 def load_TFs(path_to_tfs = None):
     if path_to_tfs is None:
@@ -352,7 +391,7 @@ def load_sig(path_to_sig = None):
 
 def load_surf(path_to_surf = None):
     if path_to_surf is None:
-        path_to_surf = get_pyther_dir() + "/data/regulatorIDs/surf-hugo.txt"
+        path_to_surf = get_pyther_dir() + "/data/regulatorIDs/surface-hugo.txt"
     surf_list = load_regulators(path_to_surf)
     return(surf_list)
 
