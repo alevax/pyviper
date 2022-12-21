@@ -7,9 +7,11 @@ import scanpy as sc
 from pyther_classes import *
 import pathlib
 
-def get_pyther_dir():
-    pyther_dir = str(pathlib.Path(__file__).parent.parent.resolve())
-    return(pyther_dir)
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+# -----------------------------------------------------------------------------
+# ------------------------------- CORE FUNCTIONS ------------------------------
+# -----------------------------------------------------------------------------
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 def interactome_from_tsv(filePath, intName):
     """\
@@ -108,6 +110,35 @@ def aREA(gex_data, intObj, layer = None):
 
     return(nES)
 
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+# -----------------------------------------------------------------------------
+# ------------------------------ PYTHER FUNCTIONS -----------------------------
+# -----------------------------------------------------------------------------
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+# ------------------------------ HELPER FUNCTIONS -----------------------------
+def get_pyther_dir():
+    pyther_dir = str(pathlib.Path(__file__).parent.parent.resolve())
+    return(pyther_dir)
+
+def mat_to_anndata(mat):
+    # Helper function for *pyther* and *path_enr*
+    # Create obs dataframe
+    mat_sampleNames = pd.DataFrame(index=range(len(mat.index.values)),columns=range(0))
+    mat_sampleNames.index = mat.index.values
+    mat_sampleNames
+
+    # Create var dataframe
+    mat_features = pd.DataFrame(index=range(len(mat.columns.values)),columns=range(0))
+    mat_features.index = mat.columns.values
+    mat_features
+
+    # Convert the pandas dataframe from Pyther into a new Anndata object
+    pax_data = anndata.AnnData(X=mat,
+                               obs=mat_sampleNames,
+                               var=mat_features)
+    return(pax_data)
+
 def pyther(gex_data, intObj, layer = None):
     """\
     Allows the individual to infer protein activity from gene expression using
@@ -171,24 +202,126 @@ def path_enr(adata, intObj, layer = None):
         pathEnrObj.gex_data = adata
     return(pathEnrObj)
 
-def mat_to_anndata(mat):
-    # Helper function for *pyther* and *path_enr*
-    # Create obs dataframe
-    mat_sampleNames = pd.DataFrame(index=range(len(mat.index.values)),columns=range(0))
-    mat_sampleNames.index = mat.index.values
-    mat_sampleNames
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+# -----------------------------------------------------------------------------
+# ------------------------ LOADING REGULATORS FUNCTIONS -----------------------
+# -----------------------------------------------------------------------------
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-    # Create var dataframe
-    mat_features = pd.DataFrame(index=range(len(mat.columns.values)),columns=range(0))
-    mat_features.index = mat.columns.values
-    mat_features
+# ------------------------------ HELPER FUNCTIONS -----------------------------
 
-    # Convert the pandas dataframe from Pyther into a new Anndata object
-    pax_data = anndata.AnnData(X=mat,
-                               obs=mat_sampleNames,
-                               var=mat_features)
-    return(pax_data)
 
+
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+# -----------------------------------------------------------------------------
+# ----------------------------- FILTERING FUNCTIONS ---------------------------
+# -----------------------------------------------------------------------------
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+
+def load_TFs(path_to_tfs = None):
+    if path_to_tfs is None:
+        path_to_tfs = get_pyther_dir() + "/data/regulatorIDs/tfs-hugo.txt"
+    tfs_list = load_regulators(path_to_tfs)
+    return(tfs_list)
+
+def load_coTFs(path_to_cotfs = None):
+    if path_to_cotfs is None:
+        path_to_cotfs = get_pyther_dir() + "/data/regulatorIDs/cotfs-hugo.txt"
+    cotfs_list = load_regulators(path_to_cotfs)
+    return(cotfs_list)
+
+def load_sig(path_to_sig = None):
+    if path_to_sig is None:
+        path_to_sig = get_pyther_dir() + "/data/regulatorIDs/sig-hugo.txt"
+    sig_list = load_regulators(path_to_sig)
+    return(sig_list)
+
+def load_surf(path_to_surf = None):
+    if path_to_surf is None:
+        path_to_surf = get_pyther_dir() + "/data/regulatorIDs/surface-hugo.txt"
+    surf_list = load_regulators(path_to_surf)
+    return(surf_list)
+
+def load_regulators(path_to_txt):
+    with open(path_to_txt) as temp_file:
+        regulator_set = [line.rstrip('\n') for line in temp_file]
+    return(regulator_set)
+
+def load_msigdb_regulon(collection = "c2"):
+    reg = None
+    if(collection.lower() == "c2"):
+        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c2-as-regulon.tsv"
+        reg = interactome_from_tsv(reg_path, "MSigDB_C2")
+    elif(collection.lower() == "c5"):
+        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c5-as-regulon.tsv"
+        reg = interactome_from_tsv(reg_path, "MSigDB_C5")
+    elif(collection.lower() == "c6"):
+        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c6-as-regulon.tsv"
+        reg = interactome_from_tsv(reg_path, "MSigDB_C6")
+    elif(collection.lower() == "c7"):
+        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c7-as-regulon.tsv"
+        reg = interactome_from_tsv(reg_path, "MSigDB_C7")
+    elif(collection.lower() == "h"):
+        reg_path = get_pyther_dir() + "/data/regulons/msigdb-h-as-regulon.tsv"
+        reg = interactome_from_tsv(reg_path, "MSigDB_H")
+    return(reg)
+
+# ------------------------------ HELPER FUNCTIONS -----------------------------
+# Python program to illustrate the intersection
+# of two lists in most simple way
+def intersection(lst1, lst2):
+    lst3 = [value for value in lst1 if value in lst2]
+    return lst3
+
+
+
+def get_mat_from_anndata(adata, features_indices):
+    mat = pd.DataFrame(adata.X[:,features_indices],
+                       index = list(adata.obs_names),
+                       columns = adata.var_names[features_indices,])
+    return(mat)
+
+def get_features_indices(adata, features_list):
+    true_false_list = pd.Series(adata.var_names).isin(features_list).tolist()
+    features_indices = [i for i, x in enumerate(true_false_list) if x]
+    return(features_indices)
+
+def get_features_list(adata,
+                    feature_groups="all",
+                    path_to_tfs = None,
+                    path_to_cotfs = None,
+                    path_to_sig = None,
+                    path_to_surf = None):
+    if(type(feature_groups) is str):
+        feature_groups = [feature_groups]
+    if "all" not in feature_groups:
+        feature_groups = [x.lower() for x in feature_groups]
+        features_list = list()
+        if "tfs" in feature_groups or "tf" in feature_groups:
+            tfs = load_TFs(path_to_tfs)
+            features_list.extend(tfs)
+        if "cotfs" in feature_groups or "cotf" in feature_groups:
+            cotfs = load_coTFs(path_to_cotfs)
+            features_list.extend(cotfs)
+        if "sigs" in feature_groups or "sig" in feature_groups:
+            sig = load_sig(path_to_sig)
+            features_list.extend(sig)
+        if "surfs" in feature_groups or "surf" in feature_groups:
+            surf = load_surf(path_to_surf)
+            features_list.extend(surf)
+        features_list = intersection(features_list, list(adata.var_names))
+    else:
+        features_list = adata.var_names
+    return(features_list)
+
+
+
+
+
+# -----------------------------------------------------------------------------
+# ------------------------ SCANPY TOOLS PYTHER WRAPPERS -----------------------
+# -----------------------------------------------------------------------------
 def tl_pca(adata,
             *,
             filter_by_feature_groups=None, #["TFs", "CoTFs", "sig", "surf"],
@@ -311,119 +444,7 @@ def tl_diffmap(adata,
     adata.uns['diffmap_evals'] = adata_filt.uns['diffmap_evals']
     return(adata)
 
-def get_anndata_filtered_by_feature_group(adata,
-                               feature_groups="all", #["TFs", "CoTFs", "sig", "surf"],
-                               path_to_tfs = None,
-                               path_to_cotfs = None,
-                               path_to_sig = None,
-                               path_to_surf = None,):
-    features_list = get_features_list(adata,
-            feature_groups,
-            path_to_tfs,
-            path_to_cotfs,
-            path_to_sig,
-            path_to_surf)
-    adata_filt = get_anndata_filtered_by_feature_list(adata, features_list)
-    return(adata_filt)
 
-def get_anndata_filtered_by_feature_list(adata, features_list):
-    features_indices = get_features_indices(adata, features_list)
-    mat = get_mat_from_anndata(adata, features_indices)
-    adata_with_features_only = mat_to_anndata(mat)
-    return(adata_with_features_only)
-
-def get_mat_from_anndata(adata, features_indices):
-    mat = pd.DataFrame(adata.X[:,features_indices],
-                       index = list(adata.obs_names),
-                       columns = adata.var_names[features_indices,])
-    return(mat)
-
-def get_features_indices(adata, features_list):
-    true_false_list = pd.Series(adata.var_names).isin(features_list).tolist()
-    features_indices = [i for i, x in enumerate(true_false_list) if x]
-    return(features_indices)
-
-def get_features_list(adata,
-                    feature_groups="all",
-                    path_to_tfs = None,
-                    path_to_cotfs = None,
-                    path_to_sig = None,
-                    path_to_surf = None):
-    if(type(feature_groups) is str):
-        feature_groups = [feature_groups]
-    if "all" not in feature_groups:
-        feature_groups = [x.lower() for x in feature_groups]
-        features_list = list()
-        if "tfs" in feature_groups or "tf" in feature_groups:
-            tfs = load_TFs(path_to_tfs)
-            features_list.extend(tfs)
-        if "cotfs" in feature_groups or "cotf" in feature_groups:
-            cotfs = load_coTFs(path_to_cotfs)
-            features_list.extend(cotfs)
-        if "sigs" in feature_groups or "sig" in feature_groups:
-            sig = load_sig(path_to_sig)
-            features_list.extend(sig)
-        if "surfs" in feature_groups or "surf" in feature_groups:
-            surf = load_surf(path_to_surf)
-            features_list.extend(surf)
-        features_list = intersection(features_list, list(adata.var_names))
-    else:
-        features_list = adata.var_names
-    return(features_list)
-
-def load_TFs(path_to_tfs = None):
-    if path_to_tfs is None:
-        path_to_tfs = get_pyther_dir() + "/data/regulatorIDs/tfs-hugo.txt"
-    tfs_list = load_regulators(path_to_tfs)
-    return(tfs_list)
-
-def load_coTFs(path_to_cotfs = None):
-    if path_to_cotfs is None:
-        path_to_cotfs = get_pyther_dir() + "/data/regulatorIDs/cotfs-hugo.txt"
-    cotfs_list = load_regulators(path_to_cotfs)
-    return(cotfs_list)
-
-def load_sig(path_to_sig = None):
-    if path_to_sig is None:
-        path_to_sig = get_pyther_dir() + "/data/regulatorIDs/sig-hugo.txt"
-    sig_list = load_regulators(path_to_sig)
-    return(sig_list)
-
-def load_surf(path_to_surf = None):
-    if path_to_surf is None:
-        path_to_surf = get_pyther_dir() + "/data/regulatorIDs/surface-hugo.txt"
-    surf_list = load_regulators(path_to_surf)
-    return(surf_list)
-
-def load_regulators(path_to_txt):
-    with open(path_to_txt) as temp_file:
-        regulator_set = [line.rstrip('\n') for line in temp_file]
-    return(regulator_set)
-
-def load_msigdb_regulon(collection = "c2"):
-    reg = None
-    if(collection.lower() == "c2"):
-        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c2-as-regulon.tsv"
-        reg = interactome_from_tsv(reg_path, "MSigDB_C2")
-    elif(collection.lower() == "c5"):
-        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c5-as-regulon.tsv"
-        reg = interactome_from_tsv(reg_path, "MSigDB_C5")
-    elif(collection.lower() == "c6"):
-        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c6-as-regulon.tsv"
-        reg = interactome_from_tsv(reg_path, "MSigDB_C6")
-    elif(collection.lower() == "c7"):
-        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c7-as-regulon.tsv"
-        reg = interactome_from_tsv(reg_path, "MSigDB_C7")
-    elif(collection.lower() == "h"):
-        reg_path = get_pyther_dir() + "/data/regulons/msigdb-h-as-regulon.tsv"
-        reg = interactome_from_tsv(reg_path, "MSigDB_H")
-    return(reg)
-
-# Python program to illustrate the intersection
-# of two lists in most simple way
-def intersection(lst1, lst2):
-    lst3 = [value for value in lst1 if value in lst2]
-    return lst3
 
 def pl_umap(adata,
             *,
@@ -612,3 +633,26 @@ def get_pAct_anndata_with_pathEnr_umap(adata):
     adata_pAct = adata.pax_data
     adata_pAct.obsm["X_umap"] = adata.obsm["X_umap"]
     return(adata_pAct)
+
+
+
+def get_anndata_filtered_by_feature_group(adata,
+                               feature_groups="all", #["TFs", "CoTFs", "sig", "surf"],
+                               path_to_tfs = None,
+                               path_to_cotfs = None,
+                               path_to_sig = None,
+                               path_to_surf = None):
+    features_list = get_features_list(adata,
+            feature_groups,
+            path_to_tfs,
+            path_to_cotfs,
+            path_to_sig,
+            path_to_surf)
+    adata_filt = get_anndata_filtered_by_feature_list(adata, features_list)
+    return(adata_filt)
+
+def get_anndata_filtered_by_feature_list(adata, features_list):
+    features_indices = get_features_indices(adata, features_list)
+    mat = get_mat_from_anndata(adata, features_indices)
+    adata_with_features_only = mat_to_anndata(mat)
+    return(adata_with_features_only)
