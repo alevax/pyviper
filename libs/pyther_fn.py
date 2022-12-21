@@ -31,7 +31,7 @@ def interactome_from_tsv(filePath, intName):
     """
     # read file
     netTable = pd.read_csv(filePath, sep = '\t')
-    intObj = Interactome('intName')
+    interactome = Interactome('intName')
     # loop through regulators
     uniqueRegs = netTable.regulator.unique()
     for u in uniqueRegs:
@@ -42,11 +42,11 @@ def interactome_from_tsv(filePath, intName):
         morDict = dict(zip(uDF.target, uDF.mor))
         # make regulon object
         regObj = Regulon(u, icDict, morDict)
-        intObj.addReg(u, regObj)
+        interactome.addReg(u, regObj)
     # return
-    return(intObj)
+    return(interactome)
 
-def aREA(gex_data, intObj, layer = None):
+def aREA(gex_data, interactome, layer = None):
     """\
     Allows the individual to infer normalized enrichment scores from gene
     expression data using the analytical ranked enrichment analysis (aREA)
@@ -59,7 +59,7 @@ def aREA(gex_data, intObj, layer = None):
     ----------
     gex_data
         Gene expression stored in an anndata object (e.g. from Scanpy).
-    intObj
+    interactome
         The interactome object.
     layer
         The layer in the anndata object to use as the gene expression input
@@ -77,13 +77,13 @@ def aREA(gex_data, intObj, layer = None):
     rankMat = rankdata(gesMat, axis = 1)
 
     # find intersecting genes
-    targetSet = intObj.get_targetSet()
+    targetSet = interactome.get_targetSet()
     varNames = gex_data.var_names.to_list()
     intersectGenes = [value for value in targetSet if value in varNames]
 
     # reduce regulon matrices
-    icMat = intObj.icMat().loc[intersectGenes]
-    morMat = intObj.morMat().loc[intersectGenes]
+    icMat = interactome.icMat().loc[intersectGenes]
+    morMat = interactome.morMat().loc[intersectGenes]
 
     # prepare the 1-tailed / 2-tailed matrices
     gesInds = [varNames.index(i) for i in intersectGenes]
@@ -104,7 +104,7 @@ def aREA(gex_data, intObj, layer = None):
     # integrate
     iES = (abs(dES) + uES * (uES > 0)) * np.sign(dES)
     # make NES
-    nES = iES.mul(intObj.icpVec(), 0)
+    nES = iES.mul(interactome.icpVec(), 0)
     nES = np.transpose(nES)
     nES.index = gex_data.obs.index
 
@@ -116,7 +116,9 @@ def aREA(gex_data, intObj, layer = None):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
+# -----------------------------------------------------------------------------
 # ------------------------------ HELPER FUNCTIONS -----------------------------
+# -----------------------------------------------------------------------------
 def mat_to_anndata(mat):
     # Helper function for *pyther* and *path_enr*
     # Create obs dataframe
@@ -135,7 +137,10 @@ def mat_to_anndata(mat):
                                var=mat_features)
     return(pax_data)
 
-def pyther(gex_data, intObj, layer = None):
+# -----------------------------------------------------------------------------
+# ------------------------------- MAIN FUNCTIONS ------------------------------
+# -----------------------------------------------------------------------------
+def pyther(gex_data, interactome, layer = None):
     """\
     Allows the individual to infer protein activity from gene expression using
     the VIPER (Virtual Inference of Protein-activity by Enriched Regulon
@@ -145,7 +150,7 @@ def pyther(gex_data, intObj, layer = None):
     ----------
     gex_data
         Gene expression stored in an anndata object.
-    intObj
+    interactome
         The interactome object.
     layer
         The layer in the anndata object to use as the gene expression input
@@ -157,14 +162,14 @@ def pyther(gex_data, intObj, layer = None):
     stored in the .gex_data slot.
     """
     # aREA takes gex_data.X
-    nesMat = aREA(gex_data, intObj, layer)
-    # Create an Anndata object from the nesMat
-    pax_data = mat_to_anndata(nesMat)
-    # Store the GExpr Anndata object in the PAct Anndata object
+    nes_mat = aREA(gex_data, interactome, layer)
+    # Create an Anndata object from the nes_mat
+    pax_data = mat_to_anndata(nes_mat)
+    # Store the gex Anndata object in the pax Anndata object
     pax_data.gex_data = gex_data
     return(pax_data)
 
-def path_enr(adata, intObj, layer = None):
+def path_enr(adata, interactome, layer = None):
     """\
     Allows the individual to infer normalized enrichment scores of pathways
     using the analytical ranked enrichment analysis (aREA) function.
@@ -175,7 +180,7 @@ def path_enr(adata, intObj, layer = None):
     ----------
     adata
         Gene expression or protein activity stored in an anndata object.
-    intObj
+    interactome
         The interactome object containing pathways.
     layer
         The layer in the anndata object to use as the gene expression input
@@ -185,18 +190,18 @@ def path_enr(adata, intObj, layer = None):
     A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values.
     """
     # aREA takes the pathways interactome and the adata
-    pathEnrMat = aREA(adata, intObj, layer)
+    path_enr_mat = aREA(adata, interactome, layer)
     # Create a new Anndata object
-    pathEnrObj = mat_to_anndata(pathEnrMat)
+    pwe_data = mat_to_anndata(path_enr_mat)
     # This means we did pathway enrichment on VIPER: adata is pax_data
     if adata.gex_data is not None:
-        pathEnrObj.gex_data = adata.gex_data
+        pwe_data.gex_data = adata.gex_data
         adata.gex_data = None
-        pathEnrObj.pax_data = adata
-    # This means we did pathway enrichment on gExpr: adata is gex_data
+        pwe_data.pax_data = adata
+    # This means we did pathway enrichment on gex: adata is gex_data
     else:
-        pathEnrObj.gex_data = adata
-    return(pathEnrObj)
+        pwe_data.gex_data = adata
+    return(pwe_data)
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
@@ -204,7 +209,10 @@ def path_enr(adata, intObj, layer = None):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
+# -----------------------------------------------------------------------------
 # ------------------------------ HELPER FUNCTIONS -----------------------------
+# -----------------------------------------------------------------------------
+
 def get_pyther_dir():
     pyther_dir = str(pathlib.Path(__file__).parent.parent.resolve())
     return(pyther_dir)
@@ -213,6 +221,10 @@ def load_regulators(path_to_txt):
     with open(path_to_txt) as temp_file:
         regulator_set = [line.rstrip('\n') for line in temp_file]
     return(regulator_set)
+
+# -----------------------------------------------------------------------------
+# ------------------------------- MAIN FUNCTIONS ------------------------------
+# -----------------------------------------------------------------------------
 
 # ------------------------------- LOAD REGULATORS -----------------------------
 def load_TFs(path_to_tfs = None, species = "human"):
@@ -278,7 +290,10 @@ def load_msigdb_regulon(collection = "c2"):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
+# -----------------------------------------------------------------------------
 # ------------------------------ HELPER FUNCTIONS -----------------------------
+# -----------------------------------------------------------------------------
+
 # Python program to illustrate the intersection
 # of two lists in most simple way
 def intersection(lst1, lst2):
@@ -324,7 +339,11 @@ def get_features_list(adata,
         features_list = adata.var_names
     return(features_list)
 
-# --------------------------- MAIN FILTER FUNCTIONS ---------------------------
+# -----------------------------------------------------------------------------
+# ------------------------------- MAIN FUNCTIONS ------------------------------
+# -----------------------------------------------------------------------------
+
+# ------------------------- GET ANNDATA OBJECT FILTERED -----------------------
 def get_anndata_filtered_by_feature_group(adata,
                                feature_groups="all", #["TFs", "CoTFs", "sig", "surf"],
                                path_to_tfs = None,
@@ -345,9 +364,26 @@ def get_anndata_filtered_by_feature_list(adata, features_list):
     mat = get_mat_from_anndata(adata, features_indices)
     adata_with_features_only = mat_to_anndata(mat)
     return(adata_with_features_only)
-# -----------------------------------------------------------------------------
+
+# ----------------------------- FILTER INTERACTOME ----------------------------
+def prune_interactome(interactome, features_list):
+    # First prune the regulators
+    # Using a list comprehension to make a list of the keys to be deleted
+    regulators_to_delete = [key for key in interactome.regDict if key not in features_list]
+    # delete the key/s
+    for regulator in regulators_to_delete:
+        del interactome.regDict[regulator]
+
+    # Then prune the targets
+    for regulator in interactome.regDict:
+        regulon = interactome.get_reg(regulator)
+        targets_to_delete = [key for key in regulon.get_targets() if key not in features_list]
+        for target in targets_to_delete:
+            del interactome.get_reg(regulator).morDict[target]
+            del interactome.get_reg(regulator).icDict[target]
+    return(interactome)
+
 # ------------------------ SCANPY TOOLS PYTHER WRAPPERS -----------------------
-# -----------------------------------------------------------------------------
 def tl_pca(adata,
             *,
             filter_by_feature_groups=None, #["TFs", "CoTFs", "sig", "surf"],
@@ -420,7 +456,6 @@ def tl_umap(adata,
     adata.obsm["X_umap"] = adata_filt.obsm["X_umap"]
     return(adata)
 
-#KeyError: 'No "neighbors" in .uns'
 def tl_draw_graph(adata,
             *,
             filter_by_feature_groups=None, #["TFs", "CoTFs", "sig", "surf"],
@@ -440,13 +475,12 @@ def tl_draw_graph(adata,
     sc.tl.pca(adata_filt, svd_solver=svd_solver)
     sc.pp.neighbors(adata_filt, n_neighbors=n_neighbors, n_pcs=n_pcs)
     sc.tl.draw_graph(adata_filt, **kwargs)
-    if "X_draw_graph_fa" in list(pAct_adata.obsm.keys()):
+    if "X_draw_graph_fa" in list(adata.obsm.keys()):
         adata.obsm["X_draw_graph_fa"] = adata_filt.obsm["X_draw_graph_fa"]
-    if "X_draw_graph_fr" in list(pAct_adata.obsm.keys()):
+    if "X_draw_graph_fr" in list(adata.obsm.keys()):
         adata.obsm["X_draw_graph_fr"] = adata_filt.obsm["X_draw_graph_fr"]
     return(adata)
 
-#ValueError: You need to run `pp.neighbors` first to compute a neighborhood graph.
 def tl_diffmap(adata,
             *,
             filter_by_feature_groups=None, #["TFs", "CoTFs", "sig", "surf"],
@@ -476,18 +510,22 @@ def tl_diffmap(adata,
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-# --------------------------- plotting helper functions -----------------------
-def get_gExpr_anndata_with_NES_umap(adata):
-    adata_gExpr = adata.gex_data
-    adata_gExpr.obsm["X_umap"] = adata.obsm["X_umap"]
-    return(adata_gExpr)
+# -----------------------------------------------------------------------------
+# ------------------------------ HELPER FUNCTIONS -----------------------------
+# -----------------------------------------------------------------------------
+def get_gex_anndata_with_nes_umap(adata):
+    adata_gex = adata.gex_data
+    adata_gex.obsm["X_umap"] = adata.obsm["X_umap"]
+    return(adata_gex)
 
-def get_pAct_anndata_with_pathEnr_umap(adata):
-    adata_pAct = adata.pax_data
-    adata_pAct.obsm["X_umap"] = adata.obsm["X_umap"]
-    return(adata_pAct)
+def get_pax_anndata_with_path_enr_umap(adata):
+    adata_pax = adata.pax_data
+    adata_pax.obsm["X_umap"] = adata.obsm["X_umap"]
+    return(adata_pax)
 
-# ---------------------------- plotting main functions ------------------------
+# -----------------------------------------------------------------------------
+# ------------------------------- MAIN FUNCTIONS ------------------------------
+# -----------------------------------------------------------------------------
 def pl_umap(adata,
             *,
             plot_stored_gex_data=False,
@@ -513,9 +551,9 @@ def pl_umap(adata,
     A plot of :class:`~matplotlib.axes.Axes`.
     """
     if(plot_stored_gex_data is True):
-        adata = get_gExpr_anndata_with_NES_umap(adata)
+        adata = get_gex_anndata_with_nes_umap(adata)
     elif(plot_stored_pax_data is True):
-        adata = get_pAct_anndata_with_pathEnr_umap(adata)
+        adata = get_pax_anndata_with_path_enr_umap(adata)
     sc.pl.umap(adata, **kwargs)
 
 def pl_scatter(adata,
@@ -543,9 +581,9 @@ def pl_scatter(adata,
     A plot of :class:`~matplotlib.axes.Axes`.
     """
     if(plot_stored_gex_data is True):
-        adata = get_gExpr_anndata_with_NES_umap(adata)
+        adata = get_gex_anndata_with_nes_umap(adata)
     elif(plot_stored_pax_data is True):
-        adata = get_pAct_anndata_with_pathEnr_umap(adata)
+        adata = get_pax_anndata_with_path_enr_umap(adata)
     sc.pl.scatter(adata,**kwargs)
 
 def pl_heatmap(adata,
@@ -573,9 +611,9 @@ def pl_heatmap(adata,
     A plot of :class:`~matplotlib.axes.Axes`.
     """
     if(plot_stored_gex_data is True):
-        adata = get_gExpr_anndata_with_NES_umap(adata)
+        adata = get_gex_anndata_with_nes_umap(adata)
     elif(plot_stored_pax_data is True):
-        adata = get_pAct_anndata_with_pathEnr_umap(adata)
+        adata = get_pax_anndata_with_path_enr_umap(adata)
     sc.pl.heatmap(adata,**kwargs)
 
 def pl_dotplot(adata,
@@ -584,9 +622,9 @@ def pl_dotplot(adata,
                       plot_stored_pax_data = False,
                       **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gExpr_anndata_with_NES_umap(adata)
+        adata = get_gex_anndata_with_nes_umap(adata)
     elif(plot_stored_pax_data is True):
-        adata = get_pAct_anndata_with_pathEnr_umap(adata)
+        adata = get_pax_anndata_with_path_enr_umap(adata)
     sc.pl.dotplot(adata,**kwargs)
 
 def pl_tracksplot(adata,
@@ -595,9 +633,9 @@ def pl_tracksplot(adata,
                       plot_stored_pax_data = False,
                       **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gExpr_anndata_with_NES_umap(adata)
+        adata = get_gex_anndata_with_nes_umap(adata)
     elif(plot_stored_pax_data is True):
-        adata = get_pAct_anndata_with_pathEnr_umap(adata)
+        adata = get_pax_anndata_with_path_enr_umap(adata)
     sc.pl.tracksplot(adata,**kwargs)
 
 def pl_violin(adata,
@@ -606,9 +644,9 @@ def pl_violin(adata,
                      plot_stored_pax_data = False,
                      **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gExpr_anndata_with_NES_umap(adata)
+        adata = get_gex_anndata_with_nes_umap(adata)
     elif(plot_stored_pax_data is True):
-        adata = get_pAct_anndata_with_pathEnr_umap(adata)
+        adata = get_pax_anndata_with_path_enr_umap(adata)
     sc.pl.violin(adata,**kwargs)
 
 def pl_stacked_violin(adata,
@@ -617,9 +655,9 @@ def pl_stacked_violin(adata,
                              plot_stored_pax_data = False,
                              **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gExpr_anndata_with_NES_umap(adata)
+        adata = get_gex_anndata_with_nes_umap(adata)
     elif(plot_stored_pax_data is True):
-        adata = get_pAct_anndata_with_pathEnr_umap(adata)
+        adata = get_pax_anndata_with_path_enr_umap(adata)
     sc.pl.stacked_violin(adata,**kwargs)
 
 def pl_matrixplot(adata,
@@ -628,9 +666,9 @@ def pl_matrixplot(adata,
                          plot_stored_pax_data = False,
                          **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gExpr_anndata_with_NES_umap(adata)
+        adata = get_gex_anndata_with_nes_umap(adata)
     elif(plot_stored_pax_data is True):
-        adata = get_pAct_anndata_with_pathEnr_umap(adata)
+        adata = get_pax_anndata_with_path_enr_umap(adata)
     sc.pl.matrixplot(adata,**kwargs)
 
 def pl_clustermap(adata,
@@ -639,9 +677,9 @@ def pl_clustermap(adata,
                          plot_stored_pax_data = False,
                          **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gExpr_anndata_with_NES_umap(adata)
+        adata = get_gex_anndata_with_nes_umap(adata)
     elif(plot_stored_pax_data is True):
-        adata = get_pAct_anndata_with_pathEnr_umap(adata)
+        adata = get_pax_anndata_with_path_enr_umap(adata)
     sc.pl.clustermap(adata,**kwargs)
 
 def pl_ranking(adata,
@@ -650,9 +688,9 @@ def pl_ranking(adata,
                       plot_stored_pax_data = False,
                       **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gExpr_anndata_with_NES_umap(adata)
+        adata = get_gex_anndata_with_nes_umap(adata)
     elif(plot_stored_pax_data is True):
-        adata = get_pAct_anndata_with_pathEnr_umap(adata)
+        adata = get_pax_anndata_with_path_enr_umap(adata)
     sc.pl.ranking(adata,**kwargs)
 
 def pl_dendrogram(adata,
@@ -661,7 +699,7 @@ def pl_dendrogram(adata,
                          plot_stored_pax_data = False,
                          **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gExpr_anndata_with_NES_umap(adata)
+        adata = get_gex_anndata_with_nes_umap(adata)
     elif(plot_stored_pax_data is True):
-        adata = get_pAct_anndata_with_pathEnr_umap(adata)
+        adata = get_pax_anndata_with_path_enr_umap(adata)
     sc.pl.dendrogram(adata,**kwargs)
