@@ -117,10 +117,6 @@ def aREA(gex_data, intObj, layer = None):
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 # ------------------------------ HELPER FUNCTIONS -----------------------------
-def get_pyther_dir():
-    pyther_dir = str(pathlib.Path(__file__).parent.parent.resolve())
-    return(pyther_dir)
-
 def mat_to_anndata(mat):
     # Helper function for *pyther* and *path_enr*
     # Create obs dataframe
@@ -204,50 +200,58 @@ def path_enr(adata, intObj, layer = None):
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
-# ------------------------ LOADING REGULATORS FUNCTIONS -----------------------
+# --------------------------- LOADING DATA FUNCTIONS --------------------------
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 # ------------------------------ HELPER FUNCTIONS -----------------------------
-
-
-
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-# -----------------------------------------------------------------------------
-# ----------------------------- FILTERING FUNCTIONS ---------------------------
-# -----------------------------------------------------------------------------
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-
-
-def load_TFs(path_to_tfs = None):
-    if path_to_tfs is None:
-        path_to_tfs = get_pyther_dir() + "/data/regulatorIDs/tfs-hugo.txt"
-    tfs_list = load_regulators(path_to_tfs)
-    return(tfs_list)
-
-def load_coTFs(path_to_cotfs = None):
-    if path_to_cotfs is None:
-        path_to_cotfs = get_pyther_dir() + "/data/regulatorIDs/cotfs-hugo.txt"
-    cotfs_list = load_regulators(path_to_cotfs)
-    return(cotfs_list)
-
-def load_sig(path_to_sig = None):
-    if path_to_sig is None:
-        path_to_sig = get_pyther_dir() + "/data/regulatorIDs/sig-hugo.txt"
-    sig_list = load_regulators(path_to_sig)
-    return(sig_list)
-
-def load_surf(path_to_surf = None):
-    if path_to_surf is None:
-        path_to_surf = get_pyther_dir() + "/data/regulatorIDs/surface-hugo.txt"
-    surf_list = load_regulators(path_to_surf)
-    return(surf_list)
+def get_pyther_dir():
+    pyther_dir = str(pathlib.Path(__file__).parent.parent.resolve())
+    return(pyther_dir)
 
 def load_regulators(path_to_txt):
     with open(path_to_txt) as temp_file:
         regulator_set = [line.rstrip('\n') for line in temp_file]
     return(regulator_set)
 
+# ------------------------------- LOAD REGULATORS -----------------------------
+def load_TFs(path_to_tfs = None, species = "human"):
+    if path_to_tfs is None:
+        if species == "human":
+            path_to_tfs = get_pyther_dir() + "/data/regulatorIDs/tfs-hugo.txt"
+        elif species == "mouse":
+            path_to_tfs = get_pyther_dir() + "/data/regulatorIDs/tfs-hugo-mouse.txt"
+    tfs_list = load_regulators(path_to_tfs)
+    return(tfs_list)
+
+def load_coTFs(path_to_cotfs = None, species = "human"):
+    if path_to_cotfs is None:
+        if species == "human":
+            path_to_cotfs = get_pyther_dir() + "/data/regulatorIDs/cotfs-hugo.txt"
+        elif species == "mouse":
+            path_to_cotfs = get_pyther_dir() + "/data/regulatorIDs/cotfs-hugo-mouse.txt"
+    cotfs_list = load_regulators(path_to_cotfs)
+    return(cotfs_list)
+
+def load_sig(path_to_sig = None, species = "human"):
+    if path_to_sig is None:
+        if species == "human":
+            path_to_sig = get_pyther_dir() + "/data/regulatorIDs/sig-hugo.txt"
+        elif species == "mouse":
+            path_to_sig = get_pyther_dir() + "/data/regulatorIDs/sig-hugo-mouse.txt"
+    sig_list = load_regulators(path_to_sig)
+    return(sig_list)
+
+def load_surf(path_to_surf = None, species = "human"):
+    if path_to_surf is None:
+        if species == "human":
+            path_to_surf = get_pyther_dir() + "/data/regulatorIDs/surface-hugo.txt"
+        elif species == "mouse":
+            path_to_surf = get_pyther_dir() + "/data/regulatorIDs/surface-hugo-mouse.txt"
+    surf_list = load_regulators(path_to_surf)
+    return(surf_list)
+
+# ---------------------------- LOAD MSIGDB REGULONS ---------------------------
 def load_msigdb_regulon(collection = "c2"):
     reg = None
     if(collection.lower() == "c2"):
@@ -267,14 +271,19 @@ def load_msigdb_regulon(collection = "c2"):
         reg = interactome_from_tsv(reg_path, "MSigDB_H")
     return(reg)
 
+
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+# -----------------------------------------------------------------------------
+# ----------------------------- FILTERING FUNCTIONS ---------------------------
+# -----------------------------------------------------------------------------
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
 # ------------------------------ HELPER FUNCTIONS -----------------------------
 # Python program to illustrate the intersection
 # of two lists in most simple way
 def intersection(lst1, lst2):
     lst3 = [value for value in lst1 if value in lst2]
     return lst3
-
-
 
 def get_mat_from_anndata(adata, features_indices):
     mat = pd.DataFrame(adata.X[:,features_indices],
@@ -315,10 +324,27 @@ def get_features_list(adata,
         features_list = adata.var_names
     return(features_list)
 
+# --------------------------- MAIN FILTER FUNCTIONS ---------------------------
+def get_anndata_filtered_by_feature_group(adata,
+                               feature_groups="all", #["TFs", "CoTFs", "sig", "surf"],
+                               path_to_tfs = None,
+                               path_to_cotfs = None,
+                               path_to_sig = None,
+                               path_to_surf = None):
+    features_list = get_features_list(adata,
+            feature_groups,
+            path_to_tfs,
+            path_to_cotfs,
+            path_to_sig,
+            path_to_surf)
+    adata_filt = get_anndata_filtered_by_feature_list(adata, features_list)
+    return(adata_filt)
 
-
-
-
+def get_anndata_filtered_by_feature_list(adata, features_list):
+    features_indices = get_features_indices(adata, features_list)
+    mat = get_mat_from_anndata(adata, features_indices)
+    adata_with_features_only = mat_to_anndata(mat)
+    return(adata_with_features_only)
 # -----------------------------------------------------------------------------
 # ------------------------ SCANPY TOOLS PYTHER WRAPPERS -----------------------
 # -----------------------------------------------------------------------------
@@ -444,8 +470,24 @@ def tl_diffmap(adata,
     adata.uns['diffmap_evals'] = adata_filt.uns['diffmap_evals']
     return(adata)
 
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+# -----------------------------------------------------------------------------
+# ------------------------------ PLOTTING FUNCTIONS ---------------------------
+# -----------------------------------------------------------------------------
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
+# --------------------------- plotting helper functions -----------------------
+def get_gExpr_anndata_with_NES_umap(adata):
+    adata_gExpr = adata.gex_data
+    adata_gExpr.obsm["X_umap"] = adata.obsm["X_umap"]
+    return(adata_gExpr)
 
+def get_pAct_anndata_with_pathEnr_umap(adata):
+    adata_pAct = adata.pax_data
+    adata_pAct.obsm["X_umap"] = adata.obsm["X_umap"]
+    return(adata_pAct)
+
+# ---------------------------- plotting main functions ------------------------
 def pl_umap(adata,
             *,
             plot_stored_gex_data=False,
@@ -623,36 +665,3 @@ def pl_dendrogram(adata,
     elif(plot_stored_pax_data is True):
         adata = get_pAct_anndata_with_pathEnr_umap(adata)
     sc.pl.dendrogram(adata,**kwargs)
-
-def get_gExpr_anndata_with_NES_umap(adata):
-    adata_gExpr = adata.gex_data
-    adata_gExpr.obsm["X_umap"] = adata.obsm["X_umap"]
-    return(adata_gExpr)
-
-def get_pAct_anndata_with_pathEnr_umap(adata):
-    adata_pAct = adata.pax_data
-    adata_pAct.obsm["X_umap"] = adata.obsm["X_umap"]
-    return(adata_pAct)
-
-
-
-def get_anndata_filtered_by_feature_group(adata,
-                               feature_groups="all", #["TFs", "CoTFs", "sig", "surf"],
-                               path_to_tfs = None,
-                               path_to_cotfs = None,
-                               path_to_sig = None,
-                               path_to_surf = None):
-    features_list = get_features_list(adata,
-            feature_groups,
-            path_to_tfs,
-            path_to_cotfs,
-            path_to_sig,
-            path_to_surf)
-    adata_filt = get_anndata_filtered_by_feature_list(adata, features_list)
-    return(adata_filt)
-
-def get_anndata_filtered_by_feature_list(adata, features_list):
-    features_indices = get_features_indices(adata, features_list)
-    mat = get_mat_from_anndata(adata, features_indices)
-    adata_with_features_only = mat_to_anndata(mat)
-    return(adata_with_features_only)
