@@ -374,13 +374,6 @@ def prune_interactome(interactome, features_list):
     for regulator in regulators_to_delete:
         del interactome.regDict[regulator]
 
-    # Then prune the targets
-    for regulator in interactome.regDict:
-        regulon = interactome.get_reg(regulator)
-        targets_to_delete = [key for key in regulon.get_targets() if key not in features_list]
-        for target in targets_to_delete:
-            del interactome.get_reg(regulator).morDict[target]
-            del interactome.get_reg(regulator).icDict[target]
     return(interactome)
 
 # ------------------------ SCANPY TOOLS PYTHER WRAPPERS -----------------------
