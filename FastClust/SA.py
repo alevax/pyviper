@@ -1,4 +1,5 @@
 from SA_GS_subfunctions import *
+from dual_annealing_with_progress_bar import *
 from matplotlib.colors import LinearSegmentedColormap
 from scipy.optimize import dual_annealing
 import seaborn as sns
@@ -76,7 +77,8 @@ def SA_Clustering(adata,
 
     if verbose: print("Beginning Simulated Annealing clustering...")
     # perform the dual annealing search
-    opt_result = dual_annealing(func = objective,
+    # opt_result = dual_annealing(func = objective,
+    opt_result = dual_annealing_with_progress_bar(func = objective,
                                 bounds = bounds,
                                 args = (adata,
                                         n_subsamples,
