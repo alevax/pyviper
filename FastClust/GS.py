@@ -89,7 +89,7 @@ def get_opt_res_knn_from_gs_results(gs_results):
     return(opt_values)
 
 # -------------------------- ** MAIN RUN FUNCTION ** ---------------------------
-def run_fastclust_gs_clustering(
+def run_fastclust_GS_clustering(
     adata,
     res_vector = np.arange(0.1, 2, 0.2),
     NN_vector = np.arange(11, 101, 10),
@@ -122,6 +122,7 @@ def run_fastclust_gs_clustering(
     opt_values = get_opt_res_knn_from_gs_results(gs_results)
     opt_res = opt_values["opt_res"]
     opt_knn = opt_values["opt_knn"]
+    gs_results["opt_result"] = [opt_values["opt_res"], opt_values["opt_knn"]]
     sc.pp.neighbors(adata, n_neighbors=opt_knn, use_rep = "dist_obj")
     adata = cluster_adata(adata,
                       0,#my_random_seed,
@@ -136,7 +137,7 @@ def run_fastclust_gs_clustering(
 # ---------------------------- ** PLOTTING FUNCS ** ----------------------------
 # ------------------------------------------------------------------------------
 # @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
-def get_gs_search_plot(adata, plot_type = "sil_avg"):
+def get_GS_search_plot(adata, plot_type = "sil_avg"):
     heatmap_table = pd.pivot_table(adata.GS_results_dict["search_df"],
                            values=plot_type,
                            index=['knn'],
