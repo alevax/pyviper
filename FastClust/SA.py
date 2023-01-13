@@ -122,7 +122,7 @@ def get_sa_results(adata,
     return(sa_results)
 
 # -------------------------- ** MAIN RUN FUNCTION ** ---------------------------
-def run_fastclust_sa_clustering(adata,
+def run_fastclust_SA_clustering(adata,
                   res_range = [0.01, 2],
                   NN_range = [3,30],
                   object_dist = None,
@@ -253,7 +253,7 @@ def create_countour_layer_for_sa_search_plot(ax, search_df):
                                  clip = [ax.get_xlim(),ax.get_ylim()])
 
 # ----------------------- ** MAIN PLOTTING FUNCTION ** -------------------------
-def get_sa_search_plot(adata, plot_type = "sil_avg", plot_density = True):
+def get_SA_search_plot(adata, plot_type = "sil_avg", plot_density = True):
     # https://stackoverflow.com/questions/16834861/create-own-colormap-using-matplotlib-and-plot-color-scale
     search_df = adata.SA_results_dict["search_df"]
     fig, ax = plt.subplots()
@@ -261,4 +261,5 @@ def get_sa_search_plot(adata, plot_type = "sil_avg", plot_density = True):
     create_cbar_for_sa_search_plot(ax, plot_type)
     if(plot_density == True):
         create_countour_layer_for_sa_search_plot(ax, search_df)
+    plt.close()
     return(fig)
