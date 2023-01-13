@@ -264,25 +264,36 @@ def load_surf(path_to_surf = None, species = "human"):
     return(surf_list)
 
 # ---------------------------- LOAD MSIGDB REGULONS ---------------------------
-def load_msigdb_regulon(collection = "c2"):
-    reg = None
-    if(collection.lower() == "c2"):
-        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c2-as-regulon.tsv"
-        reg = load_interactome_from_tsv(reg_path, "MSigDB_C2")
-    elif(collection.lower() == "c5"):
-        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c5-as-regulon.tsv"
-        reg = load_interactome_from_tsv(reg_path, "MSigDB_C5")
-    elif(collection.lower() == "c6"):
-        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c6-as-regulon.tsv"
-        reg = load_interactome_from_tsv(reg_path, "MSigDB_C6")
-    elif(collection.lower() == "c7"):
-        reg_path = get_pyther_dir() + "/data/regulons/msigdb-c7-as-regulon.tsv"
-        reg = load_interactome_from_tsv(reg_path, "MSigDB_C7")
-    elif(collection.lower() == "h"):
-        reg_path = get_pyther_dir() + "/data/regulons/msigdb-h-as-regulon.tsv"
-        reg = load_interactome_from_tsv(reg_path, "MSigDB_H")
+def merge_dicts(dict1, dict2):
+    res = {**dict1, **dict2}
+    return res
+def get_msigdb_reg_path(collection):
+    reg_path = get_pyther_dir() + "/data/regulons/msigdb-" + collection + "-as-regulon.tsv"
+    return(reg_path)
+def load_msigdb_from_tsv(collection):
+    reg_path = get_msigdb_reg_path(collection.lower())
+    reg = load_interactome_from_tsv(reg_path, "MSigDB_" + collection.upper())
     return(reg)
-
+def load_msigdb_regulon_single(collection = "c2"):
+    reg = None
+    if(collection.lower() in ["c2", "c5", "c6", "c7", "h"]):
+        reg = load_msigdb_from_tsv(collection)
+    return(reg)
+def load_msigdb_regulon_multiple(collection = ["h", "c2"]):
+    combined_dict = {}
+    for i in range(len(collection)):
+        new_dict = load_msigdb_regulon_single(collection[i]).regDict
+        combined_dict = merge_dicts(combined_dict, new_dict)
+    combined_interactome = Interactome(name = '+'.join(collection),
+                                       regDict = combined_dict)
+    return(combined_interactome)
+def load_msigdb_regulon(collection = "h"):
+    reg = None
+    if(type(collection) is str):
+        reg = load_msigdb_regulon_single(collection)
+    elif(type(collection) is list):
+        reg = load_msigdb_regulon_multiple(collection)
+    return(reg)
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
