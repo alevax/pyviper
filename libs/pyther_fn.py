@@ -13,7 +13,7 @@ import pathlib
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def interactome_from_tsv(filePath, intName):
+def load_interactome_from_tsv(filePath, intName):
     """\
     Allows the user to load an interactome object from a TSV file.
 
@@ -268,19 +268,19 @@ def load_msigdb_regulon(collection = "c2"):
     reg = None
     if(collection.lower() == "c2"):
         reg_path = get_pyther_dir() + "/data/regulons/msigdb-c2-as-regulon.tsv"
-        reg = interactome_from_tsv(reg_path, "MSigDB_C2")
+        reg = load_interactome_from_tsv(reg_path, "MSigDB_C2")
     elif(collection.lower() == "c5"):
         reg_path = get_pyther_dir() + "/data/regulons/msigdb-c5-as-regulon.tsv"
-        reg = interactome_from_tsv(reg_path, "MSigDB_C5")
+        reg = load_interactome_from_tsv(reg_path, "MSigDB_C5")
     elif(collection.lower() == "c6"):
         reg_path = get_pyther_dir() + "/data/regulons/msigdb-c6-as-regulon.tsv"
-        reg = interactome_from_tsv(reg_path, "MSigDB_C6")
+        reg = load_interactome_from_tsv(reg_path, "MSigDB_C6")
     elif(collection.lower() == "c7"):
         reg_path = get_pyther_dir() + "/data/regulons/msigdb-c7-as-regulon.tsv"
-        reg = interactome_from_tsv(reg_path, "MSigDB_C7")
+        reg = load_interactome_from_tsv(reg_path, "MSigDB_C7")
     elif(collection.lower() == "h"):
         reg_path = get_pyther_dir() + "/data/regulons/msigdb-h-as-regulon.tsv"
-        reg = interactome_from_tsv(reg_path, "MSigDB_H")
+        reg = load_interactome_from_tsv(reg_path, "MSigDB_H")
     return(reg)
 
 
