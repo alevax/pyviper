@@ -9,32 +9,32 @@ import seaborn as sns
 # ------------------------- ** DUAL ANNEALING FUNCS ** -------------------------
 # ------------------------------------------------------------------------------
 # @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
-def SA_Clustering(adata,
-                  res_range = [0.01, 2],
-                  NN_range = [3,30],
-                  object_dist = None,
-                  use_reduction=True,
-                  reduction_slot="X_pca",
-                  SS_weights = "unitary",
-                  SS_exp_base = 2.718282,
-                  verbose = True,
-                  clust_alg = "Leiden",
-                  n_subsamples = 1,
-                  subsamples_pct_cells=100,
-                  maxiter = 1000,
-                  initial_temp = 5230,
-                  restart_temp_ratio = 2e-5,
-                  visit = 2.62,
-                  accept = -5.0,
-                  maxfun = 1e7,
-                  seed = 0):
+def get_sa_results(adata,
+                   res_range = [0.01, 2],
+                   NN_range = [3,30],
+                   object_dist = None,
+                   use_reduction=True,
+                   reduction_slot="X_pca",
+                   SS_weights = "unitary",
+                   SS_exp_base = 2.718282,
+                   verbose = True,
+                   clust_alg = "Leiden",
+                   n_subsamples = 1,
+                   subsamples_pct_cells=100,
+                   maxiter = 1000,
+                   initial_temp = 5230,
+                   restart_temp_ratio = 2e-5,
+                   visit = 2.62,
+                   accept = -5.0,
+                   maxfun = 1e7,
+                   seed = 0):
     # par_init = NULL,
     # control = NULL,
     # lq = 0,
     # rng_seeds = c(1234,0)):
     if verbose: print("Computing distance object...")
     dist_list = getObjectDist(adata, object_dist, use_reduction, reduction_slot)
-    adata.obsm["GS_obj"] = dist_list["d"]
+    adata.obsm["dist_obj"] = dist_list["d"]
     n_pcs =  dist_list["numPCs"]
     # In order to use global inside a nested function, we have to declare a
         # variable with a global keyword inside a nested function
@@ -49,16 +49,17 @@ def SA_Clustering(adata,
         a_nn = int(np.floor(a_nn))
         global sil_df
         global curr_iter
-        sc.pp.neighbors(adata, n_neighbors=a_nn, use_rep = "GS_obj")
+        sc.pp.neighbors(adata, n_neighbors=a_nn, use_rep = "dist_obj")
         adata = cluster_adata(adata,
                                  0,#my_random_seed,
                                  a_res,
-                                 clust_alg)
+                                 clust_alg,
+                                 "SA_clusters")
         # run 100 times, change the seed
         silhouette_avgs = []
         for i in range(1,n_subsamples+1):
             sil_df = add_clustering_results_to_sil_df_using_subsampling(
-                               adata.obsm["GS_obj"],
+                               adata.obsm["dist_obj"],
                                adata,
                                i,
                                subsamples_pct_cells,
@@ -69,7 +70,8 @@ def SA_Clustering(adata,
                                SS_weights,
                                SS_exp_base,
                                curr_iter,
-                               update_method = "concat"
+                               update_method = "concat",
+                               obs_key_to_store_clusts = "SA_clusters"
             )
         curr_iter = curr_iter + 1
         sil_avg = np.mean(sil_df["sil_avg"].tail(n_subsamples).values) #Get the mean silouette score for these subsamples
@@ -118,6 +120,56 @@ def SA_Clustering(adata,
         "run_params": run_params
     }
     return(sa_results)
+
+# -------------------------- ** MAIN RUN FUNCTION ** ---------------------------
+def run_fastclust_sa_clustering(adata,
+                  res_range = [0.01, 2],
+                  NN_range = [3,30],
+                  object_dist = None,
+                  use_reduction=True,
+                  reduction_slot="X_pca",
+                  SS_weights = "unitary",
+                  SS_exp_base = 2.718282,
+                  verbose = True,
+                  clust_alg = "Leiden",
+                  n_subsamples = 1,
+                  subsamples_pct_cells=100,
+                  maxiter = 1000,
+                  initial_temp = 5230,
+                  restart_temp_ratio = 2e-5,
+                  visit = 2.62,
+                  accept = -5.0,
+                  maxfun = 1e7,
+                  seed = 0):
+    sa_results = get_sa_results(adata,
+                          res_range,
+                          NN_range,
+                          object_dist,
+                          use_reduction,
+                          reduction_slot,
+                          SS_weights,
+                          SS_exp_base,
+                          verbose,
+                          clust_alg,
+                          n_subsamples,
+                          subsamples_pct_cells,
+                          maxiter,
+                          initial_temp,
+                          restart_temp_ratio,
+                          visit,
+                          accept,
+                          maxfun,
+                          seed)
+    opt_res = sa_results["opt_result"].x[0]
+    opt_knn = int(np.floor(sa_results["opt_result"].x[1]))
+    sc.pp.neighbors(adata, n_neighbors=opt_knn, use_rep = "dist_obj")
+    adata = cluster_adata(adata,
+                      0,#my_random_seed,
+                      opt_res,
+                      clust_alg,
+                      obs_key_to_store_clusts = "SA_clusters")
+    adata.SA_results_dict = sa_results
+    return(adata)
 
 # @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
 # ------------------------------------------------------------------------------
@@ -199,33 +251,11 @@ def create_countour_layer_for_sa_search_plot(ax, search_df):
                                  y=search_df["knn"],
                                  ax = ax,
                                  clip = [ax.get_xlim(),ax.get_ylim()])
-def get_sa_search_plot(sa_results, plot_type = "sil_avg", plot_density = True):
+
+# ----------------------- ** MAIN PLOTTING FUNCTION ** -------------------------
+def get_sa_search_plot(adata, plot_type = "sil_avg", plot_density = True):
     # https://stackoverflow.com/questions/16834861/create-own-colormap-using-matplotlib-and-plot-color-scale
-    # if(plot_type == "sil_avg"):
-    #     cmap = LinearSegmentedColormap.from_list("", get_YlOrRd_9())#["red","violet","blue"])
-    #     cbar_label = "Ave Sil Score"
-    # elif(plot_type == "iter"):
-    #     cmap = LinearSegmentedColormap.from_list("", get_YlGnBu_9())#["red","violet","blue"])
-    #     cbar_label = "Iteration"
-    # elif(plot_type == "n_clust"):
-    #     cbar_label = "Clusters"
-    #     cmap = LinearSegmentedColormap.from_list("", get_RdPu_9())
-    # else:
-    #     cmap = LinearSegmentedColormap.from_list("", get_inferno_10())
-    #     cbar_label = None
-    # search_df = sa_results["search_df"]
-    #
-    # fig = plt.figure()
-    # plt.scatter(search_df["resolution"], search_df["knn"], c=search_df[plot_type], cmap = cmap)
-    # cbar = plt.colorbar()
-    # cbar.ax.get_yaxis().labelpad = 15
-    # cbar.ax.set_ylabel(cbar_label, rotation=270)
-    # plt.xlabel('Resolution')
-    # plt.ylabel('Nearest Neighbors')
-    # plt.close()
-    # return(fig)
-    # https://stackoverflow.com/questions/16834861/create-own-colormap-using-matplotlib-and-plot-color-scale
-    search_df = sa_results["search_df"]
+    search_df = adata.SA_results_dict["search_df"]
     fig, ax = plt.subplots()
     create_scatter_plot_for_sa_search_plot(ax, search_df, plot_type)
     create_cbar_for_sa_search_plot(ax, plot_type)

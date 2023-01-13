@@ -2,24 +2,30 @@ from SA_GS_subfunctions import *
 from tqdm import tqdm
 import seaborn as sns
 
-def GridSearch(
+# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
+# ------------------------------------------------------------------------------
+# --------------------------- ** GRIDSEARCH FUNCS ** ---------------------------
+# ------------------------------------------------------------------------------
+# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
+def get_gs_results(
     adata,
-    res_vector = np.arange(0.1, 2, 0.2),
-    NN_vector = np.arange(11, 101, 10),
-    object_dist = None,
+    res_vector=np.arange(0.1, 2, 0.2),
+    NN_vector=np.arange(11, 101, 10),
+    object_dist=None,
     use_reduction=True,
     reduction_slot="X_pca",
-    SS_weights = "unitary",
-    SS_exp_base = 2.718282,
-    verbose = True,
-    show_progress_bar = True,
-    clust_alg = "Leiden",
-    n_subsamples = 1,
-    subsamples_pct_cells = 100
+    SS_weights="unitary",
+    SS_exp_base=2.718282,
+    verbose=True,
+    show_progress_bar=True,
+    clust_alg="Leiden",
+    n_subsamples=1,
+    subsamples_pct_cells=100
 ):
-    if verbose: print("Computing distance object...")
+    if verbose:
+        print("Computing distance object...")
     dist_list = getObjectDist(adata, object_dist, use_reduction, reduction_slot)
-    adata.obsm["GS_obj"] = dist_list["d"]
+    adata.obsm["dist_obj"] = dist_list["d"]
     n_pcs =  dist_list["numPCs"]
     n_iters = len(NN_vector)*len(res_vector)*n_subsamples
     sil_df = getEmptySilDF(n_iters)
@@ -27,17 +33,18 @@ def GridSearch(
     if verbose: print("Beginning GridSearch clustering...")
     if show_progress_bar: pbar = tqdm(desc = "GridSearch", total = n_iters, position=0, leave=True)
     for a_nn in NN_vector:
-        sc.pp.neighbors(adata, n_neighbors=a_nn, use_rep = "GS_obj")
+        sc.pp.neighbors(adata, n_neighbors=a_nn, use_rep = "dist_obj")
         for a_res in res_vector:
             adata = cluster_adata(adata,
                              0,#my_random_seed,
                              a_res,
-                             clust_alg)
+                             clust_alg,
+                             obs_key_to_store_clusts = "GS_clusters")
             # run 100 times, change the seed
             silhouette_avgs = []
             for i in range(1,n_subsamples+1):
                 sil_df = add_clustering_results_to_sil_df_using_subsampling(
-                                   adata.obsm["GS_obj"],
+                                   adata.obsm["dist_obj"],
                                    adata,
                                    i,
                                    subsamples_pct_cells,
@@ -47,7 +54,8 @@ def GridSearch(
                                    a_nn,
                                    SS_weights,
                                    SS_exp_base,
-                                   curr_iter
+                                   curr_iter,
+                                   obs_key_to_store_clusts = "GS_clusters"
                 )
                 if show_progress_bar: pbar.update(1)
                 curr_iter = curr_iter + 1
@@ -71,8 +79,65 @@ def GridSearch(
     }
     return(gs_results)
 
-def get_gs_search_plot(gs_results, plot_type = "sil_avg"):
-    heatmap_table = pd.pivot_table(gs_results["search_df"],
+def get_opt_res_knn_from_gs_results(gs_results):
+    search_df = gs_results["search_df"]
+    max_sil_avg = np.max(search_df["sil_avg"])
+    search_df_opt_row = search_df[search_df["sil_avg"] >= max_sil_avg].iloc[0]
+    opt_res = search_df_opt_row["resolution"]
+    opt_knn = int(search_df_opt_row["knn"])
+    opt_values = {"opt_res": opt_res, "opt_knn": opt_knn}
+    return(opt_values)
+
+# -------------------------- ** MAIN RUN FUNCTION ** ---------------------------
+def run_fastclust_gs_clustering(
+    adata,
+    res_vector = np.arange(0.1, 2, 0.2),
+    NN_vector = np.arange(11, 101, 10),
+    object_dist = None,
+    use_reduction=True,
+    reduction_slot="X_pca",
+    SS_weights = "unitary",
+    SS_exp_base = 2.718282,
+    verbose = True,
+    show_progress_bar = True,
+    clust_alg = "Leiden",
+    n_subsamples = 1,
+    subsamples_pct_cells = 100
+):
+    gs_results = get_gs_results(
+        adata,
+        res_vector,
+        NN_vector,
+        object_dist,
+        use_reduction,
+        reduction_slot,
+        SS_weights,
+        SS_exp_base,
+        verbose,
+        show_progress_bar,
+        clust_alg,
+        n_subsamples,
+        subsamples_pct_cells
+    )
+    opt_values = get_opt_res_knn_from_gs_results(gs_results)
+    opt_res = opt_values["opt_res"]
+    opt_knn = opt_values["opt_knn"]
+    sc.pp.neighbors(adata, n_neighbors=opt_knn, use_rep = "dist_obj")
+    adata = cluster_adata(adata,
+                      0,#my_random_seed,
+                      opt_res,
+                      clust_alg,
+                      obs_key_to_store_clusts = "GS_clusters")
+    adata.GS_results_dict = gs_results
+    return(adata)
+
+# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
+# ------------------------------------------------------------------------------
+# ---------------------------- ** PLOTTING FUNCS ** ----------------------------
+# ------------------------------------------------------------------------------
+# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
+def get_gs_search_plot(adata, plot_type = "sil_avg"):
+    heatmap_table = pd.pivot_table(adata.GS_results_dict["search_df"],
                            values=plot_type,
                            index=['knn'],
                            columns=['resolution'], aggfunc=np.sum)

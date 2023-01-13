@@ -7,6 +7,11 @@ from random import sample
 from random import seed
 import matplotlib.pyplot as plt
 
+# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
+# ------------------------------------------------------------------------------
+# ----------------------------- ** SIL DF FUNCS ** -----------------------------
+# ------------------------------------------------------------------------------
+# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
 def at_least_min(n, min):
     if n < min:
         return(min)
@@ -65,14 +70,14 @@ def update_sil_df(sil_df,
         sil_df = pd.concat([sil_df, new_iter_results],
                       ignore_index = True)
     return(sil_df)
-def compute_silhouette_score(dist_mat, adata, pct_cells, SS_weights, SS_exp_base, i):
+def compute_silhouette_score(dist_mat, adata, pct_cells, SS_weights, SS_exp_base, i, obs_key_to_store_clusts = "clusters"):
     # In case Leiden only finds 1 cluster, set SS=0 so it won't be selected as optimal.
-    if(len(adata.obs['clusters'].unique())==1):
+    if(len(adata.obs[obs_key_to_store_clusts].unique())==1):
         sil_avg = 0
     else:
         if SS_weights == 'exp':
             sil = silhouette_samples(X = dist_mat,
-                                     labels = adata.obs['clusters']).tolist()
+                                     labels = adata.obs[obs_key_to_store_clusts]).tolist()
             seed(i)
             sil = np.array(sample(sil, int(pct_cells/100*adata.shape[0])), dtype=float)
             neg_sil_indices = np.where(sil < 0)
@@ -81,7 +86,7 @@ def compute_silhouette_score(dist_mat, adata, pct_cells, SS_weights, SS_exp_base
         else:
             sil_avg = silhouette_score(
                                             X = dist_mat,
-                                            labels = adata.obs['clusters'],
+                                            labels = adata.obs[obs_key_to_store_clusts],
                                             sample_size=int(pct_cells/100*adata.shape[0]), #Alessandro had commented out
                                             random_state = i
         )
@@ -97,9 +102,10 @@ def add_clustering_results_to_sil_df_using_subsampling(dist_mat,
                                                        SS_weights,
                                                        SS_exp_base,
                                                        curr_iter,
-                                                       update_method="iloc"):
-    silhouette_avgs_i = compute_silhouette_score(dist_mat, adata, pct_cells, SS_weights, SS_exp_base, i)
-    tot_clusters = len(adata.obs['clusters'].cat.categories)
+                                                       update_method="iloc",
+                                                       obs_key_to_store_clusts = "clusters"):
+    silhouette_avgs_i = compute_silhouette_score(dist_mat, adata, pct_cells, SS_weights, SS_exp_base, i, obs_key_to_store_clusts)
+    tot_clusters = len(adata.obs[obs_key_to_store_clusts].cat.categories)
 #     tmp = "Clusters: " + str(tot_clusters) + " | Avg Sil Score: " + str(round(silhouette_avgs_i,3))
     sil_df = update_sil_df(sil_df,
                            n_pcs,
@@ -116,6 +122,13 @@ def getEmptySilDF(nrow = 0):
     sil_df = pd.DataFrame(columns=['iter','n_pcs','resolution','knn','n_clust','subsamp_iter','sil_avg','seed'],
                          index=np.arange(nrow))
     return(sil_df)
+
+
+# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
+# ------------------------------------------------------------------------------
+# ---------------------------- ** DISTANCE FUNCS ** ----------------------------
+# ------------------------------------------------------------------------------
+# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
 def getDistanceMatrix(adata):
     from scipy.spatial.distance import pdist, squareform
 #     distances = pdist(sample.values, metric='euclidean')
@@ -172,6 +185,12 @@ def getObjectDist(adata, object_dist, use_reduction, reduction_slot):
         del object_dist
     res = {"d": d, "numPCs": numPCs}
     return res
+
+# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
+# ------------------------------------------------------------------------------
+# ----------------------------- ** CLUSTER FUNCS ** ----------------------------
+# ------------------------------------------------------------------------------
+# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
 def get_clust_func(clust_alg):
     if(str.lower(clust_alg) == "louvain"):
         clust_func = sc.tl.louvain
@@ -180,11 +199,12 @@ def get_clust_func(clust_alg):
     return(clust_func)
 def cluster_adata(adata,
                   my_random_seed,
-                  a_res,
-                  clust_alg):
+                  res,
+                  clust_alg,
+                  obs_key_to_store_clusts = "clusters"):
                 clust_func = get_clust_func(clust_alg)
                 clust_func(adata,
                            random_state=my_random_seed,
-                           resolution=a_res,
-                           key_added="clusters")
+                           resolution=res,
+                           key_added=obs_key_to_store_clusts)
                 return(adata)
