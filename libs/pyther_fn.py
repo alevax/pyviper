@@ -173,8 +173,7 @@ def pyther(gex_data, interactome, layer = None):
 def path_enr(adata,
              interactome,
              layer = None,
-             verbose = False,
-             make_adata_names_format_match_interactome = False):
+             verbose = False):
     """\
     Allows the individual to infer normalized enrichment scores of pathways
     using the analytical ranked enrichment analysis (aREA) function.
@@ -194,13 +193,21 @@ def path_enr(adata,
     -------
     A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values.
     """
-    if(make_adata_names_format_match_interactome is True):
-        interactome_gene_name_format = detect_interactome_name_type(interactome)
-        adata_gene_name_format_original = detect_index_name_type(adata)
+    if(verbose): print("Checking interactome names format...")
+    interactome_gene_name_format = detect_interactome_name_type(interactome)
+    if(verbose): print("Interactome names are formatted as " + interactome_gene_name_format + ".")
+    if(verbose): print("Checking adata names format...")
+    adata_gene_name_format_original = detect_index_name_type(adata)
+    if(verbose): print("adata names are formatted as " + adata_gene_name_format_original + ".")
+    make_adata_names_format_match_interactome = False
+
+    if(interactome_gene_name_format != adata_gene_name_format_original):
+        make_adata_names_format_match_interactome = True
         if(verbose): print("Translating adata names to match interactome...")
         adata = translate_adata_index(adata,
                                       current_format = adata_gene_name_format_original,
                                       desired_format = interactome_gene_name_format)
+
     # aREA takes the pathways interactome and the adata
     if(verbose): print("Running aREA using to calculate pathway enrichment...")
     path_enr_mat = aREA(adata, interactome, layer)
@@ -247,33 +254,26 @@ def detect_interactome_name_type(interactome):
 def detect_index_name_type(adata):
     return(detect_name_type(adata.var.index))
 def detect_name_type(input_array):
-    found_match = False
     nrow = len(input_array)
+    if nrow == 0: return(None) #redundant: case handled by 0-length for loop
+    found_match = False
     human2mouse = load_human2mouse()
     gene_name_format = None
     i = 0
-    while(found_match == False and i != nrow - 1):
-        # Keep going through the index for genes
-            # until a match is found in our database
-            # If no matches found, then return None.
-        for i in range(nrow):
-            gene = input_array[i]
-            if(gene in human2mouse["mouse_symbol"].values):
-                gene_name_format = "mouse_symbol"
-                found_match = True
-                break
-            elif(gene in human2mouse["human_symbol"].values):
-                gene_name_format = "human_symbol"
-                found_match = True
-                break
-            elif(gene in human2mouse["mouse_ensembl"].values):
-                gene_name_format = "mouse_ensembl"
-                found_match = True
-                break
-            elif(gene in human2mouse["human_ensembl"].values):
-                gene_name_format = "human_ensembl"
-                found_match = True
-                break
+    for i in range(nrow):
+        gene = input_array[i]
+        if(gene in human2mouse["mouse_symbol"].values):
+            gene_name_format = "mouse_symbol"
+            break
+        elif(gene in human2mouse["human_symbol"].values):
+            gene_name_format = "human_symbol"
+            break
+        elif(gene in human2mouse["mouse_ensembl"].values):
+            gene_name_format = "mouse_ensembl"
+            break
+        elif(gene in human2mouse["human_ensembl"].values):
+            gene_name_format = "human_ensembl"
+            break
     return(gene_name_format)
 # ---------------------------- TRANSLATE SMALL PICTURE FUNCS ---------------------------
 def translate_gene_name(input_gene_name,
@@ -290,11 +290,14 @@ def translate_adata_index_into_new_var_column(
          adata,
          translate_df,
          current_format = "mouse_symbol",
-         desired_format = "human_symbol"):
+         desired_format = "human_symbol",
+         show_progress_bar = True):
     current_gene_names = adata.var.index.values
     n_genes = len(current_gene_names)
     desired_gene_names = [None]*n_genes
-    for i in tqdm(range(n_genes)):
+
+    iterator = (i for i in range(n_genes)) if not show_progress_bar else tqdm(range(n_genes))
+    for i in iterator:
         desired_gene_names[i] = translate_gene_name(
             current_gene_names[i],
             translate_df,
@@ -307,18 +310,21 @@ def translate_adata_index_into_new_var_column(
 def translate_adata_index_from_to_with_translate_df(adata,
          translate_df,
          current_format = "mouse_symbol",
-         desired_format = "human_symbol"):
+         desired_format = "human_symbol",
+         show_progress_bar = True):
     adata = translate_adata_index_into_new_var_column(
          adata,
          translate_df,
          current_format,
-         desired_format)
+         desired_format,
+         show_progress_bar)
     adata.var[current_format] = adata.var.index.values
     adata.var.set_index(desired_format, inplace=True)
     return(adata)
 def translate_adata_index_from_to(adata,
                                   current_format = "mouse_symbol",
-                                 desired_format = "human_symbol"):
+                                  desired_format = "human_symbol",
+                                  show_progress_bar = True):
     acceptable_formats = ["mouse_symbol", "mouse_ensembl", "human_symbol", "human_ensembl"]
     if(current_format in ["mouse_symbol", "mouse_ensembl"]):
         translate_df = load_mouse2human()
@@ -334,9 +340,13 @@ def translate_adata_index_from_to(adata,
         adata = translate_adata_index_from_to_with_translate_df(adata,
              translate_df,
              current_format,
-             desired_format = desired_format)
+             desired_format = desired_format,
+             show_progress_bar = show_progress_bar)
     return(adata)
-def translate_adata_index(adata, desired_format = "human_symbol", current_format = None):
+def translate_adata_index(adata,
+                          desired_format = "human_symbol",
+                          current_format = None,
+                          show_progress_bar = True):
     acceptable_formats = ["mouse_symbol", "mouse_ensembl", "human_symbol", "human_ensembl"]
     if desired_format not in acceptable_formats:
         raise ValueError("Error: desired_format is not one the following:"
@@ -345,7 +355,8 @@ def translate_adata_index(adata, desired_format = "human_symbol", current_format
         current_format = detect_index_name_type(adata)
     adata = translate_adata_index_from_to(adata,
                                           current_format,
-                                          desired_format)
+                                          desired_format,
+                                          show_progress_bar)
     return(adata)
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
