@@ -34,17 +34,7 @@ def get_gs_results(
     if verbose: print("Beginning GridSearch clustering...")
     if show_progress_bar: pbar = tqdm(desc = "GridSearch", total = n_iters, position=0, leave=True)
     for a_nn in NN_vector:
-        # startTime_sc_pp_neighbors = datetime.now() # TIME TESTING
-        # print(str(startTime_sc_pp_neighbors) + ": sc.pp.neighbors: a_nn=" + str(a_nn) + " - starting...") # TIME TESTING
-
         sc.pp.neighbors(adata, n_neighbors=a_nn, use_rep = "X_pca")
-
-        # endTime_sc_pp_neighbors = datetime.now() # TIME TESTING
-        # print(str(endTime_sc_pp_neighbors) + ": sc.pp.neighbors: a_nn=" + str(a_nn) + " - done.") # TIME TESTING
-
-        # diffTime_sc_pp_neighbors = endTime_sc_pp_neighbors - startTime_sc_pp_neighbors # TIME TESTING
-        # print(str(diffTime_sc_pp_neighbors.total_seconds())+ ": sc.pp.neighbors: a_nn=" + str(a_nn) + " - diffTime") # TIME TESTING
-
         for a_res in res_vector:
             # print("a_res=" + str(a_res))
             adata = cluster_adata(adata,

@@ -99,20 +99,7 @@ def add_clustering_results_to_sil_df_using_subsampling(dist_mat,
                                                        curr_iter,
                                                        update_method="iloc",
                                                        obs_key_to_store_clusts = "clusters"):
-    # startTime_compute_SS = datetime.now() # TIME TESTING
-    # print(str(startTime_compute_SS) + ": compute_SS: a_nn=" + str(a_nn) + ", a_res=" + str(a_res) + " - starting...") # TIME TESTING
-
     silhouette_avgs_i = compute_silhouette_score(dist_mat, adata, pct_cells, SS_weights, SS_exp_base, i, obs_key_to_store_clusts)
-
-    # endTime_compute_SS = datetime.now() # TIME TESTING
-    # print(str(endTime_compute_SS) + ": compute_SS: a_nn=" + str(a_nn) + ", a_res=" + str(a_res) + " - Done.") # TIME TESTING
-
-    # diffTime_compute_SS = endTime_compute_SS - startTime_compute_SS # TIME TESTING
-    # print(str(diffTime_compute_SS.total_seconds()) + ": compute_SS: a_nn=" + str(a_nn) + ", a_res=" + str(a_res) + " - diffTime.") # TIME TESTING
-
-    # startTime_update_SilDF = datetime.now() # TIME TESTING
-    # print(str(startTime_update_SilDF) + ": update_SilDF: a_nn=" + str(a_nn) + ", a_res=" + str(a_res) + " - starting...") # TIME TESTING
-
     tot_clusters = len(adata.obs[obs_key_to_store_clusts].cat.categories)
     sil_df = update_sil_df(sil_df,
                            n_pcs,
@@ -124,13 +111,6 @@ def add_clustering_results_to_sil_df_using_subsampling(dist_mat,
                            i,
                            curr_iter,
                            update_method)
-
-    # endTime_update_SilDF = datetime.now() # TIME TESTING
-    # print(str(endTime_update_SilDF) + ": update_SilDF: a_nn=" + str(a_nn) + ", a_res=" + str(a_res) + " - Done.") # TIME TESTING
-
-    # diffTime_update_SilDF = endTime_update_SilDF - startTime_update_SilDF # TIME TESTING
-    # print(str(diffTime_update_SilDF.total_seconds()) + ": update_SilDF: a_nn=" + str(a_nn) + ", a_res=" + str(a_res) + " - diffTime.") # TIME TESTING
-
     return(sil_df)
 def getEmptySilDF(nrow = 0):
     sil_df = pd.DataFrame(columns=['iter','n_pcs','resolution','knn','n_clust','subsamp_iter','sil_avg','seed'],
@@ -211,20 +191,9 @@ def cluster_adata(adata,
                   res,
                   clust_alg,
                   obs_key_to_store_clusts = "clusters"):
-
-                # startTime_sc_pp_louvain = datetime.now() # TIME TESTING
-                # print(str(startTime_sc_pp_louvain) + ": sc.pp.louvain: res=" + str(res) + " - starting...") # TIME TESTING
-
                 clust_alg_func = get_clust_func(clust_alg)
                 clust_alg_func(adata,
                                random_state=my_random_seed,
                                resolution=res,
                                key_added=obs_key_to_store_clusts)
-
-                # endTime_sc_pp_louvain = datetime.now() # TIME TESTING
-                # print(str(endTime_sc_pp_louvain) + ": sc.pp.louvain: res=" + str(res) + " - done.") # TIME TESTING
-
-                # diffTime_sc_pp_louvain = endTime_sc_pp_louvain - startTime_sc_pp_louvain # TIME TESTING
-                # print(str(diffTime_sc_pp_louvain.total_seconds())+ ": sc.pp.louvain: res=" + str(res) + " - runTime") # TIME TESTING
-
                 return(adata)
