@@ -33,13 +33,16 @@ def get_gs_results(
     if verbose: print("Beginning GridSearch clustering...")
     if show_progress_bar: pbar = tqdm(desc = "GridSearch", total = n_iters, position=0, leave=True)
     for a_nn in NN_vector:
+        # print("sc.pp.neighbors: a_nn=" + str(a_nn) + " - starting...")
         sc.pp.neighbors(adata, n_neighbors=a_nn, use_rep = "dist_obj")
+        # print("sc.pp.neighbors: a_nn=" + str(a_nn) + " - done.")
         for a_res in res_vector:
+            # print("a_res=" + str(a_res))
             adata = cluster_adata(adata,
-                             0,#my_random_seed,
-                             a_res,
-                             clust_alg,
-                             obs_key_to_store_clusts = "GS_clusters")
+                                  0,#my_random_seed,
+                                  a_res,
+                                  clust_alg,
+                                  obs_key_to_store_clusts = "GS_clusters")
             # run 100 times, change the seed
             silhouette_avgs = []
             for i in range(1,n_subsamples+1):
@@ -125,10 +128,10 @@ def run_fastclust_GS_clustering(
     gs_results["opt_result"] = [opt_values["opt_res"], opt_values["opt_knn"]]
     sc.pp.neighbors(adata, n_neighbors=opt_knn, use_rep = "dist_obj")
     adata = cluster_adata(adata,
-                      0,#my_random_seed,
-                      opt_res,
-                      clust_alg,
-                      obs_key_to_store_clusts = "GS_clusters")
+                          0,#my_random_seed,
+                          opt_res,
+                          clust_alg,
+                          obs_key_to_store_clusts = "GS_clusters")
     adata.GS_results_dict = gs_results
     return(adata)
 

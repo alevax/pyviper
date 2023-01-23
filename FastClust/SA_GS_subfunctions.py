@@ -6,6 +6,9 @@ import pandas as pd
 from random import sample
 from random import seed
 import matplotlib.pyplot as plt
+from tqdm import tqdm
+import time
+
 
 # @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
 # ------------------------------------------------------------------------------
@@ -143,36 +146,118 @@ def getDistanceMatrix(adata):
     return(pairwise_df)
 
 # SA_GS_subfunctions.R
-def computeCorrDistance(X):
+# def cor_progbar(df): # RUNS TOO SLOW
+#     # corr_matrix = np.zeros((len(df.columns), len(df.columns)))
+#     # pbar = tqdm(desc="GridSearch",
+#     #         total=len(df.columns) * len(df.columns),
+#     #         position=0,
+#     #         leave=True)
+#     # for i in range(len(df.columns)):
+#     #     for j in range(i, len(df.columns)):
+#     #         corr_matrix[i, j] = df[df.columns[i]].corr(df[df.columns[j]])
+#     #         pbar.update(1)
+#     # pbar.close()
+#     corr_matrix = np.zeros((len(df.columns), len(df.columns)))
+#     with tqdm(total=len(df.columns)) as pbar:
+#         for i in range(len(df.columns)):
+#             corr_matrix[i] = df.corrwith(df[df.columns[i]])
+#             pbar.update(1)
+#     return(corr_matrix)
+# def one_minus_x_progbar(x, pbar):
+#     pbar.update()
+#     return(1 - x)
+# def sqrt_progbar(x, pbar):
+#     pbar.update()
+#     return(np.sqrt(x))
+# def sqrt_one_minus_x_progbar(x, pbar):
+#     pbar.update()
+#     return(np.sqrt(1 - x))
+
+def computeCorrDistance(data, verbose = True):
     # Equivalent to the following in R: d = sqrt(1 - stats::corr(X))
     # Convert numpy.array into a pandas dataframe
-    df = pd.DataFrame(X)
+    # df = pd.DataFrame(X)
     # Compute the correlation (i.e. stats::corr(X) )
-    corr_matrix_df = df.corr()
+    # if(verbose): print("Computing the correlation...")
+    # corr_matrix_df = df.corr() #cor_progbar(df)
     # Subtract every correlation value from 1 (i.e. 1 - corr_matrix )
-    df_sub = corr_matrix_df.applymap(lambda x: 1 - x)
-    # Compute the square root of the previous result (i.e. sqrt(sub_matrix))
-    df_sqrt = df_sub.applymap(lambda x: np.sqrt(x))
-    return(df_sqrt)
-def add_row_column_names_to_dist_mat(df_dist, adata):
+    # if(verbose): print("Computing subtraction...")
+    # with tqdm(total=len(corr_matrix_df.index) * len(corr_matrix_df.columns),
+    #           unit='iteration',
+    #           unit_scale=True,
+    #           miniters=1,
+    #           desc='Processing',
+    #           leave=True) as pbar:
+    #     df_sub = corr_matrix_df.applymap(lambda x: one_minus_x_progbar(x, pbar))
+    # # Compute the square root of the previous result (i.e. sqrt(sub_matrix))
+    # if(verbose): print("Computing square root...")
+    # with tqdm(total=len(df_sub.index) * len(df_sub.columns),
+    #           unit='iteration',
+    #           unit_scale=True,
+    #           miniters=1,
+    #           desc='Processing',
+    #           leave=True) as pbar:
+    #     df_sqrt = df_sub.applymap(lambda x: sqrt_progbar(x, pbar))
+    # if(verbose): print("Computing subtraction and square root...")
+    # with tqdm(total=len(corr_matrix_df.index) * len(corr_matrix_df.columns),
+    #           unit='iteration',
+    #           unit_scale=True,
+    #           miniters=1,
+    #           desc='Processing',
+    #           leave=True) as pbar:
+    #     df_sqrt = corr_matrix_df.applymap(lambda x: sqrt_one_minus_x_progbar(x, pbar))
+    # convert the dataframe to numpy array
+
+    # In general, the performance of np.corrcoef will be faster when
+        #  working with large datasets compared to df.corr() from pandas
+    # if(verbose): print("Computing the correlation...")
+    # with tqdm_numpy(desc="Calculating Correlation Matrix") as pbar:
+    #     corr_matrix = np.corrcoef(X, rowvar=False)
+    # if(verbose): print("Calculating sqrt_one_minus_corr_matrix...")
+    # with tqdm_numpy(desc="Calculating sqrt_one_minus_corr_matrix") as pbar:
+    #     sqrt_one_minus_corr_matrix = np.sqrt(1 - corr_matrix)
+
+    # print("VERSION 1:")
+    # corrcoef_start_time = time.time()
+    # corr_matrix = np.corrcoef(data)
+    # corrcoef_end_time = time.time()
+    # corrcoef_elapsed_time = corrcoef_end_time - corrcoef_start_time
+    # print(str(corrcoef_elapsed_time))
+    # print("")
+
+    # print("VERSION 2:")
+    # corrcoef_start_time = time.time()
+    # with tqdm(total=data.shape[1], desc="Calculating Correlation Matrix") as pbar:
+    #     for i in range(data.shape[1]):
+    #         corr_matrix = np.corrcoef(data, rowvar=False)
+    #         pbar.update()
+    # corrcoef_end_time = time.time()
+    # corrcoef_elapsed_time = corrcoef_end_time - corrcoef_start_time
+    # print(str(corrcoef_elapsed_time))
+    if(verbose): print("Computing the correlation...")
+    corr_matrix = np.corrcoef(data)
+    if(verbose): print("Calculating sqrt_one_minus_corr_matrix...")
+    sqrt_one_minus_corr_matrix = np.sqrt(1 - corr_matrix)
+    return(sqrt_one_minus_corr_matrix)
+def add_row_column_names_to_dist_mat(dist_mat, adata):
     # Turn into a dataframe with row and column names
     df_dist = pd.DataFrame(
-        df_dist.values,
+        dist_mat,
         columns = adata.obs_names,
         index = adata.obs_names
     )
     return(df_dist)
-def getObjectDist(adata, object_dist, use_reduction, reduction_slot):
+def getObjectDist(adata, object_dist, use_reduction, reduction_slot, verbose = True):
     if object_dist is None:
         if use_reduction == False:
             # use original features
             #
-            d = computeCorrDistance(adata.X)
+            d = computeCorrDistance(adata.X, verbose)
             numPCs = None
         elif use_reduction == True:
             # use principal components
             X = adata.obsm[reduction_slot]
-            d = computeCorrDistance(X.T)
+            d = computeCorrDistance(X, verbose) #computeCorrDistance(X.T, verbose)
             numPCs = X.shape[1]
         else:
             raise ValueError("reduction must be logical.")
@@ -202,9 +287,9 @@ def cluster_adata(adata,
                   res,
                   clust_alg,
                   obs_key_to_store_clusts = "clusters"):
-                clust_func = get_clust_func(clust_alg)
-                clust_func(adata,
-                           random_state=my_random_seed,
-                           resolution=res,
-                           key_added=obs_key_to_store_clusts)
+                clust_alg_func = get_clust_func(clust_alg)
+                clust_alg_func(adata,
+                               random_state=my_random_seed,
+                               resolution=res,
+                               key_added=obs_key_to_store_clusts)
                 return(adata)
