@@ -1,6 +1,7 @@
 from SA_GS_subfunctions import *
 from tqdm import tqdm
 import seaborn as sns
+from datetime import datetime
 
 # @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
 # ------------------------------------------------------------------------------
@@ -33,9 +34,17 @@ def get_gs_results(
     if verbose: print("Beginning GridSearch clustering...")
     if show_progress_bar: pbar = tqdm(desc = "GridSearch", total = n_iters, position=0, leave=True)
     for a_nn in NN_vector:
-        # print("sc.pp.neighbors: a_nn=" + str(a_nn) + " - starting...")
-        sc.pp.neighbors(adata, n_neighbors=a_nn, use_rep = "dist_obj")
-        # print("sc.pp.neighbors: a_nn=" + str(a_nn) + " - done.")
+        # startTime_sc_pp_neighbors = datetime.now() # TIME TESTING
+        # print(str(startTime_sc_pp_neighbors) + ": sc.pp.neighbors: a_nn=" + str(a_nn) + " - starting...") # TIME TESTING
+
+        sc.pp.neighbors(adata, n_neighbors=a_nn, use_rep = "X_pca")
+
+        # endTime_sc_pp_neighbors = datetime.now() # TIME TESTING
+        # print(str(endTime_sc_pp_neighbors) + ": sc.pp.neighbors: a_nn=" + str(a_nn) + " - done.") # TIME TESTING
+
+        # diffTime_sc_pp_neighbors = endTime_sc_pp_neighbors - startTime_sc_pp_neighbors # TIME TESTING
+        # print(str(diffTime_sc_pp_neighbors.total_seconds())+ ": sc.pp.neighbors: a_nn=" + str(a_nn) + " - diffTime") # TIME TESTING
+
         for a_res in res_vector:
             # print("a_res=" + str(a_res))
             adata = cluster_adata(adata,
@@ -126,7 +135,7 @@ def run_fastclust_GS_clustering(
     opt_res = opt_values["opt_res"]
     opt_knn = opt_values["opt_knn"]
     gs_results["opt_result"] = [opt_values["opt_res"], opt_values["opt_knn"]]
-    sc.pp.neighbors(adata, n_neighbors=opt_knn, use_rep = "dist_obj")
+    sc.pp.neighbors(adata, n_neighbors=opt_knn, use_rep = "X_pca")
     adata = cluster_adata(adata,
                           0,#my_random_seed,
                           opt_res,
@@ -156,8 +165,14 @@ def get_GS_search_plot(adata, plot_type = "sil_avg"):
         cbar_label = "Clusters"
 
     fig = plt.figure()
-    ax = sns.heatmap(heatmap_table, cmap = color_map, cbar_kws={'label': cbar_label})
+    ax = sns.heatmap(heatmap_table,
+                     cmap = color_map,
+                     cbar_kws={'label': cbar_label},
+                     linewidths=1,
+                     linecolor='black')
     ax.invert_yaxis()
+    # for _, spine in ax.spines.items():
+        # spine.set_visible(True)
     plt.xlabel('Resolution')
     plt.ylabel('Nearest Neighbors')
     plt.close()
