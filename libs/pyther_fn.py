@@ -863,3 +863,59 @@ def pl_dendrogram(adata,
     elif(plot_stored_pax_data is True):
         adata = get_pax_anndata_with_path_enr_umap(adata)
     sc.pl.dendrogram(adata,**kwargs)
+
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+# -----------------------------------------------------------------------------
+# --------------------------- DATA TRANSFORM FUNCTIONS ------------------------
+# -----------------------------------------------------------------------------
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+# -----------------------------------------------------------------------------
+# ------------------------------ HELPER FUNCTIONS -----------------------------
+# -----------------------------------------------------------------------------
+
+def mad_from_R(x, center=None, constant=1.4826, low=False, high=False):
+    if center is None:
+        center=np.median(x)
+    x = x[~np.isnan(x)] if np.isnan(x).any() else x
+    n = len(x)
+    if (low or high) and n % 2 == 0:
+        if low and high:
+            raise ValueError("'low' and 'high' cannot be both True")
+        n2 = n // 2 + int(high)
+        return constant * np.sort(np.abs(x - center))[n2]
+    return constant * np.median(np.abs(x - center))
+
+# -----------------------------------------------------------------------------
+# ------------------------------- MAIN FUNCTIONS ------------------------------
+# -----------------------------------------------------------------------------
+
+# Function assumes features as rows and observations as columns
+# Numerator Functions:
+    # Median - numpy.median
+    # Mean - numpy.mean
+# Denominator Functions:
+    # Median absolute deviation - mad_from_R
+    # Standard deviation - statistics.stdev
+def rank_norm(x, NUM_FUN=np.median, DEM_FUN = mad_from_R, trim=0):
+    rank = scipy.stats.rankdata(x, axis=0)
+    median = FUN(rank, axis=1, keepdims=True)#np.median(rank, axis=1, keepdims=True)
+    mad = np.apply_along_axis(DEM_FUN, 1, rank)
+
+    x = ((rank - median)/mad[:, np.newaxis])
+
+    print("- Number of NA features:", np.isnan(x).sum())
+    print("- Number of Inf features:", np.sum(np.isinf(np.sum(x, axis=1))))
+    print("- Number of 0 features:", np.sum(np.sum(np.isnan(x), axis=1)))
+    print("- Features to Remove:")
+
+    x = np.where(np.isnan(x), np.nanmin(x), x)
+    x = np.clip(x, a_min=np.nanmin(x), a_max=np.nanmax(x))
+    print("- Removing NULL/NA features ...")
+    x = x[~np.isnan(x).any(axis=1)]
+
+    print("- Number of NA features:", np.isnan(x).sum())
+    print("- Number of Inf features:", np.sum(np.isinf(np.sum(x, axis=1))))
+    print("- Number of 0 features:", np.sum(np.sum(np.isnan(x), axis=1)))
+
+    return x
