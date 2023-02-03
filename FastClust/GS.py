@@ -81,14 +81,28 @@ def get_gs_results(
     }
     return(gs_results)
 
-def get_opt_res_knn_from_gs_results(gs_results):
+def get_opt_res_knn_from_gs_results(gs_results, n_clusts = None):
     search_df = gs_results["search_df"]
+    if n_clusts is not None:
+        search_df = search_df[search_df['n_clust'] == n_clusts]
     max_sil_avg = np.max(search_df["sil_avg"])
     search_df_opt_row = search_df[search_df["sil_avg"] >= max_sil_avg].iloc[0]
     opt_res = search_df_opt_row["resolution"]
     opt_knn = int(search_df_opt_row["knn"])
     opt_values = {"opt_res": opt_res, "opt_knn": opt_knn}
     return(opt_values)
+def compute_gs_optimal_clustering(adata, gs_results, clust_alg = "Leiden", n_clusts = None):
+    opt_values = get_opt_res_knn_from_gs_results(gs_results, n_clusts)
+    opt_res = opt_values["opt_res"]
+    opt_knn = opt_values["opt_knn"]
+    gs_results["opt_result"] = [opt_values["opt_res"], opt_values["opt_knn"]]
+    sc.pp.neighbors(adata, n_neighbors=opt_knn, use_rep = "X_pca")
+    adata = cluster_adata(adata,
+                          0,#my_random_seed,
+                          opt_res,
+                          clust_alg,
+                          obs_key_to_store_clusts = "GS_clusters")
+    return(adata)
 
 # -------------------------- ** MAIN RUN FUNCTION ** ---------------------------
 def run_fastclust_GS_clustering(
@@ -121,16 +135,7 @@ def run_fastclust_GS_clustering(
         n_subsamples,
         subsamples_pct_cells
     )
-    opt_values = get_opt_res_knn_from_gs_results(gs_results)
-    opt_res = opt_values["opt_res"]
-    opt_knn = opt_values["opt_knn"]
-    gs_results["opt_result"] = [opt_values["opt_res"], opt_values["opt_knn"]]
-    sc.pp.neighbors(adata, n_neighbors=opt_knn, use_rep = "X_pca")
-    adata = cluster_adata(adata,
-                          0,#my_random_seed,
-                          opt_res,
-                          clust_alg,
-                          obs_key_to_store_clusts = "GS_clusters")
+    adata = compute_gs_optimal_clustering(adata, gs_results, clust_alg)
     adata.GS_results_dict = gs_results
     return(adata)
 
