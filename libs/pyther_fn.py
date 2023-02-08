@@ -898,24 +898,30 @@ def mad_from_R(x, center=None, constant=1.4826, low=False, high=False):
     # Median absolute deviation - mad_from_R
     # Standard deviation - statistics.stdev
 def rank_norm(x, NUM_FUN=np.median, DEM_FUN = mad_from_R, trim=0):
-    rank = scipy.stats.rankdata(x, axis=0)
-    median = FUN(rank, axis=1, keepdims=True)#np.median(rank, axis=1, keepdims=True)
+    rank = rankdata(x, axis=0)
+    median = NUM_FUN(rank, axis=1, keepdims=True)#np.median(rank, axis=1, keepdims=True)
     mad = np.apply_along_axis(DEM_FUN, 1, rank)
 
     x = ((rank - median)/mad[:, np.newaxis])
 
-    print("- Number of NA features:", np.isnan(x).sum())
+    print("- Number of NA features:", np.sum(np.sum(np.isnan(x), axis=1)))
     print("- Number of Inf features:", np.sum(np.isinf(np.sum(x, axis=1))))
-    print("- Number of 0 features:", np.sum(np.sum(np.isnan(x), axis=1)))
+    print("- Number of 0 features:", np.sum(np.sum(x, axis=1) == 0))
     print("- Features to Remove:")
+
+    # Take care of infinite values
+    max_finite = np.nanmax(x[np.isfinite(x)])
+    min_finite = np.nanmin(x[np.isfinite(x)])
+    x[np.isposinf(x)] = max_finite
+    x[np.isneginf(x)] = min_finite
 
     x = np.where(np.isnan(x), np.nanmin(x), x)
     x = np.clip(x, a_min=np.nanmin(x), a_max=np.nanmax(x))
     print("- Removing NULL/NA features ...")
     x = x[~np.isnan(x).any(axis=1)]
 
-    print("- Number of NA features:", np.isnan(x).sum())
+    print("- Number of NA features:", np.sum(np.sum(np.isnan(x), axis=1)))
     print("- Number of Inf features:", np.sum(np.isinf(np.sum(x, axis=1))))
-    print("- Number of 0 features:", np.sum(np.sum(np.isnan(x), axis=1)))
+    print("- Number of 0 features:", np.sum(np.sum(x, axis=1) == 0))
 
     return x
