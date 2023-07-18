@@ -414,7 +414,7 @@ def pyther(gesObj,
         ws = np.abs(nes)**mvws
         print('mvws =' , mvws)
     else:
-        ws = sigT(nes,mvws[0],mvws[1])
+        ws = sigT(np.abs(nes),mvws[1],mvws[0])
 
     result['value'] = np.sum(nes*ws,axis =1)/np.sum(ws,axis =1)
 
