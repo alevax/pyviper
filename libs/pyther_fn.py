@@ -52,10 +52,10 @@ def load_interactome_from_tsv(filePath, intName):
 #     Allows the individual to infer normalized enrichment scores from gene
 #     expression data using the analytical ranked enrichment analysis (aREA)
 #     function.
-# 
+#
 #     It is the basis of the VIPER (Virtual Inference of Protein-activity
 #     by Enriched Regulon analysis) algorithm.
-# 
+#
 #     Parameters
 #     ----------
 #     gex_data
@@ -73,19 +73,19 @@ def load_interactome_from_tsv(filePath, intName):
 #         gesMat = gex_data.X
 #     else:
 #         gesMat = gex_data.layers[layer]
-# 
+#
 #     # rank transform the GES
 #     rankMat = rankdata(gesMat, axis = 1)
-# 
+#
 #     # find intersecting genes
 #     targetSet = interactome.get_targetSet()
 #     varNames = gex_data.var_names.to_list()
 #     intersectGenes = [value for value in targetSet if value in varNames]
-# 
+#
 #     # reduce regulon matrices
 #     icMat = interactome.icMat().loc[intersectGenes]
 #     morMat = interactome.morMat().loc[intersectGenes]
-# 
+#
 #     # prepare the 1-tailed / 2-tailed matrices
 #     gesInds = [varNames.index(i) for i in intersectGenes]
 #     ges2T = rankMat / (rankMat.shape[1] + 1)
@@ -93,22 +93,22 @@ def load_interactome_from_tsv(filePath, intName):
 #     ges1T = ges1T + (1 - np.max(ges1T))/2
 #     ges2TQ = norm.ppf(ges2T[:, gesInds])
 #     ges1TQ = norm.ppf(ges1T[:, gesInds])
-# 
+#
 #     # 2-tail enrichment
 #     dES = pd.DataFrame.transpose(pd.DataFrame.mul(icMat, morMat))
 #     dES = dES.dot(np.transpose(ges2TQ))
-# 
+#
 #     # 1-tail enrichemnt
 #     uES = pd.DataFrame.transpose(pd.DataFrame.mul(1 - abs(morMat), icMat))
 #     uES = uES.dot(np.transpose(ges1TQ))
-# 
+#
 #     # integrate
 #     iES = (abs(dES) + uES * (uES > 0)) * np.sign(dES)
 #     # make NES
 #     nES = iES.mul(interactome.icpVec(), 0)
 #     nES = np.transpose(nES)
 #     nES.index = gex_data.obs.index
-# 
+#
 #     return(nES)
 
 def aREA(gex_data, interactome, layer = None):
@@ -138,35 +138,35 @@ def aREA(gex_data, interactome, layer = None):
     else:
         gesMat = gex_data.layers[layer]
 
-    # rank transform the GES using the rankdata function from scipy.stats 
+    # rank transform the GES using the rankdata function from scipy.stats
     rankMat = rankdata(gesMat, axis = 1)
-    
-    # ------------ find intersecting genes ------------ 
+
+    # ------------ find intersecting genes ------------
     # Use get_targetSet as part of the interactome class to get a list of all targets in the interactome
     targetSet = interactome.get_targetSet()
     # Get a list of the gene names of the gExpr signature matrix
     varNames = gex_data.var_names.to_list()
     # Get the intersction of gene names in the gExpr signature and those in the target set
     intersectGenes = [value for value in targetSet if value in varNames]
-    
-    # ------------ reduce regulon matrices ------------ 
+
+    # ------------ reduce regulon matrices ------------
     # The icMat is the matrix with regulators in the columns, targets in the rows and likelihood (weights) as values
         # (we filter to intersectGenes as targets by using .loc[intersectGenes])
     icMat = interactome.icMat().loc[intersectGenes]
     # The morDict is the matrix with regulators in the columns, targets in the rows and tfmode (modes) as values
     morMat = interactome.morMat().loc[intersectGenes]
-    
+
     # ------------ prepare the 1-tailed / 2-tailed matrices ------------
-    
+
     # gesInds is a series of indices - the index of every target in the gExpr signature matrix
         # for each of the intersecting genes
     gesInds = [varNames.index(i) for i in intersectGenes]
-    
+
     # To get the one tailed matrix, we normalize our rank values between 0 and 1 across each sample,
         # thereby scaling our data across each sample
     # To do this, we divide each row of the rankMat by the number of samples (rows) plus 1 to get the 2-tailed matrix
     ges2T = rankMat / (rankMat.shape[1] + 1)
-    # For a one tailed test, 
+    # For a one tailed test,
         # (1) since each sample has a range of 0 to 1, we recenter our values at 0 for each sample by subtracting 0.5
         # (2) take the absolute value so values are classified by their extremeness and not their sign
         # (3) return the range of data from 0 to 0.5 to 0 to 1 by multiplying by 2
@@ -180,7 +180,7 @@ def aREA(gex_data, interactome, layer = None):
     # values from ges2T and ges1T. The resulting matrices are called ges2TQ and ges1TQ, respectively.
     ges2TQ = norm.ppf(ges2T[:, gesInds])
     ges1TQ = norm.ppf(ges1T[:, gesInds])
-    
+
     # ------------ 2-tail enrichment ------------
     # We multiply the likelihood matrix (icMat) and the tfmode matrix (morMat)
     # to get directional weights of the targets in each regulon
@@ -188,8 +188,8 @@ def aREA(gex_data, interactome, layer = None):
     # We then perform a dot product of these weights and the genes in our 2 tailed Z-scores matrix ges2TQ
     # to get our directed enrichment scores (samples in columns, regulators in the rows)
     dES = dES.dot(np.transpose(ges2TQ))
-    
-    # ------------ 1-tail enrichemnt ------------ 
+
+    # ------------ 1-tail enrichemnt ------------
     # We multiply the likelihood matrix (icMat) and the tfmode matrix (morMat)
     # to get undirected weights of the targets in each regulon
         # The farther the tfmode is from 0 and closer it is to 1, the smaller the weights
@@ -197,12 +197,12 @@ def aREA(gex_data, interactome, layer = None):
     # We then perform a dot product of these weights and the genes in our 1 tailed Z-scores matrix ges1TQ
     # to get our undirected enrichment scores (samples in columns, regulators in the rows)
     uES = uES.dot(np.transpose(ges1TQ))
-    
-    # ------------ Integrate enrichment ------------ 
+
+    # ------------ Integrate enrichment ------------
     # We integrate our directed and undirected enrichment scores matrices to get our integrated enrichment scores
     iES = (abs(dES) + uES * (uES > 0)) * np.sign(dES)
-    
-    # ------------ make NES (Normalized Enrichment Scores) matrix ------------ 
+
+    # ------------ make NES (Normalized Enrichment Scores) matrix ------------
     # interactome.icpVec() returns a vector
         # This vector is generated by taking each individual regulon in the newtork and calculating
         # the likelihood index proportion to all interactions
@@ -993,11 +993,6 @@ def mad_from_R(x, center=None, constant=1.4826, low=False, high=False):
         n2 = n // 2 + int(high)
         return constant * np.sort(np.abs(x - center))[n2]
     return constant * np.median(np.abs(x - center))
-
-# -----------------------------------------------------------------------------
-# ------------------------------- MAIN FUNCTIONS ------------------------------
-# -----------------------------------------------------------------------------
-
 # Function assumes features as rows and observations as columns
 # Numerator Functions:
     # Median - numpy.median
@@ -1005,17 +1000,17 @@ def mad_from_R(x, center=None, constant=1.4826, low=False, high=False):
 # Denominator Functions:
     # Median absolute deviation - mad_from_R
     # Standard deviation - statistics.stdev
-def rank_norm(x, NUM_FUN=np.median, DEM_FUN = mad_from_R, trim=0):
+def rank_norm_matrix(x, NUM_FUN=np.median, DEM_FUN = mad_from_R, trim=0, verbose = True):
     rank = rankdata(x, axis=0)
     median = NUM_FUN(rank, axis=1, keepdims=True)#np.median(rank, axis=1, keepdims=True)
     mad = np.apply_along_axis(DEM_FUN, 1, rank)
 
     x = ((rank - median)/mad[:, np.newaxis])
 
-    print("- Number of NA features:", np.sum(np.sum(np.isnan(x), axis=1)))
-    print("- Number of Inf features:", np.sum(np.isinf(np.sum(x, axis=1))))
-    print("- Number of 0 features:", np.sum(np.sum(x, axis=1) == 0))
-    print("- Features to Remove:")
+    if(verbose): print("- Number of NA features:", np.sum(np.sum(np.isnan(x), axis=1)))
+    if(verbose): print("- Number of Inf features:", np.sum(np.isinf(np.sum(x, axis=1))))
+    if(verbose): print("- Number of 0 features:", np.sum(np.sum(x, axis=1) == 0))
+    if(verbose): print("- Features to Remove:")
 
     # Take care of infinite values
     max_finite = np.nanmax(x[np.isfinite(x)])
@@ -1025,11 +1020,39 @@ def rank_norm(x, NUM_FUN=np.median, DEM_FUN = mad_from_R, trim=0):
 
     x = np.where(np.isnan(x), np.nanmin(x), x)
     x = np.clip(x, a_min=np.nanmin(x), a_max=np.nanmax(x))
-    print("- Removing NULL/NA features ...")
+    if(verbose): print("- Removing NULL/NA features ...")
     x = x[~np.isnan(x).any(axis=1)]
 
-    print("- Number of NA features:", np.sum(np.sum(np.isnan(x), axis=1)))
-    print("- Number of Inf features:", np.sum(np.isinf(np.sum(x, axis=1))))
-    print("- Number of 0 features:", np.sum(np.sum(x, axis=1) == 0))
+    if(verbose): print("- Number of NA features:", np.sum(np.sum(np.isnan(x), axis=1)))
+    if(verbose): print("- Number of Inf features:", np.sum(np.isinf(np.sum(x, axis=1))))
+    if(verbose): print("- Number of 0 features:", np.sum(np.sum(x, axis=1) == 0))
 
     return x
+
+# -----------------------------------------------------------------------------
+# ------------------------------- MAIN FUNCTIONS ------------------------------
+# -----------------------------------------------------------------------------
+
+def rank_norm(x, NUM_FUN=np.median, DEM_FUN = mad_from_R, trim=0, layer_input = None, layer_output = None, verbose = True):
+    if(isinstance(x, anndata.AnnData) or isinstance(x, anndata._core.anndata.AnnData)):
+        if(layer_input is None):
+            gesMat = x.X.copy()
+        else:
+            if(verbose): print('- Using the layer "' + layer_input + '" as input...')
+            gesMat = x.layers[layer_input].copy()
+    elif(isinstance(x, np.ndarray)):
+        gesMat = x.copy()
+    elif(isinstance(x, pd.DataFrame)):
+        gesMat = x.copy().to_numpy
+    else:
+        raise Exception("In RankNorm(x), x must be anndata.AnnData, numpy.ndarray or pandas.DataFrame.")
+    gesMat = rank_norm_matrix(gesMat, NUM_FUN, DEM_FUN, trim, verbose)
+    if(isinstance(x, anndata.AnnData)):
+        if(layer_output is None):
+            x.X = gesMat
+        else:
+            if(verbose): print('- Saving result in the layer "' + layer_output + '"...')
+            x.layers[layer_output] = gesMat
+    else:
+        x = gesMat
+    return(x)
