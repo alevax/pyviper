@@ -6,7 +6,7 @@ InteractomeToTable <- function(net.obj, out.file) {
 	# make df
 	net.df <- do.call(rbind, lapply(names(net.obj), function(x) {
 		reg.obj <- net.obj[[x]] 
-		if (is.na(reg.obj$subnets))
+		if (is.null(reg.obj$subnets))
 		{
 			reg.df <- data.frame('regulator' = rep(x, length(reg.obj$tfmode)),
 													 'target' = names(reg.obj$tfmode),
