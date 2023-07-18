@@ -28,7 +28,7 @@ InteractomeToTable <- function(net.obj, out.file) {
 		write.table(net.df, file = out.file, quote = FALSE, sep = '\t',
 								row.names = FALSE, col.names = TRUE)
 	} else {
-		return(reg.df)
+		return(net.df)
 	}
 }
 
