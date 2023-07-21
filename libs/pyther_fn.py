@@ -394,10 +394,12 @@ def pyther(gesObj,
             print("Computing regulons enrichment with aREA")
 
         # n_jobs need to be decided.
-        netMets = Parallel(n_jobs = njobs)(
+
+        netMets = Parallel(n_jobs = njobs, verbose = 11)(
             (delayed)(meta_aREA)(gesObj,iObj,eset_filter = eset_filter)
             for iObj in intList
             )
+        
 
     firstMat = netMets.pop(0)
 
