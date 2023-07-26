@@ -5,7 +5,7 @@ from scipy.stats import ttest_1samp
 import pandas as pd
 import anndata
 import scanpy as sc
-from .pyther_classes import *
+from pyther_classes import *
 import pathlib
 from tqdm import tqdm
 from joblib import Parallel, delayed
@@ -261,7 +261,7 @@ def bootstrap_aREA(gesObj, intObj, bmean, bsd, eset_filter = False):
     return result
 
 
-def meta_aREA(gesObj, intObj, eset_filter = False,pleiotropy = False, pleiotropyArgs = {}):
+def meta_aREA(gesObj, intObj, eset_filter = False,pleiotropy = False, pleiotropyArgs = {}, layer = None):
 
     pb = None
  
@@ -271,7 +271,7 @@ def meta_aREA(gesObj, intObj, eset_filter = False,pleiotropy = False, pleiotropy
         #would this line have influnence outside this function? 
         
         
-    result = aREA(gesObj,intObj)
+    result = aREA(gesObj,intObj, layer)
     result = result.reset_index().melt(
         id_vars = 'index',
         var_name = 'gene')
@@ -312,8 +312,9 @@ def mat_to_anndata(mat):
 # -----------------------------------------------------------------------------
 # ------------------------------- MAIN FUNCTIONS ------------------------------
 # -----------------------------------------------------------------------------
-def pyther(gesObj, 
-           intList, 
+def pyther(gex_data, 
+           interactome,
+           layer = None,
            njobs = 3,
            eset_filter = True, 
            bootstrap = 0, 
@@ -324,9 +325,15 @@ def pyther(gesObj,
            mvws=1, 
            method=[None, "scale", "rank", "mad", "ttest"],
            pleiotropyArgs={'regulator':0.05, 'shadow':0.05, 'targets':10, "penalty":20, "method":"adaptive"},
-           verbose= True):
+           verbose= True,
+           output_type  = ['anndata', 'ndarray']):
 
-   
+# 
+    gesObj = gex_data
+    intList = interactome    
+
+    
+
 
     if type(intList) == Interactome:
         intList = [intList]
@@ -384,7 +391,7 @@ def pyther(gesObj,
         #targets = intObj.get_targetSet()
         # may need a bootstrap area
         netMets = Parallel(n_jobs = njobs)(
-        (delayed)(bootstrap_aREA)(gesObj,iObj,eset_filter = True)
+        (delayed)(bootstrap_aREA)(gesObj,iObj,eset_filter = True,layer = layer)
         for iObj in intList
         )
 
@@ -420,7 +427,15 @@ def pyther(gesObj,
 
     result['value'] = np.sum(nes*ws,axis =1)/np.sum(ws,axis =1)
 
-    return result.pivot(index='index',columns="gene", values="value") #final result
+    preOp = result.pivot(index='index',columns="gene", values="value")
+
+
+    if output_type == 'ndarray':
+        op = preOp       
+    else:
+        op = mat_to_anndata(preOp)
+    
+    return op #final result
 
 def path_enr(adata,
              interactome,
