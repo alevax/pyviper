@@ -52,3 +52,13 @@ intObj = interactome_from_tsv('network.tsv', 'network_name')
     nesMat = aREA(gesObj, intObj)
 
     ```
+
+- matrix_narnea
+  
+  `matrix_narnea(gesObj, int_table)`
+
+  matrix narnea in still under development. Current version only takes a dataframe of regulon network as input `int_table`. Result is ordered alphabetically.  For input and output details, please refer to test_narnea.ipynb
+
+  ```
+  test_narnea = matrix_narnea(testset, int_table)
+  ```
