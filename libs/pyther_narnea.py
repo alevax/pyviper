@@ -82,7 +82,7 @@ def replace_random(x, a, b):
 
 ### Matrix narnea
 
-def matrix_narnea(gesObj, int_table):
+def matrix_narnea(gesObj, int_table, intermediate = False):
     
     pd.options.mode.chained_assignment = None
     exp_genes = list(gesObj.var.sort_index().index)
@@ -209,6 +209,13 @@ def matrix_narnea(gesObj, int_table):
     PES_comb_nes = PES_pos_NES * pos_NES + PES_neg_NES * (~pos_NES)
     PES_mat = NES_mat / np.abs(PES_comb_nes)
 
-    result = [NES_mat, PES_mat]
+    
 
+    if (intermediate) == False :
+        NES_mat = pd.DataFrame(NES_mat.T, index = gesObj.obs.index, columns= list(AW_AM_prob.columns))
+        PES_mat = pd.DataFrame(PES_mat.T, index = gesObj.obs.index, columns= list(AW_AM_prob.columns))
+                               
+
+    
+    result = [NES_mat, PES_mat]
     return result

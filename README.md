@@ -55,7 +55,7 @@ intObj = interactome_from_tsv('network.tsv', 'network_name')
 
 - matrix_narnea
   
-  `matrix_narnea(gesObj, int_table)`
+  `matrix_narnea(gesObj, int_table, intermediate = False)`
 
   matrix narnea in still under development. Current version only takes a dataframe of regulon network as input `int_table`. Result is ordered alphabetically.  For input and output details, please refer to test_narnea.ipynb
 
