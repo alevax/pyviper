@@ -47,7 +47,7 @@ def load_interactome_from_tsv(filePath, intName):
     interactome = Interactome('intName')
     # loop through regulators
     uniqueRegs = netTable.regulator.unique()
-    for u in uniqueRegs:
+    for u in tqdm(uniqueRegs, desc="Processing regulators", unit="regulator"):
         # subset dataframe
         uDF = netTable[netTable.regulator == u]
         # make dictionaries
