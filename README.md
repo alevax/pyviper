@@ -62,3 +62,13 @@ intObj = interactome_from_tsv('network.tsv', 'network_name')
   ```
   test_narnea = matrix_narnea(testset, int_table)
   ```
+
+- slice_concat
+  
+  `slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwargs)`
+
+  this function works for large dataset, which allows you to slice the data, run the function and concat the results. For pyther function , the output type should be 'ndarray'. For detailed example, please refer to test.ipynb
+
+  ```
+  slice_concat(pyther,gex_data, bins = 2, interactome = intList, output_type = 'ndarray',verbose = False)
+  ```

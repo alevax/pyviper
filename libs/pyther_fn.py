@@ -2,6 +2,8 @@ import numpy as np
 from scipy.stats import norm
 from scipy.stats import rankdata
 from scipy.stats import ttest_1samp
+import os
+import shutil
 import pandas as pd
 import anndata
 import scanpy as sc
@@ -331,9 +333,8 @@ def pyther(gex_data,
 # 
     gesObj = gex_data
     intList = interactome    
-
     
-
+    pd.options.mode.chained_assignment = None
 
     if type(intList) == Interactome:
         intList = [intList]
@@ -397,12 +398,15 @@ def pyther(gex_data,
 
     else:
 
+        joblib_verbose = 0
         if verbose:
             print("Computing regulons enrichment with aREA")
+            joblib_verbose = 11
+
 
         # n_jobs need to be decided.
 
-        netMets = Parallel(n_jobs = njobs, verbose = 11)(
+        netMets = Parallel(n_jobs = njobs, verbose = joblib_verbose)(
             (delayed)(meta_aREA)(gesObj,iObj,eset_filter = eset_filter)
             for iObj in intList
             )
@@ -421,7 +425,8 @@ def pyther(gex_data,
     #mvws = 1
     if type(mvws) == int :
         ws = np.abs(nes)**mvws
-        print('mvws =' , mvws)
+        if verbose:
+            print('mvws =' , mvws)
     else:
         ws = sigT(np.abs(nes),mvws[1],mvws[0])
 
@@ -635,6 +640,45 @@ def translate_adata_index(adata,
 # -----------------------------------------------------------------------------
 # ------------------------------ HELPER FUNCTIONS -----------------------------
 # -----------------------------------------------------------------------------
+def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwargs): 
+    #kwargs are the parameters for the inner function.
+    #slice the data cells * genes
+
+    result_list = []
+    size = int(gex_data.shape[0]/bins) 
+    residue = gex_data.shape[0] % bins
+
+    if write_local:
+        os.mkdir('temp')
+
+        for i in range(bins-1):
+            segment = gex_data[i*size: i*size + size,]
+            temp_result = inner_function(segment, **kwargs)
+            temp_result.to_csv('temp/'+ str(i) + '.csv')
+        
+        # the last one
+        segment = gex_data[(bins-1)*size: bins*size + residue,]
+        temp_result = inner_function(segment, **kwargs)
+        temp_result.to_csv('temp/'+ str(bins-1) + '.csv')
+
+
+        all_file_list=os.listdir('temp')
+        for single_file in all_file_list:
+            result_list.append(pd.read_csv(os.path.join('temp',single_file)))
+
+        shutil.rmtree('temp')
+
+    else:        
+        for i in range(bins):
+            segment = gex_data[i*size: i*size + size,]
+            result_list.append(inner_function(segment, **kwargs))
+
+    
+    # concat result
+
+    result = pd.concat(result_list,axis=0).reset_index(drop = True)
+    return result
+
 
 def get_pyther_dir():
     pyther_dir = str(pathlib.Path(__file__).parent.parent.resolve())
