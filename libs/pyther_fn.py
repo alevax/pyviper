@@ -677,6 +677,7 @@ def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwar
     # concat result
 
     result = pd.concat(result_list,axis=0).reset_index(drop = True)
+    result.set_index(keys='index',inplace=True)
     return result
 
 
