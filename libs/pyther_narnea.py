@@ -4,7 +4,8 @@ import pandas as pd
 from pyther_classes import *
 from scipy.stats import norm
 from scipy.stats import rankdata
-
+from joblib import Parallel, delayed
+import anndata
 ### Tool functions
 
 
@@ -82,7 +83,7 @@ def replace_random(x, a, b):
 
 ### Matrix narnea
 
-def matrix_narnea(gesObj, int_table, intermediate = False):
+def matrix_narnea(gesObj, int_table, intermediate = False, min_targets = 30):
     
     pd.options.mode.chained_assignment = None
     exp_genes = list(gesObj.var.sort_index().index)
@@ -99,7 +100,9 @@ def matrix_narnea(gesObj, int_table, intermediate = False):
     # why we cant have 0, 1 and -1?
 
     # filtered out those with target less than min.targets )may be this should  be a function for interactone class
-
+    reg_counts  = filtered_table['regulator'].value_counts() 
+    reg_counts = list(reg_counts[reg_counts>=min_targets].index)
+    filtered_table = filtered_table[filtered_table['regulator'].isin(reg_counts)] 
 
     # modify the expression matrix: 
         # fill with number less than the min in this sample, sign is randomly assigned according to the +_ proportion
@@ -219,3 +222,98 @@ def matrix_narnea(gesObj, int_table, intermediate = False):
     
     result = [NES_mat, PES_mat]
     return result
+
+### Meta narnea
+
+def meta_narnea(gesObj, intList, sample_weight = True, njobs = 3):
+    pd.options.mode.chained_assignment = None
+    results = Parallel(n_jobs = njobs)(
+        (delayed)(matrix_narnea)(gesObj,iObj)
+        for iObj in intList
+        )
+    
+    the_first = results.pop(0)
+    melt_pes = the_first[1].reset_index().melt(
+        id_vars = 'index',
+        var_name = 'gene')
+
+
+    for i in range(len(results)):
+        the_pes = results[i][1].reset_index().melt(
+        id_vars = 'index',
+        var_name = 'gene')
+        melt_pes = melt_pes.merge(the_pes,how = 'outer',on = ['index','gene'])
+
+    all_regs = melt_pes['gene'].drop_duplicates()
+    melt_pes.dropna(inplace=True)
+    melt_pes
+
+    pes_max = np.apply_along_axis(np.argmax, axis=1, arr=np.abs(melt_pes[list(melt_pes.columns)[2:]])) 
+
+    net_weight = melt_pes[['index']]
+    net_weight['net'] = pes_max
+    net_weight.reset_index(inplace = True)
+
+    net_weight = net_weight.pivot(index = 'level_0', columns = 'net',values = 'net' ).notna()
+    net_weight['index'] = melt_pes[['index']]
+    
+    shared_regs = melt_pes['gene'].drop_duplicates()
+    net_weight = net_weight.groupby('index').sum()/len(shared_regs)
+
+
+    bg_matrix = pd.DataFrame(0,index = the_first[0].index, columns = all_regs)
+
+    #PES
+
+    pre_pes = bg_matrix.copy()
+    all_regs_pes = bg_matrix + the_first[1]
+    all_regs_pes.fillna(0, inplace = True)
+    all_regs_pes.sort_index(inplace=True)
+    pes_dom = (all_regs_pes != 0) * net_weight[0].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs)))
+    
+    net_weight_array = net_weight[0].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs)))
+    net_weight_array
+    pre_pes = pre_pes + all_regs_pes * net_weight_array
+    pre_pes
+
+    for i in range(1,len(results)+1):
+        all_regs_pes =  bg_matrix + results[i-1][1] 
+        all_regs_pes.fillna(0, inplace = True)
+        all_regs_pes.sort_index(inplace=True)
+        pes_dom = pes_dom + (all_regs_pes!= 0) * net_weight[i].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs)))
+        net_weight_array = net_weight[i].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs)))
+        pre_pes =  pre_pes + all_regs_pes * net_weight_array
+
+    pre_pes = pre_pes/pes_dom
+
+    # NES
+
+    pre_nes = bg_matrix.copy() 
+    all_regs_nes = bg_matrix + the_first[0]
+    all_regs_nes.fillna(0, inplace = True)
+    all_regs_nes.sort_index(inplace=True)
+    nes_dom = ((all_regs_nes != 0) * net_weight[0].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs))))**2
+
+    net_weight_array = net_weight[0].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs)))
+    net_weight_array
+    pre_nes = pre_nes + all_regs_nes * net_weight_array
+
+
+
+    for i in range(1,len(results)+1):
+        all_regs_nes =  bg_matrix + results[i-1][0] 
+        all_regs_nes.fillna(0, inplace = True)
+        all_regs_nes.sort_index(inplace=True)
+        nes_dom = nes_dom + ((all_regs_pes!= 0) * net_weight[i].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs))))**2
+        net_weight_array = net_weight[i].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs)))
+        pre_nes =  pre_nes + all_regs_nes * net_weight_array
+
+    pre_nes = pre_nes/np.sqrt(nes_dom)
+    pre_nes
+
+    # anndata op
+
+    op = anndata.AnnData(pre_nes)
+    op.layers['pes'] = pre_pes
+
+    return op
