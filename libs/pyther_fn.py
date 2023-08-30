@@ -654,11 +654,20 @@ def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwar
         for i in range(bins-1):
             segment = gex_data[i*size: i*size + size,]
             temp_result = inner_function(segment, **kwargs)
+
+            if type(temp_result) == anndata._core.anndata.AnnData:
+                temp_result = temp_result.to_df()
+
+
             temp_result.to_csv('temp/'+ str(i) + '.csv')
         
         # the last one
         segment = gex_data[(bins-1)*size: bins*size + residue,]
         temp_result = inner_function(segment, **kwargs)
+
+        if type(temp_result) == anndata._core.anndata.AnnData:
+            temp_result = temp_result.to_df()
+        
         temp_result.to_csv('temp/'+ str(bins-1) + '.csv')
 
 
