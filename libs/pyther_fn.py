@@ -1,18 +1,32 @@
 import numpy as np
 from scipy.stats import norm
 from scipy.stats import rankdata
+from scipy.stats import ttest_1samp
+import os
+import shutil
 import pandas as pd
 import anndata
 import scanpy as sc
 from pyther_classes import *
 import pathlib
 from tqdm import tqdm
+from joblib import Parallel, delayed
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
 # ------------------------------- CORE FUNCTIONS ------------------------------
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+# calculator
+
+def sigT(x, slope = 20, inflection = 0.5):
+    return (1 - 1/(1 + np.exp(slope * (x - inflection))))        
+
+def sample_ttest(i,array):
+    return ttest_1samp((array[i] - np.delete(array, i, 0)), 0).statistic
+
+
 
 def load_interactome_from_tsv(filePath, intName):
     """\
@@ -35,7 +49,7 @@ def load_interactome_from_tsv(filePath, intName):
     interactome = Interactome('intName')
     # loop through regulators
     uniqueRegs = netTable.regulator.unique()
-    for u in uniqueRegs:
+    for u in tqdm(uniqueRegs, desc="Processing regulators", unit="regulator"):
         # subset dataframe
         uDF = netTable[netTable.regulator == u]
         # make dictionaries
@@ -219,6 +233,57 @@ def aREA(gex_data, interactome, layer = None):
     # We return our result
     return(nES)
 
+def bootstrap_aREA(gesObj, intObj, bmean, bsd, eset_filter = False):
+    if (eset_filter):
+        tmp = list(set(list(intObj.get_targetSet())+list(intObj.get_regulonNames())))
+        gesObj = gesObj[:,gesObj.var_names.isin(pd.Series(tmp))]
+
+    samples = gesObj.shape[0]
+    regulons = len(intObj.get_regulonNames())
+
+    nes = np.zeros((samples,regulons))
+    nessd = np.zeros((samples,regulons))
+
+    bootstrap_obj = anndata.AnnData(X = np.zeros(bmean.shape),var=gesObj.var)
+
+    for i in range(samples): # for each row 
+        
+        bootstrap_obj.X = (-gesObj.X[i,:] + bmean)/bsd
+
+        result = aREA(bootstrap_obj,intObj)
+        nes[i] = np.mean(result, axis = 0)
+        nessd[i] = np.std(result, axis = 0)
+
+    result = pd.DataFrame(nes,index=gesObj.obs.index,columns=result.columns)
+
+    result = result.reset_index().melt(
+        id_vars = 'index',
+        var_name = 'gene')
+
+    return result
+
+
+def meta_aREA(gesObj, intObj, eset_filter = False,pleiotropy = False, pleiotropyArgs = {}, layer = None):
+
+    pb = None
+ 
+    if (eset_filter):
+        tmp = list(set(list(intObj.get_targetSet())+list(intObj.get_regulonNames())))
+        gesObj = gesObj[:,gesObj.var_names.isin(pd.Series(tmp))]
+        #would this line have influnence outside this function? 
+        
+        
+    result = aREA(gesObj,intObj, layer)
+    result = result.reset_index().melt(
+        id_vars = 'index',
+        var_name = 'gene')
+    
+    if (pleiotropy):
+        print('pleiotropy is currently unavailable')
+
+    return result
+
+
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
 # ------------------------------ PYTHER FUNCTIONS -----------------------------
@@ -249,34 +314,133 @@ def mat_to_anndata(mat):
 # -----------------------------------------------------------------------------
 # ------------------------------- MAIN FUNCTIONS ------------------------------
 # -----------------------------------------------------------------------------
-def pyther(gex_data, interactome, layer = None):
-    """\
-    Allows the individual to infer protein activity from gene expression using
-    the VIPER (Virtual Inference of Protein-activity by Enriched Regulon
-    analysis) algorithm.
+def pyther(gex_data, 
+           interactome,
+           layer = None,
+           njobs = 3,
+           eset_filter = True, 
+           bootstrap = 0, 
+           dnull = None, 
+           pleiotropy = False, 
+           minsize=25, 
+           adaptive_size=False,
+           mvws=1, 
+           method=[None, "scale", "rank", "mad", "ttest"],
+           pleiotropyArgs={'regulator':0.05, 'shadow':0.05, 'targets':10, "penalty":20, "method":"adaptive"},
+           verbose= True,
+           output_type  = ['anndata', 'ndarray']):
 
-    Parameters
-    ----------
-    gex_data
-        Gene expression stored in an anndata object.
-    interactome
-        The interactome object.
-    layer
-        The layer in the anndata object to use as the gene expression input
-        (default = None).
-    Returns
-    -------
-    A dataframe of :class:`~anndata._core.anndata.AnnData` with NES values
-    stored in the .X slot and the original anndata object with gene expression
-    stored in the .gex_data slot.
-    """
-    # aREA takes gex_data.X
-    nes_mat = aREA(gex_data, interactome, layer)
-    # Create an Anndata object from the nes_mat
-    pax_data = mat_to_anndata(nes_mat)
-    # Store the gex Anndata object in the pax Anndata object
-    pax_data.gex_data = gex_data
-    return(pax_data)
+# 
+    gesObj = gex_data
+    intList = interactome    
+    
+    pd.options.mode.chained_assignment = None
+
+    if type(intList) == Interactome:
+        intList = [intList]
+        print('Single regulon inputed')
+
+    if pleiotropy:
+        bootstrap = 0
+        if verbose:
+            print("Using pleiotropic correction, bootstraps iterations are ignored.")
+    
+    if verbose:
+        print("Computing the association scores")
+
+    ''' not in current version 3.8 of python , only in python 3.10
+    match method:
+
+        case 'scale': #scale each gene in all sample
+            gesObj.X = (gesObj.X - np.mean(gesObj.X,axis=0))/np.std(gesObj.X,axis=0)
+        case 'rank':
+            gesObj.X = rankdata(gesObj.X,axis=0)*(np.random.random(gesObj.X.shape)*2/10-0.1)
+        case 'mad':
+            median = np.median(gesObj.X,axis=0)
+            gesObj.X = (gesObj.X-median)/np.median(np.abs(gesObj.X-median))
+        case 'ttest':
+            # I dont quite understand this part maybe ask later:
+            gesObj.X = gesObj.X
+    '''
+    if method == 'scale':
+        gesObj.X = (gesObj.X - np.mean(gesObj.X,axis=0))/np.std(gesObj.X,axis=0)
+    elif method == 'rank':
+        gesObj.X = rankdata(gesObj.X,axis=0)*(np.random.random(gesObj.X.shape)*2/10-0.1)
+    elif method == 'mad':
+        median = np.median(gesObj.X,axis=0)
+        gesObj.X = (gesObj.X-median)/np.median(np.abs(gesObj.X-median))
+    elif method == 'ttest':
+        gesObj.X = np.array([sample_ttest(i, gesObj.X.copy()) for i in range(gesObj.shape[0])])
+
+    #if 
+
+    if bootstrap > 0:
+
+#        num_sample = gesObj.X.shape[0]
+        bmean = np.zeros((bootstrap,gesObj.X.shape[1]))
+        bsd = np.zeros((bootstrap,gesObj.X.shape[1]))
+
+
+        sampled_indices = np.random.choice(gesObj.obs.index,bootstrap*len(gesObj.obs))
+        
+        for i in range(bootstrap):
+            sample_name = sampled_indices[i*len(gesObj.obs):(i+1)*len(gesObj.obs)]
+            #sample mean
+            bmean[i] = np.mean(gesObj[sample_name,:].X, axis=0)
+            bsd[i] = np.std(gesObj[sample_name,:].X, axis=0)
+
+        #targets = intObj.get_targetSet()
+        # may need a bootstrap area
+        netMets = Parallel(n_jobs = njobs)(
+        (delayed)(bootstrap_aREA)(gesObj,iObj,eset_filter = True,layer = layer)
+        for iObj in intList
+        )
+
+    else:
+
+        joblib_verbose = 0
+        if verbose:
+            print("Computing regulons enrichment with aREA")
+            joblib_verbose = 11
+
+
+        # n_jobs need to be decided.
+
+        netMets = Parallel(n_jobs = njobs, verbose = joblib_verbose)(
+            (delayed)(meta_aREA)(gesObj,iObj,eset_filter = eset_filter)
+            for iObj in intList
+            )
+        
+
+    firstMat = netMets.pop(0)
+
+    for thisMat in netMets:
+        firstMat = firstMat.merge(thisMat,how = 'outer',on = ['index','gene'])
+    
+    firstMat.fillna(0,inplace = True)
+
+    result = firstMat[['index','gene']]
+    nes = firstMat[list(firstMat.columns)[2:]].values
+
+    #mvws = 1
+    if type(mvws) == int :
+        ws = np.abs(nes)**mvws
+        if verbose:
+            print('mvws =' , mvws)
+    else:
+        ws = sigT(np.abs(nes),mvws[1],mvws[0])
+
+    result['value'] = np.sum(nes*ws,axis =1)/np.sum(ws,axis =1)
+
+    preOp = result.pivot(index='index',columns="gene", values="value")
+
+
+    if output_type == 'ndarray':
+        op = preOp       
+    else:
+        op = mat_to_anndata(preOp)
+    
+    return op #final result
 
 def path_enr(adata,
              interactome,
@@ -476,6 +640,55 @@ def translate_adata_index(adata,
 # -----------------------------------------------------------------------------
 # ------------------------------ HELPER FUNCTIONS -----------------------------
 # -----------------------------------------------------------------------------
+def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwargs): 
+    #kwargs are the parameters for the inner function.
+    #slice the data cells * genes
+
+    result_list = []
+    size = int(gex_data.shape[0]/bins) 
+    residue = gex_data.shape[0] % bins
+
+    if write_local:
+        os.mkdir('temp')
+
+        for i in range(bins-1):
+            segment = gex_data[i*size: i*size + size,]
+            temp_result = inner_function(segment, **kwargs)
+
+            if type(temp_result) == anndata._core.anndata.AnnData:
+                temp_result = temp_result.to_df()
+
+
+            temp_result.to_csv('temp/'+ str(i) + '.csv')
+        
+        # the last one
+        segment = gex_data[(bins-1)*size: bins*size + residue,]
+        temp_result = inner_function(segment, **kwargs)
+
+        if type(temp_result) == anndata._core.anndata.AnnData:
+            temp_result = temp_result.to_df()
+        
+        temp_result.to_csv('temp/'+ str(bins-1) + '.csv')
+
+
+        all_file_list=os.listdir('temp')
+        for single_file in all_file_list:
+            result_list.append(pd.read_csv(os.path.join('temp',single_file)))
+
+        shutil.rmtree('temp')
+
+    else:        
+        for i in range(bins):
+            segment = gex_data[i*size: i*size + size,]
+            result_list.append(inner_function(segment, **kwargs))
+
+    
+    # concat result
+
+    result = pd.concat(result_list,axis=0).reset_index(drop = True)
+    result.set_index(keys='index',inplace=True)
+    return result
+
 
 def get_pyther_dir():
     pyther_dir = str(pathlib.Path(__file__).parent.parent.resolve())
