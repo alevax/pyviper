@@ -55,7 +55,7 @@ intObj = interactome_from_tsv('network.tsv', 'network_name')
 
 -   **pyther**
 
-    ```
+    ```python
     def pyther(
               gex_data,  # anndata obj
               interactome, # list of interactomes
@@ -77,7 +77,7 @@ intObj = interactome_from_tsv('network.tsv', 'network_name')
 
 - **aREA**
   
-    ```
+    ```python
     aREA(
         gex_data, # anndata obj
         interactome, # a single interactome
@@ -94,7 +94,7 @@ intObj = interactome_from_tsv('network.tsv', 'network_name')
 
 - **matrix_narnea**
   
-  ```
+  ```python
   matrix_narnea(
                 gesObj, # anndata obj
                 int_table, # dataframe
@@ -105,13 +105,13 @@ intObj = interactome_from_tsv('network.tsv', 'network_name')
 
   matrix narnea in still under development. Current version takes a dataframe of regulon network as input `int_table`. Output is a list contains two dataframes: `nes` and `pes` score,  ordered alphabetically. For input and output details, please refer to test_narnea.ipynb
 
-  ```
+  ```python
   test_narnea = matrix_narnea(testset, int_table)
   ```
 
 - **meta_narnea**
   
-    ```
+    ```python
     meta_narnea(
                 gesObj, # anndata obj
                 intList, # list of dataframes
@@ -121,10 +121,15 @@ intObj = interactome_from_tsv('network.tsv', 'network_name')
 
   meta_narnea enables matrix narnea to be performed on a list of networks, with results being intergraded by weighted average. Output is an anndata object of NES score with an extra layer of `.pes` of PES score.
 
+  ```python
+  meta_narnea(fibroblast_1000, intList)
+  
+  ```
+
 
 - **slice_concat**
   
-  ```
+  ```python
   slice_concat(
               inner_function, 
               gex_data ,
@@ -135,6 +140,6 @@ intObj = interactome_from_tsv('network.tsv', 'network_name')
 
   this function works for large dataset, which allows you to slice the data, run the function and concat the results.In current version, it only support functions with output of dataframe or anndata object. For pyther function , the output type should be 'ndarray'. For detailed example, please refer to test.ipynb
 
-  ```
+  ```python
   slice_concat(pyther,gex_data, bins = 2, interactome = intList, output_type = 'ndarray',verbose = False)
   ```
