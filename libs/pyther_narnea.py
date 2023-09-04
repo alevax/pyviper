@@ -64,7 +64,7 @@ def combine_nes(D_nes, U_nes, COV_nes):
     # pos_nes = norm.isf(quantile, loc=0, scale=1)
     # neg_nes = norm.ppf(quantile, loc=0, scale=1)
     a = np.sqrt(- final_p + np.log(2))
-    pos_nes = -0.2136 + 1.417*a
+    pos_nes = -1.4374174 + 1.8396835*a - 0.0562393*a**2 + 0.0025810*a**3
     neg_nes = -pos_nes
     
 
