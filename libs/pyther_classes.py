@@ -15,6 +15,13 @@ class Regulon:
         retStr += "\tNumber of Targets: " + str(len(self.icDict))
         return retStr
 
+    def copy(self):
+        return Regulon(self.name, self.icDict.copy(), self.morDict.copy())
+
+    # method to create a deep copy of the Regulon object
+    def deep_copy(self):
+        return Regulon(self.name, copy.deepcopy(self.icDict), copy.deepcopy(self.morDict))
+    
     # returns size as the number of targets
     def size(self):
         return len(self.icDict.keys())
@@ -56,6 +63,14 @@ class Interactome:
         retStr += "\tNumber of Regulons: " + str(len(self.regDict))
         return retStr
 
+    def copy(self):
+        return Interactome(self.name, self.regDict.copy())
+
+    # method to create a deep copy of the Interactome object
+    def deep_copy(self):
+        reg_dict_copy = {key: value.deep_copy() for key, value in self.regDict.items()}
+        return Interactome(self.name, regDict=reg_dict_copy)
+    
     # returns size as the number of regulons
     def size(self):
         return len(self.regDict.keys())
@@ -105,3 +120,4 @@ class Interactome:
     def icpVec(self):
         icpVec = [r.icProportion() for r in self.regDict.values()]
         return icpVec
+
