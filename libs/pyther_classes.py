@@ -121,3 +121,39 @@ class Interactome:
         icpVec = [r.icProportion() for r in self.regDict.values()]
         return icpVec
 
+    def filter_regulons(self, regulator_list):
+        # First prune the regulators
+        # Using a list comprehension to make a list of the keys to be deleted
+        regulators_to_delete = [key for key in self.regDict if key not in regulator_list]
+        # delete the key/s
+        for regulator in regulators_to_delete:
+            del self.regDict[regulator]
+
+    def filter_targets(self, targets_list, cleanup = True, min_n_targets = 1):
+        for regulator in self.regDict:
+            regulon = self.regDict[regulator]
+            targets_to_delete = [value for value in regulon.icDict if value not in targets_list]
+            # targets_to_delete = [value for value in ACP1.morDict if value not in targets_list]
+            for target in targets_to_delete:
+                del regulon.icDict[target]
+                del regulon.morDict[target]
+        if cleanup is True:
+            # delete the key/s
+            regulators_to_delete = [regulator for regulator in self.regDict if len(self.regDict[regulator].icDict) < min_n_targets]
+            for regulator in regulators_to_delete:
+                del self.regDict[regulator]
+
+    # This should be the method from VIPER
+    # later add adaptive and wm parameters
+    def prune(self, cutoff = 50, eliminate = True):
+        for regulator in self.regDict:
+            regulon = self.regDict[regulator]
+            targets_sorted = sorted(regulon.icDict, key=lambda key: regulon.icDict[key], reverse=True)
+            targets_pruned = targets_sorted[:min(len(targets_sorted), cutoff)]
+            regulon.icDict = {target: regulon.icDict[target] for target in targets_pruned}
+            regulon.morDict = {target: regulon.morDict[target] for target in targets_pruned}
+        if eliminate is True:
+            # delete the key/s
+            regulators_to_delete = [regulator for regulator in self.regDict if len(self.regDict[regulator].icDict) < cutoff]
+            for regulator in regulators_to_delete:
+                del self.regDict[regulator]
