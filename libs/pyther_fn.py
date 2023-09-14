@@ -42,24 +42,46 @@ def load_interactome_from_tsv(filePath, intName):
         The name of the interactome.
     Returns
     -------
-    A dictionary of :class:`~pyther_classes.Interactome`.
+    A pd.DataFrame of :class:`~pyther_classes.Interactome`.
     """
     # read file
     netTable = pd.read_csv(filePath, sep = '\t')
-    interactome = Interactome('intName')
-    # loop through regulators
-    uniqueRegs = netTable.regulator.unique()
-    for u in tqdm(uniqueRegs, desc="Processing regulators", unit="regulator"):
-        # subset dataframe
-        uDF = netTable[netTable.regulator == u]
-        # make dictionaries
-        icDict = dict(zip(uDF.target, uDF.likelihood))
-        morDict = dict(zip(uDF.target, uDF.mor))
-        # make regulon object
-        regObj = Regulon(u, icDict, morDict)
-        interactome.addReg(u, regObj)
+    interactome = Interactome('intName', netTable)
     # return
     return(interactome)
+
+# def load_interactome_from_tsv(filePath, intName):
+#     """\
+#     Allows the user to load an interactome object from a TSV file.
+#
+#     The TSV file is created by the R function InteractomeToTable.
+#
+#     Parameters
+#     ----------
+#     filePath
+#         The file to the regulon.tsv file.
+#     intName
+#         The name of the interactome.
+#     Returns
+#     -------
+#     A dictionary of :class:`~pyther_classes.Interactome`.
+#     """
+#     # read file
+#     netTable = pd.read_csv(filePath, sep = '\t')
+#     interactome = Interactome('intName')
+#     # loop through regulators
+#     uniqueRegs = netTable.regulator.unique()
+#     for u in tqdm(uniqueRegs, desc="Processing regulators", unit="regulator"):
+#         # subset dataframe
+#         uDF = netTable[netTable.regulator == u]
+#         # make dictionaries
+#         icDict = dict(zip(uDF.target, uDF.likelihood))
+#         morDict = dict(zip(uDF.target, uDF.mor))
+#         # make regulon object
+#         regObj = Regulon(u, icDict, morDict)
+#         interactome.addReg(u, regObj)
+#     # return
+#     return(interactome)
 
 # def aREA(gex_data, interactome, layer = None):
 #     """\
