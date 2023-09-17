@@ -686,12 +686,12 @@ def translate_adata_index(adata,
 # -----------------------------------------------------------------------------
 # ------------------------------ HELPER FUNCTIONS -----------------------------
 # -----------------------------------------------------------------------------
-def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwargs):
+def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwargs): 
     #kwargs are the parameters for the inner function.
     #slice the data cells * genes
 
     result_list = []
-    size = int(gex_data.shape[0]/bins)
+    size = int(gex_data.shape[0]/bins) 
     residue = gex_data.shape[0] % bins
 
     if write_local:
@@ -700,11 +700,20 @@ def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwar
         for i in range(bins-1):
             segment = gex_data[i*size: i*size + size,]
             temp_result = inner_function(segment, **kwargs)
-            temp_result.to_csv('temp/'+ str(i) + '.csv')
 
+            if type(temp_result) == anndata._core.anndata.AnnData:
+                temp_result = temp_result.to_df()
+
+
+            temp_result.to_csv('temp/'+ str(i) + '.csv')
+        
         # the last one
         segment = gex_data[(bins-1)*size: bins*size + residue,]
         temp_result = inner_function(segment, **kwargs)
+
+        if type(temp_result) == anndata._core.anndata.AnnData:
+            temp_result = temp_result.to_df()
+        
         temp_result.to_csv('temp/'+ str(bins-1) + '.csv')
 
 
@@ -714,17 +723,17 @@ def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwar
 
         shutil.rmtree('temp')
 
-    else:
+    else:        
         for i in range(bins):
             segment = gex_data[i*size: i*size + size,]
             result_list.append(inner_function(segment, **kwargs))
 
-
+    
     # concat result
 
     result = pd.concat(result_list,axis=0).reset_index(drop = True)
+    result.set_index(keys='index',inplace=True)
     return result
-
 
 def get_pyther_dir():
     pyther_dir = str(pathlib.Path(__file__).parent.parent.resolve())
