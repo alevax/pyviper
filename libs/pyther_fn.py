@@ -8,6 +8,7 @@ import pandas as pd
 import anndata
 import scanpy as sc
 from pyther_classes import *
+from pyther_narnea import *
 import pathlib
 from tqdm import tqdm
 from joblib import Parallel, delayed
@@ -336,6 +337,113 @@ def mat_to_anndata(mat):
 # -----------------------------------------------------------------------------
 # ------------------------------- MAIN FUNCTIONS ------------------------------
 # -----------------------------------------------------------------------------
+def pyther_all(gex_data, 
+               interactome,
+               layer = None,
+               njobs = 3,
+               eset_filter = True, 
+               method=[None, "scale", "rank", "mad", "ttest"],
+               enrichment = [None, 'area','narnea'],
+               mvws=1, 
+               verbose= True,
+               output_type  = ['anndata', 'ndarray']
+               ):
+    
+    gesObj = gex_data
+    intList = interactome    
+    
+    pd.options.mode.chained_assignment = None
+
+    ### preprocessing
+
+    if type(intList) == Interactome:
+        intList = [intList]
+        print('Single network inputed')
+    
+    if verbose:
+        print("Computing the association scores")
+
+    
+    if method == 'scale':
+        gesObj.X = (gesObj.X - np.mean(gesObj.X,axis=0))/np.std(gesObj.X,axis=0)
+    elif method == 'rank':
+        gesObj.X = rankdata(gesObj.X,axis=0)*(np.random.random(gesObj.X.shape)*2/10-0.1)
+    elif method == 'mad':
+        median = np.median(gesObj.X,axis=0)
+        gesObj.X = (gesObj.X-median)/np.median(np.abs(gesObj.X-median))
+    elif method == 'ttest':
+        gesObj.X = np.array([sample_ttest(i, gesObj.X.copy()) for i in range(gesObj.shape[0])])
+
+    # enrichment 
+
+    if  enrichment  == None:
+        enrichment = 'narnea'
+    
+    if enrichment == 'area':
+
+        joblib_verbose = 0
+        if verbose:
+            print("Computing regulons enrichment with aREA")
+            joblib_verbose = 11
+
+        # convert interactom from df
+
+        for i in range(len(intList)):
+            intList[i] = Interactome('intName', intList[i])
+
+
+        # n_jobs need to be decided.
+
+        netMets = Parallel(n_jobs = njobs, verbose = joblib_verbose)(
+            (delayed)(meta_aREA)(gesObj,iObj,eset_filter = eset_filter)
+            for iObj in intList
+            )
+        
+
+        firstMat = netMets.pop(0)
+
+        for thisMat in netMets:
+            firstMat = firstMat.merge(thisMat,how = 'outer',on = ['index','gene'])
+        
+        firstMat.fillna(0,inplace = True)
+
+        result = firstMat[['index','gene']]
+        nes = firstMat[list(firstMat.columns)[2:]].values
+
+        #mvws = 1
+        if type(mvws) == int :
+            ws = np.abs(nes)**mvws
+            if verbose:
+                print('mvws =' , mvws)
+        else:
+            ws = sigT(np.abs(nes),mvws[1],mvws[0])
+
+        result['value'] = np.sum(nes*ws,axis =1)/np.sum(ws,axis =1)
+
+        preOp = result.pivot(index='index',columns="gene", values="value")
+
+
+        if output_type == 'ndarray':
+            op = preOp       
+        else:
+            op = mat_to_anndata(preOp)
+            
+    else: 
+
+        joblib_verbose = 0
+        if verbose:
+            print("Computing regulons enrichment with NaRnEa")
+            joblib_verbose = 11
+        
+        op = meta_narnea(gesObj, intList, sample_weight = True, njobs = njobs)
+
+
+
+
+    return op
+    
+
+
 def pyther(gex_data, 
            interactome,
            layer = None,
