@@ -22,7 +22,7 @@ from joblib import Parallel, delayed
 # calculator
 
 def sigT(x, slope = 20, inflection = 0.5):
-    return (1 - 1/(1 + np.exp(slope * (x - inflection))))        
+    return (1 - 1/(1 + np.exp(slope * (x - inflection))))
 
 def sample_ttest(i,array):
     return ttest_1samp((array[i] - np.delete(array, i, 0)), 0).statistic
@@ -89,10 +89,10 @@ def load_interactome_from_tsv(filePath, intName):
 #     Allows the individual to infer normalized enrichment scores from gene
 #     expression data using the analytical ranked enrichment analysis (aREA)
 #     function.
-# 
+#
 #     It is the basis of the VIPER (Virtual Inference of Protein-activity
 #     by Enriched Regulon analysis) algorithm.
-# 
+#
 #     Parameters
 #     ----------
 #     gex_data
@@ -110,19 +110,19 @@ def load_interactome_from_tsv(filePath, intName):
 #         gesMat = gex_data.X
 #     else:
 #         gesMat = gex_data.layers[layer]
-# 
+#
 #     # rank transform the GES
 #     rankMat = rankdata(gesMat, axis = 1)
-# 
+#
 #     # find intersecting genes
 #     targetSet = interactome.get_targetSet()
 #     varNames = gex_data.var_names.to_list()
 #     intersectGenes = [value for value in targetSet if value in varNames]
-# 
+#
 #     # reduce regulon matrices
 #     icMat = interactome.icMat().loc[intersectGenes]
 #     morMat = interactome.morMat().loc[intersectGenes]
-# 
+#
 #     # prepare the 1-tailed / 2-tailed matrices
 #     gesInds = [varNames.index(i) for i in intersectGenes]
 #     ges2T = rankMat / (rankMat.shape[1] + 1)
@@ -130,25 +130,25 @@ def load_interactome_from_tsv(filePath, intName):
 #     ges1T = ges1T + (1 - np.max(ges1T))/2
 #     ges2TQ = norm.ppf(ges2T[:, gesInds])
 #     ges1TQ = norm.ppf(ges1T[:, gesInds])
-# 
+#
 #     # 2-tail enrichment
 #     dES = pd.DataFrame.transpose(pd.DataFrame.mul(icMat, morMat))
 #     dES = dES.dot(np.transpose(ges2TQ))
-# 
+#
 #     # 1-tail enrichemnt
 #     uES = pd.DataFrame.transpose(pd.DataFrame.mul(1 - abs(morMat), icMat))
 #     uES = uES.dot(np.transpose(ges1TQ))
-# 
+#
 #     # integrate
 #     iES = (abs(dES) + uES * (uES > 0)) * np.sign(dES)
 #     # make NES
 #     nES = iES.mul(interactome.icpVec(), 0)
 #     nES = np.transpose(nES)
 #     nES.index = gex_data.obs.index
-# 
+#
 #     return(nES)
 
-def aREA(gex_data, interactome, layer = None):
+def aREA(gex_data, interactome, eset_filter = False, layer = None):
     """\
     Allows the individual to infer normalized enrichment scores from gene
     expression data using the analytical ranked enrichment analysis (aREA)
@@ -170,40 +170,47 @@ def aREA(gex_data, interactome, layer = None):
     -------
     A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values.
     """
+    if (eset_filter):
+        tmp = list(set(list(interactome.get_targetSet())+list(interactome.get_regulonNames())))
+        gex_data = gex_data[:,gex_data.var_names.isin(pd.Series(tmp))]
+        #would this line have influnence outside this function?
+
     if layer is None:
         gesMat = gex_data.X
     else:
         gesMat = gex_data.layers[layer]
 
-    # rank transform the GES using the rankdata function from scipy.stats 
+
+
+    # rank transform the GES using the rankdata function from scipy.stats
     rankMat = rankdata(gesMat, axis = 1)
-    
-    # ------------ find intersecting genes ------------ 
+
+    # ------------ find intersecting genes ------------
     # Use get_targetSet as part of the interactome class to get a list of all targets in the interactome
     targetSet = interactome.get_targetSet()
     # Get a list of the gene names of the gExpr signature matrix
     varNames = gex_data.var_names.to_list()
     # Get the intersction of gene names in the gExpr signature and those in the target set
     intersectGenes = [value for value in targetSet if value in varNames]
-    
-    # ------------ reduce regulon matrices ------------ 
+
+    # ------------ reduce regulon matrices ------------
     # The icMat is the matrix with regulators in the columns, targets in the rows and likelihood (weights) as values
         # (we filter to intersectGenes as targets by using .loc[intersectGenes])
     icMat = interactome.icMat().loc[intersectGenes]
     # The morDict is the matrix with regulators in the columns, targets in the rows and tfmode (modes) as values
     morMat = interactome.morMat().loc[intersectGenes]
-    
+
     # ------------ prepare the 1-tailed / 2-tailed matrices ------------
-    
+
     # gesInds is a series of indices - the index of every target in the gExpr signature matrix
         # for each of the intersecting genes
     gesInds = [varNames.index(i) for i in intersectGenes]
-    
+
     # To get the one tailed matrix, we normalize our rank values between 0 and 1 across each sample,
         # thereby scaling our data across each sample
     # To do this, we divide each row of the rankMat by the number of samples (rows) plus 1 to get the 2-tailed matrix
     ges2T = rankMat / (rankMat.shape[1] + 1)
-    # For a one tailed test, 
+    # For a one tailed test,
         # (1) since each sample has a range of 0 to 1, we recenter our values at 0 for each sample by subtracting 0.5
         # (2) take the absolute value so values are classified by their extremeness and not their sign
         # (3) return the range of data from 0 to 0.5 to 0 to 1 by multiplying by 2
@@ -217,7 +224,7 @@ def aREA(gex_data, interactome, layer = None):
     # values from ges2T and ges1T. The resulting matrices are called ges2TQ and ges1TQ, respectively.
     ges2TQ = norm.ppf(ges2T[:, gesInds])
     ges1TQ = norm.ppf(ges1T[:, gesInds])
-    
+
     # ------------ 2-tail enrichment ------------
     # We multiply the likelihood matrix (icMat) and the tfmode matrix (morMat)
     # to get directional weights of the targets in each regulon
@@ -225,8 +232,8 @@ def aREA(gex_data, interactome, layer = None):
     # We then perform a dot product of these weights and the genes in our 2 tailed Z-scores matrix ges2TQ
     # to get our directed enrichment scores (samples in columns, regulators in the rows)
     dES = dES.dot(np.transpose(ges2TQ))
-    
-    # ------------ 1-tail enrichemnt ------------ 
+
+    # ------------ 1-tail enrichemnt ------------
     # We multiply the likelihood matrix (icMat) and the tfmode matrix (morMat)
     # to get undirected weights of the targets in each regulon
         # The farther the tfmode is from 0 and closer it is to 1, the smaller the weights
@@ -234,12 +241,12 @@ def aREA(gex_data, interactome, layer = None):
     # We then perform a dot product of these weights and the genes in our 1 tailed Z-scores matrix ges1TQ
     # to get our undirected enrichment scores (samples in columns, regulators in the rows)
     uES = uES.dot(np.transpose(ges1TQ))
-    
-    # ------------ Integrate enrichment ------------ 
+
+    # ------------ Integrate enrichment ------------
     # We integrate our directed and undirected enrichment scores matrices to get our integrated enrichment scores
     iES = (abs(dES) + uES * (uES > 0)) * np.sign(dES)
-    
-    # ------------ make NES (Normalized Enrichment Scores) matrix ------------ 
+
+    # ------------ make NES (Normalized Enrichment Scores) matrix ------------
     # interactome.icpVec() returns a vector
         # This vector is generated by taking each individual regulon in the newtork and calculating
         # the likelihood index proportion to all interactions
@@ -269,11 +276,11 @@ def bootstrap_aREA(gesObj, intObj, bmean, bsd, eset_filter = False):
 
     bootstrap_obj = anndata.AnnData(X = np.zeros(bmean.shape),var=gesObj.var)
 
-    for i in range(samples): # for each row 
-        
+    for i in range(samples): # for each row
+
         bootstrap_obj.X = (-gesObj.X[i,:] + bmean)/bsd
 
-        result = aREA(bootstrap_obj,intObj)
+        result = aREA(bootstrap_obj, intObj, eset_filter = False)
         nes[i] = np.mean(result, axis = 0)
         nessd[i] = np.std(result, axis = 0)
 
@@ -285,27 +292,39 @@ def bootstrap_aREA(gesObj, intObj, bmean, bsd, eset_filter = False):
 
     return result
 
+def meta_aREA(gesObj, intObj, eset_filter = False, pleiotropy = False, pleiotropyArgs = {}, layer = None, mvws = 1, njobs = 1, verbose = False):
+    if intObj is Interactome:
+        preOp = aREA(gesObj, intObj, eset_filter, layer)
+    if len(intObj) == 1:
+        preOp = aREA(gesObj, intObj[0], eset_filter, layer)
+    elif njobs == 1:
+        netMets = [aREA_melt(gesObj, iObj, eset_filter, pleiotropy, pleiotropyArgs, layer) for iObj in intObj]
+        preOp = consolidate_meta_aREA_results(netMets, mvws, verbose)
+    else:
+        joblib_verbose = 0
+        if verbose:
+            print("Computing regulons enrichment with aREA")
+            joblib_verbose = 11
+        # n_jobs need to be decided.
+        netMets = Parallel(n_jobs = njobs, verbose = joblib_verbose)(
+            (delayed)(aREA_melt)(gesObj, iObj, eset_filter, pleiotropy, pleiotropyArgs, layer)
+            for iObj in intList
+            )
+        preOp = consolidate_meta_aREA_results(netMets, mvws, verbose)
+    return preOp
 
-def meta_aREA(gesObj, intObj, eset_filter = False,pleiotropy = False, pleiotropyArgs = {}, layer = None):
-
+def aREA_melt(gesObj, intObj, eset_filter = False, pleiotropy = False, pleiotropyArgs = {}, layer = None,):
     pb = None
- 
-    if (eset_filter):
-        tmp = list(set(list(intObj.get_targetSet())+list(intObj.get_regulonNames())))
-        gesObj = gesObj[:,gesObj.var_names.isin(pd.Series(tmp))]
-        #would this line have influnence outside this function? 
-        
-        
-    result = aREA(gesObj,intObj, layer)
+    result = aREA(gesObj, intObj, eset_filter, layer)
     result = result.reset_index().melt(
         id_vars = 'index',
-        var_name = 'gene')
-    
+        var_name = 'gene'
+    )
+
     if (pleiotropy):
         print('pleiotropy is currently unavailable')
 
     return result
-
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
@@ -334,147 +353,66 @@ def mat_to_anndata(mat):
                                var=mat_features)
     return(pax_data)
 
+def consolidate_meta_aREA_results(netMets, mvws = 1, verbose = False):
+    firstMat = netMets.pop(0)
+
+    for thisMat in netMets:
+        firstMat = firstMat.merge(thisMat,how = 'outer',on = ['index','gene'])
+
+    firstMat.fillna(0,inplace = True)
+
+    result = firstMat[['index','gene']]
+    nes = firstMat[list(firstMat.columns)[2:]].values
+
+    #mvws = 1
+    if type(mvws) == int :
+        ws = np.abs(nes)**mvws
+        if verbose:
+            print('mvws =' , mvws)
+    else:
+        ws = sigT(np.abs(nes),mvws[1],mvws[0])
+
+    result['value'] = np.sum(nes*ws,axis =1)/np.sum(ws,axis =1)
+
+    preOp = result.pivot(index='index',columns="gene", values="value")
+    return preOp
+
 # -----------------------------------------------------------------------------
 # ------------------------------- MAIN FUNCTIONS ------------------------------
 # -----------------------------------------------------------------------------
-def pyther_all(gex_data, 
-               interactome,
-               layer = None,
-               njobs = 3,
-               eset_filter = True, 
-               method=[None, "scale", "rank", "mad", "ttest"],
-               enrichment = [None, 'area','narnea'],
-               mvws=1, 
-               verbose= True,
-               output_type  = ['anndata', 'ndarray']
-               ):
-    
-    gesObj = gex_data
-    intList = interactome    
-    
-    pd.options.mode.chained_assignment = None
-
-    ### preprocessing
-
-    if type(intList) == Interactome:
-        intList = [intList]
-        print('Single network inputed')
-    
-    if verbose:
-        print("Computing the association scores")
-
-    
-    if method == 'scale':
-        gesObj.X = (gesObj.X - np.mean(gesObj.X,axis=0))/np.std(gesObj.X,axis=0)
-    elif method == 'rank':
-        gesObj.X = rankdata(gesObj.X,axis=0)*(np.random.random(gesObj.X.shape)*2/10-0.1)
-    elif method == 'mad':
-        median = np.median(gesObj.X,axis=0)
-        gesObj.X = (gesObj.X-median)/np.median(np.abs(gesObj.X-median))
-    elif method == 'ttest':
-        gesObj.X = np.array([sample_ttest(i, gesObj.X.copy()) for i in range(gesObj.shape[0])])
-
-    # enrichment 
-
-    if  enrichment  == None:
-        enrichment = 'narnea'
-    
-    if enrichment == 'area':
-
-        joblib_verbose = 0
-        if verbose:
-            print("Computing regulons enrichment with aREA")
-            joblib_verbose = 11
-
-        # convert interactom from df
-
-        for i in range(len(intList)):
-            intList[i] = Interactome('intName', intList[i])
-
-
-        # n_jobs need to be decided.
-
-        netMets = Parallel(n_jobs = njobs, verbose = joblib_verbose)(
-            (delayed)(meta_aREA)(gesObj,iObj,eset_filter = eset_filter)
-            for iObj in intList
-            )
-        
-
-        firstMat = netMets.pop(0)
-
-        for thisMat in netMets:
-            firstMat = firstMat.merge(thisMat,how = 'outer',on = ['index','gene'])
-        
-        firstMat.fillna(0,inplace = True)
-
-        result = firstMat[['index','gene']]
-        nes = firstMat[list(firstMat.columns)[2:]].values
-
-        #mvws = 1
-        if type(mvws) == int :
-            ws = np.abs(nes)**mvws
-            if verbose:
-                print('mvws =' , mvws)
-        else:
-            ws = sigT(np.abs(nes),mvws[1],mvws[0])
-
-        result['value'] = np.sum(nes*ws,axis =1)/np.sum(ws,axis =1)
-
-        preOp = result.pivot(index='index',columns="gene", values="value")
-
-
-        if output_type == 'ndarray':
-            op = preOp       
-        else:
-            op = mat_to_anndata(preOp)
-            
-    else: 
-
-        joblib_verbose = 0
-        if verbose:
-            print("Computing regulons enrichment with NaRnEa")
-            joblib_verbose = 11
-        
-        op = meta_narnea(gesObj, intList, sample_weight = True, njobs = njobs)
-
-
-
-
-    return op
-    
-
-
-def pyther(gex_data, 
+def pyther(gex_data,
            interactome,
            layer = None,
-           njobs = 3,
-           eset_filter = True, 
-           bootstrap = 0, 
-           dnull = None, 
-           pleiotropy = False, 
-           minsize=25, 
-           adaptive_size=False,
-           mvws=1, 
+           njobs = 1,
+           eset_filter = True,
+           # bootstrap = 0,
+           # dnull = None,
+           # pleiotropy = False,
+           # minsize=25,
+           # adaptive_size=False,
            method=[None, "scale", "rank", "mad", "ttest"],
-           pleiotropyArgs={'regulator':0.05, 'shadow':0.05, 'targets':10, "penalty":20, "method":"adaptive"},
-           verbose= True,
-           output_type  = ['anndata', 'ndarray']):
+           enrichment = [None, 'area','narnea'],
+           mvws=1,
+           # pleiotropyArgs={'regulator':0.05, 'shadow':0.05, 'targets':10, "penalty":20, "method":"adaptive"},
+           verbose = True,
+           output_type  = ['anndata', 'ndarray']
+           ):
 
-# 
+#
     gesObj = gex_data
-    intList = interactome    
-    
+    intList = interactome
+
     pd.options.mode.chained_assignment = None
 
     if type(intList) == Interactome:
         intList = [intList]
         print('Single regulon inputed')
 
-    if pleiotropy:
-        bootstrap = 0
-        if verbose:
-            print("Using pleiotropic correction, bootstraps iterations are ignored.")
-    
+    # if pleiotropy:
+    #     bootstrap = 0
+    #     if verbose:
+    #         print("Using pleiotropic correction, bootstraps iterations are ignored.")
+
     if verbose:
         print("Computing the association scores")
 
@@ -502,74 +440,52 @@ def pyther(gex_data,
     elif method == 'ttest':
         gesObj.X = np.array([sample_ttest(i, gesObj.X.copy()) for i in range(gesObj.shape[0])])
 
-    #if 
+#     if bootstrap > 0:
+#
+# #        num_sample = gesObj.X.shape[0]
+#         bmean = np.zeros((bootstrap,gesObj.X.shape[1]))
+#         bsd = np.zeros((bootstrap,gesObj.X.shape[1]))
+#
+#
+#         sampled_indices = np.random.choice(gesObj.obs.index,bootstrap*len(gesObj.obs))
+#
+#         for i in range(bootstrap):
+#             sample_name = sampled_indices[i*len(gesObj.obs):(i+1)*len(gesObj.obs)]
+#             #sample mean
+#             bmean[i] = np.mean(gesObj[sample_name,:].X, axis=0)
+#             bsd[i] = np.std(gesObj[sample_name,:].X, axis=0)
+#
+#         #targets = intObj.get_targetSet()
+#         # may need a bootstrap area
+#         netMets = Parallel(n_jobs = njobs)(
+#         (delayed)(bootstrap_aREA)(gesObj,iObj,eset_filter = True,layer = layer)
+#         for iObj in intList
+#         )
+#
+#         preOp = consolidate_meta_aREA_results(netMets, mvws, verbose)
+#
+#     else:
 
-    if bootstrap > 0:
+    if enrichment is None: enrichment = 'narnea'
 
-#        num_sample = gesObj.X.shape[0]
-        bmean = np.zeros((bootstrap,gesObj.X.shape[1]))
-        bsd = np.zeros((bootstrap,gesObj.X.shape[1]))
-
-
-        sampled_indices = np.random.choice(gesObj.obs.index,bootstrap*len(gesObj.obs))
-        
-        for i in range(bootstrap):
-            sample_name = sampled_indices[i*len(gesObj.obs):(i+1)*len(gesObj.obs)]
-            #sample mean
-            bmean[i] = np.mean(gesObj[sample_name,:].X, axis=0)
-            bsd[i] = np.std(gesObj[sample_name,:].X, axis=0)
-
-        #targets = intObj.get_targetSet()
-        # may need a bootstrap area
-        netMets = Parallel(n_jobs = njobs)(
-        (delayed)(bootstrap_aREA)(gesObj,iObj,eset_filter = True,layer = layer)
-        for iObj in intList
-        )
-
+    if enrichment == 'area':
+        preOp = meta_aREA(gesObj, intList, eset_filter, pleiotropy, pleiotropyArgs, layer, njobs, verbose)
+        if output_type == 'ndarray':
+            op = preOp
+        else:
+            op = mat_to_anndata(preOp)
     else:
-
         joblib_verbose = 0
         if verbose:
-            print("Computing regulons enrichment with aREA")
+            print("Computing regulons enrichment with NaRnEa")
             joblib_verbose = 11
+        preOp = meta_narnea(gesObj, intList, sample_weight = True, njobs = njobs)
+        if output_type == 'ndarray':
+            op = preOp
+        else:
+            op = mat_to_anndata(preOp["nes"]) #anndata.AnnData(preOp["nes"])
+            op.layers['pes'] = preOp["pes"]
 
-
-        # n_jobs need to be decided.
-
-        netMets = Parallel(n_jobs = njobs, verbose = joblib_verbose)(
-            (delayed)(meta_aREA)(gesObj,iObj,eset_filter = eset_filter)
-            for iObj in intList
-            )
-        
-
-    firstMat = netMets.pop(0)
-
-    for thisMat in netMets:
-        firstMat = firstMat.merge(thisMat,how = 'outer',on = ['index','gene'])
-    
-    firstMat.fillna(0,inplace = True)
-
-    result = firstMat[['index','gene']]
-    nes = firstMat[list(firstMat.columns)[2:]].values
-
-    #mvws = 1
-    if type(mvws) == int :
-        ws = np.abs(nes)**mvws
-        if verbose:
-            print('mvws =' , mvws)
-    else:
-        ws = sigT(np.abs(nes),mvws[1],mvws[0])
-
-    result['value'] = np.sum(nes*ws,axis =1)/np.sum(ws,axis =1)
-
-    preOp = result.pivot(index='index',columns="gene", values="value")
-
-
-    if output_type == 'ndarray':
-        op = preOp       
-    else:
-        op = mat_to_anndata(preOp)
-    
     return op #final result
 
 def path_enr(adata,
@@ -770,12 +686,12 @@ def translate_adata_index(adata,
 # -----------------------------------------------------------------------------
 # ------------------------------ HELPER FUNCTIONS -----------------------------
 # -----------------------------------------------------------------------------
-def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwargs): 
+def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwargs):
     #kwargs are the parameters for the inner function.
     #slice the data cells * genes
 
     result_list = []
-    size = int(gex_data.shape[0]/bins) 
+    size = int(gex_data.shape[0]/bins)
     residue = gex_data.shape[0] % bins
 
     if write_local:
@@ -784,20 +700,11 @@ def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwar
         for i in range(bins-1):
             segment = gex_data[i*size: i*size + size,]
             temp_result = inner_function(segment, **kwargs)
-
-            if type(temp_result) == anndata._core.anndata.AnnData:
-                temp_result = temp_result.to_df()
-
-
             temp_result.to_csv('temp/'+ str(i) + '.csv')
-        
+
         # the last one
         segment = gex_data[(bins-1)*size: bins*size + residue,]
         temp_result = inner_function(segment, **kwargs)
-
-        if type(temp_result) == anndata._core.anndata.AnnData:
-            temp_result = temp_result.to_df()
-        
         temp_result.to_csv('temp/'+ str(bins-1) + '.csv')
 
 
@@ -807,16 +714,15 @@ def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwar
 
         shutil.rmtree('temp')
 
-    else:        
+    else:
         for i in range(bins):
             segment = gex_data[i*size: i*size + size,]
             result_list.append(inner_function(segment, **kwargs))
 
-    
+
     # concat result
 
     result = pd.concat(result_list,axis=0).reset_index(drop = True)
-    result.set_index(keys='index',inplace=True)
     return result
 
 
