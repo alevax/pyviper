@@ -134,7 +134,8 @@ def replace_random(x, a, b):
 
 ### Matrix narnea
 
-def matrix_narnea(gesObj, intObj, intermediate = False, min_targets = 30):
+
+def matrix_narnea(gesObj, intObj, intermediate = False, min_targets = 30,verbose = False):
 
     int_table = intObj.netTable
 
@@ -159,10 +160,11 @@ def matrix_narnea(gesObj, intObj, intermediate = False, min_targets = 30):
 
     # modify the expression matrix:
         # fill with number less than the min in this sample, sign is randomly assigned according to the +_ proportion
+    if verbose:
+        print('reordering genes')
 
     expr = np.copy(gesObj[:,exp_genes].X)
 
-    print('reordered genes')
 
     zeros = len(expr[expr == 0])
 
@@ -214,21 +216,25 @@ def matrix_narnea(gesObj, intObj, intermediate = False, min_targets = 30):
     AW_AM_prob = AM_mat * AW_mat
     AW_AM_abs_prob = AM_abs_mat * AW_mat
 
-    print('Calculating DES...')
+    if verbose:
+        print('Calculating DES...')
 
     D_list = directed_nes(ranks, signs, AW_AM_prob, E_rs, E_r2, expr.shape[0])
 
-    print('Calculating UES...')
+    if verbose:
+        print('Calculating UES...')
 
     U_list = undirected_nes(ranks, signs, AW_AM_abs_prob, E_r, E_r2, expr.shape[0])
 
     COV_nes = nes_covariance(ranks, signs, AW_AM_prob, AW_AM_abs_prob, E_r, E_rs,D_list[2], U_list[2], len(genes))
 
-    print('Calculating NES...')
+    if verbose:
+        print('Calculating NES...')
 
     NES_mat = combine_nes(D_list[3], U_list[3], COV_nes)
 
-    print('Calculating PES...')
+    if verbose:
+        print('Calculating PES...')
 
 
     # for each regulator, calculate two values
@@ -278,29 +284,32 @@ def matrix_narnea(gesObj, intObj, intermediate = False, min_targets = 30):
 
 ### Meta narnea
 
-def meta_narnea(gesObj, intObj, sample_weight = True, njobs = 1):
+def meta_narnea(gesObj, intObj, sample_weight = True, njobs = 1,verbose = False):
     pd.options.mode.chained_assignment = None
 
-    if intObj is Interactome:
+    if type(intObj) == Interactome:
         return matrix_narnea(gesObj, intObj)
-    elif len(intObj) == 1:
-        return matrix_narnea(gesObj, intObj[0])
+    # elif len(intObj) == 1:
+    #     return matrix_narnea(gesObj, intObj[0])
     elif njobs == 1:
-        results = [matrix_narnea(gesObj, iObj) for iObj in intObj]
+        results = [matrix_narnea(gesObj, iObj, verbose = verbose) for iObj in intObj]
     else:
         results = Parallel(n_jobs = njobs)(
             (delayed)(matrix_narnea)(gesObj,iObj)
             for iObj in intObj
             )
 
+    if verbose:
+        print('Integrating results')
+
     the_first = results.pop(0)
-    melt_pes = the_first[1].reset_index().melt(
+    melt_pes = the_first['pes'].reset_index().melt(
         id_vars = 'index',
         var_name = 'gene')
 
 
     for i in range(len(results)):
-        the_pes = results[i][1].reset_index().melt(
+        the_pes = results[i]['pes'].reset_index().melt(
         id_vars = 'index',
         var_name = 'gene')
         melt_pes = melt_pes.merge(the_pes,how = 'outer',on = ['index','gene'])
@@ -322,12 +331,12 @@ def meta_narnea(gesObj, intObj, sample_weight = True, njobs = 1):
     net_weight = net_weight.groupby('index').sum()/len(shared_regs)
 
 
-    bg_matrix = pd.DataFrame(0,index = the_first[0].index, columns = all_regs)
+    bg_matrix = pd.DataFrame(0,index = the_first['nes'].index, columns = all_regs)
 
     #PES
 
     pre_pes = bg_matrix.copy()
-    all_regs_pes = bg_matrix + the_first[1]
+    all_regs_pes = bg_matrix + the_first['pes']
     all_regs_pes.fillna(0, inplace = True)
     all_regs_pes.sort_index(inplace=True)
     pes_dom = (all_regs_pes != 0) * net_weight[0].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs)))
@@ -338,7 +347,7 @@ def meta_narnea(gesObj, intObj, sample_weight = True, njobs = 1):
     pre_pes
 
     for i in range(1,len(results)+1):
-        all_regs_pes =  bg_matrix + results[i-1][1]
+        all_regs_pes =  bg_matrix + results[i-1]['pes']
         all_regs_pes.fillna(0, inplace = True)
         all_regs_pes.sort_index(inplace=True)
         pes_dom = pes_dom + (all_regs_pes!= 0) * net_weight[i].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs)))
@@ -350,7 +359,7 @@ def meta_narnea(gesObj, intObj, sample_weight = True, njobs = 1):
     # NES
 
     pre_nes = bg_matrix.copy()
-    all_regs_nes = bg_matrix + the_first[0]
+    all_regs_nes = bg_matrix + the_first['nes']
     all_regs_nes.fillna(0, inplace = True)
     all_regs_nes.sort_index(inplace=True)
     nes_dom = ((all_regs_nes != 0) * net_weight[0].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs))))**2
@@ -362,7 +371,7 @@ def meta_narnea(gesObj, intObj, sample_weight = True, njobs = 1):
 
 
     for i in range(1,len(results)+1):
-        all_regs_nes =  bg_matrix + results[i-1][0]
+        all_regs_nes =  bg_matrix + results[i-1]['nes']
         all_regs_nes.fillna(0, inplace = True)
         all_regs_nes.sort_index(inplace=True)
         nes_dom = nes_dom + ((all_regs_pes!= 0) * net_weight[i].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs))))**2

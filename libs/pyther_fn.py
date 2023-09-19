@@ -47,7 +47,7 @@ def load_interactome_from_tsv(filePath, intName):
     """
     # read file
     netTable = pd.read_csv(filePath, sep = '\t')
-    interactome = Interactome('intName', netTable)
+    interactome = Interactome('intName', netTable) # what's the opint of this 'intname'
     # return
     return(interactome)
 
@@ -293,10 +293,13 @@ def bootstrap_aREA(gesObj, intObj, bmean, bsd, eset_filter = False):
     return result
 
 def meta_aREA(gesObj, intObj, eset_filter = False, pleiotropy = False, pleiotropyArgs = {}, layer = None, mvws = 1, njobs = 1, verbose = False):
-    if intObj is Interactome:
+    if type(intObj) == Interactome:
         preOp = aREA(gesObj, intObj, eset_filter, layer)
-    if len(intObj) == 1:
-        preOp = aREA(gesObj, intObj[0], eset_filter, layer)
+    
+    #for I've added 'preparing networks' after input into main function.
+    #if len(intObj) == 1:
+    #    preOp = aREA(gesObj, intObj[0], eset_filter, layer)
+
     elif njobs == 1:
         netMets = [aREA_melt(gesObj, iObj, eset_filter, pleiotropy, pleiotropyArgs, layer) for iObj in intObj]
         preOp = consolidate_meta_aREA_results(netMets, mvws, verbose)
@@ -308,7 +311,7 @@ def meta_aREA(gesObj, intObj, eset_filter = False, pleiotropy = False, pleiotrop
         # n_jobs need to be decided.
         netMets = Parallel(n_jobs = njobs, verbose = joblib_verbose)(
             (delayed)(aREA_melt)(gesObj, iObj, eset_filter, pleiotropy, pleiotropyArgs, layer)
-            for iObj in intList
+            for iObj in intObj
             )
         preOp = consolidate_meta_aREA_results(netMets, mvws, verbose)
     return preOp
@@ -401,12 +404,25 @@ def pyther(gex_data,
 #
     gesObj = gex_data
     intList = interactome
-
     pd.options.mode.chained_assignment = None
 
-    if type(intList) == Interactome:
-        intList = [intList]
-        print('Single regulon inputed')
+    # if verbose:
+    #     print('preparing regulon networks')
+
+    # if type(interactome) == pd.core.frame.DataFrame:
+    #     intList = Interactome('intName', interactome)
+
+    # else:
+
+    #     for i in interactome:
+    #         intList.append(Interactome('intName', i))
+
+
+    #adapt for single regulon input is nolonger needed.
+
+    # if type(intList) == Interactome:
+    #     intList = [intList]
+    #     print('Single regulon inputed')
 
     # if pleiotropy:
     #     bootstrap = 0
@@ -414,7 +430,7 @@ def pyther(gex_data,
     #         print("Using pleiotropic correction, bootstraps iterations are ignored.")
 
     if verbose:
-        print("Computing the association scores")
+        print("Preparing the association scores")
 
     ''' not in current version 3.8 of python , only in python 3.10
     match method:
@@ -466,20 +482,23 @@ def pyther(gex_data,
 #
 #     else:
 
+
+
     if enrichment is None: enrichment = 'narnea'
 
     if enrichment == 'area':
-        preOp = meta_aREA(gesObj, intList, eset_filter, pleiotropy, pleiotropyArgs, layer, njobs, verbose)
+        preOp = meta_aREA(gesObj, intList, eset_filter, layer = layer, njobs = njobs, verbose = verbose, mvws = mvws )
         if output_type == 'ndarray':
             op = preOp
         else:
             op = mat_to_anndata(preOp)
     else:
-        joblib_verbose = 0
+        # time record disabled
+        #joblib_verbose = 0
         if verbose:
             print("Computing regulons enrichment with NaRnEa")
-            joblib_verbose = 11
-        preOp = meta_narnea(gesObj, intList, sample_weight = True, njobs = njobs)
+            #joblib_verbose = 11
+        preOp = meta_narnea(gesObj, intList, sample_weight = True, njobs = njobs, verbose = verbose)
         if output_type == 'ndarray':
             op = preOp
         else:
