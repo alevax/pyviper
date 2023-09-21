@@ -104,9 +104,9 @@ def combine_nes(D_nes, U_nes, COV_nes):
 
     # facing precision issue with this approach, switch to a numerical approximation way
 
-    # quantile =  np.exp(final_p - np.log(2))
-    # pos_nes = norm.isf(quantile, loc=0, scale=1)
-    # neg_nes = norm.ppf(quantile, loc=0, scale=1)
+#    quantile =  np.exp(final_p - np.log(2))
+#    pos_nes = norm.isf(quantile, loc=0, scale=1)
+    #neg_nes = norm.ppf(quantile, loc=0, scale=1)
     a = np.sqrt(- final_p + np.log(2))
     pos_nes = -1.4374174 + 1.8396835*a - 0.0562393*a**2 + 0.0025810*a**3
 
@@ -215,6 +215,10 @@ def matrix_narnea(gesObj, intObj, intermediate = False, min_targets = 30,verbose
 
     AW_AM_prob = AM_mat * AW_mat
     AW_AM_abs_prob = AM_abs_mat * AW_mat
+
+#    AW_AM_prob.astype('float64')
+#    AW_AM_abs_prob.astype('float64')
+
 
     if verbose:
         print('Calculating DES...')
