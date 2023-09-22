@@ -293,9 +293,6 @@ def bootstrap_aREA(gesObj, intObj, bmean, bsd, eset_filter = False):
     return result
 
 def meta_aREA(gesObj, intObj, eset_filter = False, pleiotropy = False, pleiotropyArgs = {}, layer = None, mvws = 1, njobs = 1, verbose = False):
-    if(len(gesObj.obs_names) != len(gesObj.obs_names.unique())):
-        raise ValueError("gesObj.obs_names are not unique.")
-
     # We want all if/else conditions in case
     # users or testers run this function directly
     if type(intObj) == Interactome:
