@@ -104,9 +104,9 @@ def combine_nes(D_nes, U_nes, COV_nes):
 
     # facing precision issue with this approach, switch to a numerical approximation way
 
-#    quantile =  np.exp(final_p - np.log(2))
-#    pos_nes = norm.isf(quantile, loc=0, scale=1)
-    #neg_nes = norm.ppf(quantile, loc=0, scale=1)
+    # quantile =  np.exp(final_p - np.log(2))
+    # pos_nes = norm.isf(quantile, loc=0, scale=1)
+    # neg_nes = norm.ppf(quantile, loc=0, scale=1)
     a = np.sqrt(- final_p + np.log(2))
     pos_nes = -1.4374174 + 1.8396835*a - 0.0562393*a**2 + 0.0025810*a**3
 
@@ -219,7 +219,6 @@ def matrix_narnea(gesObj, intObj, intermediate = False, min_targets = 30,verbose
 #    AW_AM_prob.astype('float64')
 #    AW_AM_abs_prob.astype('float64')
 
-
     if verbose:
         print('Calculating DES...')
 
@@ -286,8 +285,109 @@ def matrix_narnea(gesObj, intObj, intermediate = False, min_targets = 30,verbose
     result = {"nes": NES_mat, "pes": PES_mat}
     return result
 
-### Meta narnea
 
+def get_pes_list(results):
+    # Iterate through each DataFrame to collect unique gene names
+    pes_list = []
+    for res in results:
+        pes_list.append(res['pes'])
+    return pes_list
+
+def get_all_regs_in_NaRnEA_list(results):
+    pes_list = get_pes_list(results)
+    return get_all_regs(pes_list)
+
+def get_all_regs(mat_list):
+    # Iterate through each DataFrame to collect unique gene names
+    all_regs_set = set()
+    for mat in mat_list:
+        reg_names = mat.columns.tolist()
+        all_regs_set.update(reg_names)
+
+    # Sort the gene names alphabetically
+    all_regs = sorted(list(all_regs_set))
+
+    return all_regs
+
+def get_resized_mats(mat_list, empty_value = np.nan):
+    # Get names of all regulators
+    all_regs = get_all_regs(mat_list)
+
+    # Iterate through each DataFrame to normalize it
+    resized_mat_list = []
+    for mat in mat_list:
+        # Create a DataFrame with empty values (e.g. NaN or 0) for missing gene names
+        mat = mat.copy()
+        missing_regs = list(set(all_regs) - set(mat.columns))
+        empty_df = pd.DataFrame(empty_value, index=mat.index, columns=list(missing_regs))
+        # Concatenate the original DataFrame with the empty (e.g. NaN or 0) DataFrame
+        resized_mat = pd.concat([mat, empty_df], axis=1)
+        # Sort the columns alphabetically
+        resized_mat = resized_mat[all_regs]
+        resized_mat_list.append(resized_mat)
+
+    return resized_mat_list
+
+def get_resized_pes(results):
+    # Get list of PES dataframes
+    pes_list = get_pes_list(results)
+    resized_pes_list = get_resized_mats(pes_list, empty_value = np.nan)
+    return resized_pes_list
+
+def find_max_absolute_value_df(dataframes):
+    # Stack the DataFrames into a 3D NumPy array
+    stacked_arrays = [df.values for df in dataframes]
+    stacked_data = np.stack(stacked_arrays, axis=-1)
+
+    # Calculate the absolute maximum along the last axis (axis=-1)
+    absolute_max_indices = np.nanargmax(np.abs(stacked_data), axis=-1).astype(float)
+
+    # Calculate the existance of any nan values along the last axis (axis=-1)
+    nan_present_indices = np.isnan(stacked_data).any(axis=-1)
+
+    # Replace values in absolute_max_indices with NaN wherever NaN is present in nan_present_indices
+    absolute_max_indices[nan_present_indices] = np.nan
+
+    # Create a DataFrame with the same row and column names
+    result_df = pd.DataFrame(absolute_max_indices, index=dataframes[0].index, columns=dataframes[0].columns)
+
+    return result_df
+
+def calculate_value_proportions(result_df):
+    # Convert the DataFrame to a NumPy array
+    result_array = result_df.values
+
+    # Calculate the maximum value in the result array, ignore NaN values
+    max_value = int(np.nanmax(result_array))
+
+    # Initialize an empty NumPy array to store proportions
+    proportions_array = np.zeros((result_array.shape[0], max_value + 1))
+
+    # Count the occurrences of each value in each row, ignore NaN values
+    for i, row in enumerate(result_array):
+        integer_values = row[np.isfinite(row) & (row == np.floor(row))]
+        unique_values, counts = np.unique(integer_values, return_counts=True)
+        proportions_array[i, unique_values.astype(int)] = counts / len(integer_values)
+
+    # Convert the proportions array to a DataFrame
+    proportions_df = pd.DataFrame(proportions_array, columns=range(max_value + 1), index=result_df.index)
+
+    return proportions_df
+
+def get_net_weight(results):
+    # Resize the PES matrices so they have the same size, column names and row names
+    resized_pes_list = get_resized_pes(results)
+    # Stack the resized PES matrices: along the z axis, calculate position of max abs value
+    max_abs_vals_df = find_max_absolute_value_df(resized_pes_list)
+    # For each sample, calculate the proportion of max abs values from each network
+    net_weight = calculate_value_proportions(max_abs_vals_df).sort_index()
+
+    net_weight.index.name = 'index'
+    net_weight.columns.name = 'net'
+
+    return net_weight
+
+### Meta narnea
 def meta_narnea(gesObj, intObj, sample_weight = True, njobs = 1,verbose = False):
     pd.options.mode.chained_assignment = None
 
@@ -306,35 +406,11 @@ def meta_narnea(gesObj, intObj, sample_weight = True, njobs = 1,verbose = False)
     if verbose:
         print('Integrating results')
 
+
+    net_weight = get_net_weight(results)
+    all_regs = get_all_regs_in_NaRnEA_list(results)
+
     the_first = results.pop(0)
-    melt_pes = the_first['pes'].reset_index().melt(
-        id_vars = 'index',
-        var_name = 'gene')
-
-
-    for i in range(len(results)):
-        the_pes = results[i]['pes'].reset_index().melt(
-        id_vars = 'index',
-        var_name = 'gene')
-        melt_pes = melt_pes.merge(the_pes,how = 'outer',on = ['index','gene'])
-
-    all_regs = melt_pes['gene'].drop_duplicates()
-    melt_pes.dropna(inplace=True)
-    melt_pes
-
-    pes_max = np.apply_along_axis(np.argmax, axis=1, arr=np.abs(melt_pes[list(melt_pes.columns)[2:]]))
-
-    net_weight = melt_pes[['index']]
-    net_weight['net'] = pes_max
-    net_weight.reset_index(inplace = True)
-
-    net_weight = net_weight.pivot(index = 'level_0', columns = 'net',values = 'net' ).notna()
-    net_weight['index'] = melt_pes[['index']]
-
-    shared_regs = melt_pes['gene'].drop_duplicates()
-    net_weight = net_weight.groupby('index').sum()/len(shared_regs)
-
-
     bg_matrix = pd.DataFrame(0,index = the_first['nes'].index, columns = all_regs)
 
     #PES
