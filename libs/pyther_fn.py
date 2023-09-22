@@ -27,8 +27,6 @@ def sigT(x, slope = 20, inflection = 0.5):
 def sample_ttest(i,array):
     return ttest_1samp((array[i] - np.delete(array, i, 0)), 0).statistic
 
-
-
 def load_interactome_from_tsv(filePath, intName):
     """\
     Allows the user to load an interactome object from a TSV file.
@@ -51,104 +49,7 @@ def load_interactome_from_tsv(filePath, intName):
     # return
     return(interactome)
 
-# def load_interactome_from_tsv(filePath, intName):
-#     """\
-#     Allows the user to load an interactome object from a TSV file.
-#
-#     The TSV file is created by the R function InteractomeToTable.
-#
-#     Parameters
-#     ----------
-#     filePath
-#         The file to the regulon.tsv file.
-#     intName
-#         The name of the interactome.
-#     Returns
-#     -------
-#     A dictionary of :class:`~pyther_classes.Interactome`.
-#     """
-#     # read file
-#     netTable = pd.read_csv(filePath, sep = '\t')
-#     interactome = Interactome('intName')
-#     # loop through regulators
-#     uniqueRegs = netTable.regulator.unique()
-#     for u in tqdm(uniqueRegs, desc="Processing regulators", unit="regulator"):
-#         # subset dataframe
-#         uDF = netTable[netTable.regulator == u]
-#         # make dictionaries
-#         icDict = dict(zip(uDF.target, uDF.likelihood))
-#         morDict = dict(zip(uDF.target, uDF.mor))
-#         # make regulon object
-#         regObj = Regulon(u, icDict, morDict)
-#         interactome.addReg(u, regObj)
-#     # return
-#     return(interactome)
-
-# def aREA(gex_data, interactome, layer = None):
-#     """\
-#     Allows the individual to infer normalized enrichment scores from gene
-#     expression data using the analytical ranked enrichment analysis (aREA)
-#     function.
-#
-#     It is the basis of the VIPER (Virtual Inference of Protein-activity
-#     by Enriched Regulon analysis) algorithm.
-#
-#     Parameters
-#     ----------
-#     gex_data
-#         Gene expression stored in an anndata object (e.g. from Scanpy).
-#     interactome
-#         The interactome object.
-#     layer
-#         The layer in the anndata object to use as the gene expression input
-#         (default = None).
-#     Returns
-#     -------
-#     A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values.
-#     """
-#     if layer is None:
-#         gesMat = gex_data.X
-#     else:
-#         gesMat = gex_data.layers[layer]
-#
-#     # rank transform the GES
-#     rankMat = rankdata(gesMat, axis = 1)
-#
-#     # find intersecting genes
-#     targetSet = interactome.get_targetSet()
-#     varNames = gex_data.var_names.to_list()
-#     intersectGenes = [value for value in targetSet if value in varNames]
-#
-#     # reduce regulon matrices
-#     icMat = interactome.icMat().loc[intersectGenes]
-#     morMat = interactome.morMat().loc[intersectGenes]
-#
-#     # prepare the 1-tailed / 2-tailed matrices
-#     gesInds = [varNames.index(i) for i in intersectGenes]
-#     ges2T = rankMat / (rankMat.shape[1] + 1)
-#     ges1T = abs(ges2T - 0.5) * 2
-#     ges1T = ges1T + (1 - np.max(ges1T))/2
-#     ges2TQ = norm.ppf(ges2T[:, gesInds])
-#     ges1TQ = norm.ppf(ges1T[:, gesInds])
-#
-#     # 2-tail enrichment
-#     dES = pd.DataFrame.transpose(pd.DataFrame.mul(icMat, morMat))
-#     dES = dES.dot(np.transpose(ges2TQ))
-#
-#     # 1-tail enrichemnt
-#     uES = pd.DataFrame.transpose(pd.DataFrame.mul(1 - abs(morMat), icMat))
-#     uES = uES.dot(np.transpose(ges1TQ))
-#
-#     # integrate
-#     iES = (abs(dES) + uES * (uES > 0)) * np.sign(dES)
-#     # make NES
-#     nES = iES.mul(interactome.icpVec(), 0)
-#     nES = np.transpose(nES)
-#     nES.index = gex_data.obs.index
-#
-#     return(nES)
-
-def aREA(gex_data, interactome, eset_filter = False, layer = None):
+def aREA(gex_data, interactome, eset_filter = False, layer = None, verbose = True):
     """\
     Allows the individual to infer normalized enrichment scores from gene
     expression data using the analytical ranked enrichment analysis (aREA)
@@ -183,6 +84,7 @@ def aREA(gex_data, interactome, eset_filter = False, layer = None):
 
 
     # rank transform the GES using the rankdata function from scipy.stats
+    if(verbose): print("Rank transforming the data")
     rankMat = rankdata(gesMat, axis = 1)
 
     # ------------ find intersecting genes ------------
@@ -196,12 +98,14 @@ def aREA(gex_data, interactome, eset_filter = False, layer = None):
     # ------------ reduce regulon matrices ------------
     # The icMat is the matrix with regulators in the columns, targets in the rows and likelihood (weights) as values
         # (we filter to intersectGenes as targets by using .loc[intersectGenes])
+    if(verbose): print("Computing the likelihood matrix")
     icMat = interactome.icMat().loc[intersectGenes]
     # The morDict is the matrix with regulators in the columns, targets in the rows and tfmode (modes) as values
+    if(verbose): print("Computing the modes matrix")
     morMat = interactome.morMat().loc[intersectGenes]
 
     # ------------ prepare the 1-tailed / 2-tailed matrices ------------
-
+    if(verbose): print("Preparing the 1-tailed / 2-tailed matrices")
     # gesInds is a series of indices - the index of every target in the gExpr signature matrix
         # for each of the intersecting genes
     gesInds = [varNames.index(i) for i in intersectGenes]
@@ -225,6 +129,7 @@ def aREA(gex_data, interactome, eset_filter = False, layer = None):
     ges2TQ = norm.ppf(ges2T[:, gesInds])
     ges1TQ = norm.ppf(ges1T[:, gesInds])
 
+    if(verbose): print("Computing enrichment")
     # ------------ 2-tail enrichment ------------
     # We multiply the likelihood matrix (icMat) and the tfmode matrix (morMat)
     # to get directional weights of the targets in each regulon
@@ -233,7 +138,7 @@ def aREA(gex_data, interactome, eset_filter = False, layer = None):
     # to get our directed enrichment scores (samples in columns, regulators in the rows)
     dES = dES.dot(np.transpose(ges2TQ))
 
-    # ------------ 1-tail enrichemnt ------------
+    # ------------ 1-tail enrichment ------------
     # We multiply the likelihood matrix (icMat) and the tfmode matrix (morMat)
     # to get undirected weights of the targets in each regulon
         # The farther the tfmode is from 0 and closer it is to 1, the smaller the weights
@@ -243,6 +148,7 @@ def aREA(gex_data, interactome, eset_filter = False, layer = None):
     uES = uES.dot(np.transpose(ges1TQ))
 
     # ------------ Integrate enrichment ------------
+    if(verbose): print("Integrating enrichment")
     # We integrate our directed and undirected enrichment scores matrices to get our integrated enrichment scores
     iES = (abs(dES) + uES * (uES > 0)) * np.sign(dES)
 
@@ -292,7 +198,8 @@ def bootstrap_aREA(gesObj, intObj, bmean, bsd, eset_filter = False):
 
     return result
 
-def meta_aREA(gesObj, intObj, eset_filter = False, pleiotropy = False, pleiotropyArgs = {}, layer = None, mvws = 1, njobs = 1, verbose = False):
+def meta_aREA(gesObj, intObj, eset_filter = False, layer = None, mvws = 1, njobs = 1, verbose = True):
+    if not isinstance(mvws, int): raise ValueError("mvws is not of type int.")
     # We want all if/else conditions in case
     # users or testers run this function directly
     if type(intObj) == Interactome:
@@ -300,7 +207,15 @@ def meta_aREA(gesObj, intObj, eset_filter = False, pleiotropy = False, pleiotrop
     if len(intObj) == 1:
        preOp = aREA(gesObj, intObj[0], eset_filter, layer)
     elif njobs == 1:
-        netMets = [aREA(gesObj, iObj, eset_filter, layer) for iObj in intObj]
+        # netMets = [aREA(gesObj, iObj, eset_filter, layer) for iObj in intObj]
+        netMets = []
+        tot_nets = len(intObj)
+        n_completed_nets = 0
+        if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
+        for iObj in intObj:
+          netMets.append(aREA(gesObj, iObj, eset_filter, layer, verbose))
+          n_completed_nets = n_completed_nets + 1
+          if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
         preOp = consolidate_meta_aREA_results(netMets, mvws, verbose)
     else:
         joblib_verbose = 0
@@ -309,7 +224,7 @@ def meta_aREA(gesObj, intObj, eset_filter = False, pleiotropy = False, pleiotrop
             joblib_verbose = 11
         # n_jobs need to be decided.
         netMets = Parallel(n_jobs = njobs, verbose = joblib_verbose)(
-            (delayed)(aREA)(gesObj, iObj, eset_filter, layer)
+            (delayed)(aREA)(gesObj, iObj, eset_filter, layer, verbose)
             for iObj in intObj
             )
         preOp = consolidate_meta_aREA_results(netMets, mvws, verbose)
@@ -358,7 +273,9 @@ def mat_to_anndata(mat):
                                var=mat_features)
     return(pax_data)
 
-def consolidate_meta_aREA_results(netMets, mvws = 1, verbose = False):
+def consolidate_meta_aREA_results(netMets, mvws = 1, verbose = True):
+    if(verbose): print("Integrating NES matrices together with mvws=" + str(mvws) + "...")
+
     # Resize the matrices so they all share the same shape, row names and column names
     resized_nes_list = get_resized_mats(netMets, empty_value = 0)
 
@@ -367,7 +284,6 @@ def consolidate_meta_aREA_results(netMets, mvws = 1, verbose = False):
     stacked_nes = np.stack(stacked_arrays, axis=-1)
 
     # Compute the weights - creating a new set of stacks
-    if verbose: print('mvws =' , mvws)
     ws = np.abs(stacked_nes)**mvws
 
     # Multiply the stacks together; sum across the stacks; divide the sums
@@ -514,7 +430,7 @@ def pyther(gex_data,
     if enrichment is None: enrichment = 'narnea'
 
     if enrichment == 'area':
-        preOp = meta_aREA(gesObj, intList, eset_filter, layer = layer, njobs = njobs, verbose = verbose, mvws = mvws )
+        preOp = meta_aREA(gesObj, intList, eset_filter, layer = layer, mvws = mvws, njobs = njobs, verbose = verbose)
         if output_type == 'ndarray':
             op = preOp
         else:
