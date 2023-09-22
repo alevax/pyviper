@@ -453,7 +453,7 @@ def pyther(gex_data,
 def path_enr(adata,
              interactome,
              layer = None,
-             verbose = False):
+             verbose = True):
     """\
     Allows the individual to infer normalized enrichment scores of pathways
     using the analytical ranked enrichment analysis (aREA) function.
@@ -490,7 +490,7 @@ def path_enr(adata,
 
     # aREA takes the pathways interactome and the adata
     if(verbose): print("Running aREA using to calculate pathway enrichment...")
-    path_enr_mat = aREA(adata, interactome, layer)
+    path_enr_mat = aREA(adata, interactome, eset_filter = False, layer = layer, verbose = verbose)
 
     if(make_adata_names_format_match_interactome is True):
         if(verbose): print("Returning adata names to original state...")
@@ -508,6 +508,52 @@ def path_enr(adata,
     else:
         pwe_data.gex_data = adata
     return(pwe_data)
+
+def compute_cluster_stouffer_anndata(adata, obs_column_name, layer = None):
+    if layer is None:
+        dat_df = pd.DataFrame(adata.X,
+                              index=adata.obs_names,
+                              columns=adata.var_names)
+    else:
+        dat_df = pd.DataFrame(adata.layers[layer],
+                              index=adata.obs_names,
+                              columns=adata.var_names)
+    cluster_vector = adata.obs[obs_column_name]
+    result_df = compute_cluster_stouffer(dat_df, cluster_vector)
+    return anndata.AnnData(result_df)
+    # return mat_to_anndata(result_df)
+
+def compute_cluster_stouffer(dat_df, cluster_vector):
+    # Ensure cluster_vector has the same number of samples as rows in dat_df
+    if len(cluster_vector) != dat_df.shape[0]:
+        raise ValueError("Cluster vector length does not match the number of rows in the DataFrame.")
+
+    # Convert the DataFrame to a NumPy array
+    dat_array = dat_df.to_numpy()
+
+    # Find unique clusters and initialize arrays to store Stouffer scores
+    unique_clusters, cluster_indices = np.unique(cluster_vector, return_inverse=True)
+    n_clusters = len(unique_clusters)
+    n_genes = dat_df.shape[1]
+    stouffer_scores = np.zeros((n_clusters, n_genes))
+
+    # Calculate the denominator for Stouffer scores for each cluster
+    cluster_sizes = np.bincount(cluster_indices)
+    sqrt_cluster_sizes = np.sqrt(cluster_sizes)
+
+    # Calculate Stouffer scores for each cluster and gene
+    for i in range(n_clusters):
+        cluster_mask = (cluster_indices == i)
+        cluster_data = dat_array[cluster_mask]
+        stouffer_scores[i, :] = np.sum(cluster_data, axis=0) / sqrt_cluster_sizes[i]
+
+    # Create a DataFrame from the computed Stouffer scores
+    result_df = pd.DataFrame(stouffer_scores, index=unique_clusters, columns=dat_df.columns)
+
+    return result_df
+
+
+
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
