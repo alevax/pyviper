@@ -293,15 +293,17 @@ def bootstrap_aREA(gesObj, intObj, bmean, bsd, eset_filter = False):
     return result
 
 def meta_aREA(gesObj, intObj, eset_filter = False, pleiotropy = False, pleiotropyArgs = {}, layer = None, mvws = 1, njobs = 1, verbose = False):
+    if(len(gesObj.obs_names) != len(gesObj.obs_names.unique())):
+        raise ValueError("gesObj.obs_names are not unique.")
+
+    # We want all if/else conditions in case
+    # users or testers run this function directly
     if type(intObj) == Interactome:
         preOp = aREA(gesObj, intObj, eset_filter, layer)
-    
-    #for I've added 'preparing networks' after input into main function.
-    #if len(intObj) == 1:
-    #    preOp = aREA(gesObj, intObj[0], eset_filter, layer)
-
+    if len(intObj) == 1:
+       preOp = aREA(gesObj, intObj[0], eset_filter, layer)
     elif njobs == 1:
-        netMets = [aREA_melt(gesObj, iObj, eset_filter, pleiotropy, pleiotropyArgs, layer) for iObj in intObj]
+        netMets = [aREA(gesObj, iObj, eset_filter, layer) for iObj in intObj]
         preOp = consolidate_meta_aREA_results(netMets, mvws, verbose)
     else:
         joblib_verbose = 0
@@ -310,24 +312,27 @@ def meta_aREA(gesObj, intObj, eset_filter = False, pleiotropy = False, pleiotrop
             joblib_verbose = 11
         # n_jobs need to be decided.
         netMets = Parallel(n_jobs = njobs, verbose = joblib_verbose)(
-            (delayed)(aREA_melt)(gesObj, iObj, eset_filter, pleiotropy, pleiotropyArgs, layer)
+            (delayed)(aREA)(gesObj, iObj, eset_filter, layer)
             for iObj in intObj
             )
         preOp = consolidate_meta_aREA_results(netMets, mvws, verbose)
     return preOp
 
-def aREA_melt(gesObj, intObj, eset_filter = False, pleiotropy = False, pleiotropyArgs = {}, layer = None,):
-    pb = None
-    result = aREA(gesObj, intObj, eset_filter, layer)
-    result = result.reset_index().melt(
-        id_vars = 'index',
-        var_name = 'gene'
-    )
-
-    if (pleiotropy):
-        print('pleiotropy is currently unavailable')
-
-    return result
+# def aREA_melt(gesObj, intObj, eset_filter = False, pleiotropy = False, pleiotropyArgs = {}, layer = None):
+#     pb = None
+#     if(len(gesObj.obs_names) != len(gesObj.obs_names.unique())):
+#         raise ValueError("gesObj.obs_names are not unique.")
+#
+#     result = aREA(gesObj, intObj, eset_filter, layer)
+#     result = result.reset_index(names = 'index').melt(
+#         id_vars = 'index',
+#         var_name = 'gene'
+#     )
+#
+#     if (pleiotropy):
+#         print('pleiotropy is currently unavailable')
+#
+#     return result
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
@@ -357,28 +362,53 @@ def mat_to_anndata(mat):
     return(pax_data)
 
 def consolidate_meta_aREA_results(netMets, mvws = 1, verbose = False):
-    firstMat = netMets.pop(0)
+    # Resize the matrices so they all share the same shape, row names and column names
+    resized_nes_list = get_resized_mats(netMets, empty_value = 0)
 
-    for thisMat in netMets:
-        firstMat = firstMat.merge(thisMat,how = 'outer',on = ['index','gene'])
+    # Stack the data now that it's the same size
+    stacked_arrays = [df.values for df in resized_nes_list]
+    stacked_nes = np.stack(stacked_arrays, axis=-1)
 
-    firstMat.fillna(0,inplace = True)
+    # Compute the weights - creating a new set of stacks
+    if verbose: print('mvws =' , mvws)
+    ws = np.abs(stacked_nes)**mvws
 
-    result = firstMat[['index','gene']]
-    nes = firstMat[list(firstMat.columns)[2:]].values
+    # Multiply the stacks together; sum across the stacks; divide the sums
+    # Note that with mvws=1, multiplying weights and dividing here cancel out
+    meta_array = np.sum(stacked_nes*ws, axis=-1)/np.sum(ws, axis=-1)
 
-    #mvws = 1
-    if type(mvws) == int :
-        ws = np.abs(nes)**mvws
-        if verbose:
-            print('mvws =' , mvws)
-    else:
-        ws = sigT(np.abs(nes),mvws[1],mvws[0])
-
-    result['value'] = np.sum(nes*ws,axis =1)/np.sum(ws,axis =1)
-
-    preOp = result.pivot(index='index',columns="gene", values="value")
+    # Put everything in a nice user-friendly DataFrame
+    preOp = pd.DataFrame(meta_array,
+                         index=resized_nes_list[0].index,
+                         columns=resized_nes_list[0].columns).sort_index()
     return preOp
+
+# def consolidate_meta_aREA_results(netMets, mvws = 1, verbose = False):
+#     firstMat = netMets.pop(0)
+#
+#     for thisMat in netMets:
+#         firstMat = firstMat.merge(thisMat,how = 'outer',on = ['index','gene'])
+#
+#     # if not all(isinstance(name, str) for name in gesObj.obs_names):
+#     #     gesObj.obs_names = gesObj.obs_names.astype(str)
+#     #firstMat.fillna(0,inplace = True)
+#     firstMat.iloc[:, 2:] = firstMat.iloc[:, 2:].fillna(0)
+#
+#     result = firstMat[['index','gene']]
+#     nes = firstMat[list(firstMat.columns)[2:]].values
+#
+#     #mvws = 1
+#     if type(mvws) == int :
+#         ws = np.abs(nes)**mvws
+#         if verbose:
+#             print('mvws =' , mvws)
+#     else:
+#         ws = sigT(np.abs(nes),mvws[1],mvws[0])
+#
+#     result['value'] = np.sum(nes*ws,axis =1)/np.sum(ws,axis =1)
+#
+#     preOp = result.pivot(index='index',columns="gene", values="value")
+#     return preOp
 
 # -----------------------------------------------------------------------------
 # ------------------------------- MAIN FUNCTIONS ------------------------------
@@ -705,12 +735,12 @@ def translate_adata_index(adata,
 # -----------------------------------------------------------------------------
 # ------------------------------ HELPER FUNCTIONS -----------------------------
 # -----------------------------------------------------------------------------
-def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwargs): 
+def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwargs):
     #kwargs are the parameters for the inner function.
     #slice the data cells * genes
 
     result_list = []
-    size = int(gex_data.shape[0]/bins) 
+    size = int(gex_data.shape[0]/bins)
     residue = gex_data.shape[0] % bins
 
     if write_local:
@@ -725,14 +755,14 @@ def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwar
 
 
             temp_result.to_csv('temp/'+ str(i) + '.csv')
-        
+
         # the last one
         segment = gex_data[(bins-1)*size: bins*size + residue,]
         temp_result = inner_function(segment, **kwargs)
 
         if type(temp_result) == anndata._core.anndata.AnnData:
             temp_result = temp_result.to_df()
-        
+
         temp_result.to_csv('temp/'+ str(bins-1) + '.csv')
 
 
@@ -742,12 +772,12 @@ def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwar
 
         shutil.rmtree('temp')
 
-    else:        
+    else:
         for i in range(bins):
             segment = gex_data[i*size: i*size + size,]
             result_list.append(inner_function(segment, **kwargs))
 
-    
+
     # concat result
 
     result = pd.concat(result_list,axis=0).reset_index(drop = True)
