@@ -45,7 +45,7 @@ def load_interactome_from_tsv(filePath, intName):
     """
     # read file
     netTable = pd.read_csv(filePath, sep = '\t')
-    interactome = Interactome('intName', netTable) # what's the opint of this 'intname'
+    interactome = Interactome(intName, netTable) # what's the opint of this 'intname'
     # return
     return(interactome)
 
