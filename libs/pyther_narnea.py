@@ -388,7 +388,7 @@ def get_net_weight(results):
     return net_weight
 
 ### Meta narnea
-def meta_narnea(gesObj, intObj, sample_weight = True, njobs = 1,verbose = False):
+def meta_narnea(gesObj, intObj, sample_weight = True, njobs = 1, verbose = True):
     pd.options.mode.chained_assignment = None
 
     if type(intObj) == Interactome:
@@ -396,7 +396,16 @@ def meta_narnea(gesObj, intObj, sample_weight = True, njobs = 1,verbose = False)
     # elif len(intObj) == 1:
     #     return matrix_narnea(gesObj, intObj[0])
     elif njobs == 1:
-        results = [matrix_narnea(gesObj, iObj, verbose = verbose) for iObj in intObj]
+        # results = [matrix_narnea(gesObj, iObj, verbose = verbose) for iObj in intObj]
+        results = []
+        tot_nets = len(intObj)
+        n_completed_nets = 0
+        if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
+        for iObj in intObj:
+          results.append(matrix_narnea(gesObj, iObj, verbose = verbose))
+          n_completed_nets = n_completed_nets + 1
+          if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
+        
     else:
         results = Parallel(n_jobs = njobs)(
             (delayed)(matrix_narnea)(gesObj,iObj)
