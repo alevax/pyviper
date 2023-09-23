@@ -199,7 +199,7 @@ def replace_random(x, a, b):
 
 def matrix_narnea(gesObj, intObj, intermediate = False, min_targets = 30,verbose = False):
 
-    int_table = intObj.netTable
+    int_table = intObj.net_table
 
     pd.options.mode.chained_assignment = None
     exp_genes = list(gesObj.var.sort_index().index)

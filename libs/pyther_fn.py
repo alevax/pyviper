@@ -27,27 +27,27 @@ def sigT(x, slope = 20, inflection = 0.5):
 def sample_ttest(i,array):
     return ttest_1samp((array[i] - np.delete(array, i, 0)), 0).statistic
 
-def load_interactome_from_tsv(filePath, intName):
-    """\
-    Allows the user to load an interactome object from a TSV file.
-
-    The TSV file is created by the R function InteractomeToTable.
-
-    Parameters
-    ----------
-    filePath
-        The file to the regulon.tsv file.
-    intName
-        The name of the interactome.
-    Returns
-    -------
-    A pd.DataFrame of :class:`~pyther_classes.Interactome`.
-    """
-    # read file
-    netTable = pd.read_csv(filePath, sep = '\t')
-    interactome = Interactome(intName, netTable) # what's the opint of this 'intname'
-    # return
-    return(interactome)
+# def load_interactome_from_tsv(filePath, intName):
+#     """\
+#     Allows the user to load an interactome object from a TSV file.
+#
+#     The TSV file is created by the R function InteractomeToTable.
+#
+#     Parameters
+#     ----------
+#     filePath
+#         The file to the regulon.tsv file.
+#     intName
+#         The name of the interactome.
+#     Returns
+#     -------
+#     A pd.DataFrame of :class:`~pyther_classes.Interactome`.
+#     """
+#     # read file
+#     net_table = pd.read_csv(filePath, sep = '\t')
+#     interactome = Interactome(intName, net_table) # what's the opint of this 'intname'
+#     # return
+#     return(interactome)
 
 def aREA(gex_data, interactome, eset_filter = False, layer = None, verbose = True):
     """\
