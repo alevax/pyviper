@@ -387,6 +387,43 @@ def get_net_weight(results):
 
     return net_weight
 
+def integrate_NaRnEA_xes_mats(results, bg_matrix, net_weight, xes_type = 'pes'):
+
+    pre_xes = bg_matrix.copy()
+    xes_dom = bg_matrix.copy()
+    n_regs = bg_matrix.shape[1]
+
+    for i in range(0,len(results)):
+        all_regs_xes = bg_matrix.copy() + results[i][xes_type]
+        all_regs_xes.fillna(0, inplace=True)
+        all_regs_xes.sort_index(inplace=True)
+        if xes_type == 'nes':
+            xes_dom = xes_dom + ( (all_regs_xes!=0) * net_weight[i].to_numpy()[:, np.newaxis] * np.ones((1, n_regs)) )**2
+        else: #xes_type == 'pes':
+            xes_dom = xes_dom + ( (all_regs_xes!=0) * net_weight[i].to_numpy()[:, np.newaxis] * np.ones((1, n_regs)) )
+        net_weight_array = net_weight[i].to_numpy()[:, np.newaxis] * np.ones((1, n_regs))
+        pre_xes =  pre_xes + all_regs_xes * net_weight_array
+
+    if xes_type == 'nes':
+        pre_xes = pre_xes/np.sqrt(xes_dom)
+    else: #xes_type == 'pes':
+        pre_xes = pre_xes/xes_dom
+
+    # There must be regulator activity in some cells where neither network provides nonzero value.
+    # Imagine we have a regulator A. A has a regulon A_1 and A_2 in net_1 and net_2 respectively.
+    # Imagine, the targets of A_1 and the targets of A_2 are both 0 in samples S1, S2, ...., Sn.
+    # For these samples pre_xes will have 0 and these 0s will be present in xes_dom in the same place.
+    # This is because we start with bg_matrix (0 matrix) and add to it wherever the xes matrices are not 0 (all_regs_xes!= 0)
+    # so if the xes matrices have 0s in them, this will result in 0s remaining in the dom_matrix.
+    # Hence fillna fixes 0/0, which should just remain at 0.
+    # The following print statements will show the same numbers of 0s.
+    # print(np.count_nonzero(pre_xes == 0))
+    # print(np.count_nonzero(xes_dom == 0))
+    xes = pre_xes.fillna(0)
+
+    return(xes)
+
+
 ### Meta narnea
 def meta_narnea(gesObj, intObj, sample_weight = True, njobs = 1, verbose = True):
     pd.options.mode.chained_assignment = None
@@ -405,7 +442,7 @@ def meta_narnea(gesObj, intObj, sample_weight = True, njobs = 1, verbose = True)
           results.append(matrix_narnea(gesObj, iObj, verbose = verbose))
           n_completed_nets = n_completed_nets + 1
           if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
-        
+
     else:
         results = Parallel(n_jobs = njobs)(
             (delayed)(matrix_narnea)(gesObj,iObj)
@@ -415,60 +452,12 @@ def meta_narnea(gesObj, intObj, sample_weight = True, njobs = 1, verbose = True)
     if verbose:
         print('Integrating results')
 
-
     net_weight = get_net_weight(results)
     all_regs = get_all_regs_in_NaRnEA_list(results)
+    bg_matrix = pd.DataFrame(0,index = results[0]['nes'].index, columns = all_regs)
 
-    the_first = results.pop(0)
-    bg_matrix = pd.DataFrame(0,index = the_first['nes'].index, columns = all_regs)
+    nes = integrate_NaRnEA_xes_mats(results, bg_matrix, net_weight, xes_type = 'nes')
+    pes = integrate_NaRnEA_xes_mats(results, bg_matrix, net_weight, xes_type = 'pes')
 
-    #PES
-
-    pre_pes = bg_matrix.copy()
-    all_regs_pes = bg_matrix + the_first['pes']
-    all_regs_pes.fillna(0, inplace = True)
-    all_regs_pes.sort_index(inplace=True)
-    pes_dom = (all_regs_pes != 0) * net_weight[0].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs)))
-
-    net_weight_array = net_weight[0].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs)))
-    net_weight_array
-    pre_pes = pre_pes + all_regs_pes * net_weight_array
-    pre_pes
-
-    for i in range(1,len(results)+1):
-        all_regs_pes =  bg_matrix + results[i-1]['pes']
-        all_regs_pes.fillna(0, inplace = True)
-        all_regs_pes.sort_index(inplace=True)
-        pes_dom = pes_dom + (all_regs_pes!= 0) * net_weight[i].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs)))
-        net_weight_array = net_weight[i].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs)))
-        pre_pes =  pre_pes + all_regs_pes * net_weight_array
-
-    pre_pes = pre_pes/pes_dom
-
-    # NES
-
-    pre_nes = bg_matrix.copy()
-    all_regs_nes = bg_matrix + the_first['nes']
-    all_regs_nes.fillna(0, inplace = True)
-    all_regs_nes.sort_index(inplace=True)
-    nes_dom = ((all_regs_nes != 0) * net_weight[0].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs))))**2
-
-    net_weight_array = net_weight[0].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs)))
-    net_weight_array
-    pre_nes = pre_nes + all_regs_nes * net_weight_array
-
-
-
-    for i in range(1,len(results)+1):
-        all_regs_nes =  bg_matrix + results[i-1]['nes']
-        all_regs_nes.fillna(0, inplace = True)
-        all_regs_nes.sort_index(inplace=True)
-        nes_dom = nes_dom + ((all_regs_pes!= 0) * net_weight[i].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs))))**2
-        net_weight_array = net_weight[i].to_numpy()[:, np.newaxis] * np.ones((1,len(all_regs)))
-        pre_nes =  pre_nes + all_regs_nes * net_weight_array
-
-    pre_nes = pre_nes/np.sqrt(nes_dom)
-
-
-    result = {"nes": pre_nes, "pes": pre_pes}
+    result = {"nes": nes, "pes": pes}
     return result
