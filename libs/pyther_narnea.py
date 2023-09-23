@@ -9,7 +9,51 @@ import anndata
 ### Tool functions
 
 
-def log_quantile(log_r):
+# def log_quantile(log_r):
+#     A0 = 3.3871327179e0
+#     A1 = 5.0434271938e1
+#     A2 = 1.5929113202e2
+#     A3 = 5.9109374720e1
+#     B1 = 1.7895169469e1
+#     B2 = 7.8757757664e1
+#     B3 = 6.7187563600e1
+#
+#     C0 = 1.4234372777e0
+#     C1 = 2.7568153900e0
+#     C2 = 1.3067284816e0
+#     C3 = 1.7023821103e-1
+#     D1 = 7.3700164250e-1
+#     D2 = 1.2021132975e-1
+#
+#     E0 = 6.6579051150e0
+#     E1 = 3.0812263860e0
+#     E2 = 4.2868294337e-1
+#     E3 = 1.7337203997e-2
+#     F1 = 2.4197894225e-1
+#     F2 = 1.2258202635e-2
+#
+#     SPLIT1 = 0.425
+#     CONST1 = 0.180625
+#     SPLIT2 = 5.0e0
+#     CONST2 = 1.6e0
+#
+#     if log_r > np.log(0.075):
+#         p = np.exp(log_r)
+#         q = p - 0.5
+#         R = CONST1 - q * q
+#         PPND7 = -q * (((A3 * R + A2) * R + A1) * R + A0) / (((B3 * R + B2) * R + B1) * R + 1)
+#     else:
+#         R = np.sqrt(-log_r)
+#         if R <= SPLIT2:
+#             R = R - CONST2
+#             PPND7 = (((C3 * R + C2) * R + C1) * R + C0) / ((D2 * R + D1) * R + 1)
+#         else:
+#             R = R - SPLIT2
+#             PPND7 = (((E3 * R + E2) * R + E1) * R + E0) / ((F2 * R + F1) * R + 1)
+#
+#     return PPND7
+
+def vect_quantile_fast(log_r):
     A0 = 3.3871327179e0
     A1 = 5.0434271938e1
     A2 = 1.5929113202e2
@@ -32,26 +76,43 @@ def log_quantile(log_r):
     F1 = 2.4197894225e-1
     F2 = 1.2258202635e-2
 
-    SPLIT1 = 0.425
+    # SPLIT1 = 0.425
     CONST1 = 0.180625
     SPLIT2 = 5.0e0
     CONST2 = 1.6e0
 
-    if log_r > np.log(0.075):
-        p = np.exp(log_r)
-        q = p - 0.5
-        R = CONST1 - q * q
-        PPND7 = -q * (((A3 * R + A2) * R + A1) * R + A0) / (((B3 * R + B2) * R + B1) * R + 1)
-    else:
-        R = np.sqrt(-log_r)
-        if R <= SPLIT2:
-            R = R - CONST2
-            PPND7 = (((C3 * R + C2) * R + C1) * R + C0) / ((D2 * R + D1) * R + 1)
-        else:
-            R = R - SPLIT2
-            PPND7 = (((E3 * R + E2) * R + E1) * R + E0) / ((F2 * R + F1) * R + 1)
+    log_r = log_r.astype(float)
 
-    return PPND7
+    cond_1 = log_r > np.log(0.075)
+    # cond_2 = (np.sqrt(-log_r) <= SPLIT2)
+
+    # Initialize cond_2 as an array of True values with the same shape as log_r
+    cond_2 = np.ones_like(log_r, dtype=bool)
+    # Calculate cond_2 only where cond_1 is not true to prevent any warnings
+    cond_2[~cond_1] = (np.sqrt(-log_r[~cond_1]) <= SPLIT2)
+
+    coords_1 = np.where(cond_1)
+    coords_2 = np.where(~cond_1 & cond_2)
+    coords_3 = np.where(~cond_1 & ~cond_2)
+
+    # if log_r > np.log(0.075):
+    p = np.exp(log_r[coords_1])
+    q = p - 0.5
+    R = CONST1 - q * q
+    PPND7 = -q * (((A3 * R + A2) * R + A1) * R + A0) / (((B3 * R + B2) * R + B1) * R + 1)
+    log_r[coords_1] = PPND7
+    # elif R <= SPLIT2:
+    R = np.sqrt(-log_r[coords_2])
+    R = R - CONST2
+    PPND7 = (((C3 * R + C2) * R + C1) * R + C0) / ((D2 * R + D1) * R + 1)
+    log_r[coords_2] = PPND7
+    # else:
+    R = np.sqrt(-log_r[coords_3])
+    R = R - SPLIT2
+    PPND7 = (((E3 * R + E2) * R + E1) * R + E0) / ((F2 * R + F1) * R + 1)
+    log_r[coords_3] = PPND7
+
+    return log_r
 
 def directed_nes(rank_mat, sign_mat, AW_AM_prob, E_rs, E_r2, nsample):
     D = np.matmul(rank_mat*sign_mat, AW_AM_prob) #samples X regulators
@@ -107,17 +168,18 @@ def combine_nes(D_nes, U_nes, COV_nes):
     # quantile =  np.exp(final_p - np.log(2))
     # pos_nes = norm.isf(quantile, loc=0, scale=1)
     # neg_nes = norm.ppf(quantile, loc=0, scale=1)
-    a = np.sqrt(- final_p + np.log(2))
-    pos_nes = -1.4374174 + 1.8396835*a - 0.0562393*a**2 + 0.0025810*a**3
 
-#   a = final_p - np.log(2)
-#   vect_quantile = np.vectorize(log_quantile)
-#   pos_nes = vect_quantile(a)
-#
+    # a = np.sqrt(- final_p + np.log(2))
+    # pos_nes = -1.4374174 + 1.8396835*a - 0.0562393*a**2 + 0.0025810*a**3
+
+    # a = final_p - np.log(2)
+    # vect_quantile = np.vectorize(log_quantile)
+    # vect_quantile = np.vectorize(log_quantile_fast)
+    # pos_nes = vect_quantile(a)
+
+    a = final_p - np.log(2)
+    pos_nes = vect_quantile_fast(a)
     neg_nes = -pos_nes
-
-
-
 
     NES_mat = (pos_nes * p_dif + neg_nes * (~p_dif))
     return NES_mat
