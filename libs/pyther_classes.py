@@ -12,7 +12,7 @@ class Interactome:
             file_path = net_table
             file_extension = os.path.splitext(file_path)[-1].lower()
 
-            if file_extension == ".csv":
+            if file_extension == ".csv" or file_extension == ".net":
                 self.net_table = pd.read_csv(file_path, sep=",")
             elif file_extension == ".tsv":
                 self.net_table = pd.read_csv(file_path, sep="\t")
