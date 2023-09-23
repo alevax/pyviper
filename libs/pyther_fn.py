@@ -336,12 +336,13 @@ def pyther(gex_data,
            # pleiotropy = False,
            # minsize=25,
            # adaptive_size=False,
-           method=[None, "scale", "rank", "mad", "ttest"],
-           enrichment = [None, 'area','narnea'],
+           method=None, #[None, "scale", "rank", "mad", "ttest"],
+           enrichment = 'area', #[None, 'area','narnea'],
            mvws=1,
            # pleiotropyArgs={'regulator':0.05, 'shadow':0.05, 'targets':10, "penalty":20, "method":"adaptive"},
            verbose = True,
-           output_type  = ['anndata', 'ndarray']
+           output_type  = 'anndata', #['anndata', 'ndarray'],
+           transfer_obs = True
            ):
 
 #
@@ -425,35 +426,41 @@ def pyther(gex_data,
 #
 #     else:
 
-
+    print(enrichment)
+    print(output_type)
 
     if enrichment is None: enrichment = 'narnea'
-
     if enrichment == 'area':
+        if verbose: print("Computing regulons enrichment with aREA")
         preOp = meta_aREA(gesObj, intList, eset_filter, layer = layer, mvws = mvws, njobs = njobs, verbose = verbose)
-        if output_type == 'ndarray':
-            op = preOp
-        else:
-            op = mat_to_anndata(preOp)
-    else:
-        # time record disabled
-        #joblib_verbose = 0
-        if verbose:
-            print("Computing regulons enrichment with NaRnEa")
-            #joblib_verbose = 11
+    elif enrichment == 'narnea':
+        if verbose: print("Computing regulons enrichment with NaRnEa")
         preOp = meta_narnea(gesObj, intList, sample_weight = True, njobs = njobs, verbose = verbose)
-        if output_type == 'ndarray':
-            op = preOp
-        else:
-            op = mat_to_anndata(preOp["nes"]) #anndata.AnnData(preOp["nes"])
+    else:
+        raise ValueError("Unsupported enrichment type:" + str(enrichment))
+
+    if output_type == 'ndarray':
+        op = preOp
+    elif output_type == 'anndata':
+
+        if enrichment == 'area':
+            op = mat_to_anndata(preOp)
+        else: #enrichment == 'narnea':
+            op = mat_to_anndata(preOp["nes"])
             op.layers['pes'] = preOp["pes"]
+
+        if transfer_obs is True:
+            op.obs = op.obs.join(gesObj.obs)
+    else:
+        raise ValueError("Unsupported output_type:" + str(output_type))
 
     return op #final result
 
 def path_enr(adata,
              interactome,
              layer = None,
-             verbose = True):
+             verbose = True,
+             transfer_obs = True):
     """\
     Allows the individual to infer normalized enrichment scores of pathways
     using the analytical ranked enrichment analysis (aREA) function.
@@ -507,6 +514,10 @@ def path_enr(adata,
     # This means we did pathway enrichment on gex: adata is gex_data
     else:
         pwe_data.gex_data = adata
+
+    if transfer_obs is True:
+        pwe_data.obs = adata.obs
+
     return(pwe_data)
 
 def compute_cluster_stouffer_anndata(adata, obs_column_name, layer = None):
