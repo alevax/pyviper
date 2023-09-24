@@ -1,0 +1,142 @@
+### ---------- IMPORT DEPENDENCIES ----------
+# import numpy as np
+# from scipy.stats import ttest_1samp
+# import os
+# import shutil
+import pandas as pd
+# import anndata
+import scanpy as sc
+from ._filtering_funcs import *
+# from pyther_classes import *
+# from pyther_narnea import *
+# import pathlib
+
+### ---------- EXPORT LIST ----------
+__all__ = ['pca',
+           'tsne',
+           'umap',
+           'draw_graph',
+           'diffmap']
+
+# ------------------------ SCANPY TOOLS PYTHER WRAPPERS -----------------------
+def pca(adata,
+           *,
+           filter_by_feature_groups=None,  # ["TFs", "CoTFs", "sig", "surf"],
+           path_to_tfs=None,
+           path_to_cotfs=None,
+           path_to_sig=None,
+           path_to_surf=None,
+           **kwargs):
+    if filter_by_feature_groups is None:
+        filter_by_feature_groups = "all"
+    adata_filt = __get_anndata_filtered_by_feature_group(adata,
+                                                       filter_by_feature_groups,
+                                                       path_to_tfs,
+                                                       path_to_cotfs,
+                                                       path_to_sig,
+                                                       path_to_surf)
+    sc.tl.pca(adata_filt, **kwargs)
+    adata.obsm["X_pca"] = adata_filt.obsm["X_pca"]
+    return(adata)
+
+def tsne(adata,
+            *,
+            filter_by_feature_groups=None,  # ["TFs", "CoTFs", "sig", "surf"],
+            path_to_tfs=None,
+            path_to_cotfs=None,
+            path_to_sig=None,
+            path_to_surf=None,
+            **kwargs):
+    if filter_by_feature_groups is None:
+        filter_by_feature_groups = "all"
+    adata_filt = __get_anndata_filtered_by_feature_group(adata,
+                                                       filter_by_feature_groups,
+                                                       path_to_tfs,
+                                                       path_to_cotfs,
+                                                       path_to_sig,
+                                                       path_to_surf)
+    sc.tl.tsne(adata_filt, **kwargs)
+    adata.obsm["X_tsne"] = adata_filt.obsm["X_tsne"]
+    return(adata)
+
+def umap(adata,
+            *,
+            filter_by_feature_groups=None,  # ["TFs", "CoTFs", "sig", "surf"],
+            path_to_tfs=None,
+            path_to_cotfs=None,
+            path_to_sig=None,
+            path_to_surf=None,
+            svd_solver='arpack',
+            n_neighbors=10,
+            n_pcs=40,
+            **kwargs):
+    if filter_by_feature_groups is None:
+        filter_by_feature_groups = "all"
+    # Create a second anndata object
+    adata_filt = __get_anndata_filtered_by_feature_group(adata,
+                                                       filter_by_feature_groups,
+                                                       path_to_tfs,
+                                                       path_to_cotfs,
+                                                       path_to_sig,
+                                                       path_to_surf)
+    sc.tl.pca(adata_filt, svd_solver=svd_solver)
+    sc.pp.neighbors(adata_filt, n_neighbors=n_neighbors, n_pcs=n_pcs)
+    # Move sc.pp.neighbors results to adata_filt
+    # adata_filt.obsp["distances"] = adata.obsp["distances"]
+    # adata_filt.obsp["connectivities"] = adata.obsp["connectivities"]
+    # adata_filt.uns["neighbors"] = adata.uns["neighbors"]
+    # Compute the UMAP
+    sc.tl.umap(adata_filt, **kwargs)
+    # Give the UMAP from the second anndata object to the original
+    adata.obsm["X_umap"] = adata_filt.obsm["X_umap"]
+    return(adata)
+
+def draw_graph(adata,
+                  *,
+                  # ["TFs", "CoTFs", "sig", "surf"],
+                  filter_by_feature_groups=None,
+                  path_to_tfs=None,
+                  path_to_cotfs=None,
+                  path_to_sig=None,
+                  path_to_surf=None,
+                  **kwargs):
+    if filter_by_feature_groups is None:
+        filter_by_feature_groups = "all"
+    adata_filt = __get_anndata_filtered_by_feature_group(adata,
+                                                       filter_by_feature_groups,
+                                                       path_to_tfs,
+                                                       path_to_cotfs,
+                                                       path_to_sig,
+                                                       path_to_surf)
+    sc.tl.pca(adata_filt, svd_solver=svd_solver)
+    sc.pp.neighbors(adata_filt, n_neighbors=n_neighbors, n_pcs=n_pcs)
+    sc.tl.draw_graph(adata_filt, **kwargs)
+    if "X_draw_graph_fa" in list(adata.obsm.keys()):
+        adata.obsm["X_draw_graph_fa"] = adata_filt.obsm["X_draw_graph_fa"]
+    if "X_draw_graph_fr" in list(adata.obsm.keys()):
+        adata.obsm["X_draw_graph_fr"] = adata_filt.obsm["X_draw_graph_fr"]
+    return(adata)
+
+def diffmap(adata,
+               *,
+               # ["TFs", "CoTFs", "sig", "surf"],
+               filter_by_feature_groups=None,
+               path_to_tfs=None,
+               path_to_cotfs=None,
+               path_to_sig=None,
+               path_to_surf=None,
+               **kwargs):
+    if filter_by_feature_groups is None:
+        filter_by_feature_groups = "all"
+    adata_filt = __get_anndata_filtered_by_feature_group(adata,
+                                                       filter_by_feature_groups,
+                                                       path_to_tfs,
+                                                       path_to_cotfs,
+                                                       path_to_sig,
+                                                       path_to_surf)
+    sc.tl.pca(adata_filt, svd_solver=svd_solver)
+    sc.pp.neighbors(adata_filt, n_neighbors=n_neighbors, n_pcs=n_pcs)
+    sc.tl.diffmap(adata_filt, **kwargs)
+    adata.obsm["X_diffmap"] = adata_filt.obsm["X_diffmap"]
+    adata.uns['diffmap_evals'] = adata_filt.uns['diffmap_evals']
+    return(adata)

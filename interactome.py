@@ -1,6 +1,10 @@
+### ---------- IMPORT DEPENDENCIES ----------
 import pandas as pd
 import numpy as np
 import os
+
+### ---------- EXPORT LIST ----------
+__all__ = ['Interactome']
 
 class Interactome:
     # class initialization
