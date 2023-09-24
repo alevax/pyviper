@@ -490,10 +490,10 @@ def integrate_NaRnEA_xes_mats(results, bg_matrix, net_weight, xes_type = 'pes'):
 def meta_narnea(gesObj, intObj, sample_weight = True, njobs = 1, verbose = True):
     pd.options.mode.chained_assignment = None
 
-    if type(intObj) == Interactome:
+    if isinstance(intObj, Interactome):
         return matrix_narnea(gesObj, intObj)
-    # elif len(intObj) == 1:
-    #     return matrix_narnea(gesObj, intObj[0])
+    elif len(intObj) == 1:
+        return matrix_narnea(gesObj, intObj[0])
     elif njobs == 1:
         # results = [matrix_narnea(gesObj, iObj, verbose = verbose) for iObj in intObj]
         results = []

@@ -202,9 +202,10 @@ def meta_aREA(gesObj, intObj, eset_filter = False, layer = None, mvws = 1, njobs
     if not isinstance(mvws, int): raise ValueError("mvws is not of type int.")
     # We want all if/else conditions in case
     # users or testers run this function directly
-    if type(intObj) == Interactome:
+
+    if isinstance(intObj, Interactome):
         preOp = aREA(gesObj, intObj, eset_filter, layer)
-    if len(intObj) == 1:
+    elif len(intObj) == 1:
        preOp = aREA(gesObj, intObj[0], eset_filter, layer)
     elif njobs == 1:
         # netMets = [aREA(gesObj, iObj, eset_filter, layer) for iObj in intObj]
@@ -347,6 +348,7 @@ def pyther(gex_data,
 
 #
     gesObj = gex_data
+
     intList = interactome
     pd.options.mode.chained_assignment = None
 
@@ -425,9 +427,6 @@ def pyther(gex_data,
 #         preOp = consolidate_meta_aREA_results(netMets, mvws, verbose)
 #
 #     else:
-
-    print(enrichment)
-    print(output_type)
 
     if enrichment is None: enrichment = 'narnea'
     if enrichment == 'area':
