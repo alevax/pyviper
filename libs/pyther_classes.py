@@ -97,11 +97,17 @@ class Interactome:
         icpVec = icP_df["icP"].values
         return icpVec
 
-    def filter_regulons(self, regulator_list):
-        self.net_table = self.net_table[self.net_table['regulator'].isin(regulator_list)]
+    def filter_regulators(self, regulators_keep = None, regulators_remove = None):
+        if regulators_keep is not None:
+            self.net_table = self.net_table[self.net_table['regulator'].isin(regulators_keep)]
+        if regulators_remove is not None:
+            self.net_table = self.net_table[~self.net_table['regulator'].isin(regulators_remove)]
 
-    def filter_targets(self, target_list):
-        self.net_table = self.net_table[self.net_table['target'].isin(target_list)]
+    def filter_targets(self, targets_keep = None, targets_remove = None):
+        if targets_keep is not None:
+            self.net_table = self.net_table[self.net_table['target'].isin(targets_keep)]
+        if targets_remove is not None:
+            self.net_table = self.net_table[~self.net_table['target'].isin(targets_remove)]
 
     def prune(self, cutoff = 50, eliminate = True):
         # Sort the DataFrame by 'regulator' and 'likelihood' columns
