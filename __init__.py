@@ -5,10 +5,10 @@ path_to_surf = None
 
 from .aREA import *
 from .NaRnEA import *
-from .pyther import *
+from ._pyther import *
 from .interactome import *
-from .translate import *
-from .utils import *
+from ._translate import *
+from ._utils import *
 
 # Want to appear as module - no direct functions
 # made __all__ = [] in each of these .py files

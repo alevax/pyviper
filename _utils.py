@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from ._helpers import *
 from .aREA.aREA_classic import *
-from .translate import *
+from ._translate import *
 from .load import load_human2mouse, load_mouse2human
 # from .interactome import Interactome
 
