@@ -7,6 +7,7 @@ import pandas as pd
 # import anndata
 import scanpy as sc
 from ._filtering_funcs import *
+from ._filtering_funcs import _get_anndata_filtered_by_feature_group
 # from pyther_classes import *
 # from pyther_narnea import *
 # import pathlib
@@ -17,51 +18,33 @@ __all__ = []
 # ------------------------ SCANPY TOOLS PYTHER WRAPPERS -----------------------
 def pca(adata,
            *,
-           filter_by_feature_groups=None,  # ["TFs", "CoTFs", "sig", "surf"],
-           path_to_tfs=None,
-           path_to_cotfs=None,
-           path_to_sig=None,
-           path_to_surf=None,
+           layer = None,
+           filter_by_feature_groups=None, # ["tfs", "cotfs", "sig", "surf"],
            **kwargs):
     if filter_by_feature_groups is None:
         filter_by_feature_groups = "all"
-    adata_filt = __get_anndata_filtered_by_feature_group(adata,
-                                                       filter_by_feature_groups,
-                                                       path_to_tfs,
-                                                       path_to_cotfs,
-                                                       path_to_sig,
-                                                       path_to_surf)
+    adata_filt = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
+
     sc.tl.pca(adata_filt, **kwargs)
     adata.obsm["X_pca"] = adata_filt.obsm["X_pca"]
     return(adata)
 
 def tsne(adata,
             *,
-            filter_by_feature_groups=None,  # ["TFs", "CoTFs", "sig", "surf"],
-            path_to_tfs=None,
-            path_to_cotfs=None,
-            path_to_sig=None,
-            path_to_surf=None,
+            layer = None,
+            filter_by_feature_groups=None,  # ["tfs", "cotfs", "sig", "surf"],
             **kwargs):
     if filter_by_feature_groups is None:
         filter_by_feature_groups = "all"
-    adata_filt = __get_anndata_filtered_by_feature_group(adata,
-                                                       filter_by_feature_groups,
-                                                       path_to_tfs,
-                                                       path_to_cotfs,
-                                                       path_to_sig,
-                                                       path_to_surf)
+    adata_filt = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
     sc.tl.tsne(adata_filt, **kwargs)
     adata.obsm["X_tsne"] = adata_filt.obsm["X_tsne"]
     return(adata)
 
 def umap(adata,
             *,
-            filter_by_feature_groups=None,  # ["TFs", "CoTFs", "sig", "surf"],
-            path_to_tfs=None,
-            path_to_cotfs=None,
-            path_to_sig=None,
-            path_to_surf=None,
+            layer = None,
+            filter_by_feature_groups=None,  # ["tfs", "cotfs", "sig", "surf"],
             svd_solver='arpack',
             n_neighbors=10,
             n_pcs=40,
@@ -69,12 +52,7 @@ def umap(adata,
     if filter_by_feature_groups is None:
         filter_by_feature_groups = "all"
     # Create a second anndata object
-    adata_filt = __get_anndata_filtered_by_feature_group(adata,
-                                                       filter_by_feature_groups,
-                                                       path_to_tfs,
-                                                       path_to_cotfs,
-                                                       path_to_sig,
-                                                       path_to_surf)
+    adata_filt = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
     sc.tl.pca(adata_filt, svd_solver=svd_solver)
     sc.pp.neighbors(adata_filt, n_neighbors=n_neighbors, n_pcs=n_pcs)
     # Move sc.pp.neighbors results to adata_filt
@@ -89,21 +67,12 @@ def umap(adata,
 
 def draw_graph(adata,
                   *,
-                  # ["TFs", "CoTFs", "sig", "surf"],
-                  filter_by_feature_groups=None,
-                  path_to_tfs=None,
-                  path_to_cotfs=None,
-                  path_to_sig=None,
-                  path_to_surf=None,
+                  layer = None,
+                  filter_by_feature_groups=None, # ["tfs", "cotfs", "sig", "surf"],
                   **kwargs):
     if filter_by_feature_groups is None:
         filter_by_feature_groups = "all"
-    adata_filt = __get_anndata_filtered_by_feature_group(adata,
-                                                       filter_by_feature_groups,
-                                                       path_to_tfs,
-                                                       path_to_cotfs,
-                                                       path_to_sig,
-                                                       path_to_surf)
+    adata_filt = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
     sc.tl.pca(adata_filt, svd_solver=svd_solver)
     sc.pp.neighbors(adata_filt, n_neighbors=n_neighbors, n_pcs=n_pcs)
     sc.tl.draw_graph(adata_filt, **kwargs)
@@ -115,21 +84,12 @@ def draw_graph(adata,
 
 def diffmap(adata,
                *,
-               # ["TFs", "CoTFs", "sig", "surf"],
-               filter_by_feature_groups=None,
-               path_to_tfs=None,
-               path_to_cotfs=None,
-               path_to_sig=None,
-               path_to_surf=None,
+               layer = None,
+               filter_by_feature_groups=None, # ["tfs", "cotfs", "sig", "surf"],
                **kwargs):
     if filter_by_feature_groups is None:
         filter_by_feature_groups = "all"
-    adata_filt = __get_anndata_filtered_by_feature_group(adata,
-                                                       filter_by_feature_groups,
-                                                       path_to_tfs,
-                                                       path_to_cotfs,
-                                                       path_to_sig,
-                                                       path_to_surf)
+    adata_filt = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
     sc.tl.pca(adata_filt, svd_solver=svd_solver)
     sc.pp.neighbors(adata_filt, n_neighbors=n_neighbors, n_pcs=n_pcs)
     sc.tl.diffmap(adata_filt, **kwargs)

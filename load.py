@@ -2,6 +2,7 @@
 import pandas as pd
 import pathlib
 from .interactome import Interactome
+from .config import config
 
 ### EXPORT LIST
 __all__ = []
@@ -41,49 +42,45 @@ def load_human2mouse():
 # ------------------------------ HELPER FUNCTIONS -----------------------------
 # -----------------------------------------------------------------------------
 
-def __load_regulators(path_to_txt):
+def __load_regulators_from_txt(path_to_txt):
     with open(path_to_txt) as temp_file:
         regulator_set = [line.rstrip('\n') for line in temp_file]
     return(regulator_set)
+
+def __load_regulators(group, species = None, path_to_regs = None):
+    if species is None:
+        species = config['regulators_species']
+    if path_to_regs is None:
+        config_path_to_regs = config['regulators_filepaths'][species][group]
+        if config_path_to_regs is None:
+            if species == "human":
+                config_path_to_regs = __get_pyther_dir() + "/data/regulatorIDs/" + group + "-hugo.txt"
+            elif species == "mouse":
+                config_path_to_regs = __get_pyther_dir() + "/data/regulatorIDs/" + group + "-hugo-mouse.txt"
+        path_to_regs = config_path_to_regs
+    regs_list = __load_regulators_from_txt(path_to_regs)
+    return regs_list
+
 
 # -----------------------------------------------------------------------------
 # ------------------------------- MAIN FUNCTIONS ------------------------------
 # -----------------------------------------------------------------------------
 
-def load_TFs(path_to_tfs = None, species = "human"):
-    if path_to_tfs is None:
-        if species == "human":
-            path_to_tfs = __get_pyther_dir() + "/data/regulatorIDs/tfs-hugo.txt"
-        elif species == "mouse":
-            path_to_tfs = __get_pyther_dir() + "/data/regulatorIDs/tfs-hugo-mouse.txt"
-    tfs_list = __load_regulators(path_to_tfs)
+# Use can specify path: otherwise it goes to config default
+def load_TFs(species = None, path_to_tfs = None):
+    tfs_list = __load_regulators("tfs", species, path_to_tfs)
     return(tfs_list)
 
-def load_coTFs(path_to_cotfs = None, species = "human"):
-    if path_to_cotfs is None:
-        if species == "human":
-            path_to_cotfs = __get_pyther_dir() + "/data/regulatorIDs/cotfs-hugo.txt"
-        elif species == "mouse":
-            path_to_cotfs = __get_pyther_dir() + "/data/regulatorIDs/cotfs-hugo-mouse.txt"
-    cotfs_list = __load_regulators(path_to_cotfs)
+def load_coTFs(species = None, path_to_cotfs = None):
+    cotfs_list = __load_regulators("cotfs", species, path_to_cotfs)
     return(cotfs_list)
 
-def load_sig(path_to_sig = None, species = "human"):
-    if path_to_sig is None:
-        if species == "human":
-            path_to_sig = __get_pyther_dir() + "/data/regulatorIDs/sig-hugo.txt"
-        elif species == "mouse":
-            path_to_sig = __get_pyther_dir() + "/data/regulatorIDs/sig-hugo-mouse.txt"
-    sig_list = __load_regulators(path_to_sig)
+def load_sig(species = None, path_to_sig = None):
+    sig_list = __load_regulators("sig", species, path_to_sig)
     return(sig_list)
 
-def load_surf(path_to_surf = None, species = "human"):
-    if path_to_surf is None:
-        if species == "human":
-            path_to_surf = __get_pyther_dir() + "/data/regulatorIDs/surface-hugo.txt"
-        elif species == "mouse":
-            path_to_surf = __get_pyther_dir() + "/data/regulatorIDs/surface-hugo-mouse.txt"
-    surf_list = __load_regulators(path_to_surf)
+def load_surf(species = None, path_to_surf = None):
+    surf_list = __load_regulators("surface", species, path_to_surf)
     return(surf_list)
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&

@@ -1,8 +1,3 @@
-path_to_tfs = None
-path_to_cotfs = None
-path_to_sig = None
-path_to_surf = None
-
 from .aREA import *
 from .NaRnEA import *
 from ._pyther import *
