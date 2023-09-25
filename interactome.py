@@ -8,22 +8,31 @@ __all__ = ['Interactome']
 
 class Interactome:
     # class initialization
-    def __init__(self, name, net_table=None):
+    def __init__(self, name, net_table=None, input_type=None):
         self.name = name
         if net_table is None:
             self.net_table = pd.DataFrame(columns=["regulator", "target", "mor", "likelihood"])
         elif type(net_table) is str:
             file_path = net_table
-            file_extension = os.path.splitext(file_path)[-1].lower()
-
-            if file_extension == ".csv":
-                self.net_table = pd.read_csv(file_path, sep=",")
-            elif file_extension == ".tsv" or file_extension == ".net":
-                self.net_table = pd.read_csv(file_path, sep="\t")
-            elif file_extension == ".pkl":
-                self.net_table = pd.read_pickle(file_path)
+            if input_type is None:
+                file_extension = os.path.splitext(file_path)[-1].lower()
+                if file_extension == ".csv":
+                    self.net_table = pd.read_csv(file_path, sep=",")
+                elif file_extension == ".tsv" or file_extension == ".net":
+                    self.net_table = pd.read_csv(file_path, sep="\t")
+                elif file_extension == ".pkl":
+                    self.net_table = pd.read_pickle(file_path)
+                else:
+                    raise ValueError("Unsupported file format: {}".format(file_extension))
             else:
-                raise ValueError("Unsupported file format: {}".format(file_extension))
+                if "csv" in input_type:
+                    self.net_table = pd.read_csv(file_path, sep=",")
+                elif "tsv" in input_type:
+                    self.net_table = pd.read_csv(file_path, sep="\t")
+                elif "pkl" in input_type or "pickle" in input_type:
+                    self.net_table = pd.read_pickle(file_path)
+                else:
+                    raise ValueError("Unsupported file format: {}".format(input_type))
         else:
             self.net_table = net_table
 
@@ -34,16 +43,26 @@ class Interactome:
         retStr += "\tNumber of Regulons: " + str(self.size())
         return retStr
 
-    def save(self, file_path):
-        file_extension = os.path.splitext(file_path)[-1].lower()
-        if file_extension == ".csv":
-            self.net_table.to_csv(file_path, sep=",", index=False)
-        elif file_extension == ".tsv":
-            self.net_table.to_csv(file_path, sep="\t", index=False)
-        elif file_extension == ".pkl":
-            self.net_table.to_pickle(file_path)
+    def save(self, file_path, output_type=None):
+        if output_type is None:
+            file_extension = os.path.splitext(file_path)[-1].lower()
+            if file_extension == ".csv":
+                self.net_table.to_csv(file_path, sep=",", index=False)
+            elif file_extension == ".tsv":
+                self.net_table.to_csv(file_path, sep="\t", index=False)
+            elif file_extension == ".pkl":
+                self.net_table.to_pickle(file_path)
+            else:
+                raise ValueError("Unsupported file format: {}".format(file_extension))
         else:
-            raise ValueError("Unsupported file format: {}".format(file_extension))
+            if "csv" in output_type:
+                self.net_table.to_csv(file_path, sep=",", index=False)
+            elif "tsv" in output_type:
+                self.net_table.to_csv(file_path, sep="\t", index=False)
+            elif "pkl" in output_type or "pickle" in output_type:
+                self.net_table.to_pickle(file_path)
+            else:
+                raise ValueError("Unsupported file format: {}".format(output_type))
 
     def copy(self):
         return Interactome(self.name, self.net_table.copy())
