@@ -150,7 +150,7 @@ def replace_random(x, a, b):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def NaRnEA_classic(gex_data, interactome, intermediate = False, min_targets = 30,verbose = False):
+def NaRnEA_classic(gex_data, interactome, layer = None, intermediate = False, min_targets = 30,verbose = False):
 
     int_table = interactome.net_table
 
@@ -177,7 +177,11 @@ def NaRnEA_classic(gex_data, interactome, intermediate = False, min_targets = 30
         # fill with number less than the min in this sample, sign is randomly assigned according to the +_ proportion
     if verbose: print('reordering genes')
 
-    expr = np.copy(gex_data[:,exp_genes].X)
+    if layer is None:
+        expr = np.copy(gex_data[:,exp_genes].X)
+    else:
+        expr = np.copy(gex_data[:,exp_genes].layers[layer])
+
 
 
     zeros = len(expr[expr == 0])

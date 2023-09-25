@@ -106,8 +106,8 @@ def pyther(gex_data,
                      mvws=mvws, njobs=njobs, verbose=verbose)
     elif enrichment == 'narnea':
         if verbose: print("Computing regulons enrichment with NaRnEa")
-        preOp = NaRnEA(gex_data, interactome, sample_weight=True,
-                       njobs=njobs, verbose=verbose)
+        preOp = NaRnEA(gex_data, interactome, layer=layer,
+                       sample_weight=True, njobs=njobs, verbose=verbose)
 
     else:
         raise ValueError("Unsupported enrichment type:" + str(enrichment))

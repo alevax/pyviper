@@ -128,13 +128,13 @@ def integrate_NaRnEA_xes_mats(results, bg_matrix, net_weight, xes_type = 'pes'):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def NaRnEA(gex_data, interactome, sample_weight = True, njobs = 1, verbose = True):
+def NaRnEA(gex_data, interactome, layer = None, sample_weight = True, njobs = 1, verbose = True):
     pd.options.mode.chained_assignment = None
 
     if isinstance(interactome, Interactome):
-        return NaRnEA_classic(gex_data, interactome)
+        return NaRnEA_classic(gex_data, interactome, layer, verbose = verbose)
     elif len(interactome) == 1:
-        return NaRnEA_classic(gex_data, interactome[0])
+        return NaRnEA_classic(gex_data, interactome[0], layer, verbose = verbose)
     elif njobs == 1:
         # results = [NaRnEA(gex_data, iObj, verbose = verbose) for iObj in interactome]
         results = []
@@ -142,13 +142,13 @@ def NaRnEA(gex_data, interactome, sample_weight = True, njobs = 1, verbose = Tru
         n_completed_nets = 0
         if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
         for iObj in interactome:
-          results.append(NaRnEA_classic(gex_data, iObj, verbose = verbose))
+          results.append(NaRnEA_classic(gex_data, iObj, layer, verbose = verbose))
           n_completed_nets = n_completed_nets + 1
           if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
 
     else:
         results = Parallel(n_jobs = njobs)(
-            (delayed)(NaRnEA)(gex_data,iObj)
+            (delayed)(NaRnEA)(gex_data,iObj,layer)
             for iObj in interactome
             )
 
