@@ -79,27 +79,28 @@ class Interactome:
         if isinstance(network_list, Interactome):
             network_list = [network_list]
         n_networks = len(network_list)
-        if network_weights is not None:
-            if len(network_weights) != n_networks:
-                raise ValueError("network_weights is length" + str(len(network_list)) + ". Should be equal to number of networks: " + str(n_networks) + ".")
 
         for i in range(0, n_networks):
             if isinstance(network_list[i], Interactome):
                 network_list[i] = network_list[i].net_table
             elif not isinstance(network_list[i], pd.DataFrame):
                 raise ValueError("Unsupported type of network input:" + str(type(network_list[i])))
-        network_list.append(self.net_table)
+        network_list.insert(0, self.net_table)
         n_networks = len(network_list)
+
+        if network_weights is not None:
+            if len(network_weights) != n_networks:
+                raise ValueError("network_weights is length" + str(len(network_list)) + ". Should be equal to number of networks: " + str(n_networks) + ".")
+            else:
+                network_weights = np.array(network_weights)
+        else: # Make uniform weights if not given
+            network_weights = np.ones(n_networks)
 
         # Get all pairs of regulators and targets
         all_pairs = np.vstack([df[['regulator', 'target']].values for df in network_list])
         unique_pairs_df = pd.DataFrame(all_pairs).drop_duplicates()
         unique_pairs_df.columns = ["regulator", "target"]
         all_pairs_df = unique_pairs_df.sort_values(by=['regulator', 'target'])
-
-        # Make weights if not given
-        if network_weights is None:
-            network_weights = np.ones(n_networks)
 
         # Modify each network to have the same regulator-target pairs by
         # adding empty rows of 0s so they be all lined up together in a stack
@@ -141,13 +142,32 @@ class Interactome:
             # Sort so all DataFrames have the same columns for regulator and target
             net_df = net_df.sort_values(by=['regulator', 'target'])
             values_df = net_df.loc[:, ['mor', 'likelihood']].values
-            # Multiply by the network weights
-            values_df = values_df * network_weights[i]
             net_array_list.append(values_df)
 
         # Create a stack of networks & compute means across the stack
         network_stack = np.stack(net_array_list)
-        stack_means = np.nanmean(network_stack, axis=0)
+
+        # Recompute the weights as stacks in order to accounts for regulators
+        # sets being different in different networks. For each regulator,
+        # the weight a network is given will only be counted for when the
+        # network contains that regulator.
+        weights_stack = network_stack.copy()
+        weights_stack[np.isnan(weights_stack) == False] = 1
+        weights_stack = weights_stack*network_weights[:, np.newaxis, np.newaxis]
+        # For each weight, we normalize to correct to NaN values as follow.
+        # We divide by the total across the stacks to get the proportion of
+        # each weight to the other, so that they add up to 1. However, we
+        # still want the weights to add up to the original total, which they
+        # originally didn't with NaN values, so we multiply by the sum of the
+        # original weights.
+        weights_stack = weights_stack / np.nansum(weights_stack, axis = 0) * np.sum(network_weights)
+
+        # We compute the weighted mean here across the network stacks
+        # Multiply each of the items in the stack by their appropriate weight
+        network_stack = network_stack * weights_stack
+        # Take the sum across the stack and divide by the sum of weights to normalize
+        stack_means = np.nansum(network_stack, axis=0)/np.sum(np.array(network_weights))
+
 
         # Combine the mean
         df = pd.DataFrame({
