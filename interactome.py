@@ -74,8 +74,103 @@ class Interactome:
     def get_regulonNames(self):
         return self.net_table["regulator"].unique()
 
-    def add_regs(self, net_table):
-        self.net_table = pd.concat(self.net_table, net_table)
+    def integrate(self, network_list, network_weights = None, normalize_likelihoods = False):
+        # self.net_table = pd.concat(self.net_table, net_table)
+        if isinstance(network_list, Interactome):
+            network_list = [network_list]
+        n_networks = len(network_list)
+        if network_weights is not None:
+            if len(network_weights) != n_networks:
+                raise ValueError("network_weights is length" + str(len(network_list)) + ". Should be equal to number of networks: " + str(n_networks) + ".")
+
+        for i in range(0, n_networks):
+            if isinstance(network_list[i], Interactome):
+                network_list[i] = network_list[i].net_table
+            elif not isinstance(network_list[i], pd.DataFrame):
+                raise ValueError("Unsupported type of network input:" + str(type(network_list[i])))
+        network_list.append(self.net_table)
+        n_networks = len(network_list)
+
+        # Get all pairs of regulators and targets
+        all_pairs = np.vstack([df[['regulator', 'target']].values for df in network_list])
+        unique_pairs_df = pd.DataFrame(all_pairs).drop_duplicates()
+        unique_pairs_df.columns = ["regulator", "target"]
+        all_pairs_df = unique_pairs_df.sort_values(by=['regulator', 'target'])
+
+        # Make weights if not given
+        if network_weights is None:
+            network_weights = np.ones(n_networks)
+
+        # Modify each network to have the same regulator-target pairs by
+        # adding empty rows of 0s so they be all lined up together in a stack
+        net_array_list = []
+
+        for i in range(0, n_networks):
+            # Get the missing pairs from a single dataframe
+            net_df = network_list[i]
+            pairs_in_single_df = net_df[['regulator', 'target']]
+            # Convert the columns to sets for faster set operations
+            all_pairs_set = set(map(tuple, all_pairs_df[['regulator', 'target']].values))
+            single_pairs_set = set(map(tuple, pairs_in_single_df[['regulator', 'target']].values))
+            # Find missing pairs using set difference
+            missing_pairs_set = all_pairs_set - single_pairs_set
+            # Convert the missing pairs back to a DataFrame
+            missing_pairs_df = pd.DataFrame(list(missing_pairs_set), columns=['regulator', 'target'])
+            # Check if regulators in missing_pairs_df are in net_df["regulator"]
+            in_net_df = missing_pairs_df['regulator'].isin(net_df['regulator'])
+            # Create two DataFrames based on the condition
+            missing_pairs_shared_regs_df = missing_pairs_df[in_net_df]
+            missing_pairs_nonshared_regs_df = missing_pairs_df[~in_net_df]
+
+            # If the regulator of the missing pairs is in this network
+            # then we want all targets to be set to 0
+            missing_pairs_shared_regs_df.insert(2, 'mor', 0)
+            missing_pairs_shared_regs_df.insert(3, 'likelihood', 0)
+
+            # If the regulator is not in this network, then this network
+            # provide no information and we don't want it affecting means
+            # so it to NaN. If it were 0, then it would decrease mor and likelihood
+            # of all regulon targets not included with 0s. We don't want that.
+            missing_pairs_nonshared_regs_df.insert(2, 'mor', np.nan)
+            missing_pairs_nonshared_regs_df.insert(3, 'likelihood', np.nan)
+
+            # Add missing pairs
+            net_df = pd.concat([net_df,
+                                missing_pairs_shared_regs_df,
+                                missing_pairs_nonshared_regs_df], ignore_index=True)
+            # Sort so all DataFrames have the same columns for regulator and target
+            net_df = net_df.sort_values(by=['regulator', 'target'])
+            values_df = net_df.loc[:, ['mor', 'likelihood']].values
+            # Multiply by the network weights
+            values_df = values_df * network_weights[i]
+            net_array_list.append(values_df)
+
+        # Create a stack of networks & compute means across the stack
+        network_stack = np.stack(net_array_list)
+        stack_means = np.nanmean(network_stack, axis=0)
+
+        # Combine the mean
+        df = pd.DataFrame({
+            "regulator":all_pairs_df['regulator'],
+            "target":all_pairs_df['target'],
+            'mor':stack_means[:, 0],
+            'likelihood':stack_means[:, 1]
+        })
+
+        if normalize_likelihoods:
+            # Group by "regulator" and compute ranks of "likelihood"
+            df['rank'] = df.groupby('regulator')['likelihood'].rank(ascending=False)
+
+            # Compute the total number of targets + 1 for each regulator
+            df['total_targets'] = df.groupby('regulator')['target'].transform('count') + 1
+
+            # Divide "likelihood" by (total number of targets + 1) for each regulator
+            df['likelihood'] = df['rank'] / df['total_targets']
+
+            # Drop the intermediate columns if needed
+            df = df.drop(['rank', 'total_targets'], axis=1)
+
+        self.net_table = df
 
     def get_reg(self, regName):
         return self.net_table[self.net_table['regulator'] == regName]
