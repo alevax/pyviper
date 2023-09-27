@@ -143,3 +143,21 @@ intObj = interactome_from_tsv('network.tsv', 'network_name')
   ```python
   slice_concat(pyther,gex_data, bins = 2, interactome = intList, output_type = 'ndarray',verbose = False)
   ```
+
+
+
+### Available functions and modules
+
+The main functions available from `pyther` are:
+- `pyther`: "pyther" function for Virtual Inference of Protein Activity by Enriched Regulon Analysis (VIPER). The function allows using 2 enrichment algorithms, aREA and (matrix)-NaRnEA (see below)
+- `aREA`: computes [aREA](https://www.nature.com/articles/ng.3593) (analytic rank-based enrichment analysis) and meta-aREA
+- `NaRnEA`: computes [matrix-NaRnEA](https://www.biorxiv.org/content/10.1101/2021.05.20.445002v5), a vectorized, implementation of [NaRnEA](https://www.mdpi.com/1099-4300/25/3/542)
+- `path_enr`: computes pathway enrichment
+- `compute_cluster_stouffer_anndata`: computes signatures on a cluster-by-cluster basis using Cluster integration method for pathway enrichment
+- `translate-adata_index`: for mouse-to-human and human-to-mouse
+
+Additionally, the following submodules are available:
+- `pyther.load`: submodule containing several utility functions useful for different analyses, including `load_msigdb_regulon`, `load_TFs` etc
+- `pyther.pl`: submodule containing pyther-wrappers for `scanpy` plotting
+- `pyther.tl`: submodule containing pyther-wrapper for `scanpy` data transformation
+  
