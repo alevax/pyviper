@@ -46,3 +46,4 @@ vignettes/*.pdf
 *.Rproj
 *.pyc
 *.pyc
+.DS_Store

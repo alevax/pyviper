@@ -42,7 +42,8 @@ def pyther(gex_data,
            transfer_obs=True,
            store_gex_data=True
            ):
-
+    gex_data_original = gex_data
+    gex_data = gex_data_original.copy()
 
     pd.options.mode.chained_assignment = None
 
@@ -125,7 +126,7 @@ def pyther(gex_data,
         if transfer_obs is True:
             op.obs = op.obs.join(gex_data.obs)
         if store_gex_data is True:
-            op.gex_data = gex_data
+            op.gex_data = gex_data_original
     else:
         raise ValueError("Unsupported output_type:" + str(output_type))
 
