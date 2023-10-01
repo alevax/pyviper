@@ -48,15 +48,15 @@ def consolidate_meta_aREA_results(netMets, mvws = 1, verbose = True):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def aREA(gex_data, interactome, eset_filter = False, layer = None, mvws = 1, njobs = 1, verbose = True):
+def aREA(gex_data, interactome, eset_filter = False, layer = None, min_targets = 30, mvws = 1, njobs = 1, verbose = True):
     if not isinstance(mvws, int): raise ValueError("mvws is not of type int.")
     # We want all if/else conditions in case
     # users or testers run this function directly
 
     if isinstance(interactome, Interactome):
-        preOp = aREA_classic(gex_data, interactome, eset_filter, layer)
+        preOp = aREA_classic(gex_data, interactome, eset_filter, layer, min_targets, verbose)
     elif len(interactome) == 1:
-       preOp = aREA_classic(gex_data, interactome[0], eset_filter, layer)
+       preOp = aREA_classic(gex_data, interactome[0], eset_filter, layer, min_targets, verbose)
     elif njobs == 1:
         # netMets = [aREA(gex_data, iObj, eset_filter, layer) for iObj in interactome]
         netMets = []
@@ -64,7 +64,7 @@ def aREA(gex_data, interactome, eset_filter = False, layer = None, mvws = 1, njo
         n_completed_nets = 0
         if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
         for iObj in interactome:
-          netMets.append(aREA_classic(gex_data, iObj, eset_filter, layer, verbose))
+          netMets.append(aREA_classic(gex_data, iObj, eset_filter, layer, min_targets, verbose))
           n_completed_nets = n_completed_nets + 1
           if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
         preOp = consolidate_meta_aREA_results(netMets, mvws, verbose)

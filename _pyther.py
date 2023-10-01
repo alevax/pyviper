@@ -36,6 +36,7 @@ def pyther(gex_data,
            method=None,  # [None, "scale", "rank", "mad", "ttest"],
            enrichment='area',  # [None, 'area','narnea'],
            mvws=1,
+           min_targets=30,
            # pleiotropyArgs={'regulator':0.05, 'shadow':0.05, 'targets':10, "penalty":20, "method":"adaptive"},
            verbose=True,
            output_type='anndata',  # ['anndata', 'ndarray'],
@@ -103,20 +104,18 @@ def pyther(gex_data,
     if enrichment is None: enrichment = 'narnea'
     if enrichment == 'area':
         if verbose: print("Computing regulons enrichment with aREA")
-        preOp = aREA(gex_data, interactome, eset_filter, layer=layer,
-                     mvws=mvws, njobs=njobs, verbose=verbose)
+        preOp = aREA(gex_data, interactome, eset_filter, layer,
+                     min_targets, mvws, njobs, verbose)
     elif enrichment == 'narnea':
         if verbose: print("Computing regulons enrichment with NaRnEa")
-        preOp = NaRnEA(gex_data, interactome, layer=layer,
-                       sample_weight=True, njobs=njobs, verbose=verbose)
-
+        preOp = NaRnEA(gex_data, interactome, eset_filter, layer,
+                       min_targets, njobs, verbose)
     else:
         raise ValueError("Unsupported enrichment type:" + str(enrichment))
 
     if output_type == 'ndarray':
         op = preOp
     elif output_type == 'anndata':
-
         if enrichment == 'area':
             op = mat_to_anndata(preOp)
         else: #enrichment == 'narnea':

@@ -22,7 +22,7 @@ def sigT(x, slope = 20, inflection = 0.5):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def aREA_classic(gex_data, interactome, eset_filter = False, layer = None, verbose = True):
+def aREA_classic(gex_data, interactome, eset_filter = False, layer = None, min_targets=30, verbose = True):
     """\
     Allows the individual to infer normalized enrichment scores from gene
     expression data using the analytical ranked enrichment analysis (aREA)
@@ -44,21 +44,18 @@ def aREA_classic(gex_data, interactome, eset_filter = False, layer = None, verbo
     -------
     A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values.
     """
+    # Filter out those with target less than min.targets
+    interactome.prune(cutoff = min_targets, eliminate = False)
+
     if (eset_filter):
+        # This will affect the rankings of genes by eliminating those not present in the interactome
         tmp = list(set(list(interactome.get_targetSet())+list(interactome.get_regulonNames())))
         gex_data = gex_data[:,gex_data.var_names.isin(pd.Series(tmp))]
-        #would this line have influnence outside this function?
 
     if layer is None:
         gesMat = gex_data.X
     else:
         gesMat = gex_data.layers[layer]
-
-
-
-    # rank transform the GES using the rankdata function from scipy.stats
-    if(verbose): print("Rank transforming the data")
-    rankMat = rankdata(gesMat, axis = 1)
 
     # ------------ find intersecting genes ------------
     # Use get_targetSet as part of the interactome class to get a list of all targets in the interactome
@@ -68,14 +65,26 @@ def aREA_classic(gex_data, interactome, eset_filter = False, layer = None, verbo
     # Get the intersction of gene names in the gExpr signature and those in the target set
     intersectGenes = [value for value in targetSet if value in varNames]
 
+    n_targets_not_in_exp_genes = np.count_nonzero(~pd.Series(sorted(targetSet)).isin(varNames))
+    if n_targets_not_in_exp_genes > 0:
+        raise ValueError('interactome "' + str(interactome.name) + '" contains ' +
+                         str(n_targets_not_in_exp_genes) + " targets missing from gex_data.var.\n\t" +
+                        "Please run interactome.filter_targets(gex_data.var_names) on your network to\n\t" +
+                         "resolve this. It is highly recommend to do this on the unPruned network and\n\t"+
+                         "then prune to ensure all of the pruned network's targets exist within gex_data.")
+
+    # rank transform the GES using the rankdata function from scipy.stats
+    if(verbose): print("Rank transforming the data")
+    rankMat = rankdata(gesMat, axis = 1)
+
     # ------------ reduce regulon matrices ------------
     # The icMat is the matrix with regulators in the columns, targets in the rows and likelihood (weights) as values
         # (we filter to intersectGenes as targets by using .loc[intersectGenes])
     if(verbose): print("Computing the likelihood matrix")
-    icMat = interactome.icMat().loc[intersectGenes]
+    icMat = interactome.icMat()#.loc[intersectGenes]
     # The morDict is the matrix with regulators in the columns, targets in the rows and tfmode (modes) as values
     if(verbose): print("Computing the modes matrix")
-    morMat = interactome.morMat().loc[intersectGenes]
+    morMat = interactome.morMat()#.loc[intersectGenes]
 
     # ------------ prepare the 1-tailed / 2-tailed matrices ------------
     if(verbose): print("Preparing the 1-tailed / 2-tailed matrices")

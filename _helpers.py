@@ -1,5 +1,6 @@
 ### ---------- IMPORT DEPENDENCIES ----------
 import pandas as pd
+import numpy as np
 import anndata
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -22,7 +23,8 @@ def mat_to_anndata(mat):
     # Convert the pandas dataframe from Pyther into a new Anndata object
     pax_data = anndata.AnnData(X=mat,
                                obs=mat_sampleNames,
-                               var=mat_features)
+                               var=mat_features,
+                               dtype=np.float64)
     return(pax_data)
 
 

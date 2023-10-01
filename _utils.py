@@ -93,7 +93,8 @@ def path_enr(adata,
 
     # aREA takes the pathways interactome and the adata
     if(verbose): print("Running aREA using to calculate pathway enrichment...")
-    path_enr_mat = aREA_classic(adata, interactome, eset_filter = False, layer = layer, verbose = verbose)
+    interactome.filter_targets(adata.var_names)
+    path_enr_mat = aREA_classic(adata, interactome, eset_filter = False, layer = layer, min_targets=0, verbose = verbose)
 
     if(make_adata_names_format_match_interactome is True):
         if(verbose): print("Returning adata names to original state...")

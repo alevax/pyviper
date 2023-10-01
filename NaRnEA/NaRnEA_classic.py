@@ -150,7 +150,15 @@ def replace_random(x, a, b):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def NaRnEA_classic(gex_data, interactome, layer = None, intermediate = False, min_targets = 30,verbose = False):
+def NaRnEA_classic(gex_data, interactome, eset_filter = False, layer = None, min_targets = 30, verbose = False, return_as_df = False):
+
+    # filter out those with target less than min.targets
+    interactome.prune(cutoff = min_targets, eliminate = False)
+
+    if (eset_filter):
+        # This will affect the rankings of genes by eliminating those not present in the interactome
+        tmp = list(set(list(interactome.get_targetSet())+list(interactome.get_regulonNames())))
+        gex_data = gex_data[:,gex_data.var_names.isin(pd.Series(tmp))]
 
     int_table = interactome.net_table
 
@@ -159,19 +167,22 @@ def NaRnEA_classic(gex_data, interactome, layer = None, intermediate = False, mi
 
 
     # modify regulon list, take the intersect of targets and genes, making there is no 0 nor +_1 in am
+    # filtered_table = int_table[int_table['target'].isin(exp_genes)]
+    n_targets_not_in_exp_genes = np.count_nonzero(~pd.Series(sorted(interactome.get_targetSet())).isin(exp_genes))
+    if n_targets_not_in_exp_genes > 0:
+        raise ValueError('interactome "' + str(interactome.name) + '" contains ' +
+                         str(n_targets_not_in_exp_genes) + " targets missing from gex_data.var.\n\t" +
+                        "Please run interactome.filter_targets(gex_data.var_names) on your network to\n\t" +
+                         "resolve this. It is highly recommend to do this on the unPruned network and\n\t"+
+                         "then prune to ensure all of the pruned network's targets exist within gex_data.")
+    filtered_table = int_table
 
-    filtered_table = int_table[int_table['target'].isin(exp_genes)]
     # why I need to remove that, there is no filtered_table[filtered_table['mor'] == -1]
     filtered_table['mor'].replace(1 ,0.999, inplace= True)
     filtered_table['mor'].replace(-1 ,-0.999, inplace= True)
     filtered_table['mor'] = filtered_table['mor'].apply(lambda x: replace_random(x, -0.001, 0.001))
     #filtered_table['mor'].replace(0 ,0.999, inplace= True)
     # why we cant have 0, 1 and -1?
-
-    # filtered out those with target less than min.targets )may be this should  be a function for interactone class
-    reg_counts  = filtered_table['regulator'].value_counts()
-    reg_counts = list(reg_counts[reg_counts>=min_targets].index)
-    filtered_table = filtered_table[filtered_table['regulator'].isin(reg_counts)]
 
     # modify the expression matrix:
         # fill with number less than the min in this sample, sign is randomly assigned according to the +_ proportion
@@ -283,7 +294,7 @@ def NaRnEA_classic(gex_data, interactome, layer = None, intermediate = False, mi
 
 
 
-    if (intermediate) == False :
+    if (return_as_df) == False :
         NES_mat = pd.DataFrame(NES_mat.T, index = gex_data.obs.index, columns = list(AW_AM_prob.columns))
         PES_mat = pd.DataFrame(PES_mat.T, index = gex_data.obs.index, columns = list(AW_AM_prob.columns))
 
