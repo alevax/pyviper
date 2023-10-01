@@ -202,6 +202,22 @@ def embedding(adata,
                                                        obsm_slot=basis)
     sc.pl.embedding(adata, basis, **kwargs)
 
+def embedding_density(adata,
+                      *,
+                      basis='umap',
+                      plot_stored_gex_data=False,
+                      plot_stored_pax_data=False,
+                      **kwargs):
+    if(plot_stored_gex_data is True):
+        adata = __get_stored_uns_data_and_prep_to_plot(adata,
+                                                       uns_data_slot='gex_data',
+                                                       obsm_slot=basis)
+    elif(plot_stored_pax_data is True):
+        adata = __get_stored_uns_data_and_prep_to_plot(adata,
+                                                       uns_data_slot='pax_data',
+                                                       obsm_slot=basis)
+    sc.pl.embedding_density(adata, basis, **kwargs)
+
 def scatter(adata,
                *,
                plot_stored_gex_data=False,
