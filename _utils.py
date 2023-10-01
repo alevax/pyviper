@@ -105,12 +105,12 @@ def path_enr(adata,
     pwe_data = mat_to_anndata(path_enr_mat)
     # This means we did pathway enrichment on VIPER: adata is pax_data
     if hasattr(adata, "gex_data"):
-        pwe_data.gex_data = adata.gex_data
+        pwe_data.uns['gex_data'] = adata.gex_data
         adata.gex_data = None
-        pwe_data.pax_data = adata
+        pwe_data.uns['pax_data'] = adata
     # This means we did pathway enrichment on gex: adata is gex_data
     else:
-        pwe_data.gex_data = adata
+        pwe_data.uns['gex_data'] = adata
 
     if transfer_obs is True:
         pwe_data.obs = adata.obs

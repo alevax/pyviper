@@ -1,13 +1,6 @@
 ### ---------- IMPORT DEPENDENCIES ----------
-# import numpy as np
-# from scipy.stats import ttest_1samp
-# import os
-# import shutil
 import pandas as pd
-# import anndata
 import scanpy as sc
-# from pyther_classes import *
-# from pyther_narnea import *
 
 
 ### ---------- EXPORT LIST ----------
@@ -25,13 +18,59 @@ __all__ = []
 #            'dendrogram']
 
 # -----------------------------------------------------------------------------
+# ------------------------------ HELPER FUNCTIONS -----------------------------
+# -----------------------------------------------------------------------------
+def __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot, obsm_slot = None, uns_slot = None):
+    adata_stored = adata.uns[uns_data_slot].copy()
+    if obsm_slot is not None:
+        adata_stored.obsm[obsm_slot] = adata.obsm[obsm_slot]
+    if uns_slot is not None:
+        adata_stored.obsm[uns_slot] = adata.obsm[uns_slot]
+    adata = adata_stored
+    return adata
+
+# -----------------------------------------------------------------------------
 # ------------------------------- MAIN FUNCTIONS ------------------------------
 # -----------------------------------------------------------------------------
+def pca(adata,
+        *,
+        plot_stored_gex_data=False,
+        plot_stored_pax_data=False,
+        **kwargs):
+    """\
+    A wrapper for the scanpy function sc.pl.pca.
+
+    Parameters
+    ----------
+    adata
+        Gene expression or protein activity stored in an anndata object.
+    plot_stored_gex_data
+        Plot stored gex_data on the protein activity (or pathways) UMAP.
+    plot_stored_pax_data
+        If the adata is the output of the path_enr function and pax_data is
+        stored in adata, this allows one to plot pax_data values in the UMAP
+        created using pathways results.
+    **kwargs
+        Arguments to provide to the sc.pl.pca function.
+    Returns
+    -------
+    A plot of :class:`~matplotlib.axes.Axes`.
+    """
+    if(plot_stored_gex_data is True):
+        adata = __get_stored_uns_data_and_prep_to_plot(adata,
+                                                       uns_data_slot='gex_data',
+                                                       obsm_slot='X_pca')
+    elif(plot_stored_pax_data is True):
+        adata = __get_stored_uns_data_and_prep_to_plot(adata,
+                                                       uns_data_slot='pax_data',
+                                                       obsm_slot='X_pca')
+    sc.pl.pca(adata, **kwargs)
+
 def umap(adata,
-            *,
-            plot_stored_gex_data=False,
-            plot_stored_pax_data=False,
-            **kwargs):
+         *,
+         plot_stored_gex_data=False,
+         plot_stored_pax_data=False,
+         **kwargs):
     """\
     A wrapper for the scanpy function sc.pl.umap.
 
@@ -52,10 +91,116 @@ def umap(adata,
     A plot of :class:`~matplotlib.axes.Axes`.
     """
     if(plot_stored_gex_data is True):
-        adata = get_gex_anndata_with_nes_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata,
+                                                       uns_data_slot='gex_data',
+                                                       obsm_slot='X_umap')
     elif(plot_stored_pax_data is True):
-        adata = get_pax_anndata_with_path_enr_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata,
+                                                       uns_data_slot='pax_data',
+                                                       obsm_slot='X_umap')
     sc.pl.umap(adata, **kwargs)
+
+def tsne(adata,
+         *,
+         plot_stored_gex_data=False,
+         plot_stored_pax_data=False,
+         **kwargs):
+    """\
+    A wrapper for the scanpy function sc.pl.umap.
+
+    Parameters
+    ----------
+    adata
+        Gene expression or protein activity stored in an anndata object.
+    plot_stored_gex_data
+        Plot stored gex_data on the protein activity (or pathways) UMAP.
+    plot_stored_pax_data
+        If the adata is the output of the path_enr function and pax_data is
+        stored in adata, this allows one to plot pax_data values in the UMAP
+        created using pathways results.
+    **kwargs
+        Arguments to provide to the sc.pl.tsne function.
+    Returns
+    -------
+    A plot of :class:`~matplotlib.axes.Axes`.
+    """
+    if(plot_stored_gex_data is True):
+        adata = __get_stored_uns_data_and_prep_to_plot(adata,
+                                                       uns_data_slot='gex_data',
+                                                       obsm_slot='X_tsne')
+    elif(plot_stored_pax_data is True):
+        adata = __get_stored_uns_data_and_prep_to_plot(adata,
+                                                       uns_data_slot='pax_data',
+                                                       obsm_slot='X_tsne')
+    sc.pl.tsne(adata, **kwargs)
+
+def diffmap(adata,
+            *,
+            plot_stored_gex_data=False,
+            plot_stored_pax_data=False,
+            **kwargs):
+    if(plot_stored_gex_data is True):
+        adata = __get_stored_uns_data_and_prep_to_plot(adata,
+                                                       uns_data_slot='gex_data',
+                                                       obsm_slot='X_diffmap')
+    elif(plot_stored_pax_data is True):
+        adata = __get_stored_uns_data_and_prep_to_plot(adata,
+                                                       uns_data_slot='pax_data',
+                                                       obsm_slot='X_diffmap')
+    sc.pl.diffmap(adata, **kwargs)
+
+def draw_graph(adata,
+               *,
+               plot_stored_gex_data=False,
+               plot_stored_pax_data=False,
+               **kwargs):
+    if plot_stored_gex_data or plot_stored_pax_data:
+        if plot_stored_gex_data:
+            uns_data_slot='gex_data'
+        elif plot_stored_pax_data:
+            uns_data_slot='pax_data'
+        adata_stored = adata.uns[uns_data_slot].copy()
+
+        if "X_draw_graph_fa" in adata_stored.obsm.keys():
+            adata_stored.obsm["X_draw_graph_fa"] = adata.obsm["X_draw_graph_fa"]
+        if "X_draw_graph_fr" in adata_stored.obsm.keys():
+            adata_stored.obsm["X_draw_graph_fr"] = adata.obsm["X_draw_graph_fr"]
+        adata = adata_stored
+
+    sc.pl.draw_graph(adata, **kwargs)
+
+def spatial(adata,
+            *,
+            plot_stored_gex_data=False,
+            plot_stored_pax_data=False,
+            **kwargs):
+    if(plot_stored_gex_data is True):
+        adata = __get_stored_uns_data_and_prep_to_plot(adata,
+                                                       uns_data_slot='gex_data',
+                                                       obsm_slot='X_diffmap',
+                                                       uns_slot='spatial')
+    elif(plot_stored_pax_data is True):
+        adata = __get_stored_uns_data_and_prep_to_plot(adata,
+                                                       uns_data_slot='pax_data',
+                                                       obsm_slot='X_diffmap',
+                                                       uns_slot='spatial')
+    sc.pl.spatial(adata, **kwargs)
+
+def embedding(adata,
+              *,
+              basis,
+              plot_stored_gex_data=False,
+              plot_stored_pax_data=False,
+              **kwargs):
+    if(plot_stored_gex_data is True):
+        adata = __get_stored_uns_data_and_prep_to_plot(adata,
+                                                       uns_data_slot='gex_data',
+                                                       obsm_slot=basis)
+    elif(plot_stored_pax_data is True):
+        adata = __get_stored_uns_data_and_prep_to_plot(adata,
+                                                       uns_data_slot='pax_data',
+                                                       obsm_slot=basis)
+    sc.pl.embedding(adata, basis, **kwargs)
 
 def scatter(adata,
                *,
@@ -82,9 +227,9 @@ def scatter(adata,
     A plot of :class:`~matplotlib.axes.Axes`.
     """
     if(plot_stored_gex_data is True):
-        adata = get_gex_anndata_with_nes_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
-        adata = get_pax_anndata_with_path_enr_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='pax_data')
     sc.pl.scatter(adata,**kwargs)
 
 def heatmap(adata,
@@ -112,9 +257,9 @@ def heatmap(adata,
     A plot of :class:`~matplotlib.axes.Axes`.
     """
     if(plot_stored_gex_data is True):
-        adata = get_gex_anndata_with_nes_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
-        adata = get_pax_anndata_with_path_enr_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='pax_data')
     sc.pl.heatmap(adata,**kwargs)
 
 def dotplot(adata,
@@ -123,9 +268,9 @@ def dotplot(adata,
             plot_stored_pax_data=False,
             **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gex_anndata_with_nes_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
-        adata = get_pax_anndata_with_path_enr_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='pax_data')
     sc.pl.dotplot(adata,**kwargs)
 
 def tracksplot(adata,
@@ -134,9 +279,9 @@ def tracksplot(adata,
                plot_stored_pax_data=False,
                **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gex_anndata_with_nes_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
-        adata = get_pax_anndata_with_path_enr_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='pax_data')
     sc.pl.tracksplot(adata,**kwargs)
 
 def violin(adata,
@@ -145,9 +290,9 @@ def violin(adata,
            plot_stored_pax_data=False,
            **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gex_anndata_with_nes_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
-        adata = get_pax_anndata_with_path_enr_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='pax_data')
     sc.pl.violin(adata,**kwargs)
 
 def stacked_violin(adata,
@@ -156,9 +301,9 @@ def stacked_violin(adata,
                    plot_stored_pax_data=False,
                    **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gex_anndata_with_nes_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
-        adata = get_pax_anndata_with_path_enr_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='pax_data')
     sc.pl.stacked_violin(adata,**kwargs)
 
 def matrixplot(adata,
@@ -167,9 +312,9 @@ def matrixplot(adata,
                plot_stored_pax_data=False,
                **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gex_anndata_with_nes_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
-        adata = get_pax_anndata_with_path_enr_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='pax_data')
     sc.pl.matrixplot(adata,**kwargs)
 
 def clustermap(adata,
@@ -178,9 +323,9 @@ def clustermap(adata,
                plot_stored_pax_data=False,
                **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gex_anndata_with_nes_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
-        adata = get_pax_anndata_with_path_enr_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='pax_data')
     sc.pl.clustermap(adata,**kwargs)
 
 def ranking(adata,
@@ -189,9 +334,9 @@ def ranking(adata,
             plot_stored_pax_data=False,
             **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gex_anndata_with_nes_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
-        adata = get_pax_anndata_with_path_enr_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='pax_data')
     sc.pl.ranking(adata,**kwargs)
 
 def dendrogram(adata,
@@ -200,7 +345,7 @@ def dendrogram(adata,
                plot_stored_pax_data=False,
                **kwargs):
     if(plot_stored_gex_data is True):
-        adata = get_gex_anndata_with_nes_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
-        adata = get_pax_anndata_with_path_enr_umap(adata)
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='pax_data')
     sc.pl.dendrogram(adata,**kwargs)

@@ -125,7 +125,7 @@ def pyther(gex_data,
         if transfer_obs is True:
             op.obs = op.obs.join(gex_data.obs)
         if store_gex_data is True:
-            op.gex_data = gex_data_original
+            op.uns['gex_data'] = gex_data_original
     else:
         raise ValueError("Unsupported output_type:" + str(output_type))
 

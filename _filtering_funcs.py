@@ -38,7 +38,7 @@ def __get_features_indices(adata, features_list):
 def __get_features_list(adata, feature_groups="all"):
     if(type(feature_groups) is str):
         feature_groups = [feature_groups]
-    if "all" not in feature_groups:
+    if feature_groups is not None or "all" not in feature_groups:
         feature_groups = [x.lower() for x in feature_groups]
         features_list = list()
         if "tfs" in feature_groups or "tf" in feature_groups:
