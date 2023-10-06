@@ -21,7 +21,7 @@ from joblib import Parallel, delayed
 # calculator
 
 def sigT(x, slope = 20, inflection = 0.5):
-    return (1 - 1/(1 + np.exp(slope * (x - inflection))))        
+    return (1 - 1/(1 + np.exp(slope * (x - inflection))))
 
 def sample_ttest(i,array):
     return ttest_1samp((array[i] - np.delete(array, i, 0)), 0).statistic
@@ -246,8 +246,8 @@ def bootstrap_aREA(gesObj, intObj, bmean, bsd, eset_filter = False):
 
     bootstrap_obj = anndata.AnnData(X = np.zeros(bmean.shape),var=gesObj.var)
 
-    for i in range(samples): # for each row 
-        
+    for i in range(samples): # for each row
+
         bootstrap_obj.X = (-gesObj.X[i,:] + bmean)/bsd
 
         result = aREA(bootstrap_obj,intObj)
@@ -266,18 +266,18 @@ def bootstrap_aREA(gesObj, intObj, bmean, bsd, eset_filter = False):
 def meta_aREA(gesObj, intObj, eset_filter = False,pleiotropy = False, pleiotropyArgs = {}, layer = None):
 
     pb = None
- 
+
     if (eset_filter):
         tmp = list(set(list(intObj.get_targetSet())+list(intObj.get_regulonNames())))
         gesObj = gesObj[:,gesObj.var_names.isin(pd.Series(tmp))]
-        #would this line have influnence outside this function? 
-        
-        
+        #would this line have influnence outside this function?
+
+
     result = aREA(gesObj,intObj, layer)
     result = result.reset_index().melt(
         id_vars = 'index',
         var_name = 'gene')
-    
+
     if (pleiotropy):
         print('pleiotropy is currently unavailable')
 
@@ -314,26 +314,26 @@ def mat_to_anndata(mat):
 # -----------------------------------------------------------------------------
 # ------------------------------- MAIN FUNCTIONS ------------------------------
 # -----------------------------------------------------------------------------
-def pyther(gex_data, 
+def pyther(gex_data,
            interactome,
            layer = None,
            njobs = 3,
-           eset_filter = True, 
-           bootstrap = 0, 
-           dnull = None, 
-           pleiotropy = False, 
-           minsize=25, 
+           eset_filter = True,
+           bootstrap = 0,
+           dnull = None,
+           pleiotropy = False,
+           minsize=25,
            adaptive_size=False,
-           mvws=1, 
+           mvws=1,
            method=[None, "scale", "rank", "mad", "ttest"],
            pleiotropyArgs={'regulator':0.05, 'shadow':0.05, 'targets':10, "penalty":20, "method":"adaptive"},
            verbose= True,
            output_type  = ['anndata', 'ndarray']):
 
-# 
+#
     gesObj = gex_data
-    intList = interactome    
-    
+    intList = interactome
+
     pd.options.mode.chained_assignment = None
 
     if type(intList) == Interactome:
@@ -344,7 +344,7 @@ def pyther(gex_data,
         bootstrap = 0
         if verbose:
             print("Using pleiotropic correction, bootstraps iterations are ignored.")
-    
+
     if verbose:
         print("Computing the association scores")
 
@@ -372,7 +372,7 @@ def pyther(gex_data,
     elif method == 'ttest':
         gesObj.X = np.array([sample_ttest(i, gesObj.X.copy()) for i in range(gesObj.shape[0])])
 
-    #if 
+    #if
 
     if bootstrap > 0:
 
@@ -382,7 +382,7 @@ def pyther(gex_data,
 
 
         sampled_indices = np.random.choice(gesObj.obs.index,bootstrap*len(gesObj.obs))
-        
+
         for i in range(bootstrap):
             sample_name = sampled_indices[i*len(gesObj.obs):(i+1)*len(gesObj.obs)]
             #sample mean
@@ -410,13 +410,13 @@ def pyther(gex_data,
             (delayed)(meta_aREA)(gesObj,iObj,eset_filter = eset_filter)
             for iObj in intList
             )
-        
+
 
     firstMat = netMets.pop(0)
 
     for thisMat in netMets:
         firstMat = firstMat.merge(thisMat,how = 'outer',on = ['index','gene'])
-    
+
     firstMat.fillna(0,inplace = True)
 
     result = firstMat[['index','gene']]
@@ -436,10 +436,10 @@ def pyther(gex_data,
 
 
     if output_type == 'ndarray':
-        op = preOp       
+        op = preOp
     else:
         op = mat_to_anndata(preOp)
-    
+
     return op #final result
 
 def path_enr(adata,
@@ -640,12 +640,12 @@ def translate_adata_index(adata,
 # -----------------------------------------------------------------------------
 # ------------------------------ HELPER FUNCTIONS -----------------------------
 # -----------------------------------------------------------------------------
-def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwargs): 
+def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwargs):
     #kwargs are the parameters for the inner function.
     #slice the data cells * genes
 
     result_list = []
-    size = int(gex_data.shape[0]/bins) 
+    size = int(gex_data.shape[0]/bins)
     residue = gex_data.shape[0] % bins
 
     if write_local:
@@ -660,14 +660,14 @@ def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwar
 
 
             temp_result.to_csv('temp/'+ str(i) + '.csv')
-        
+
         # the last one
         segment = gex_data[(bins-1)*size: bins*size + residue,]
         temp_result = inner_function(segment, **kwargs)
 
         if type(temp_result) == anndata._core.anndata.AnnData:
             temp_result = temp_result.to_df()
-        
+
         temp_result.to_csv('temp/'+ str(bins-1) + '.csv')
 
 
@@ -677,12 +677,12 @@ def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwar
 
         shutil.rmtree('temp')
 
-    else:        
+    else:
         for i in range(bins):
             segment = gex_data[i*size: i*size + size,]
             result_list.append(inner_function(segment, **kwargs))
 
-    
+
     # concat result
 
     result = pd.concat(result_list,axis=0).reset_index(drop = True)
