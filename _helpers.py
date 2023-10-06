@@ -79,6 +79,31 @@ def mat_to_anndata(mat):
 
 
 
+# def rank_norm(x, NUM_FUN=np.median, DEM_FUN = mad_from_R, trim=0, layer_input = None, layer_output = None, verbose = True):
+#     if(isinstance(x, anndata.AnnData) or isinstance(x, anndata._core.anndata.AnnData)):
+#         if(layer_input is None):
+#             gesMat = x.X.copy()
+#         else:
+#             if(verbose): print('- Using the layer "' + layer_input + '" as input...')
+#             gesMat = x.layers[layer_input].copy()
+#     elif(isinstance(x, np.ndarray)):
+#         gesMat = x.copy()
+#     elif(isinstance(x, pd.DataFrame)):
+#         gesMat = x.copy().to_numpy
+#     else:
+#         raise Exception("In RankNorm(x), x must be anndata.AnnData, numpy.ndarray or pandas.DataFrame.")
+#     gesMat = rank_norm_matrix(gesMat, NUM_FUN, DEM_FUN, trim, verbose)
+#     if(isinstance(x, anndata.AnnData)):
+#         if(layer_output is None):
+#             x.X = gesMat
+#         else:
+#             if(verbose): print('- Saving result in the layer "' + layer_output + '"...')
+#             x.layers[layer_output] = gesMat
+#     else:
+#         x = gesMat
+#     return(x)
+
+
 
 # def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwargs):
 #     #kwargs are the parameters for the inner function.
