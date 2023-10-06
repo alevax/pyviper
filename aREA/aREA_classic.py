@@ -45,7 +45,8 @@ def aREA_classic(gex_data, interactome, eset_filter = False, layer = None, min_t
     A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values.
     """
     # Filter out those with target less than min.targets
-    interactome.prune(cutoff = min_targets, eliminate = False)
+    interactome = interactome.copy()
+    interactome.cull(min_targets = min_targets)
 
     if (eset_filter):
         # This will affect the rankings of genes by eliminating those not present in the interactome

@@ -150,10 +150,17 @@ def replace_random(x, a, b):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def NaRnEA_classic(gex_data, interactome, eset_filter = False, layer = None, min_targets = 30, verbose = False, return_as_df = False):
+def NaRnEA_classic(gex_data,
+                   interactome,
+                   eset_filter=False,
+                   layer=None,
+                   min_targets=30,
+                   verbose=False,
+                   return_as_df=False):
 
     # filter out those with target less than min.targets
-    interactome.prune(cutoff = min_targets, eliminate = False)
+    interactome = interactome.copy()
+    interactome.cull(min_targets = min_targets)
 
     if (eset_filter):
         # This will affect the rankings of genes by eliminating those not present in the interactome
@@ -181,6 +188,7 @@ def NaRnEA_classic(gex_data, interactome, eset_filter = False, layer = None, min
     filtered_table['mor'].replace(1 ,0.999, inplace= True)
     filtered_table['mor'].replace(-1 ,-0.999, inplace= True)
     filtered_table['mor'] = filtered_table['mor'].apply(lambda x: replace_random(x, -0.001, 0.001))
+
     #filtered_table['mor'].replace(0 ,0.999, inplace= True)
     # why we cant have 0, 1 and -1?
 
@@ -297,7 +305,6 @@ def NaRnEA_classic(gex_data, interactome, eset_filter = False, layer = None, min
     if (return_as_df) == False :
         NES_mat = pd.DataFrame(NES_mat.T, index = gex_data.obs.index, columns = list(AW_AM_prob.columns))
         PES_mat = pd.DataFrame(PES_mat.T, index = gex_data.obs.index, columns = list(AW_AM_prob.columns))
-
 
 
     result = {"nes": NES_mat, "pes": PES_mat}

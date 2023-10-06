@@ -201,7 +201,6 @@ class Interactome:
         targetVec = set().union(*targetVec)
         return targetVec
 
-
     # generates IC matrix for VIPER
     def icMat(self):
         pivot_df = self.net_table.copy().pivot_table(index='target',
@@ -247,12 +246,12 @@ class Interactome:
         if targets_remove is not None:
             self.net_table = self.net_table[~self.net_table['target'].isin(targets_remove)]
 
-    def prune(self, cutoff = 50, eliminate = True):
+    def prune(self, max_targets = 50, eliminate = True):
         # Sort the DataFrame by 'regulator' and 'likelihood' columns
         sorted_df = self.net_table.sort_values(by=['regulator', 'likelihood'], ascending=[True, False])
 
-        # Group by 'regulator' and apply a function to keep the top 'cutoff' rows in each group
-        pruned_df = sorted_df.groupby('regulator').apply(lambda x: x.iloc[:cutoff])
+        # Group by 'regulator' and apply a function to keep the top 'max_targets' rows in each group
+        pruned_df = sorted_df.groupby('regulator').apply(lambda x: x.iloc[:max_targets])
 
         # Reset the index to flatten the grouped DataFrame
         pruned_df = pruned_df.reset_index(drop=True)
@@ -262,9 +261,23 @@ class Interactome:
             regulator_counts = pruned_df['regulator'].value_counts()
 
             # Get the list of regulators with enough targets
-            regulators_to_keep = regulator_counts[regulator_counts >= cutoff].index
+            regulators_to_keep = regulator_counts[regulator_counts == max_targets].index
 
             # Filter the DataFrame to keep only those regulators
             pruned_df = pruned_df[pruned_df['regulator'].isin(regulators_to_keep)]
 
         self.net_table = pruned_df
+
+    def cull(self, min_targets = 30):
+        net_table = self.net_table
+
+        # Count the number of targets for each regulator
+        regulator_counts = net_table['regulator'].value_counts()
+
+        # Get the list of regulators with enough targets
+        regulators_to_keep = regulator_counts[regulator_counts >= min_targets].index
+
+        # Filter the DataFrame to keep only those regulators
+        culled_df = net_table[net_table['regulator'].isin(regulators_to_keep)]
+
+        self.net_table = culled_df

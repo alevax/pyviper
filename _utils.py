@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from ._helpers import *
 from .aREA.aREA_classic import *
+from .NaRnEA.NaRnEA_classic import *
 from ._translate import *
 from .load import load_human2mouse, load_mouse2human
 # from .interactome import Interactome
@@ -55,13 +56,11 @@ def __detect_name_type(input_array):
 def path_enr(adata,
              interactome,
              layer = None,
+             enrichment='narnea',  # [None, 'area','narnea'],
              verbose = True,
              transfer_obs = True):
     """\
-    Allows the individual to infer normalized enrichment scores of pathways
-    using the analytical ranked enrichment analysis (aREA) function.
-
-    This is a wrapper for the aREA function in Pyther.
+    Allows the individual to infer normalized enrichment scores of pathways.
 
     Parameters
     ----------
@@ -94,7 +93,28 @@ def path_enr(adata,
     # aREA takes the pathways interactome and the adata
     if(verbose): print("Running aREA using to calculate pathway enrichment...")
     interactome.filter_targets(adata.var_names)
-    path_enr_mat = aREA_classic(adata, interactome, eset_filter = False, layer = layer, min_targets=0, verbose = verbose)
+    if enrichment == 'area':
+        path_enr_mat = aREA_classic(
+            adata,
+            interactome,
+            eset_filter=False,
+            layer=layer,
+            min_targets=0,
+            verbose=verbose
+        )
+    elif enrichment=='narnea':
+        path_enr_mat = NaRnEA_classic(
+            adata,
+            interactome,
+            eset_filter=False,
+            layer=layer,
+            min_targets=0,
+            verbose=verbose
+        )
+    else:
+        raise ValueError("Unsupported enrichment for path_enr: " + str(enrichment))
+
+    print(path_enr_mat)
 
     if(make_adata_names_format_match_interactome is True):
         if(verbose): print("Returning adata names to original state...")
@@ -102,7 +122,11 @@ def path_enr(adata,
                                       current_format = interactome_gene_name_format,
                                       desired_format = adata_gene_name_format_original)
     # Create a new Anndata object
-    pwe_data = mat_to_anndata(path_enr_mat)
+    if enrichment=='area':
+        pwe_data = mat_to_anndata(path_enr_mat)
+    elif enrichment=='narnea':
+        pwe_data = mat_to_anndata(path_enr_mat['nes'])
+        pwe_data.layers['pes'] = path_enr_mat['pes']
     # This means we did pathway enrichment on VIPER: adata is pax_data
     if hasattr(adata, "gex_data"):
         pwe_data.uns['gex_data'] = adata.gex_data
