@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 import os
+from ._translate import _translate_genes_array
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['Interactome']
@@ -281,3 +282,30 @@ class Interactome:
         culled_df = net_table[net_table['regulator'].isin(regulators_to_keep)]
 
         self.net_table = culled_df
+
+    ### ---------- HELPER FUNCTION ----------
+    def __translate_net_table_column(self, net_table, desired_format, column_name):
+        current_gene_names = net_table[column_name].values
+        translation = _translate_genes_array(current_gene_names, desired_format)
+
+        # Update the interactome table with translated values
+        net_table[column_name] = translation
+
+        # Removes values without translation
+        net_table = net_table.dropna(subset=[column_name])
+
+        return net_table
+
+    def translate_targets(self, desired_format):
+        self.net_table = self.__translate_net_table_column(
+            net_table = self.net_table,
+            desired_format = desired_format,
+            column_name = 'target'
+        )
+
+    def translate_regulators(interactome, desired_format):
+        self.net_table = self.__translate_net_table_column(
+            net_table = self.net_table,
+            desired_format = desired_format,
+            column_name = 'regulator'
+        )

@@ -6,7 +6,7 @@ from ._helpers import *
 from .aREA.aREA_classic import *
 from .NaRnEA.NaRnEA_classic import *
 from ._translate import *
-from .load import load_human2mouse, load_mouse2human
+from ._load_translate import load_mouse2human, load_human2mouse
 # from .interactome import Interactome
 
 ### ---------- EXPORT LIST ----------

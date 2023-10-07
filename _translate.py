@@ -1,5 +1,7 @@
 ### ---------- IMPORT DEPENDENCIES ----------
 from tqdm import tqdm
+from ._load_translate import load_mouse2human, load_human2mouse
+import numpy as np
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['translate_adata_index']
@@ -10,76 +12,58 @@ __all__ = ['translate_adata_index']
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
+def __detect_name_type(input_array):
+    nrow = len(input_array)
+    if nrow == 0: return(None) #redundant: case handled by 0-length for loop
+    found_match = False
+    human2mouse = load_human2mouse()
+    gene_name_format = None
+    i = 0
+    for i in range(nrow):
+        gene = input_array[i]
+        if(gene in human2mouse["mouse_symbol"].values):
+            gene_name_format = "mouse_symbol"
+            break
+        elif(gene in human2mouse["human_symbol"].values):
+            gene_name_format = "human_symbol"
+            break
+        elif(gene in human2mouse["mouse_ensembl"].values):
+            gene_name_format = "mouse_ensembl"
+            break
+        elif(gene in human2mouse["human_ensembl"].values):
+            gene_name_format = "human_ensembl"
+            break
+    return(gene_name_format)
 
-# ---------------------------- TRANSLATE SMALL PICTURE FUNCS ---------------------------
-def translate_gene_name(input_gene_name,
-              translate_df,
-              current_format = "mouse_symbol",
-              desired_format = "human_symbol"):
-    translate_df_input_gene_row = translate_df.loc[translate_df[current_format] == input_gene_name]
-    if(translate_df_input_gene_row.empty):
-        output_gene_name = None
-    else:
-        output_gene_name = translate_df_input_gene_row[desired_format].values[0]
-    return(output_gene_name)
-def translate_adata_index_into_new_var_column(
-         adata,
-         translate_df,
-         current_format = "mouse_symbol",
-         desired_format = "human_symbol",
-         show_progress_bar = True):
-    current_gene_names = adata.var.index.values
-    n_genes = len(current_gene_names)
-    desired_gene_names = [None]*n_genes
-
-    iterator = (i for i in range(n_genes)) if not show_progress_bar else tqdm(range(n_genes))
-    for i in iterator:
-        desired_gene_names[i] = translate_gene_name(
-            current_gene_names[i],
-            translate_df,
-            current_format,
-            desired_format
-        )
-    adata.var[desired_format] = desired_gene_names
-    return(adata)
-# ---------------------------- TRANSLATE BIG PICTURE FUNCS ---------------------------
-def translate_adata_index_from_to_with_translate_df(adata,
-         translate_df,
-         current_format = "mouse_symbol",
-         desired_format = "human_symbol",
-         show_progress_bar = True):
-    adata = translate_adata_index_into_new_var_column(
-         adata,
-         translate_df,
-         current_format,
-         desired_format,
-         show_progress_bar)
-    adata.var[current_format] = adata.var.index.values
-    adata.var.set_index(desired_format, inplace=True)
-    return(adata)
-def translate_adata_index_from_to(adata,
-                                  current_format = "mouse_symbol",
-                                  desired_format = "human_symbol",
-                                  show_progress_bar = True):
-    acceptable_formats = ["mouse_symbol", "mouse_ensembl", "human_symbol", "human_ensembl"]
-    if(current_format in ["mouse_symbol", "mouse_ensembl"]):
+def _translate_genes_array(current_gene_names, desired_format):
+    if desired_format in ['human_symbol', 'human_ensembl']:
         translate_df = load_mouse2human()
-    elif(current_format in ["human_symbol", "human_ensembl"]):
+    elif desired_format in ['mouse_symbol', 'mouse_ensembl']:
         translate_df = load_human2mouse()
-    if current_format not in acceptable_formats:
-        raise ValueError("Error: index of adata.var is not one the following:"
-                         + "\n\t\t mouse_symbol, mouse_ensembl, human_symbol, human_ensembl")
-    if(desired_format in adata.var.columns):
-        adata.var[current_format] = adata.var.index
-        adata.var.set_index(desired_format, inplace=True)
     else:
-        adata = translate_adata_index_from_to_with_translate_df(adata,
-             translate_df,
-             current_format,
-             desired_format = desired_format,
-             show_progress_bar = show_progress_bar)
-    return(adata)
+        raise ValueError("Error: desired_format is not one the following:"
+                         + "\n\t\t mouse_symbol, mouse_ensembl, human_symbol, human_ensembl")
 
+    current_format = __detect_name_type(current_gene_names)
+    if current_format is None:
+        raise ValueError("Error: could not detect current_format as one of the following:"
+                         + "\n\t\t mouse_symbol, mouse_ensembl, human_symbol, human_ensembl")
+
+    translate_df = translate_df.sort_values(by=current_format, ascending=True)
+    dict_column_current_format = translate_df[current_format].values
+    dict_column_desired_format = translate_df[desired_format].values
+
+    # Get positions of translated values
+    positions = np.searchsorted(dict_column_current_format, current_gene_names)
+
+    # Identify input values that have no translation available
+    mask = (positions < len(dict_column_current_format)) & (dict_column_current_format[positions] == current_gene_names)
+
+    # Get translated values
+    translation = np.array([None] * len(current_gene_names))
+    translation[mask] = dict_column_desired_format[positions][mask]
+
+    return translation
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
@@ -87,18 +71,14 @@ def translate_adata_index_from_to(adata,
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def translate_adata_index(adata,
-                          desired_format = "human_symbol",
-                          current_format = None,
-                          show_progress_bar = True):
-    acceptable_formats = ["mouse_symbol", "mouse_ensembl", "human_symbol", "human_ensembl"]
-    if desired_format not in acceptable_formats:
-        raise ValueError("Error: desired_format is not one the following:"
-                         + "\n\t\t mouse_symbol, mouse_ensembl, human_symbol, human_ensembl")
-    if current_format is None:
-        current_format = detect_index_name_type(adata)
-    adata = translate_adata_index_from_to(adata,
-                                          current_format,
-                                          desired_format,
-                                          show_progress_bar)
-    return(adata)
+def translate_adata_index(adata, desired_format, eliminate = True):
+    current_format = __detect_name_type(adata.var.index.values)
+    adata.var[current_format] = adata.var.index.values
+    adata.var[desired_format] = _translate_genes_array(adata.var[current_format], desired_format)
+    adata.var.set_index(desired_format, inplace=True)
+    # return adata
+    if eliminate:
+        adata = adata[:, adata.var.index.values != None]
+        # Turn view of anndata into just anndata
+        adata = adata.copy()
+    return adata
