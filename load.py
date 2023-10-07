@@ -1,5 +1,5 @@
 ### Import dependencies
-from ._load import *
+from ._load._load import *
 
 ### EXPORT LIST
 __all__ = ['mouse2human', 'human2mouse',

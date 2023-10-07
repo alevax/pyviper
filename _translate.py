@@ -1,6 +1,6 @@
 ### ---------- IMPORT DEPENDENCIES ----------
 from tqdm import tqdm
-from ._load_translate import load_mouse2human, load_human2mouse
+from ._load._load_translate import load_mouse2human, load_human2mouse
 import numpy as np
 
 ### ---------- EXPORT LIST ----------

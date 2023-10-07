@@ -12,5 +12,5 @@ __all__ = ['__get_pyther_dir']
 
 
 def __get_pyther_dir():
-    pyther_dir = str(pathlib.Path(__file__).parent.resolve())
+    pyther_dir = str(pathlib.Path(__file__).parent.parent.resolve())
     return(pyther_dir)

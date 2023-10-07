@@ -1,6 +1,6 @@
 ### Import dependencies
 from ._load_get_path import __get_pyther_dir
-from .config import config
+from ..config import config
 
 ### EXPORT LIST
 __all__ = ['load_TFs', 'load_coTFs', 'load_sig', 'load_surf']

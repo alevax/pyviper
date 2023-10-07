@@ -1,6 +1,6 @@
 ### Import dependencies
 from ._load_get_path import __get_pyther_dir
-from .interactome import Interactome
+from ..interactome import Interactome
 
 ### EXPORT LIST
 __all__ = ['load_msigdb_regulon']
