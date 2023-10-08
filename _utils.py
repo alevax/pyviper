@@ -53,93 +53,93 @@ def __detect_name_type(input_array):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def path_enr(adata,
-             interactome,
-             layer = None,
-             enrichment='narnea',  # [None, 'area','narnea'],
-             verbose = True,
-             transfer_obs = True):
-    """\
-    Allows the individual to infer normalized enrichment scores of pathways.
-
-    Parameters
-    ----------
-    adata
-        Gene expression or protein activity stored in an anndata object.
-    interactome
-        The interactome object containing pathways.
-    layer
-        The layer in the anndata object to use as the gene expression input
-        (default = None).
-    Returns
-    -------
-    A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values.
-    """
-    if(verbose): print("Checking interactome names format...")
-    interactome_gene_name_format = __detect_interactome_name_type(interactome)
-    if(verbose): print("Interactome names are formatted as " + interactome_gene_name_format + ".")
-    if(verbose): print("Checking adata names format...")
-    adata_gene_name_format_original = __detect_index_name_type(adata)
-    if(verbose): print("adata names are formatted as " + adata_gene_name_format_original + ".")
-    make_adata_names_format_match_interactome = False
-
-    if(interactome_gene_name_format != adata_gene_name_format_original):
-        make_adata_names_format_match_interactome = True
-        if(verbose): print("Translating adata names to match interactome...")
-        adata = translate_adata_index(adata,
-                                      current_format = adata_gene_name_format_original,
-                                      desired_format = interactome_gene_name_format)
-
-    # aREA takes the pathways interactome and the adata
-    if(verbose): print("Running aREA using to calculate pathway enrichment...")
-    interactome.filter_targets(adata.var_names)
-    if enrichment == 'area':
-        path_enr_mat = aREA_classic(
-            adata,
-            interactome,
-            eset_filter=False,
-            layer=layer,
-            min_targets=0,
-            verbose=verbose
-        )
-    elif enrichment=='narnea':
-        path_enr_mat = NaRnEA_classic(
-            adata,
-            interactome,
-            eset_filter=False,
-            layer=layer,
-            min_targets=0,
-            verbose=verbose
-        )
-    else:
-        raise ValueError("Unsupported enrichment for path_enr: " + str(enrichment))
-
-    print(path_enr_mat)
-
-    if(make_adata_names_format_match_interactome is True):
-        if(verbose): print("Returning adata names to original state...")
-        adata = translate_adata_index(adata,
-                                      current_format = interactome_gene_name_format,
-                                      desired_format = adata_gene_name_format_original)
-    # Create a new Anndata object
-    if enrichment=='area':
-        pwe_data = mat_to_anndata(path_enr_mat)
-    elif enrichment=='narnea':
-        pwe_data = mat_to_anndata(path_enr_mat['nes'])
-        pwe_data.layers['pes'] = path_enr_mat['pes']
-    # This means we did pathway enrichment on VIPER: adata is pax_data
-    if hasattr(adata, "gex_data"):
-        pwe_data.uns['gex_data'] = adata.gex_data
-        adata.gex_data = None
-        pwe_data.uns['pax_data'] = adata
-    # This means we did pathway enrichment on gex: adata is gex_data
-    else:
-        pwe_data.uns['gex_data'] = adata
-
-    if transfer_obs is True:
-        pwe_data.obs = adata.obs
-
-    return(pwe_data)
+# def path_enr(adata,
+#              interactome,
+#              layer = None,
+#              enrichment='narnea',  # [None, 'area','narnea'],
+#              verbose = True,
+#              transfer_obs = True):
+#     """\
+#     Allows the individual to infer normalized enrichment scores of pathways.
+#
+#     Parameters
+#     ----------
+#     adata
+#         Gene expression or protein activity stored in an anndata object.
+#     interactome
+#         The interactome object containing pathways.
+#     layer
+#         The layer in the anndata object to use as the gene expression input
+#         (default = None).
+#     Returns
+#     -------
+#     A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values.
+#     """
+#     if(verbose): print("Checking interactome names format...")
+#     interactome_gene_name_format = __detect_interactome_name_type(interactome)
+#     if(verbose): print("Interactome names are formatted as " + interactome_gene_name_format + ".")
+#     if(verbose): print("Checking adata names format...")
+#     adata_gene_name_format_original = __detect_index_name_type(adata)
+#     if(verbose): print("adata names are formatted as " + adata_gene_name_format_original + ".")
+#     make_adata_names_format_match_interactome = False
+#
+#     if(interactome_gene_name_format != adata_gene_name_format_original):
+#         make_adata_names_format_match_interactome = True
+#         if(verbose): print("Translating adata names to match interactome...")
+#         adata = translate_adata_index(adata,
+#                                       current_format = adata_gene_name_format_original,
+#                                       desired_format = interactome_gene_name_format)
+#
+#     # aREA takes the pathways interactome and the adata
+#     if(verbose): print("Running aREA using to calculate pathway enrichment...")
+#     interactome.filter_targets(adata.var_names)
+#     if enrichment == 'area':
+#         path_enr_mat = aREA_classic(
+#             adata,
+#             interactome,
+#             eset_filter=False,
+#             layer=layer,
+#             min_targets=0,
+#             verbose=verbose
+#         )
+#     elif enrichment=='narnea':
+#         path_enr_mat = NaRnEA_classic(
+#             adata,
+#             interactome,
+#             eset_filter=False,
+#             layer=layer,
+#             min_targets=0,
+#             verbose=verbose
+#         )
+#     else:
+#         raise ValueError("Unsupported enrichment for path_enr: " + str(enrichment))
+#
+#     print(path_enr_mat)
+#
+#     if(make_adata_names_format_match_interactome is True):
+#         if(verbose): print("Returning adata names to original state...")
+#         adata = translate_adata_index(adata,
+#                                       current_format = interactome_gene_name_format,
+#                                       desired_format = adata_gene_name_format_original)
+#     # Create a new Anndata object
+#     if enrichment=='area':
+#         pwe_data = mat_to_anndata(path_enr_mat)
+#     elif enrichment=='narnea':
+#         pwe_data = mat_to_anndata(path_enr_mat['nes'])
+#         pwe_data.layers['pes'] = path_enr_mat['pes']
+#     # This means we did pathway enrichment on VIPER: adata is pax_data
+#     if hasattr(adata, "gex_data"):
+#         pwe_data.uns['gex_data'] = adata.gex_data
+#         adata.gex_data = None
+#         pwe_data.uns['pax_data'] = adata
+#     # This means we did pathway enrichment on gex: adata is gex_data
+#     else:
+#         pwe_data.uns['gex_data'] = adata
+#
+#     if transfer_obs is True:
+#         pwe_data.obs = adata.obs
+#
+#     return(pwe_data)
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------

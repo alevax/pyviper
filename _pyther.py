@@ -41,7 +41,7 @@ def pyther(gex_data,
            verbose=True,
            output_type='anndata',  # ['anndata', 'ndarray'],
            transfer_obs=True,
-           store_gex_data=True
+           store_input_data=True
            ):
     gex_data_original = gex_data
     gex_data = gex_data_original.copy()
@@ -124,8 +124,14 @@ def pyther(gex_data,
 
         if transfer_obs is True:
             op.obs = op.obs.join(gex_data.obs)
-        if store_gex_data is True:
-            op.uns['gex_data'] = gex_data_original
+        if store_input_data is True:
+            # If input data was pax_data for pathway enrichment
+            if 'gex_data' in gex_data_original.uns:
+                op.uns['gex_data'] = gex_data_original.uns['gex_data']
+                op.uns['pax_data'] = gex_data_original
+            else:
+                op.uns['gex_data'] = gex_data_original
+
     else:
         raise ValueError("Unsupported output_type:" + str(output_type))
 
