@@ -1,5 +1,5 @@
 ### Import dependencies
-from ._load_get_path import __get_pyther_dir
+from ._load_get_path import __get_vithon_dir
 from ..config import config
 
 ### EXPORT LIST
@@ -27,9 +27,9 @@ def __load_regulators(group, species = None, path_to_regs = None):
         config_path_to_regs = config['regulators_filepaths'][species][group]
         if config_path_to_regs is None:
             if species == "human":
-                config_path_to_regs = __get_pyther_dir() + "/data/regulatorIDs/" + group + "-hugo.txt"
+                config_path_to_regs = __get_vithon_dir() + "/data/regulatorIDs/" + group + "-hugo.txt"
             elif species == "mouse":
-                config_path_to_regs = __get_pyther_dir() + "/data/regulatorIDs/" + group + "-hugo-mouse.txt"
+                config_path_to_regs = __get_vithon_dir() + "/data/regulatorIDs/" + group + "-hugo-mouse.txt"
         path_to_regs = config_path_to_regs
     regs_list = __load_regulators_from_txt(path_to_regs)
     return regs_list
