@@ -1,6 +1,6 @@
 from .aREA import *
 from .NaRnEA import *
-from ._pyther import *
+from ._vithon import *
 from .interactome import *
 from ._translate import *
 from ._utils import *
