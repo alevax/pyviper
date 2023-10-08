@@ -10,7 +10,8 @@ from ._load._load_translate import load_mouse2human, load_human2mouse
 # from .interactome import Interactome
 
 ### ---------- EXPORT LIST ----------
-__all__ = ["path_enr", "compute_cluster_stouffer_anndata", "compute_cluster_stouffer"]
+# __all__ = ["path_enr", "compute_cluster_stouffer_anndata", "compute_cluster_stouffer"]
+__all__ = ["compute_cluster_stouffer_anndata"]#, "compute_cluster_stouffer"]
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
