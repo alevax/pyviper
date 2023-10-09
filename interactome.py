@@ -108,7 +108,7 @@ class Interactome:
 
         Returns
         -------
-        An object of :class:`~vithon.interactome.Interactome`.
+        An object of :class:`~pyviper.interactome.Interactome`.
         """
         return Interactome(self.name, self.net_table.copy())
 
@@ -389,8 +389,8 @@ class Interactome:
         to keep and which ones you intend to remove from this Interactome.
 
         Note that the names of regulator that belong to the groups "tfs", "cotfs",
-        "sig" and "surf" will be sourced via the paths specified in vithon.config.
-        To update these paths, use the vithon.config.set_regulators_filepath
+        "sig" and "surf" will be sourced via the paths specified in pyviper.config.
+        To update these paths, use the pyviper.config.set_regulators_filepath
         function.
 
         Parameters

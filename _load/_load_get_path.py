@@ -2,7 +2,7 @@
 import pathlib
 
 ### EXPORT LIST
-__all__ = ['__get_vithon_dir']
+__all__ = ['__get_pyviper_dir']
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
@@ -11,6 +11,6 @@ __all__ = ['__get_vithon_dir']
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 
-def __get_vithon_dir():
-    vithon_dir = str(pathlib.Path(__file__).parent.parent.resolve())
-    return(vithon_dir)
+def __get_pyviper_dir():
+    pyviper_dir = str(pathlib.Path(__file__).parent.parent.resolve())
+    return(pyviper_dir)

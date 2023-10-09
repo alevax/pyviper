@@ -141,63 +141,6 @@ def diffmap(adata,
     adata.obsm["X_diffmap"] = adata_filt.obsm["X_diffmap"]
     adata.uns['diffmap_evals'] = adata_filt.uns['diffmap_evals']
 
-def leiden(adata,
-           *,
-           key_added='leiden',
-           layer=None,
-           filter_by_feature_groups=["tfs", "cotfs"], # ["tfs", "cotfs", "sig", "surf"],
-           **kwargs):
-    """\
-    A wrapper for the scanpy function sc.tl.leiden.
-
-    Parameters
-    ----------
-    adata
-        Gene expression, protein activity or pathways stored in an anndata object.
-    key_added (default: 'leiden')
-        The key in adata.obs where the leiden clusters should be stored.
-    layer (default: None)
-        The layer to use as input data.
-    filter_by_feature_groups (default: ["tfs", "cotfs"])
-        The selected regulators, such that all other regulators are filtered out
-        from the input data. If None, all regulators will be included. Regulator
-        sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
-    **kwargs
-        Arguments to provide to the sc.tl.leiden function.
-    """
-    adata_filt = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
-    sc.tl.leiden(adata_filt, **kwargs, key_added = key_added)
-    adata.obs[key_added] = adata_filt.obs[key_added]
-    adata.uns['leiden'] = adata_filt.uns['leiden']
-
-def louvain(adata,
-            *,
-            key_added='louvain',
-            layer=None,
-            filter_by_feature_groups=["tfs", "cotfs"], # ["tfs", "cotfs", "sig", "surf"],
-            **kwargs):
-    """\
-    A wrapper for the scanpy function sc.tl.louvain.
-
-    Parameters
-    ----------
-    adata
-        Gene expression, protein activity or pathways stored in an anndata object.
-    key_added (default: 'louvain')
-        The key in adata.obs where the louvain clusters should be stored.
-    layer (default: None)
-        The layer to use as input data.
-    filter_by_feature_groups (default: ["tfs", "cotfs"])
-        The selected regulators, such that all other regulators are filtered out
-        from the input data. If None, all regulators will be included. Regulator
-        sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
-    **kwargs
-        Arguments to provide to the sc.tl.louvain function.
-    """
-    adata_filt = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
-    sc.tl.louvain(adata_filt, **kwargs)
-    adata.obs[key_added] = adata_filt.obs[key_added]
-
 def dendrogram(adata,
                *,
                groupby,
@@ -229,57 +172,77 @@ def dendrogram(adata,
     sc.tl.dendrogram(adata_filt, groupby, **kwargs, key_added = key_added)
     adata.uns[key_added] = adata_filt.uns[key_added]
 
-def dpt(adata,
-        *,
-        layer=None,
-        filter_by_feature_groups=["tfs", "cotfs"], # ["tfs", "cotfs", "sig", "surf"],
-        **kwargs):
+def stouffer(adata, obs_column_name, layer = None, filter_by_feature_groups=["tfs", "cotfs"]):
     """\
-    A wrapper for the scanpy function sc.tl.dpt.
+    Compute a stouffer signature on each of your clusters in an anndata object.
 
     Parameters
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
+    obs_column_name
+        The name of the column of observations to use as clusters
     layer (default: None)
-        The layer to use as input data.
-    filter_by_feature_groups (default: ["tfs", "cotfs"])
-        The selected regulators, such that all other regulators are filtered out
-        from the input data. If None, all regulators will be included. Regulator
-        sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
-    **kwargs
-        Arguments to provide to the sc.tl.dpt function.
-    """
-    adata_filt = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
-    sc.tl.dpt(adata_filt, **kwargs)
-    adata.obs['dpt_pseudotime'] = adata_filt.obs['dpt_pseudotime']
-    adata.obs['dpt_groups'] = adata_filt.obs['dpt_groups']
+        The layer to use as input data to compute the signatures.
 
-def paga(adata,
-         groups="leiden",
-         *,
-         layer=None,
-         filter_by_feature_groups=["tfs", "cotfs"], # ["tfs", "cotfs", "sig", "surf"],
-         **kwargs):
+    Returns
+    -------
+    A new anndata object containing cluster stouffer signatures.
+    """
+    adata = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
+    if layer is None:
+        dat_df = pd.DataFrame(adata.X,
+                              index=adata.obs_names,
+                              columns=adata.var_names)
+    else:
+        dat_df = pd.DataFrame(adata.layers[layer],
+                              index=adata.obs_names,
+                              columns=adata.var_names)
+    cluster_vector = adata.obs[obs_column_name]
+    result_df = stouffer_clusters_df(dat_df, cluster_vector)
+    adata.uns['stouffer'] = result_df
+    return adata
+    # return mat_to_anndata(result_df)
+
+def stouffer_clusters_df(dat_df, cluster_vector):
     """\
-    A wrapper for the scanpy function sc.tl.dpt.
+    Compute a stouffer signature on each of your clusters from a DataFrame.
 
     Parameters
     ----------
-    adata
-        Gene expression, protein activity or pathways stored in an anndata object.
-    groups (default: "leiden")
-        The column in adata.obs to use to compute the paga analysis.
-    layer (default: None)
-        The layer to use as input data.
-    filter_by_feature_groups (default: ["tfs", "cotfs"])
-        The selected regulators, such that all other regulators are filtered out
-        from the input data. If None, all regulators will be included. Regulator
-        sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
-    **kwargs
-        Arguments to provide to the sc.tl.dpt function.
+    dat_df
+        A pandas dataframe containing input data.
+    cluster_vector
+        A cluster vector corresponding to observations in the pd.DataFrame.
+
+    Returns
+    -------
+    A new pd.DataFrame containing cluster stouffer signatures.
     """
-    adata_filt = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
-    sc.tl.paga(adata_filt, groups, **kwargs)
-    adata.uns['paga'] = adata_filt.uns['paga']
-    adata.uns[str(groups) + '_sizes'] = adata_filt.uns[str(groups) + '_sizes']
+    # Ensure cluster_vector has the same number of samples as rows in dat_df
+    if len(cluster_vector) != dat_df.shape[0]:
+        raise ValueError("Cluster vector length does not match the number of rows in the DataFrame.")
+
+    # Convert the DataFrame to a NumPy array
+    dat_array = dat_df.to_numpy()
+
+    # Find unique clusters and initialize arrays to store Stouffer scores
+    unique_clusters, cluster_indices = np.unique(cluster_vector, return_inverse=True)
+    n_clusters = len(unique_clusters)
+    n_genes = dat_df.shape[1]
+    stouffer_scores = np.zeros((n_clusters, n_genes))
+
+    # Calculate the denominator for Stouffer scores for each cluster
+    cluster_sizes = np.bincount(cluster_indices)
+    sqrt_cluster_sizes = np.sqrt(cluster_sizes)
+
+    # Calculate Stouffer scores for each cluster and gene
+    for i in range(n_clusters):
+        cluster_mask = (cluster_indices == i)
+        cluster_data = dat_array[cluster_mask]
+        stouffer_scores[i, :] = np.sum(cluster_data, axis=0) / sqrt_cluster_sizes[i]
+
+    # Create a DataFrame from the computed Stouffer scores
+    result_df = pd.DataFrame(stouffer_scores, index=unique_clusters, columns=dat_df.columns)
+
+    return result_df

@@ -1,12 +1,12 @@
 import setuptools
-  
+
 with open("README.md", "r") as fh:
     description = fh.read()
-  
+
 setuptools.setup(
-    name="Pyther",
+    name="pyviper",
     version="1.0.0",
-    author="Alexander LE Wang & Zizhao Lin",
+    author="Alexander L.E. Wang & Zizhao Lin & Luca Zanella",
     author_email="aw3436@cumc.columbia.edu",
     packages=["Pyther"],
     description="A package to load ARACNe networks and to run VIPER and NaRnEA in Python",

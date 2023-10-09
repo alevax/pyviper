@@ -4,6 +4,7 @@ import numpy as np
 from ._helpers import *
 from .aREA.aREA_meta import aREA
 from .NaRnEA.NaRnEA_meta import NaRnEA
+from .pp import rank_norm
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['viper']
@@ -16,6 +17,37 @@ __all__ = ['viper']
 
 def sample_ttest(i,array):
     return ttest_1samp((array[i] - np.delete(array, i, 0)), 0).statistic
+
+def apply_method_on_gex_data(gex_data, method = None, layer = None):
+    if method is None:
+        return gex_data
+
+    if layer is None:
+        gesMat = gex_data.X
+    else:
+        gesMat = gex_data.layers[layer]
+
+    if method == 'scale':
+        gesMat = (gesMat - np.mean(gesMat,axis=0))/np.std(gesMat,axis=0)
+    elif method == 'rank':
+        gesMat = rankdata(gesMat,axis=0)*(np.random.random(gesMat.shape)*2/10-0.1)
+    elif method == 'mad':
+        median = np.median(gesMat,axis=0)
+        gesMat = (gesMat-median)/np.median(np.abs(gesMat-median))
+    elif method == 'ttest':
+        gesMat = np.array([sample_ttest(i, gesMat.copy()) for i in range(gex_data.shape[0])])
+    elif method == "doublerank":
+        gesMat = rank_norm(gesMat)
+    else:
+        raise ValueError("Unsupported method:" + str(method))
+
+    if layer is None:
+        gex_data.X = gesMat
+    else:
+        gex_data.layers[layer] = gesMat
+
+    return gex_data
+
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
@@ -64,7 +96,8 @@ def viper(gex_data,
     method (default: None)
         A method used to create a gene expression signature from gex_data.X. The
         default of None is used when gex_data.X is already a gene expression
-        signature. Alternative inputs include "scale", "rank", "mad", and "ttest".
+        signature. Alternative inputs include "scale", "rank", "doublerank",
+        "mad", and "ttest".
     enrichment (default: 'area')
         The algorithm to use to calculate the enrichment. Choose betweeen
         Analytical Ranked Enrichment Analysis (aREA) and Nonparametric
@@ -146,15 +179,7 @@ def viper(gex_data,
             # I dont quite understand this part maybe ask later:
             gex_data.X = gex_data.X
     '''
-    if method == 'scale':
-        gex_data.X = (gex_data.X - np.mean(gex_data.X,axis=0))/np.std(gex_data.X,axis=0)
-    elif method == 'rank':
-        gex_data.X = rankdata(gex_data.X,axis=0)*(np.random.random(gex_data.X.shape)*2/10-0.1)
-    elif method == 'mad':
-        median = np.median(gex_data.X,axis=0)
-        gex_data.X = (gex_data.X-median)/np.median(np.abs(gex_data.X-median))
-    elif method == 'ttest':
-        gex_data.X = np.array([sample_ttest(i, gex_data.X.copy()) for i in range(gex_data.shape[0])])
+    gex_data = apply_method_on_gex_data(gex_data, method, layer)
 
     if enrichment is None:
         enrichment = 'narnea'

@@ -19,7 +19,7 @@ config = {
 def set_regulators_filepath(group, species, new_filepath):
     """\
     Allows the user to use a custom list of regulatory proteins instead of the
-    default ones within VITHON's data folder.
+    default ones within pyVIPER's data folder.
 
     Parameters
     ----------

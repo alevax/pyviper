@@ -1,5 +1,5 @@
 ### Import dependencies
-from ._load_get_path import __get_vithon_dir
+from ._load_get_path import __get_pyviper_dir
 from ..interactome import Interactome
 
 ### EXPORT LIST
@@ -19,7 +19,7 @@ def __merge_dicts(dict1, dict2):
     res = {**dict1, **dict2}
     return res
 def __get_msigdb_reg_path(collection):
-    reg_path = __get_vithon_dir() + "/data/regulons/msigdb-" + collection + "-as-regulon.tsv"
+    reg_path = __get_pyviper_dir() + "/data/regulons/msigdb-" + collection + "-as-regulon.tsv"
     return(reg_path)
 def __load_msigdb_from_tsv(collection):
     reg_path = __get_msigdb_reg_path(collection.lower())

@@ -10,7 +10,7 @@ __all__ = ['mouse2human', 'human2mouse',
 
 def mouse2human():
     """\
-    Retrieves the mouse to human translation pd.DataFrame from VITHON's data
+    Retrieves the mouse to human translation pd.DataFrame from pyVIPER's data
     folder. This dataframe contains four columns:
         human_symbol, human_ensembl, mouse_ensembl, mouse_symbol
 
@@ -22,7 +22,7 @@ def mouse2human():
 
 def human2mouse():
     """\
-    Retrieves the human to mouse translation pd.DataFrame from VITHON's data
+    Retrieves the human to mouse translation pd.DataFrame from pyVIPER's data
     folder. This dataframe contains four columns:
     mouse_symbol, mouse_ensembl, human_symbol, human_ensembl
 
@@ -39,10 +39,10 @@ def TFs(species = None, path_to_tfs = None):
     Parameters
     ----------
     species (default: None)
-        When left as None, the species setting in vithon.config will be used.
+        When left as None, the species setting in pyviper.config will be used.
         Otherwise, manually specify "human" or "mouse".
     path_to_tfs (default: None)
-        When left as None, the path to TFs setting in vithon.config will be used.
+        When left as None, the path to TFs setting in pyviper.config will be used.
         Otherwise, manually specify a filepath to a .txt file containing TFs,
         one on each line.
 
@@ -59,10 +59,10 @@ def coTFs(species = None, path_to_cotfs = None):
     Parameters
     ----------
     species (default: None)
-        When left as None, the species setting in vithon.config will be used.
+        When left as None, the species setting in pyviper.config will be used.
         Otherwise, manually specify "human" or "mouse".
     path_to_cotfs (default: None)
-        When left as None, the path to coTFs setting in vithon.config will be used.
+        When left as None, the path to coTFs setting in pyviper.config will be used.
         Otherwise, manually specify a filepath to a .txt file containing coTFs,
         one on each line.
 
@@ -79,10 +79,10 @@ def sig(species = None, path_to_sig = None):
     Parameters
     ----------
     species (default: None)
-        When left as None, the species setting in vithon.config will be used.
+        When left as None, the species setting in pyviper.config will be used.
         Otherwise, manually specify "human" or "mouse".
     path_to_sig (default: None)
-        When left as None, the path to sig setting in vithon.config will be used.
+        When left as None, the path to sig setting in pyviper.config will be used.
         Otherwise, manually specify a filepath to a .txt file containing
         signaling proteins, one on each line.
 
@@ -99,10 +99,10 @@ def surf(species = None, path_to_surf = None):
     Parameters
     ----------
     species (default: None)
-        When left as None, the species setting in vithon.config will be used.
+        When left as None, the species setting in pyviper.config will be used.
         Otherwise, manually specify "human" or "mouse".
     path_to_sig (default: None)
-        When left as None, the path to surf setting in vithon.config will be used.
+        When left as None, the path to surf setting in pyviper.config will be used.
         Otherwise, manually specify a filepath to a .txt file containing surface
         proteins, one on each line.
 
@@ -114,7 +114,7 @@ def surf(species = None, path_to_surf = None):
 
 def msigdb_regulon(collection):
     """\
-    Retrieves an object or a list of objects of class Interactome from VITHON's
+    Retrieves an object or a list of objects of class Interactome from pyviper's
     data folder containing a set of pathways from the Molecular Signatures
     Database (MSigDB), downloaded from https://www.gsea-msigdb.org/gsea/msigdb.
     These collections can be from one of the following:
@@ -139,6 +139,6 @@ def msigdb_regulon(collection):
 
     Returns
     -------
-    An individual object or list of objects of class vithon.interactome.Interactome.
+    An individual object or list of objects of class pyviper.interactome.Interactome.
     """
     return load_msigdb_regulon(collection)
