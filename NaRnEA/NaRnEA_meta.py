@@ -132,13 +132,10 @@ def NaRnEA(gex_data, interactome, layer = None, eset_filter = False, min_targets
     """\
     Allows the individual to infer normalized enrichment scores and proportional
     enrichment scores from gene expression data using the Nonparametric
-    Analytical Rank-based Enrichment Analysis (NaRnEA) function.
+    Analytical Rank-based Enrichment Analysis (NaRnEA)[1] function.
 
-    NaRnEA is an updated basis for the VIPER (Virtual Inference of Protein-activity
-    by Enriched Regulon analysis) algorithm.
-
-    Griffin, A. T., Vlahos, L. J., Chiuzan, C., & Califano, A. (2023). NaRnEA:
-    An Information Theoretic Framework for Gene Set Analysis. Entropy, 25(3), 542.
+    NaRnEA is an updated basis for the VIPER (Virtual Inference of
+    Protein-activity by Enriched Regulon analysis) algorithm.
 
     The Interactome object must not contain any targets that are not in the
     features of gex_data. This can be accomplished by running:
@@ -177,6 +174,11 @@ def NaRnEA(gex_data, interactome, layer = None, eset_filter = False, min_targets
     -------
     A dictionary containing :class:`~numpy.ndarray` containing NES values
     (key: 'nes') and PES values (key: 'pes').
+
+    Citations
+    -------
+    [1] Griffin, A. T., Vlahos, L. J., Chiuzan, C., & Califano, A. (2023). NaRnEA:
+    An Information Theoretic Framework for Gene Set Analysis. Entropy, 25(3), 542.
     """
     pd.options.mode.chained_assignment = None
 

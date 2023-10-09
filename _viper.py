@@ -6,7 +6,7 @@ from .aREA.aREA_meta import aREA
 from .NaRnEA.NaRnEA_meta import NaRnEA
 
 ### ---------- EXPORT LIST ----------
-__all__ = ['vithon']
+__all__ = ['viper']
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
@@ -23,30 +23,25 @@ def sample_ttest(i,array):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def vithon(gex_data,
-           interactome,
-           layer=None,
-           eset_filter=True,
-           method=None,  # [None, "scale", "rank", "mad", "ttest"],
-           enrichment='area',  # [None, 'area','narnea'],
-           mvws=1,
-           min_targets=30,
-           njobs=1,
-           verbose=True,
-           output_as_anndata=True,
-           transfer_obs=True,
-           store_input_data=True
-           ):
+def viper(gex_data,
+          interactome,
+          layer=None,
+          eset_filter=True,
+          method=None,  # [None, "scale", "rank", "mad", "ttest"],
+          enrichment='area',  # [None, 'area','narnea'],
+          mvws=1,
+          min_targets=30,
+          njobs=1,
+          verbose=True,
+          output_as_anndata=True,
+          transfer_obs=True,
+          store_input_data=True
+          ):
     """\
-    Allows the individual to infer normalized enrichment scores and proportional
-    enrichment scores from gene expression data using the Nonparametric
-    analytical rank-based enrichment analysis (NaRnEA) function.
-
-    NaRnEA is an updated basis for the VIPER (Virtual Inference of Protein-activity
-    by Enriched Regulon analysis) algorithm.
-
-    Griffin, A. T., Vlahos, L. J., Chiuzan, C., & Califano, A. (2023). NaRnEA:
-    An Information Theoretic Framework for Gene Set Analysis. Entropy, 25(3), 542.
+    Allows the individual to infer normalized enrichment scores using Analytical
+    Ranked Enrichment Analysis (aREA)[1] or Nonparametric Analytical Rank-based
+    Enrichment Analysis (NaRnEA)[2]. NaRnEA also compute proportional enrichment
+    scores.
 
     The Interactome object must not contain any targets that are not in the
     features of gex_data. This can be accomplished by running:
@@ -118,6 +113,16 @@ def vithon(gex_data,
     layer 'pes' when enrichment = 'narnea'. Will contain .gex_data and/or
     .pax_data in the unstructured data slot (.uns) when store_input_data = True.
     Will contain identical .obs to the input anndata when transfer_obs = True.
+
+    Citations
+    -------
+    [1] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye,
+    B. H., & Califano, A. (2016). Functional characterization of somatic
+    mutations in cancer using network-based inference of protein activity.
+    Nature genetics, 48(8), 838-847.
+
+    [2] Griffin, A. T., Vlahos, L. J., Chiuzan, C., & Califano, A. (2023). NaRnEA:
+    An Information Theoretic Framework for Gene Set Analysis. Entropy, 25(3), 542.
     """
 
     gex_data_original = gex_data

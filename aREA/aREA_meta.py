@@ -52,16 +52,11 @@ def consolidate_meta_aREA_results(netMets, mvws = 1, verbose = True):
 def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets = 30, mvws = 1, njobs = 1, verbose = True):
     """\
     Allows the individual to infer normalized enrichment scores from gene
-    expression data using the Analytical Ranked Enrichment Analysis (aREA)
+    expression data using the Analytical Ranked Enrichment Analysis (aREA)[1]
     function.
 
     It is the original basis of the VIPER (Virtual Inference of Protein-activity
     by Enriched Regulon analysis) algorithm.
-
-    Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye,
-    B. H., & Califano, A. (2016). Functional characterization of somatic
-    mutations in cancer using network-based inference of protein activity.
-    Nature genetics, 48(8), 838-847.
 
     The Interactome object must not contain any targets that are not in the
     features of gex_data. This can be accomplished by running:
@@ -107,6 +102,13 @@ def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets =
     Returns
     -------
     A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values.
+
+    Citations
+    -------
+    [1] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye,
+    B. H., & Califano, A. (2016). Functional characterization of somatic
+    mutations in cancer using network-based inference of protein activity.
+    Nature genetics, 48(8), 838-847.
     """
 
     if not isinstance(mvws, int): raise ValueError("mvws is not of type int.")
