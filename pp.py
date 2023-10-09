@@ -7,6 +7,19 @@ from scipy.stats import rankdata
 ### ---------- EXPORT LIST ----------
 __all__ = []
 
+
+def _mad_from_R(x, center=None, constant=1.4826, low=False, high=False):
+    if center is None:
+        center=np.median(x)
+    x = x[~np.isnan(x)] if np.isnan(x).any() else x
+    n = len(x)
+    if (low or high) and n % 2 == 0:
+        if low and high:
+            raise ValueError("'low' and 'high' cannot be both True")
+        n2 = n // 2 + int(high)
+        return constant * np.sort(np.abs(x - center))[n2]
+    return constant * np.median(np.abs(x - center))
+
 # Function assumes features as rows and observations as columns
 # Numerator Functions:
     # Median - numpy.median
@@ -14,7 +27,7 @@ __all__ = []
 # Denominator Functions:
     # Median absolute deviation - mad_from_R
     # Standard deviation - statistics.stdev
-def _rank_norm(x, NUM_FUN=np.median, DEM_FUN = mad_from_R, verbose = False):
+def _rank_norm(x, NUM_FUN=np.median, DEM_FUN = _mad_from_R, verbose = False):
     rank = rankdata(x, axis=0)
     median = NUM_FUN(rank, axis=1, keepdims=True)#np.median(rank, axis=1, keepdims=True)
     mad = np.apply_along_axis(DEM_FUN, 1, rank)
@@ -42,18 +55,6 @@ def _rank_norm(x, NUM_FUN=np.median, DEM_FUN = mad_from_R, verbose = False):
     if verbose: print("- Number of 0 features:", np.sum(np.sum(x, axis=1) == 0))
 
     return x
-
-def _mad_from_R(x, center=None, constant=1.4826, low=False, high=False):
-    if center is None:
-        center=np.median(x)
-    x = x[~np.isnan(x)] if np.isnan(x).any() else x
-    n = len(x)
-    if (low or high) and n % 2 == 0:
-        if low and high:
-            raise ValueError("'low' and 'high' cannot be both True")
-        n2 = n // 2 + int(high)
-        return constant * np.sort(np.abs(x - center))[n2]
-    return constant * np.median(np.abs(x - center))
 
 def rank_norm(x, NUM_FUN=np.median, DEM_FUN = _mad_from_R, layer_input = None, layer_output = None, verbose = False):
     """\
