@@ -2,7 +2,9 @@
 import pandas as pd
 import numpy as np
 import os
+import pickle
 from ._translate import _translate_genes_array
+from ._load._load_regulators import _load_regulators
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['Interactome']
@@ -10,6 +12,25 @@ __all__ = ['Interactome']
 class Interactome:
     # class initialization
     def __init__(self, name, net_table=None, input_type=None):
+        """\
+        Create an Interactome object to contain the results of ARACNe.
+
+        Parameters
+        ----------
+        name
+            A filepath to one's disk to store the Interactome.
+        net_table (default: None)
+            Either
+            (1) a pd.DataFrame containing four columns in this order:
+                "regulator", "target", "mor", "likelihood"
+            (2) a filepath to this pd.DataFrame stored either as a .csv,
+            .tsv or .pkl.
+            (3) a filepath to an Interacome object stored as a .pkl.
+        input_type (default: None)
+            Only relevant when net_table is a filepath. If None, the input_type
+            will be inferred from the net_table. Otherwise, specify "csv", "tsv"
+            or "pkl".
+        """
         self.name = name
         if net_table is None:
             self.net_table = pd.DataFrame(columns=["regulator", "target", "mor", "likelihood"])
@@ -17,25 +38,30 @@ class Interactome:
             file_path = net_table
             if input_type is None:
                 file_extension = os.path.splitext(file_path)[-1].lower()
-                if file_extension == ".csv":
+                input_type = file_extension[1:]
+
+                if input_type in ["csv", ".csv"]:
                     self.net_table = pd.read_csv(file_path, sep=",")
-                elif file_extension == ".tsv" or file_extension == ".net":
+                elif input_type in ["tsv", ".tsv"]:
                     self.net_table = pd.read_csv(file_path, sep="\t")
-                elif file_extension == ".pkl":
-                    self.net_table = pd.read_pickle(file_path)
-                else:
-                    raise ValueError("Unsupported file format: {}".format(file_extension))
-            else:
-                if "csv" in input_type:
-                    self.net_table = pd.read_csv(file_path, sep=",")
-                elif "tsv" in input_type:
-                    self.net_table = pd.read_csv(file_path, sep="\t")
-                elif "pkl" in input_type or "pickle" in input_type:
-                    self.net_table = pd.read_pickle(file_path)
+                elif input_type in ["pkl", ".pkl", "pickle"]:
+                    with open(file_path, 'rb') as file:
+                        pkl_obj = pickle.load(file)
+                    if isinstance(pkl_obj, pd.core.frame.DataFrame):
+                        self.net_table = pkl_obj
+                    elif isinstance(pkl_obj, self. __class__):
+                        self.net_table = pkl_obj.net_table
+                        self.name = pkl_obj.name
+                    else:
+                        raise ValueError("Unsupported file type: {}".format(type(pkl_obj)))
                 else:
                     raise ValueError("Unsupported file format: {}".format(input_type))
         else:
             self.net_table = net_table
+        n_cols = self.net_table.shape[1]
+        if n_cols != 4:
+            raise ValueError("net_table contains {} columns".format(n_cols))
+        self.net_table.columns = ['regulator', 'target', 'mor', 'likelihood']
 
     # string representation
     def __str__(self):
@@ -45,37 +71,91 @@ class Interactome:
         return retStr
 
     def save(self, file_path, output_type=None):
+        """\
+        Save the Interactome object to one's disk. If saved as "csv" or
+        "tsv", just the interactome.net_table will be saved. If saved as
+        "pkl", the whole interactome object will be saved.
+
+        Parameters
+        ----------
+        file_path
+            A filepath to one's disk to store the Interactome.
+        output_type (default: None)
+            If None, the output_type will be inferred from the file_path.
+            Otherwise, specify "csv", "tsv" or "pkl".
+
+        Returns
+        -------
+        None
+        """
         if output_type is None:
             file_extension = os.path.splitext(file_path)[-1].lower()
-            if file_extension == ".csv":
-                self.net_table.to_csv(file_path, sep=",", index=False)
-            elif file_extension == ".tsv":
-                self.net_table.to_csv(file_path, sep="\t", index=False)
-            elif file_extension == ".pkl":
-                self.net_table.to_pickle(file_path)
-            else:
-                raise ValueError("Unsupported file format: {}".format(file_extension))
+            output_type = file_extension[1:]
+
+        if output_type in ["csv", ".csv"]:
+            self.net_table.to_csv(file_path, sep=",", index=False)
+        elif output_type in ["tsv", ".tsv"]:
+            self.net_table.to_csv(file_path, sep="\t", index=False)
+        elif output_type in ["pkl", ".pkl", "pickle"]:
+            with open(file_path, 'wb') as file:
+                pickle.dump(self, file)
         else:
-            if "csv" in output_type:
-                self.net_table.to_csv(file_path, sep=",", index=False)
-            elif "tsv" in output_type:
-                self.net_table.to_csv(file_path, sep="\t", index=False)
-            elif "pkl" in output_type or "pickle" in output_type:
-                self.net_table.to_pickle(file_path)
-            else:
-                raise ValueError("Unsupported file format: {}".format(output_type))
+            raise ValueError("Unsupported file format: {}".format(output_type))
 
     def copy(self):
+        """\
+        Create a copy of this Interactome object.
+
+        Returns
+        -------
+        An object of :class:`~vithon.interactome.Interactome`.
+        """
         return Interactome(self.name, self.net_table.copy())
 
     # returns size as the number of regulons
     def size(self):
+        """\
+        Get the the number of regulators in this Interactome.
+
+        Returns
+        -------
+        An int
+        """
         return len(self.get_regulonNames())
 
     def get_regulonNames(self):
+        """\
+        Get an array of all unique regulators in this Interactome.
+
+        Returns
+        -------
+        An array of strings of :class:`~numpy.ndarray`.
+        """
         return self.net_table["regulator"].unique()
 
     def integrate(self, network_list, network_weights = None, normalize_likelihoods = False):
+        """\
+        Integrate this Interactome object with one or more other Interacome
+        objects to create a consensus network. In general, this should be done
+        when interactome objects have the same epigenetics (e.g. due to being
+        made from different datasets of same celltype). MetaVIPER should be used
+        instead when you have multiple interactomes with different epigenetics
+        (e.g. due to being made of data with different celltypes).
+
+        Parameters
+        ----------
+        network_list
+            A single object or a list of objects of class Interactome.
+        network_weights (default: None)
+            An array containing weights for each network being integrated. The
+            first weight corresponds to this network, while the others correspond
+            to those in the network list in order. If None, equal weights are
+            used.
+        normalize_likelihoods (default: False)
+            An extra operation that can performed after the integration
+            operation where within each regulator, likelihood values are ranked
+            and scaled from 0 to 1.
+        """
         # self.net_table = pd.concat(self.net_table, net_table)
         if isinstance(network_list, Interactome):
             network_list = [network_list]
@@ -194,16 +274,43 @@ class Interactome:
         self.net_table = df
 
     def get_reg(self, regName):
+        """\
+        Get the rows of the net_table where the regulator is regName.
+
+        Parameters
+        ----------
+        regName
+            The name of a regulator in this Interactome.
+
+        Returns
+        -------
+        A dataframe of :class:`~pandas.core.frame.DataFrame`.
+        """
         return self.net_table[self.net_table['regulator'] == regName]
 
     # generates the unified set of targets from all regulons
     def get_targetSet(self):
+        """\
+        Get a set of the unique targets in this Interactome
+
+        Returns
+        -------
+        A set.
+        """
         targetVec = [self.net_table["target"].unique()]
         targetVec = set().union(*targetVec)
         return targetVec
 
     # generates IC matrix for VIPER
     def icMat(self):
+        """\
+        Get the DataFrame of all the likelihood values. Targets are in the rows,
+        while Regulators are in the columns.
+
+        Returns
+        -------
+        A dataframe of :class:`~pandas.core.frame.DataFrame`.
+        """
         pivot_df = self.net_table.copy().pivot_table(index='target',
                                                     columns='regulator',
                                                     values='likelihood',
@@ -217,6 +324,14 @@ class Interactome:
 
     # generates MoR matrix for VIPER
     def morMat(self):
+        """\
+        Get the DataFrame of all the correlation values. Targets are in the rows,
+        while Regulators are in the columns.
+
+        Returns
+        -------
+        A dataframe of :class:`~pandas.core.frame.DataFrame`.
+        """
         morMat = self.net_table.copy().pivot_table(index='target',
                                                   columns='regulator',
                                                   values='mor',
@@ -228,6 +343,17 @@ class Interactome:
 
     # generates the vector of icP values for VIPER
     def icpVec(self):
+        """\
+        Get the vector containing the proportion of the "Interaction Confidence"
+        (IC) score for each interaction in a network, relative to the maximum IC
+        score in the network. This vector is generated by taking each individual
+        regulon in the newtork and calculating the likelihood index proportion
+        to all interactions.
+
+        Returns
+        -------
+        An array of :class:`~numpy.ndarray`.
+        """
         icP_function = lambda x: np.sqrt(np.sum((x / x.max())**2))
         icP_df = self.net_table.copy().groupby('regulator')['likelihood'].apply(icP_function).reset_index(name='icP')
         unique_regulators = self.get_regulonNames()
@@ -235,19 +361,119 @@ class Interactome:
         icpVec = icP_df["icP"].values
         return icpVec
 
+    def __check_if_reg_names_are_groups(self, regulator_names):
+        if len(regulator_names) > 4:
+            return False
+        else:
+            regulator_names = [x.lower() for x in regulator_names]
+            all_groups = ["tfs", "cotfs", "sig", "surf"]
+            if np.all(np.isin(regulator_names, all_groups)):
+                return True
+            else:
+                return False
+
+    def __get_regulators_by_groups(self, regulator_groups):
+        regulator_names = []
+        regulator_groups = [x.lower() for x in regulator_groups]
+        all_groups = ["tfs", "cotfs", "sig", "surf"]
+        if not np.all(np.isin(regulator_names, all_groups)):
+            raise ValueError('Given groups are not all one of the following: "tfs", "cotfs", "sig" and "surf".')
+        for group in regulator_groups:
+            regulator_names = regulator_names + _load_regulators(group)
+        return regulator_names
+
+
     def filter_regulators(self, regulators_keep = None, regulators_remove = None):
+        """\
+        Filter regulators by choosing by name or by group which ones you intend
+        to keep and which ones you intend to remove from this Interactome.
+
+        Note that the names of regulator that belong to the groups "tfs", "cotfs",
+        "sig" and "surf" will be sourced via the paths specified in vithon.config.
+        To update these paths, use the vithon.config.set_regulators_filepath
+        function.
+
+        Parameters
+        ----------
+        regulators_keep (default: None)
+            This should be either:
+            (1) An array or list containing the names of specific regulators you
+            wish to keep in the network. When left as None, this parameter is
+            not used to filter.
+            (2) An array or list containing a group or groups of regulators that
+            you wish to keep in the network. These groups should be one of the
+            following: "tfs", "cotfs", "sig", "surf".
+        regulators_remove (default: None)
+            This should be either:
+            (1) An array or list containing the names of specific regulators you
+            wish to remove from the network. When left as None, this parameter
+            is not used to filter.
+            (2) An array or list containing a group or groups of regulators that
+            you wish to remove from the network. These groups should be one of the
+            following: "tfs", "cotfs", "sig", "surf".
+        """
+        # if regulators_keep is not None:
+        #     self.net_table = self.net_table[self.net_table['regulator'].isin(regulators_keep)]
+        # if regulators_remove is not None:
+        #     self.net_table = self.net_table[~self.net_table['regulator'].isin(regulators_remove)]
         if regulators_keep is not None:
+            if self.__check_if_reg_names_are_groups(regulators_keep) is True:
+                regulators_keep = self.__get_regulators_by_groups(regulator_groups = regulators_keep)
             self.net_table = self.net_table[self.net_table['regulator'].isin(regulators_keep)]
+
         if regulators_remove is not None:
+            if self.__check_if_reg_names_are_groups(regulators_remove) is True:
+                regulators_remove = self.__get_regulators_by_groups(regulator_groups = regulators_remove)
             self.net_table = self.net_table[~self.net_table['regulator'].isin(regulators_remove)]
 
     def filter_targets(self, targets_keep = None, targets_remove = None):
+        """\
+        Filter targets by choosing by name which ones you intend to keep and
+        which ones you intend remove from this Interactome.
+
+        When working with an anndata object or a gene expression array, it is
+        highly recommended to filter the unPruned network before pruning. This
+        is to ensure the pruned network contains a consistent number of targets
+        per regulator regulator, all of which exist within gex_data. A regulator
+        that has more targets than others will have "boosted" NES scores, such
+        that they cannot be compared to those with fewer targets.
+        For example, with an anndata object named gex_data, one may is suggested
+        to do:
+            interactome.filter_targets(gex_data.var_names)
+
+        Parameters
+        ----------
+        targets_keep (default: None)
+            An array containing the names of targets you wish to keep in the
+            network. When left as None, this parameter is not used to filter.
+        targets_remove (default: None)
+            An array containing the names of targets you wish to remove from the
+            network. When left as None, this parameter is not used to filter.
+        """
         if targets_keep is not None:
             self.net_table = self.net_table[self.net_table['target'].isin(targets_keep)]
         if targets_remove is not None:
             self.net_table = self.net_table[~self.net_table['target'].isin(targets_remove)]
 
     def prune(self, max_targets = 50, eliminate = True):
+        """\
+        Prune the Interactome by eliminating extra targets from regulators and,
+        with eliminate = True, cull regulators with too few targets from the
+        network. Note that by ensuring the pruned networks contains the same
+        number of targets for each regulator, NES scores are comparable. If one
+        regulator has more targest than another, than its NES score will be
+        "boosted" and they cannot be compared against each other.
+
+        Parameters
+        ----------
+        max_targets (default: 50)
+            The maximum number of targets that each regulon is allowed.
+        eliminate (default: True)
+            If eliminate = True, then any regulators with fewer targets than
+            max_targets will be culled from the network. In other words, after
+            pruning, all regulators will have exactly max_targets number of
+            targets. This ensures all NES scores are comparable with aREA.
+        """
         # Sort the DataFrame by 'regulator' and 'likelihood' columns
         sorted_df = self.net_table.sort_values(by=['regulator', 'likelihood'], ascending=[True, False])
 
@@ -270,6 +496,16 @@ class Interactome:
         self.net_table = pruned_df
 
     def cull(self, min_targets = 30):
+        """\
+        Cull the Interactome by eliminating regulators with fewer targets than
+        min_targets. Users may wish to use this function because an adequate
+        number of targets is needed to accurately predict enrichment scores.
+
+        Parameters
+        ----------
+        min_targets (default: 30)
+            The minimum number of targets that each regulon is required.
+        """
         net_table = self.net_table
 
         # Count the number of targets for each regulator
@@ -297,6 +533,22 @@ class Interactome:
         return net_table
 
     def translate_targets(self, desired_format):
+        """\
+        Translate the targets of the Interactome.  The current name format of
+        the targets should be one of the following:
+            mouse_symbol, mouse_ensembl, human_symbol, or human_ensembl
+
+        It is recommended to do this before pruning to ensure a consistent number
+        of targets because if targets do not have a translation, they will be
+        deleted, resulting in different numbers of targets in a pruned
+        interactome that once had consistent number of targets.
+
+        Parameters
+        ----------
+        desired_format
+            Desired format can be one of four strings: "mouse_symbol",
+            "mouse_ensembl", "human_symbol", or "human_ensembl".
+        """
         self.net_table = self.__translate_net_table_column(
             net_table = self.net_table,
             desired_format = desired_format,
@@ -304,6 +556,17 @@ class Interactome:
         )
 
     def translate_regulators(interactome, desired_format):
+        """\
+        Translate the regulators of the Interactome. The current name format of
+        the regulators should be one of the following:
+            mouse_symbol, mouse_ensembl, human_symbol, or human_ensembl
+
+        Parameters
+        ----------
+        desired_format
+            Desired format can be one of four strings: "mouse_symbol",
+            "mouse_ensembl", "human_symbol", or "human_ensembl".
+        """
         self.net_table = self.__translate_net_table_column(
             net_table = self.net_table,
             desired_format = desired_format,

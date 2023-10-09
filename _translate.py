@@ -71,7 +71,26 @@ def _translate_genes_array(current_gene_names, desired_format):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
+
 def translate_adata_index(adata, desired_format, eliminate = True):
+    """\
+    Take adata.var.index.names, replace them with a translation of desired_format,
+    and move the original names to a new column in var. The current name format
+    and desired_format of the gene names in adata.var.index should be one of the
+    following:
+        mouse_symbol, mouse_ensembl, human_symbol, or human_ensembl
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata object.
+    desired_format
+        Desired format can be one of four strings: "mouse_symbol",
+        "mouse_ensembl", "human_symbol", or "human_ensembl".
+    eliminate (default: True)
+        Whether to eliminate var rows that don't have a translation. Otherwise,
+        None will be left in place in the index.
+    """
     current_format = __detect_name_type(adata.var.index.values)
     adata.var[current_format] = adata.var.index.values
     adata.var[desired_format] = _translate_genes_array(adata.var[current_format], desired_format)

@@ -22,7 +22,7 @@ def sigT(x, slope = 20, inflection = 0.5):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def aREA_classic(gex_data, interactome, eset_filter = False, layer = None, min_targets=30, verbose = True):
+def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_targets=30, verbose = True):
     """\
     Allows the individual to infer normalized enrichment scores from gene
     expression data using the analytical ranked enrichment analysis (aREA)
@@ -72,7 +72,8 @@ def aREA_classic(gex_data, interactome, eset_filter = False, layer = None, min_t
                          str(n_targets_not_in_exp_genes) + " targets missing from gex_data.var.\n\t" +
                         "Please run interactome.filter_targets(gex_data.var_names) on your network to\n\t" +
                          "resolve this. It is highly recommend to do this on the unPruned network and\n\t"+
-                         "then prune to ensure all of the pruned network's targets exist within gex_data.")
+                         "then prune to the pruned network contains a consistent number of targets per\n\t"
+                         "regulator, allow of which exist within gex_data.")
 
     # rank transform the GES using the rankdata function from scipy.stats
     if(verbose): print("Rank transforming the data")

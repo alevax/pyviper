@@ -43,13 +43,11 @@ def pca(adata,
     Parameters
     ----------
     adata
-        Gene expression or protein activity stored in an anndata object.
-    plot_stored_gex_data
-        Plot stored gex_data on the protein activity (or pathways) UMAP.
-    plot_stored_pax_data
-        If the adata is the output of the path_enr function and pax_data is
-        stored in adata, this allows one to plot pax_data values in the UMAP
-        created using pathways results.
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'] on adata.obsm['X_pca'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'] on adata.obsm['X_pca'].
     **kwargs
         Arguments to provide to the sc.pl.pca function.
     Returns
@@ -77,13 +75,11 @@ def umap(adata,
     Parameters
     ----------
     adata
-        Gene expression or protein activity stored in an anndata object.
-    plot_stored_gex_data
-        Plot stored gex_data on the protein activity (or pathways) UMAP.
-    plot_stored_pax_data
-        If the adata is the output of the path_enr function and pax_data is
-        stored in adata, this allows one to plot pax_data values in the UMAP
-        created using pathways results.
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'] on adata.obsm['X_umap'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'] on adata.obsm['X_umap'].
     **kwargs
         Arguments to provide to the sc.pl.umap function.
     Returns
@@ -106,18 +102,16 @@ def tsne(adata,
          plot_stored_pax_data=False,
          **kwargs):
     """\
-    A wrapper for the scanpy function sc.pl.umap.
+    A wrapper for the scanpy function sc.pl.tsne.
 
     Parameters
     ----------
     adata
-        Gene expression or protein activity stored in an anndata object.
-    plot_stored_gex_data
-        Plot stored gex_data on the protein activity (or pathways) UMAP.
-    plot_stored_pax_data
-        If the adata is the output of the path_enr function and pax_data is
-        stored in adata, this allows one to plot pax_data values in the UMAP
-        created using pathways results.
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'] on adata.obsm['X_tsne'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'] on adata.obsm['X_tsne'].
     **kwargs
         Arguments to provide to the sc.pl.tsne function.
     Returns
@@ -139,6 +133,23 @@ def diffmap(adata,
             plot_stored_gex_data=False,
             plot_stored_pax_data=False,
             **kwargs):
+    """\
+    A wrapper for the scanpy function sc.pl.diffmap.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'] on adata.obsm['X_diffmap'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'] on adata.obsm['X_diffmap'].
+    **kwargs
+        Arguments to provide to the sc.pl.diffmap function.
+    Returns
+    -------
+    A plot of :class:`~matplotlib.axes.Axes`.
+    """
     if(plot_stored_gex_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata,
                                                        uns_data_slot='gex_data',
@@ -154,11 +165,28 @@ def draw_graph(adata,
                plot_stored_gex_data=False,
                plot_stored_pax_data=False,
                **kwargs):
+    """\
+    A wrapper for the scanpy function sc.pl.draw_graph.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'] on adata.obsm['X_draw_graph_fa'] or adata.obsm['X_draw_graph_fr'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'] on adata.obsm['X_draw_graph_fa'] or adata.obsm['X_draw_graph_fr'].
+    **kwargs
+        Arguments to provide to the sc.pl.draw_graph function.
+    Returns
+    -------
+    A plot of :class:`~matplotlib.axes.Axes`.
+    """
     if plot_stored_gex_data or plot_stored_pax_data:
         if plot_stored_gex_data:
-            uns_data_slot='gex_data'
+            uns_data_slot = 'gex_data'
         elif plot_stored_pax_data:
-            uns_data_slot='pax_data'
+            uns_data_slot = 'pax_data'
         adata_stored = adata.uns[uns_data_slot].copy()
 
         if "X_draw_graph_fa" in adata_stored.obsm.keys():
@@ -174,15 +202,32 @@ def spatial(adata,
             plot_stored_gex_data=False,
             plot_stored_pax_data=False,
             **kwargs):
+    """\
+    A wrapper for the scanpy function sc.pl.spatial.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'] on adata.uns['spatial'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'] on adata.uns['spatial'].
+    **kwargs
+        Arguments to provide to the sc.pl.spatial function.
+    Returns
+    -------
+    A plot of :class:`~matplotlib.axes.Axes`.
+    """
     if(plot_stored_gex_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata,
                                                        uns_data_slot='gex_data',
-                                                       obsm_slot='X_diffmap',
+                                                       obsm_slot=None,
                                                        uns_slot='spatial')
     elif(plot_stored_pax_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata,
                                                        uns_data_slot='pax_data',
-                                                       obsm_slot='X_diffmap',
+                                                       obsm_slot=None,
                                                        uns_slot='spatial')
     sc.pl.spatial(adata, **kwargs)
 
@@ -192,6 +237,25 @@ def embedding(adata,
               plot_stored_gex_data=False,
               plot_stored_pax_data=False,
               **kwargs):
+    """\
+    A wrapper for the scanpy function sc.pl.embedding.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata object.
+    basis
+        The name of the represenation in adata.obsm that should be used for plotting.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'] on adata.obsm[basis].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'] on adata.obsm[basis].
+    **kwargs
+        Arguments to provide to the sc.pl.embedding function.
+    Returns
+    -------
+    A plot of :class:`~matplotlib.axes.Axes`.
+    """
     if(plot_stored_gex_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata,
                                                        uns_data_slot='gex_data',
@@ -208,6 +272,25 @@ def embedding_density(adata,
                       plot_stored_gex_data=False,
                       plot_stored_pax_data=False,
                       **kwargs):
+    """\
+    A wrapper for the scanpy function sc.pl.embedding_density.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata object.
+    basis (default: 'umap')
+        The name of the represenation in adata.obsm that should be used for plotting.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'] on adata.obsm[basis].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'] on adata.obsm[basis].
+    **kwargs
+        Arguments to provide to the sc.pl.embedding_density function.
+    Returns
+    -------
+    A plot of :class:`~matplotlib.axes.Axes`.
+    """
     if(plot_stored_gex_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata,
                                                        uns_data_slot='gex_data',
@@ -229,13 +312,11 @@ def scatter(adata,
     Parameters
     ----------
     adata
-        Gene expression or protein activity stored in an anndata object.
-    plot_stored_gex_data
-        Plot stored gex_data on the protein activity (or pathways) UMAP.
-    plot_stored_pax_data
-        If the adata is the output of the path_enr function and pax_data is
-        stored in adata, this allows one to plot pax_data values in the UMAP
-        created using pathways results.
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'].
     **kwargs
         Arguments to provide to the sc.pl.scatter function.
     Returns
@@ -259,13 +340,11 @@ def heatmap(adata,
     Parameters
     ----------
     adata
-        Gene expression or protein activity stored in an anndata object.
-    plot_stored_gex_data
-        Plot stored gex_data on the protein activity (or pathways) UMAP.
-    plot_stored_pax_data
-        If the adata is the output of the path_enr function and pax_data is
-        stored in adata, this allows one to plot pax_data values in the UMAP
-        created using pathways results.
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'].
     **kwargs
         Arguments to provide to the sc.pl.heatmap function.
     Returns
@@ -283,6 +362,23 @@ def dotplot(adata,
             plot_stored_gex_data=False,
             plot_stored_pax_data=False,
             **kwargs):
+    """\
+    A wrapper for the scanpy function sc.pl.dotplot.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'].
+    **kwargs
+        Arguments to provide to the sc.pl.dotplot function.
+    Returns
+    -------
+    A plot of :class:`~matplotlib.axes.Axes`.
+    """
     if(plot_stored_gex_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
@@ -294,6 +390,23 @@ def tracksplot(adata,
                plot_stored_gex_data=False,
                plot_stored_pax_data=False,
                **kwargs):
+    """\
+    A wrapper for the scanpy function sc.pl.tracksplot.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'].
+    **kwargs
+        Arguments to provide to the sc.pl.tracksplot function.
+    Returns
+    -------
+    A plot of :class:`~matplotlib.axes.Axes`.
+    """
     if(plot_stored_gex_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
@@ -305,6 +418,23 @@ def violin(adata,
            plot_stored_gex_data=False,
            plot_stored_pax_data=False,
            **kwargs):
+    """\
+    A wrapper for the scanpy function sc.pl.violin.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'].
+    **kwargs
+        Arguments to provide to the sc.pl.violin function.
+    Returns
+    -------
+    A plot of :class:`~matplotlib.axes.Axes`.
+    """
     if(plot_stored_gex_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
@@ -316,6 +446,23 @@ def stacked_violin(adata,
                    plot_stored_gex_data=False,
                    plot_stored_pax_data=False,
                    **kwargs):
+    """\
+    A wrapper for the scanpy function sc.pl.stacked_violin.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'].
+    **kwargs
+        Arguments to provide to the sc.pl.stacked_violin function.
+    Returns
+    -------
+    A plot of :class:`~matplotlib.axes.Axes`.
+    """
     if(plot_stored_gex_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
@@ -327,6 +474,23 @@ def matrixplot(adata,
                plot_stored_gex_data=False,
                plot_stored_pax_data=False,
                **kwargs):
+    """\
+    A wrapper for the scanpy function sc.pl.matrixplot.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'].
+    **kwargs
+        Arguments to provide to the sc.pl.matrixplot function.
+    Returns
+    -------
+    A plot of :class:`~matplotlib.axes.Axes`.
+    """
     if(plot_stored_gex_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
@@ -338,6 +502,23 @@ def clustermap(adata,
                plot_stored_gex_data=False,
                plot_stored_pax_data=False,
                **kwargs):
+    """\
+    A wrapper for the scanpy function sc.pl.clustermap.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'].
+    **kwargs
+        Arguments to provide to the sc.pl.clustermap function.
+    Returns
+    -------
+    A plot of :class:`~matplotlib.axes.Axes`.
+    """
     if(plot_stored_gex_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
@@ -349,6 +530,23 @@ def ranking(adata,
             plot_stored_gex_data=False,
             plot_stored_pax_data=False,
             **kwargs):
+    """\
+    A wrapper for the scanpy function sc.pl.ranking.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'].
+    **kwargs
+        Arguments to provide to the sc.pl.ranking function.
+    Returns
+    -------
+    A plot of :class:`~matplotlib.axes.Axes`.
+    """
     if(plot_stored_gex_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
@@ -360,6 +558,23 @@ def dendrogram(adata,
                plot_stored_gex_data=False,
                plot_stored_pax_data=False,
                **kwargs):
+    """\
+    A wrapper for the scanpy function sc.pl.dendrogram.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata object.
+    plot_stored_gex_data (default: False)
+        Plot adata.uns['gex_data'].
+    plot_stored_pax_data (default: False)
+        Plot adata.uns['pax_data'].
+    **kwargs
+        Arguments to provide to the sc.pl.dendrogram function.
+    Returns
+    -------
+    A plot of :class:`~matplotlib.axes.Axes`.
+    """
     if(plot_stored_gex_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):

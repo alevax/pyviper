@@ -152,8 +152,8 @@ def replace_random(x, a, b):
 
 def NaRnEA_classic(gex_data,
                    interactome,
-                   eset_filter=False,
                    layer=None,
+                   eset_filter=False,
                    min_targets=30,
                    verbose=False,
                    return_as_df=False):
@@ -181,7 +181,8 @@ def NaRnEA_classic(gex_data,
                          str(n_targets_not_in_exp_genes) + " targets missing from gex_data.var.\n\t" +
                         "Please run interactome.filter_targets(gex_data.var_names) on your network to\n\t" +
                          "resolve this. It is highly recommend to do this on the unPruned network and\n\t"+
-                         "then prune to ensure all of the pruned network's targets exist within gex_data.")
+                         "then prune to the pruned network contains a consistent number of targets per\n\t"
+                         "regulator, allow of which exist within gex_data.")
     filtered_table = int_table
 
     # why I need to remove that, there is no filtered_table[filtered_table['mor'] == -1]

@@ -128,13 +128,62 @@ def integrate_NaRnEA_xes_mats(results, bg_matrix, net_weight, xes_type = 'pes'):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def NaRnEA(gex_data, interactome, eset_filter = False, layer = None, min_targets = 30, njobs = 1, verbose = True):
+def NaRnEA(gex_data, interactome, layer = None, eset_filter = False, min_targets = 30, njobs = 1, verbose = True):
+    """\
+    Allows the individual to infer normalized enrichment scores and proportional
+    enrichment scores from gene expression data using the Nonparametric
+    Analytical Rank-based Enrichment Analysis (NaRnEA) function.
+
+    NaRnEA is an updated basis for the VIPER (Virtual Inference of Protein-activity
+    by Enriched Regulon analysis) algorithm.
+
+    Griffin, A. T., Vlahos, L. J., Chiuzan, C., & Califano, A. (2023). NaRnEA:
+    An Information Theoretic Framework for Gene Set Analysis. Entropy, 25(3), 542.
+
+    The Interactome object must not contain any targets that are not in the
+    features of gex_data. This can be accomplished by running:
+        interactome.filter_targets(gex_data.var_names)
+    It is highly recommend to do this on the unPruned network and then prune to
+    ensure the pruned network contains a consistent number of targets per
+    regulator, all of which exist within gex_data. A regulator that has more
+    targets than others will have "boosted" NES scores, such that they cannot be
+    compared to those with fewer targets.
+
+    Parameters
+    ----------
+    gex_data
+        Gene expression stored in an anndata object (e.g. from Scanpy).
+    interactome
+        An object of class Interactome.
+    layer (default: None)
+        The layer in the anndata object to use as the gene expression input.
+    eset_filter (default: False)
+        Whether to filter out genes not present in the interactome (True) or to
+        keep this biological context (False). This will affect gene rankings.
+    min_targets (default: 30)
+        The minimum number of targets that each regulator in the interactome
+        should contain. Regulators that contain fewer targets than this minimum
+        will be culled from the network (via the Interactome.cull method). The
+        reason users may choose to use this threshold is because adequate
+        targets are needed to accurately predict enrichment.
+    njobs (default: 1)
+        For metaViper. When using multiple networks, assign jobs to different
+        networks.
+    verbose (default: True)
+        Whether extended output about the progress of the algorithm should be
+        given.
+
+    Returns
+    -------
+    A dictionary containing :class:`~numpy.ndarray` containing NES values
+    (key: 'nes') and PES values (key: 'pes').
+    """
     pd.options.mode.chained_assignment = None
 
     if isinstance(interactome, Interactome):
-        return NaRnEA_classic(gex_data, interactome, eset_filter, layer, min_targets, verbose)
+        return NaRnEA_classic(gex_data, interactome, layer, eset_filter, min_targets, verbose)
     elif len(interactome) == 1:
-        return NaRnEA_classic(gex_data, interactome[0], eset_filter, layer, min_targets, verbose)
+        return NaRnEA_classic(gex_data, interactome[0], layer, eset_filter, min_targets, verbose)
     elif njobs == 1:
         # results = [NaRnEA(gex_data, iObj, verbose = verbose) for iObj in interactome]
         results = []
@@ -142,7 +191,7 @@ def NaRnEA(gex_data, interactome, eset_filter = False, layer = None, min_targets
         n_completed_nets = 0
         if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
         for iObj in interactome:
-          results.append(NaRnEA_classic(gex_data, iObj, eset_filter, layer, min_targets, verbose))
+          results.append(NaRnEA_classic(gex_data, iObj, layer, eset_filter, min_targets, verbose))
           n_completed_nets = n_completed_nets + 1
           if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
 

@@ -150,6 +150,22 @@ def __detect_name_type(input_array):
 
 
 def compute_cluster_stouffer_anndata(adata, obs_column_name, layer = None):
+    """\
+    Compute a stouffer signature on each of your clusters in an anndata object.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata object.
+    obs_column_name
+        The name of the column of observations to use as clusters
+    layer (default: None)
+        The layer to use as input data to compute the signatures.
+
+    Returns
+    -------
+    A new anndata object containing cluster stouffer signatures.
+    """
     if layer is None:
         dat_df = pd.DataFrame(adata.X,
                               index=adata.obs_names,
@@ -164,6 +180,20 @@ def compute_cluster_stouffer_anndata(adata, obs_column_name, layer = None):
     # return mat_to_anndata(result_df)
 
 def compute_cluster_stouffer(dat_df, cluster_vector):
+    """\
+    Compute a stouffer signature on each of your clusters from a DataFrame.
+
+    Parameters
+    ----------
+    dat_df
+        A pandas dataframe containing input data.
+    cluster_vector
+        A cluster vector corresponding to observations in the pd.DataFrame.
+
+    Returns
+    -------
+    A new pd.DataFrame containing cluster stouffer signatures.
+    """
     # Ensure cluster_vector has the same number of samples as rows in dat_df
     if len(cluster_vector) != dat_df.shape[0]:
         raise ValueError("Cluster vector length does not match the number of rows in the DataFrame.")
