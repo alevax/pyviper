@@ -298,7 +298,7 @@ class Interactome:
         A set.
         """
         targetVec = [self.net_table["target"].unique()]
-        targetVec = set().union(*targetVec)
+        targetVec = np.array(targetVec)
         return targetVec
 
     # generates IC matrix for VIPER

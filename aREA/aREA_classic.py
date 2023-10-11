@@ -64,9 +64,9 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     # Get a list of the gene names of the gExpr signature matrix
     varNames = gex_data.var_names.to_list()
     # Get the intersction of gene names in the gExpr signature and those in the target set
-    intersectGenes = [value for value in targetSet if value in varNames]
+    intersectGenes = np.intersect1d(targetSet, varNames)
 
-    n_targets_not_in_exp_genes = np.count_nonzero(~pd.Series(sorted(targetSet)).isin(varNames))
+    n_targets_not_in_exp_genes = np.count_nonzero(~np.isin(targetSet, varNames))
     if n_targets_not_in_exp_genes > 0:
         raise ValueError('interactome "' + str(interactome.name) + '" contains ' +
                          str(n_targets_not_in_exp_genes) + " targets missing from gex_data.var.\n\t" +
