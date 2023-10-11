@@ -175,7 +175,7 @@ def NaRnEA_classic(gex_data,
 
     # modify regulon list, take the intersect of targets and genes, making there is no 0 nor +_1 in am
     # filtered_table = int_table[int_table['target'].isin(exp_genes)]
-    n_targets_not_in_exp_genes = np.count_nonzero(~pd.Series(sorted(interactome.get_targetSet())).isin(exp_genes))
+    n_targets_not_in_exp_genes = np.count_nonzero(~np.isin(interactome.get_targetSet(), exp_genes))
     if n_targets_not_in_exp_genes > 0:
         raise ValueError('interactome "' + str(interactome.name) + '" contains ' +
                          str(n_targets_not_in_exp_genes) + " targets missing from gex_data.var.\n\t" +
