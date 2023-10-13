@@ -7,6 +7,18 @@ Here is a brief guide on how to use the current version of the pyther code:
 
 ---
 
+### Installation
+#### local
+```shell
+git clone https://github.com/alevax/pyther/tree/main
+cd pyther
+pip install -e .
+```
+#### pypi (TODO once public)
+```shell
+pip install pyther
+```
+
 ### Dependencies
 
 - `scanpy` for single cell pipeline
