@@ -15,5 +15,13 @@ setuptools.setup(
     url="https://github.com/alevax/pyther",
     license='MIT',
     python_requires='>=3.8',
-    install_requires=[scanpy, scipy, os, shutil, joblib, pathlib]
+    install_requires=[
+        "scipy",
+        "tqdm",
+        "scanpy",
+        "anndata",
+        "pandas",
+        "numpy",
+        "joblib"
+    ]
 )
