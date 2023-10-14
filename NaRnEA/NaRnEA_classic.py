@@ -164,7 +164,7 @@ def NaRnEA_classic(gex_data,
 
     if (eset_filter):
         # This will affect the rankings of genes by eliminating those not present in the interactome
-        tmp = list(set(list(interactome.get_targetSet())+list(interactome.get_regulonNames())))
+        tmp = np.unique(np.concatenate((interactome.get_targetSet(), interactome.get_regulonNames())))
         gex_data = gex_data[:,gex_data.var_names.isin(pd.Series(tmp))]
 
     int_table = interactome.net_table

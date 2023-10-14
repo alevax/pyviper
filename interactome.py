@@ -295,11 +295,9 @@ class Interactome:
 
         Returns
         -------
-        A set.
+        A 1D NumPy array.
         """
-        targetVec = [self.net_table["target"].unique()]
-        targetVec = np.array(targetVec)
-        return targetVec
+        return self.net_table["target"].unique()
 
     # generates IC matrix for VIPER
     def icMat(self):
