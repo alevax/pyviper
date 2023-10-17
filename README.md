@@ -77,7 +77,7 @@ Additionally, the following submodules are available:
 Please, report any issues that you experience through this repository ["Issues"]().
 
 ## License
-`pyther` is distributed under a BSD 3-Clause License (see [LICENSE]()).
+`pyther` is distributed under a MIT License (see [LICENSE]()).
 
 
 ## Citation
