@@ -1,10 +1,4 @@
-pyther.NaRnEA package
-=====================
-
-Submodules
-----------
-
-pyther.NaRnEA.NaRnEA\_classic module
+NaRnEA.NaRnEA\_classic
 ------------------------------------
 
 .. automodule:: pyther.NaRnEA.NaRnEA_classic
@@ -12,18 +6,10 @@ pyther.NaRnEA.NaRnEA\_classic module
    :undoc-members:
    :show-inheritance:
 
-pyther.NaRnEA.NaRnEA\_meta module
+NaRnEA.NaRnEA\_meta
 ---------------------------------
 
 .. automodule:: pyther.NaRnEA.NaRnEA_meta
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: pyther.NaRnEA
    :members:
    :undoc-members:
    :show-inheritance:

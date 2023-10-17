@@ -1,19 +1,4 @@
-pyther package
-==============
-
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   pyther.NaRnEA
-   pyther.aREA
-
-Submodules
-----------
-
-pyther.config module
+config
 --------------------
 
 .. automodule:: pyther.config
@@ -21,7 +6,7 @@ pyther.config module
    :undoc-members:
    :show-inheritance:
 
-pyther.interactome module
+interactome
 -------------------------
 
 .. automodule:: pyther.interactome
@@ -29,7 +14,7 @@ pyther.interactome module
    :undoc-members:
    :show-inheritance:
 
-pyther.load module
+load
 ------------------
 
 .. automodule:: pyther.load
@@ -37,7 +22,7 @@ pyther.load module
    :undoc-members:
    :show-inheritance:
 
-pyther.pl module
+pl
 ----------------
 
 .. automodule:: pyther.pl
@@ -45,7 +30,7 @@ pyther.pl module
    :undoc-members:
    :show-inheritance:
 
-pyther.pp module
+pp
 ----------------
 
 .. automodule:: pyther.pp
@@ -53,18 +38,10 @@ pyther.pp module
    :undoc-members:
    :show-inheritance:
 
-pyther.tl module
+tl
 ----------------
 
 .. automodule:: pyther.tl
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: pyther
    :members:
    :undoc-members:
    :show-inheritance:

@@ -1,10 +1,4 @@
-pyther.aREA package
-===================
-
-Submodules
-----------
-
-pyther.aREA.aREA\_classic module
+aREA.aREA\_classic
 --------------------------------
 
 .. automodule:: pyther.aREA.aREA_classic
@@ -12,18 +6,10 @@ pyther.aREA.aREA\_classic module
    :undoc-members:
    :show-inheritance:
 
-pyther.aREA.aREA\_meta module
+aREA.aREA\_meta
 -----------------------------
 
 .. automodule:: pyther.aREA.aREA_meta
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: pyther.aREA
    :members:
    :undoc-members:
    :show-inheritance:
