@@ -1,9 +1,11 @@
+.DS_Store
+
 _build/
 _templace/
 _static/
 build/
 *.egg-info/
-.ipynb_checkpoints
+.ipynb_checkpoints/
 .spyproject/*
 __pycache__
 __pycache__/*
