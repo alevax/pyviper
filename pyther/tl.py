@@ -1,5 +1,6 @@
 ### ---------- IMPORT DEPENDENCIES ----------
 import pandas as pd
+import numpy as np
 import scanpy as sc
 from ._filtering_funcs import *
 from ._filtering_funcs import _get_anndata_filtered_by_feature_group
