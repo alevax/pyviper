@@ -5,6 +5,7 @@ from ._helpers import *
 from .aREA.aREA_meta import aREA
 from .NaRnEA.NaRnEA_meta import NaRnEA
 from .pp import rank_norm
+from joblib import Parallel, delayed
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['viper']
@@ -64,6 +65,7 @@ def viper(gex_data,
           mvws=1,
           min_targets=30,
           njobs=1,
+          batch_size=1000,
           verbose=True,
           output_as_anndata=True,
           transfer_obs=True,
@@ -120,6 +122,8 @@ def viper(gex_data,
     njobs (default: 1)
         For metaViper. When using multiple networks, assign jobs to different
         networks.
+    batch_size (default: 1000)
+        Maximum number of samples to process at once.
     verbose (default: True)
         Whether extended output about the progress of the algorithm should be
         given.
@@ -160,7 +164,9 @@ def viper(gex_data,
 
     gex_data_original = gex_data
     gex_data = gex_data_original.copy()
-
+    
+    n_batches = int(np.ceil(gex_data.shape[0] / batch_size))
+    
     pd.options.mode.chained_assignment = None
 
     if verbose: print("Preparing the association scores")
@@ -187,12 +193,28 @@ def viper(gex_data,
         enrichment = enrichment.lower()
     if enrichment == 'area':
         if verbose: print("Computing regulons enrichment with aREA")
-        preOp = aREA(gex_data, interactome, layer, eset_filter,
-                     min_targets, mvws, njobs, verbose)
+            
+        preOp = Parallel(njobs)(
+            delayed(aREA)(
+                gex_data[batch_i*batch_size:batch_i*batch_size+batch_size], 
+                interactome, layer, eset_filter,
+                min_targets, mvws, njobs, verbose
+            ) for batch_i in range(n_batches)
+        )
+        preOp = pd.concat(preOp)
+        
     elif enrichment == 'narnea':
         if verbose: print("Computing regulons enrichment with NaRnEa")
-        preOp = NaRnEA(gex_data, interactome, layer, eset_filter,
-                       min_targets, njobs, verbose)
+
+        preOp = Parallel(njobs)(
+            delayed(NaRnEA)(
+                gex_data[batch_i*batch_size:batch_i*batch_size+batch_size], 
+                interactome, layer, eset_filter,
+                min_targets, njobs, verbose
+            ) for batch_i in range(n_batches)
+        )
+        preOp = pd.concat(preOp)
+
     else:
         raise ValueError("Unsupported enrichment type:" + str(enrichment))
 
