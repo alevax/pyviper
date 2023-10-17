@@ -206,14 +206,17 @@ def viper(gex_data,
     elif enrichment == 'narnea':
         if verbose: print("Computing regulons enrichment with NaRnEa")
 
-        preOp = Parallel(njobs)(
+        results = Parallel(njobs)(
             delayed(NaRnEA)(
                 gex_data[batch_i*batch_size:batch_i*batch_size+batch_size], 
                 interactome, layer, eset_filter,
                 min_targets, njobs, verbose
             ) for batch_i in range(n_batches)
         )
-        preOp = pd.concat(preOp)
+        preOp = {
+            "nes": pd.concat([res["nes"] for res in results]),
+            "pes": pd.concat([res["pes"] for res in results])
+        }
 
     else:
         raise ValueError("Unsupported enrichment type:" + str(enrichment))

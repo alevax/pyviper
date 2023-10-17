@@ -50,7 +50,12 @@ network_interactome = pyther.Interactome('net', network)
 network_interactome.filter_targets(ges.var_names)
 
 # compute regulon activities
-activity = pyther.viper(gex_data=ges, interactome=network_interactome)
+## area
+activity = pyther.viper(gex_data=ges, interactome=network_interactome, enrichment="area")
+print(activity.to_df())
+
+## narnea
+activity = pyther.viper(gex_data=ges, interactome=network_interactome, enrichment="narnea")
 print(activity.to_df())
 ```
 
