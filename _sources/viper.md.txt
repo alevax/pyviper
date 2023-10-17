@@ -1,0 +1,5 @@
+# `viper`
+
+```{eval-rst}
+.. autofunction:: pyther._viper.viper
+```

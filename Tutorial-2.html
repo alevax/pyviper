@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach &mdash; pyther 1.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/nbsphinx-code-cells.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level" href="Tutorial-1.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pyther
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pyther.html">config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.interactome">interactome</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.load">load</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.pl">pl</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.pp">pp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.tl">tl</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.aREA.html">aREA.aREA_classic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.aREA.html#module-pyther.aREA.aREA_meta">aREA.aREA_meta</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.NaRnEA.html">NaRnEA.NaRnEA_classic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.NaRnEA.html#module-pyther.NaRnEA.NaRnEA_meta">NaRnEA.NaRnEA_meta</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-1.html">Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Setup-path-and-import-modules">Setup path and import modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Step-1.-Load-a-gene-expression-matrix-and-associated-metadata">Step 1. Load a gene expression matrix and associated metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Step-2.-Preprocess-and-generate-a-gene-expression-signature-at-the-single-cell-level">Step 2. Preprocess and generate a gene expression signature at the single-cell level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Step-3.-Load-multiple-ARACNe-inferred-gene-regulatory-networks">Step 3. Load multiple ARACNe-inferred gene regulatory networks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-pyther-(metaVIPER-approach)">Convert the gene expression signature into a protein activity matrix using pyther (metaVIPER approach)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Step-4.-Analyze-single-cells-at-the-Protein-Activity-level">Step 4. Analyze single-cells at the Protein Activity level</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyther</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Tutorial-2.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="Tutorial-2---Inferring-Protein-Activity-from-scRNA-seq-data-from-multiple-cell-populations-with-the-meta-VIPER-approach">
+<h1>Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach<a class="headerlink" href="#Tutorial-2---Inferring-Protein-Activity-from-scRNA-seq-data-from-multiple-cell-populations-with-the-meta-VIPER-approach" title="Permalink to this heading"></a></h1>
+<p>This tutorial explores the use of <code class="docutils literal notranslate"><span class="pre">pyther</span></code> in the “metaVIPER” fashion. metaVIPER allows assessing protein activity by integrating analysis of multiple gene regulatory networks. While the following example is mainly intended for illustrative purposes, metaVIPER is particularly useful in real-world scenarios to infer protein activity in tissue-independent fashion by using multiple, non-tissue-matched interactomes. The fundamental idea at the core of the metaVIPER approach there is the assumption
+that transcriptional targets of each protein can be recapitulated by one or more available interactomes. The <code class="docutils literal notranslate"><span class="pre">pyther</span></code> function allows running metaVIPER using both <a class="reference external" href="https://www.nature.com/articles/ng.3593">aREA</a> and <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">NaRnEA</a> enrichment methods. For additional details, please refer to <a class="reference external" href="https://www.nature.com/articles/s41467-018-03843-3">Ding et al., 2016</a>.</p>
+<p>Use a data matrix with more cells. Fix paths to data when submitting (remove old paths tested for both data and metadata).</p>
+<div class="section" id="Setup-path-and-import-modules">
+<h2>Setup path and import modules<a class="headerlink" href="#Setup-path-and-import-modules" title="Permalink to this heading"></a></h2>
+<p>Setup your path variables in the source as follows:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pyther_path</span> <span class="o">=</span> <span class="s2">&quot;/Users/lucazanella7/Desktop/ColumbiaProjects/&quot;</span> <span class="c1"># where Pyther is located in the machine</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">pyther_path</span><span class="p">)</span> <span class="c1"># add path to pyther to sys.path</span>
+
+<span class="kn">import</span> <span class="nn">pyther</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">import</span> <span class="nn">anndata</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;.*The &#39;nopython&#39; keyword.*&quot;</span><span class="p">)</span> <span class="c1"># for jit decorator issue with sc.pp.neighbors (09/30/2023)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Step-1.-Load-a-gene-expression-matrix-and-associated-metadata">
+<h2>Step 1. Load a gene expression matrix and associated metadata<a class="headerlink" href="#Step-1.-Load-a-gene-expression-matrix-and-associated-metadata" title="Permalink to this heading"></a></h2>
+<p>Load the gene expression matrix (UMIs) and store it into an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> object to enable interoperability with <a class="reference external" href="https://scanpy-tutorials.readthedocs.io/en/latest/#">scanpy</a>. Cells used in this tutorial were sampled from scRNA-seq data published in <a class="reference external" href="https://www.nature.com/articles/s41422-019-0195-y">Peng et al., 2019</a>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># gExpr_path = &quot;/Users/lucazanella7/Desktop/ColumbiaProjects/pyther_test_data/subset_Peng/T11_subset.tsv&quot;  # where gene expression matrix (UMI counts) is located</span>
+<span class="n">gExpr_path</span> <span class="o">=</span> <span class="s2">&quot;/Users/lucazanella7/Desktop/ColumbiaProjects/pyther_test_data/subset_Peng/d1_d2_f_subset_6500.tsv&quot;</span> <span class="c1"># path to gene expression matrix (UMI counts)</span>
+<span class="n">adata_gExpr</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">gExpr_path</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+</pre></div>
+</div>
+</div>
+<p>Display matrix dimensions (cells x genes)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_gExpr</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+AnnData object with n_obs × n_vars = 6500 × 24005
+</pre></div></div>
+</div>
+<p>Load cell-associated metadata</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#metadata_path = &quot;/Users/lucazanella7/Desktop/ColumbiaProjects/pyther_test_data/subset_Peng/T11_metadata.tsv&quot;  # where cells metadata are located</span>
+<span class="n">metadata_path</span> <span class="o">=</span> <span class="s2">&quot;/Users/lucazanella7/Desktop/ColumbiaProjects/pyther_test_data/subset_Peng/d1_d2_f_metadata_6500.tsv&quot;</span> <span class="c1"># path to cells metadata</span>
+<span class="n">cells_metadata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">metadata_path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># load it</span>
+</pre></div>
+</div>
+</div>
+<p>Store the metadata in the <code class="docutils literal notranslate"><span class="pre">adata_gExpr</span></code> object as observation annotation.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">obs</span><span class="p">,</span> <span class="n">cells_metadata</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span><span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># store cell-specific metadata as annotation observation</span>
+</pre></div>
+</div>
+</div>
+<p>Display the observation annotation from the AnnData object.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Patient</th>
+      <th>Cell_Type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>T1_AAACCTGAGATGTCGG</th>
+      <td>T1</td>
+      <td>Fibroblast cell</td>
+    </tr>
+    <tr>
+      <th>T1_AACACGTCAATGACCT</th>
+      <td>T1</td>
+      <td>Ductal cell type 2</td>
+    </tr>
+    <tr>
+      <th>T1_AACCATGTCTGTCCGT</th>
+      <td>T1</td>
+      <td>Ductal cell type 2</td>
+    </tr>
+    <tr>
+      <th>T1_AACCGCGTCGAATGGG</th>
+      <td>T1</td>
+      <td>Ductal cell type 2</td>
+    </tr>
+    <tr>
+      <th>T1_AACGTTGCAATGGATA</th>
+      <td>T1</td>
+      <td>Stellate cell</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The observation annotations include the patient from which each cell was sequenced and the annotated cell type. List the cell types.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;Cell_Type&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;n&#39;</span><span class="p">)</span> <span class="c1"># show cell types and number of cells for each type in AnnData</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Cell_Type</th>
+      <th>n</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Ductal cell type 1</td>
+      <td>690</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Ductal cell type 2</td>
+      <td>2938</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Fibroblast cell</td>
+      <td>1477</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Stellate cell</td>
+      <td>1395</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Data contain 4 cells types: Ductal cells of type 1 and 2 (non-transformed and malignant, respectively), Fibroblasts and Stellate cells (myofibroblast-like cells).</p>
+</div>
+<div class="section" id="Step-2.-Preprocess-and-generate-a-gene-expression-signature-at-the-single-cell-level">
+<h2>Step 2. Preprocess and generate a gene expression signature at the single-cell level<a class="headerlink" href="#Step-2.-Preprocess-and-generate-a-gene-expression-signature-at-the-single-cell-level" title="Permalink to this heading"></a></h2>
+<p>The UMI matrix can be processed using the standard <code class="docutils literal notranslate"><span class="pre">Scanpy</span></code> preprocessing workflow. Since the quality of the provided data was pre-assessed and found to be high, cell filtering will be minimal. For a more detailed explanation of QC steps, refer to the preprocessing tutorials bt <a class="reference external" href="https://scanpy-tutorials.readthedocs.io/en/latest/pbmc3k.html">Scanpy</a> or <a class="reference external" href="https://satijalab.org/seurat/articles/pbmc3k_tutorial">Seurat</a>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_cells</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">min_genes</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span> <span class="c1"># filter out cells with &lt;200 genes expressed</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">min_cells</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># filter out genes that are detected in &lt;3 cells</span>
+</pre></div>
+</div>
+</div>
+<p>Display matrix dimensions post-filtering (cells x genes)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_gExpr</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+AnnData object with n_obs × n_vars = 6500 × 20931
+    obs: &#39;Patient&#39;, &#39;Cell_Type&#39;, &#39;n_genes&#39;
+    var: &#39;n_cells&#39;
+</pre></div></div>
+</div>
+<p>Normalize the gene expression matrix by the total number of UMIs to 10,000 UMIs per cells to make each gene expression comparable across cells and log-transform the normalized counts. Then, store the log-normalized counts in the <code class="docutils literal notranslate"><span class="pre">.raw</span></code> attribute of the <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> object</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">normalize_total</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">target_sum</span><span class="o">=</span><span class="mf">1e4</span><span class="p">)</span> <span class="c1"># normalize counts</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">)</span> <span class="c1"># log-transform the counts</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">calculate_qc_metrics</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">percent_top</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log1p</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># compute some statistics, e.g. total_counts, n_cells_by_counts etc</span>
+
+<span class="n">adata_gExpr</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">adata_gExpr</span>   <span class="c1"># store log-normalized counts to .raw Attribute for potential future use</span>
+</pre></div>
+</div>
+</div>
+<p>Generate a gene expression signature on a single-cell basis by scaling each gene to unit variance. This scaled matrix will be used as an input to <code class="docutils literal notranslate"><span class="pre">pyther</span></code> to compute the protein activity matrix. Several approaches exist for the purpose, including computing a reference with respect to an external reference or using models such as <a class="reference external" href="https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1874-1">SCTransform</a>. We will employ the simplest approach for demonstrative purposes.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">regress_out</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="s1">&#39;total_counts&#39;</span><span class="p">)</span> <span class="c1"># regress out the effect of the total number of UMIs</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="c1"># standardize gene expression and clip max values to 10</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_gExpr</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+AnnData object with n_obs × n_vars = 6500 × 20931
+    obs: &#39;Patient&#39;, &#39;Cell_Type&#39;, &#39;n_genes&#39;, &#39;n_genes_by_counts&#39;, &#39;total_counts&#39;
+    var: &#39;n_cells&#39;, &#39;n_cells_by_counts&#39;, &#39;mean_counts&#39;, &#39;pct_dropout_by_counts&#39;, &#39;total_counts&#39;, &#39;mean&#39;, &#39;std&#39;
+    uns: &#39;log1p&#39;
+</pre></div></div>
+</div>
+<p>Display a chunk of the scaled matrix (signature)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_gExpr</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span><span class="o">.</span><span class="n">to_df</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>AP006222.2</th>
+      <th>RP11-206L10.3</th>
+      <th>RP11-206L10.2</th>
+      <th>RP11-206L10.9</th>
+      <th>LINC00115</th>
+      <th>FAM41C</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>T1_AACACGTCAATGACCT</th>
+      <td>-0.366852</td>
+      <td>-0.107912</td>
+      <td>-0.064235</td>
+      <td>-0.081443</td>
+      <td>-0.186370</td>
+      <td>-0.112861</td>
+    </tr>
+    <tr>
+      <th>T1_AACCATGTCTGTCCGT</th>
+      <td>-0.320497</td>
+      <td>-0.086591</td>
+      <td>-0.066305</td>
+      <td>-0.071187</td>
+      <td>-0.147921</td>
+      <td>-0.067329</td>
+    </tr>
+    <tr>
+      <th>T1_AACCGCGTCGAATGGG</th>
+      <td>-0.306291</td>
+      <td>-0.080056</td>
+      <td>-0.066939</td>
+      <td>-0.068043</td>
+      <td>-0.136138</td>
+      <td>-0.053375</td>
+    </tr>
+    <tr>
+      <th>T1_AACGTTGCAATGGATA</th>
+      <td>-0.315497</td>
+      <td>-0.084291</td>
+      <td>-0.066528</td>
+      <td>-0.070080</td>
+      <td>-0.143774</td>
+      <td>-0.062418</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</div>
+<div class="section" id="Step-3.-Load-multiple-ARACNe-inferred-gene-regulatory-networks">
+<h2>Step 3. Load multiple ARACNe-inferred gene regulatory networks<a class="headerlink" href="#Step-3.-Load-multiple-ARACNe-inferred-gene-regulatory-networks" title="Permalink to this heading"></a></h2>
+<p>Load 3 lineage-specific gene regulatory network generated with the ARACNe. These networks were generated from malignant and normal ductal cells and fibroblasts, respectively, i.e. the most represented cell types in the data. Refer to the <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">ARACNe3</a> and <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/27153652/">ARACNe-AP</a> manuscripts for additional information. Fix paths</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d1_net_path</span> <span class="o">=</span> <span class="s2">&quot;/Users/lucazanella7/Desktop/ColumbiaProjects/pyther_test_data/subset_Peng/pruned_Ductal_1.tsv&quot;</span> <span class="c1"># path to ARACNe network for ductal 1</span>
+<span class="n">d2_net_path</span> <span class="o">=</span> <span class="s2">&quot;/Users/lucazanella7/Desktop/ColumbiaProjects/pyther_test_data/subset_Peng/pruned_Ductal_2.tsv&quot;</span> <span class="c1"># path to ARACNe network for ductal 2</span>
+<span class="n">f_net_path</span> <span class="o">=</span> <span class="s2">&quot;/Users/lucazanella7/Desktop/ColumbiaProjects/pyther_test_data/subset_Peng/pruned_fibro.tsv&quot;</span> <span class="c1"># path to ARACNe network for fibroblasts</span>
+
+<span class="n">ductal_1_net</span> <span class="o">=</span> <span class="n">pyther</span><span class="o">.</span><span class="n">Interactome</span><span class="p">(</span><span class="s1">&#39;ductal_1&#39;</span><span class="p">,</span><span class="n">net_table</span><span class="o">=</span><span class="n">d1_net_path</span><span class="p">)</span> <span class="c1"># load interactome for ductal cell type 1</span>
+<span class="n">ductal_2_net</span> <span class="o">=</span> <span class="n">pyther</span><span class="o">.</span><span class="n">Interactome</span><span class="p">(</span><span class="s1">&#39;ductal_2&#39;</span><span class="p">,</span><span class="n">net_table</span><span class="o">=</span><span class="n">d2_net_path</span><span class="p">)</span> <span class="c1"># load interactome for ductal cell type 2</span>
+<span class="n">fibroblast_net</span> <span class="o">=</span> <span class="n">pyther</span><span class="o">.</span><span class="n">Interactome</span><span class="p">(</span><span class="s1">&#39;fibroblast&#39;</span><span class="p">,</span><span class="n">net_table</span><span class="o">=</span><span class="n">f_net_path</span><span class="p">)</span> <span class="c1"># load interactome for fibroblasts</span>
+</pre></div>
+</div>
+</div>
+<p>Each regulatory network is an instance of class <code class="docutils literal notranslate"><span class="pre">Interactome</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">?</span>fibroblast_net
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">Type:</span>        Interactome
+<span class="ansi-red-fg">String form:</span>
+Object of class Interactome:
+        Name: fibroblast        Number of Regulons: 6437
+<span class="ansi-red-fg">File:</span>        ~/Desktop/ColumbiaProjects/pyther/interactome.py
+<span class="ansi-red-fg">Docstring:</span>   &lt;no docstring&gt;
+</pre></div></div>
+</div>
+<p>Filter out targets in the <code class="docutils literal notranslate"><span class="pre">Interactomes</span></code> that are not present in the gene expression matrix</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ductal_1_net</span><span class="o">.</span><span class="n">filter_targets</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">var_names</span><span class="p">)</span>
+<span class="n">ductal_2_net</span><span class="o">.</span><span class="n">filter_targets</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">var_names</span><span class="p">)</span>
+<span class="n">fibroblast_net</span><span class="o">.</span><span class="n">filter_targets</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">var_names</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Prune each regulon to have exactly 200 targets (this step can be omitted when setting <code class="docutils literal notranslate"><span class="pre">enrichment=narnea</span></code> in <code class="docutils literal notranslate"><span class="pre">pyther</span></code>)</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ductal_1_net</span><span class="o">.</span><span class="n">prune</span><span class="p">(</span><span class="n">cutoff</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span><span class="n">eliminate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ductal_2_net</span><span class="o">.</span><span class="n">prune</span><span class="p">(</span><span class="n">cutoff</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span><span class="n">eliminate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">fibroblast_net</span><span class="o">.</span><span class="n">prune</span><span class="p">(</span><span class="n">cutoff</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span><span class="n">eliminate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-pyther-(metaVIPER-approach)">
+<h2>Convert the gene expression signature into a protein activity matrix using pyther (metaVIPER approach)<a class="headerlink" href="#Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-pyther-(metaVIPER-approach)" title="Permalink to this heading"></a></h2>
+<p>Convert the previously-computed gene expression signature into a protein activity by using multiple interactomes simultaneousely via the metaVIPER approach. Use <code class="docutils literal notranslate"><span class="pre">enrichment=&quot;narnea&quot;</span></code> and store the result in an <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> object. Use 3 cores to speed up the calculation. See Tutorial-1 for additional details on different modalities to compute enrichment. consider showing slice_concat function here if the matrix used has more cells?</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_PA</span> <span class="o">=</span> <span class="n">pyther</span><span class="o">.</span><span class="n">pyther</span><span class="p">(</span><span class="n">gex_data</span><span class="o">=</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="c1"># gene expression signature</span>
+                             <span class="n">interactome</span><span class="o">=</span><span class="p">[</span><span class="n">ductal_1_net</span><span class="p">,</span> <span class="n">ductal_2_net</span><span class="p">,</span> <span class="n">fibroblast_net</span><span class="p">],</span> <span class="c1"># list of interactomes</span>
+                             <span class="n">enrichment</span> <span class="o">=</span> <span class="s2">&quot;narnea&quot;</span><span class="p">,</span>
+                             <span class="n">output_type</span><span class="o">=</span><span class="s2">&quot;anndata&quot;</span><span class="p">,</span>
+                             <span class="n">njobs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="c1"># 3 cores</span>
+                             <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Preparing the association scores
+Computing regulons enrichment with NaRnEa
+Integrating results
+</pre></div></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">pyther</span></code> (NaRnEA-enrichment) returns an object of class <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> that stores a matrix collecting the Normalized Enrichment Scores (NES) and a matrix of Proportional Enrichment Scores (PES) for regulatory protein in each cell. See Tutorial 1 for more details and <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/36981431/">Griffin et al., 2022</a>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_PA</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+AnnData object with n_obs × n_vars = 6500 × 6667
+    obs: &#39;Patient&#39;, &#39;Cell_Type&#39;, &#39;n_genes&#39;, &#39;n_genes_by_counts&#39;, &#39;total_counts&#39;
+    uns: &#39;gex_data&#39;
+    layers: &#39;pes&#39;
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Step-4.-Analyze-single-cells-at-the-Protein-Activity-level">
+<h2>Step 4. Analyze single-cells at the Protein Activity level<a class="headerlink" href="#Step-4.-Analyze-single-cells-at-the-Protein-Activity-level" title="Permalink to this heading"></a></h2>
+<p>We present some basic, but instructive analyses at the protein activity matrix. Start by running Principal Components Analysis (PCA) on the PES matrix, to reduce the dimensionality of the dataset. Use the PCA function avaiable through <code class="docutils literal notranslate"><span class="pre">pyther.tl</span></code>, a module that provides several wrappers to <code class="docutils literal notranslate"><span class="pre">scanpy.tl</span></code> which simplifies the transformation of protein activity data.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pyther</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">adata_PA</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;pes&quot;</span><span class="p">,</span> <span class="n">svd_solver</span><span class="o">=</span><span class="s1">&#39;arpack&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Compute the neighbors graph of cells using the PCA representation of the protein activity matrix. For sake of simplicity, we set 10 nearest neightbors and 50 principal components. Typically, these parameters need tuning.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata_PA</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Generate a <a class="reference external" href="https://arxiv.org/abs/1802.03426">UMAP</a> embedding of the previously computed graph.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_PA</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Display the 2-dimensional UMAP embedding with the corresponding function from the <code class="docutils literal notranslate"><span class="pre">pyther.pl</span></code>, a module that provides wrappers for <code class="docutils literal notranslate"><span class="pre">scanpy.pl</span></code> functions for enhanced visualization of key protein activity features. Color by cell type.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">set_figure_params</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+<span class="n">pyther</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_PA</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;Cell_Type&quot;</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;Set3&quot;</span><span class="p">,</span> <span class="n">add_outline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:369: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:379: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  cax = scatter(
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/Tutorial-2_46_1.png" class="no-scaled-link" src="_images/Tutorial-2_46_1.png" style="width: 478px; height: 333px;" />
+</div>
+</div>
+<p>Find the regulatory proteins that were predicted to be most active for each cell type by integrating the NES of each regulatory protein across all cells of a given cell type using the Stouffer’s method:</p>
+<div class="math notranslate nohighlight">
+\[NES^C_j = \frac{\sum_{k \in C}NES_{k,j}}{\sqrt{n^C}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(NES^C_j\)</span> denotes the integrated NES for regulator <span class="math notranslate nohighlight">\(j\)</span> in cluster/cell type <span class="math notranslate nohighlight">\(C\)</span>, <span class="math notranslate nohighlight">\(NES_{k,j}\)</span> is the NES of regulator <span class="math notranslate nohighlight">\(j\)</span> in cluster/cell type <span class="math notranslate nohighlight">\(C\)</span> and <span class="math notranslate nohighlight">\(n^C\)</span> is the number of cells in cluster <span class="math notranslate nohighlight">\(C\)</span>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[73]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">NES_integrated</span> <span class="o">=</span> <span class="n">pyther</span><span class="o">.</span><span class="n">compute_cluster_stouffer_anndata</span><span class="p">(</span><span class="n">adata_PA</span><span class="p">,</span> <span class="s2">&quot;Cell_Type&quot;</span><span class="p">)</span> <span class="c1"># Stouffer integration</span>
+</pre></div>
+</div>
+</div>
+<p>Analogously, <code class="docutils literal notranslate"><span class="pre">compute_cluster_stouffer</span></code>, can be used to perform the same operations in Pandas DataFrames. Remove ribosomal proteins from the above matrix (ribosomal protein genes are among the most highly expressed genes in most cell types).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[103]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filtered_proteins</span> <span class="o">=</span> <span class="n">NES_integrated</span><span class="o">.</span><span class="n">var_names</span><span class="p">[</span><span class="o">~</span><span class="n">NES_integrated</span><span class="o">.</span><span class="n">var_names</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;RP&#39;</span><span class="p">)]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span> <span class="c1"># Exclude columns starting with &#39;RP&#39; from integrated matrix</span>
+<span class="n">NES_integrated</span> <span class="o">=</span> <span class="n">NES_integrated</span><span class="p">[:,</span><span class="n">filtered_proteins</span><span class="p">]</span> <span class="c1"># remove ribosomal proteins from the AnnData object</span>
+</pre></div>
+</div>
+</div>
+<p>Extract the 5 most activated regulatory protein in each cell population</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[133]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">active_proteins</span> <span class="o">=</span> <span class="n">NES_integrated</span><span class="o">.</span><span class="n">to_df</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">nlargest</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># the top 5 most activated proteins in each cell type</span>
+<span class="n">active_proteins</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[133]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Ductal cell type 1         [NPM1, BTF3, EEF1D, PEBP1, EEF2]
+Ductal cell type 2    [KRT19, S100A16, S100A6, CLIC1, TSPO]
+Fibroblast cell             [EEF2, HSPA5, NPM1, ARF4, CD99]
+Stellate cell               [NPM1, EEF2, CLTA, PFN1, EEF1D]
+dtype: object
+</pre></div></div>
+</div>
+<p>Show the top activated proteins on a heatmap</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[202]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">protein_set</span> <span class="o">=</span> <span class="n">active_proteins</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="c1"># protein set to display on the heatmap</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">pyther</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">adata_PA</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="n">protein_set</span><span class="p">,</span> <span class="n">groupby</span><span class="o">=</span><span class="s2">&quot;Cell_Type&quot;</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;pes&quot;</span><span class="p">,</span><span class="n">vcenter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;RdBu_r&quot;</span><span class="p">,</span><span class="n">dendrogram</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">swap_axes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/Tutorial-2_54_0.png" class="no-scaled-link" src="_images/Tutorial-2_54_0.png" style="width: 998px; height: 632px;" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[172]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">protein_markers_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Ductal cell type 1&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;AMBP&#39;</span><span class="p">,</span> <span class="s1">&#39;CFTR&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;Ductal cell type 2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;KRT19&#39;</span><span class="p">,</span> <span class="s1">&#39;TSPAN8&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;Fibroblast cell&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;VIM&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;Stellate cell&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;PDGFRB&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">set_figure_params</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">pyther</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">dotplot</span><span class="p">(</span><span class="n">adata_PA</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="n">protein_markers_dict</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;pes&quot;</span><span class="p">,</span><span class="n">groupby</span><span class="o">=</span><span class="s1">&#39;Cell_Type&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;RdBu_r&quot;</span><span class="p">,</span> <span class="n">vcenter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">dendrogram</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_dotplot.py:749: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39;, &#39;norm&#39; will be ignored
+  dot_ax.scatter(x, y, **kwds)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/Tutorial-2_55_1.png" class="no-scaled-link" src="_images/Tutorial-2_55_1.png" style="width: 521px; height: 366px;" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Tutorial-1.html" class="btn btn-neutral float-left" title="Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, ..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

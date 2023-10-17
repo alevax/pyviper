@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>viper &mdash; pyther 1.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Interactome" href="interactome.html" />
+    <link rel="prev" title="Pyther" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pyther
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">viper</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pyther._viper.viper"><code class="docutils literal notranslate"><span class="pre">viper()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="interactome.html"><code class="docutils literal notranslate"><span class="pre">Interactome</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="aREA.html"><code class="docutils literal notranslate"><span class="pre">aREA</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="NaRnEA.html"><code class="docutils literal notranslate"><span class="pre">NaRnEA</span></code></a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyther</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><code class="docutils literal notranslate"><span class="pre">viper</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/viper.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="viper">
+<h1><code class="docutils literal notranslate"><span class="pre">viper</span></code><a class="headerlink" href="#viper" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyther._viper.viper">
+<span class="sig-prename descclassname"><span class="pre">pyther._viper.</span></span><span class="sig-name descname"><span class="pre">viper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gex_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactome</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eset_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enrichment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'area'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">njobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_as_anndata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transfer_obs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_input_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyther._viper.viper" title="Permalink to this definition"></a></dt>
+<dd><p>Allows the individual to infer normalized enrichment scores using Analytical
+Ranked Enrichment Analysis (aREA)[1] or Nonparametric Analytical Rank-based
+Enrichment Analysis (NaRnEA)[2]. NaRnEA also compute proportional enrichment
+scores.</p>
+<p>The Interactome object must not contain any targets that are not in the
+features of gex_data. This can be accomplished by running:</p>
+<blockquote>
+<div><p>interactome.filter_targets(gex_data.var_names)</p>
+</div></blockquote>
+<p>It is highly recommend to do this on the unPruned network and then prune to
+ensure the pruned network contains a consistent number of targets per
+regulator, allow of which exist within gex_data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gex_data</strong> – Gene expression stored in an anndata object (e.g. from Scanpy).</p></li>
+<li><p><strong>interactome</strong> – An object of class Interactome or a list of Interactome objects.</p></li>
+<li><p><strong>(</strong><strong>default</strong> (<em>store_input_data</em>) – The layer in the anndata object to use as the gene expression input.</p></li>
+<li><p><strong>(</strong><strong>default</strong> – Whether to filter out genes not present in the interactome (True) or to
+keep this biological context (False). This will affect gene rankings.</p></li>
+<li><p><strong>(</strong><strong>default</strong> – A method used to create a gene expression signature from gex_data.X. The
+default of None is used when gex_data.X is already a gene expression
+signature. Alternative inputs include “scale”, “rank”, “doublerank”,
+“mad”, and “ttest”.</p></li>
+<li><p><strong>(</strong><strong>default</strong> – The algorithm to use to calculate the enrichment. Choose betweeen
+Analytical Ranked Enrichment Analysis (aREA) and Nonparametric
+Analytical Rank-based Enrichment Analysis (NaRnEA) function. Default =’area’,
+alternative = ‘narnea’.</p></li>
+<li><p><strong>(</strong><strong>default</strong> – Number indicating either the exponent score for the metaViper weights.
+These are only applicable when enrichment = ‘area’ and are not used when
+enrichment = ‘narnea’. Roughly, a lower number (e.g. 1) results in
+networks being treated as a consensus network (useful for multiple
+networks of the same celltype with the same epigenetics), while a higher
+number (e.g. 10) results in networks being treated as separate (useful
+for multiple networks of different celltypes with different epigenetics).</p></li>
+<li><p><strong>(</strong><strong>default</strong> – The minimum number of targets that each regulator in the interactome
+should contain. Regulators that contain fewer targets than this minimum
+will be culled from the network (via the Interactome.cull method). The
+reason users may choose to use this threshold is because adequate
+targets are needed to accurately predict enrichment.</p></li>
+<li><p><strong>(</strong><strong>default</strong> – For metaViper. When using multiple networks, assign jobs to different
+networks.</p></li>
+<li><p><strong>(</strong><strong>default</strong> – Maximum number of samples to process at once.</p></li>
+<li><p><strong>(</strong><strong>default</strong> – Whether extended output about the progress of the algorithm should be
+given.</p></li>
+<li><p><strong>(</strong><strong>default</strong> – Way of delivering output.</p></li>
+<li><p><strong>(</strong><strong>default</strong> – Whether to transfer the observation metadata from the input anndata to
+the output anndata. Thus, not applicable when output_as_anndata==False.</p></li>
+<li><p><strong>(</strong><strong>default</strong> – Whether to store the input anndata in an unstructured data slot (.uns) of
+the output anndata. Thus, not applicable when output_as_anndata==False.
+If input anndata already contains ‘gex_data’ in .uns, the input will
+assumed to be protein activity and will be stored in .uns as ‘pax_data’.
+Otherwise, the data will be stored as ‘gex_data’ in .uns.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>A dictionary containing <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code> containing NES values</p></li>
+<li><p><strong>(key</strong> (<em>‘nes’) and PES values (key: ‘pes’) when output_as_anndata==False and</em>)</p></li>
+<li><p><em>enrichment = “narnea”.</em></p></li>
+<li><p>A dataframe of <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code> containing NES values</p></li>
+<li><p><em>when output_as_anndata==False and enrichment = “area”.</em></p></li>
+<li><p><em>An anndata object containin NES values in .X. Will contain PES values in the</em></p></li>
+<li><p><em>layer ‘pes’ when enrichment = ‘narnea’. Will contain .gex_data and/or</em></p></li>
+<li><p><em>.pax_data in the unstructured data slot (.uns) when store_input_data = True.</em></p></li>
+<li><p><em>Will contain identical .obs to the input anndata when transfer_obs = True.</em></p></li>
+<li><p><em>Citations</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>[1] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye,</em></p></li>
+<li><p><em>B. H., &amp; Califano, A. (2016). Functional characterization of somatic</em></p></li>
+<li><p><em>mutations in cancer using network-based inference of protein activity.</em></p></li>
+<li><p><em>Nature genetics, 48(8), 838-847.</em></p></li>
+<li><p><em>[2] Griffin, A. T., Vlahos, L. J., Chiuzan, C., &amp; Califano, A. (2023). NaRnEA</em></p></li>
+<li><p><em>An Information Theoretic Framework for Gene Set Analysis. Entropy, 25(3), 542.</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Pyther" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="interactome.html" class="btn btn-neutral float-right" title="Interactome" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, ..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

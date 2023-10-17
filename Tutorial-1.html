@@ -1,0 +1,2124 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level &mdash; pyther 1.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/nbsphinx-code-cells.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach" href="Tutorial-2.html" />
+    <link rel="prev" title="NaRnEA.NaRnEA_classic" href="pyther.NaRnEA.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pyther
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pyther.html">config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.interactome">interactome</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.load">load</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.pl">pl</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.pp">pp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.tl">tl</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.aREA.html">aREA.aREA_classic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.aREA.html#module-pyther.aREA.aREA_meta">aREA.aREA_meta</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.NaRnEA.html">NaRnEA.NaRnEA_classic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyther.NaRnEA.html#module-pyther.NaRnEA.NaRnEA_meta">NaRnEA.NaRnEA_meta</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Setup-path-and-import-modules">Setup path and import modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Step-1.-Load-a-gene-expression-%22signature%22-at-the-single-cell-level">Step 1. Load a gene expression “signature” at the single-cell level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Step-2.-Load-a-gene-regulatory-network-inferred-with-ARACNe">Step 2. Load a gene regulatory network inferred with ARACNe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-pyther">Convert the gene expression signature into a protein activity matrix using pyther</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Method-1---protein-activity-inference-using-aREA">Method 1 - protein activity inference using aREA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Method-2---protein-activity-inference-using-(matrix)-NaRnEA">Method 2 - protein activity inference using (matrix)-NaRnEA</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Step-4.-Analyze-single-cells-at-the-Protein-Activity-level">Step 4. Analyze single-cells at the Protein Activity level</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-2.html">Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyther</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Tutorial-1.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="Tutorial-1---Analyzing-scRNA-seq-data-at-the-Protein-Activity-Level">
+<h1>Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level<a class="headerlink" href="#Tutorial-1---Analyzing-scRNA-seq-data-at-the-Protein-Activity-Level" title="Permalink to this heading"></a></h1>
+<p>Add description of the goal of this tutorial. Make sure that ways to load/install the package are updated. Also correct the path to the data (or include a dataset on GitHub, Zenodo or others). Also, fix the number of the sections.</p>
+<div class="section" id="Setup-path-and-import-modules">
+<h2>Setup path and import modules<a class="headerlink" href="#Setup-path-and-import-modules" title="Permalink to this heading"></a></h2>
+<p>Setup your path variables in the source as follows:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pyther_path</span> <span class="o">=</span> <span class="s2">&quot;/Users/lucazanella7/Desktop/ColumbiaProjects/&quot;</span> <span class="c1"># where Pyther is located in the machine</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">pyther_path</span><span class="p">)</span> <span class="c1"># add path to pyther to sys.path</span>
+
+<span class="kn">import</span> <span class="nn">pyther</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">import</span> <span class="nn">anndata</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;.*The &#39;nopython&#39; keyword.*&quot;</span><span class="p">)</span> <span class="c1"># for jit decorator issue with sc.pp.neighbors (09/30/2023)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Step-1.-Load-a-gene-expression-%22signature%22-at-the-single-cell-level">
+<h2>Step 1. Load a gene expression “signature” at the single-cell level<a class="headerlink" href="#Step-1.-Load-a-gene-expression-%22signature%22-at-the-single-cell-level" title="Permalink to this heading"></a></h2>
+<p>Load gene expression signature to be used as input to <code class="docutils literal notranslate"><span class="pre">pyther</span></code> for Protein Activity inference. We store the gene expression signature into an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> object to enable interoperability with <a class="reference external" href="https://scanpy-tutorials.readthedocs.io/en/latest/#">scanpy</a>. Display matrix dimensions with cells on rows and features (genes) on columns (after transposition). Gene expression signatures can be generated using […] describe approaches. The gene
+expression signature used in this tutorial was generated from a population of malignant ductal cells from publicly avaiable data from <a class="reference external" href="https://www.nature.com/articles/s41422-019-0195-y">Peng et al., 2019</a>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gene_expr_path</span> <span class="o">=</span> <span class="s2">&quot;/Users/lucazanella7/Desktop/ColumbiaProjects/pyther_test_data/subset_Peng/Ductal_2.csv&quot;</span>
+<span class="n">gene_expr_signature</span> <span class="o">=</span> <span class="n">anndata</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">gene_expr_path</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+<span class="n">gene_expr_signature</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+AnnData object with n_obs × n_vars = 11315 × 5000
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Step-2.-Load-a-gene-regulatory-network-inferred-with-ARACNe">
+<h2>Step 2. Load a gene regulatory network inferred with ARACNe<a class="headerlink" href="#Step-2.-Load-a-gene-regulatory-network-inferred-with-ARACNe" title="Permalink to this heading"></a></h2>
+<p>Load and inspect lineage-specific gene regulatory network generated with the ARACNe. The current ARACNe network was inferred from malingant ductal cells using ARACNe3.See the following manuscript <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">ARACNe3</a> and <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/27153652/">ARACNe-AP</a> for additional information on current ARACNe implementations.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">network_path</span> <span class="o">=</span> <span class="s2">&quot;/Users/lucazanella7/Desktop/ColumbiaProjects/pyther_test_data/subset_Peng/pruned_Ductal_2.tsv&quot;</span>
+                            <span class="c1"># path to tsv-formatted ARACNe network</span>
+
+<span class="n">network</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">network_path</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Display the first 5 interactions in the regulatory network. <code class="docutils literal notranslate"><span class="pre">mor</span></code> and <code class="docutils literal notranslate"><span class="pre">likelihood</span></code> represent the mode of regulation of the given regulator-target pair and the likelihood of the interaction, respectively.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">network</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>regulator</th>
+      <th>target</th>
+      <th>mor</th>
+      <th>likelihood</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>AATF</td>
+      <td>CDC42SE2</td>
+      <td>0.005831</td>
+      <td>0.999934</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>AATF</td>
+      <td>EIF4EBP2</td>
+      <td>0.019100</td>
+      <td>0.999868</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>AATF</td>
+      <td>DDB1</td>
+      <td>0.019182</td>
+      <td>0.999802</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>AATF</td>
+      <td>COPB2</td>
+      <td>0.064825</td>
+      <td>0.999736</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>AATF</td>
+      <td>MDM4</td>
+      <td>0.023039</td>
+      <td>0.999670</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Other algorithms can be used to generate gene regulatory networks, but we recommend postprocessing the output to the suitable dataframe format, with columns displayed above.</p>
+<p>Convert the pandas DataFrame interactome to an object of class <code class="docutils literal notranslate"><span class="pre">Interactome</span></code> to enable easier manipulation. Type <code class="docutils literal notranslate"><span class="pre">help(pyther.Interactome)</span></code> to see available methods.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">network_interactome</span> <span class="o">=</span> <span class="n">pyther</span><span class="o">.</span><span class="n">Interactome</span><span class="p">(</span><span class="s1">&#39;malignant_ductal_interactome&#39;</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Filter out targets in the <code class="docutils literal notranslate"><span class="pre">Interactome</span></code> that are not present in the gene expression matrix</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">network_interactome</span><span class="o">.</span><span class="n">filter_targets</span><span class="p">(</span><span class="n">gene_expr_signature</span><span class="o">.</span><span class="n">var_names</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>As an example, display the number of targets of a couple of selected regulators, MYC and SERPINA12.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_MYC</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">network_interactome</span><span class="o">.</span><span class="n">get_reg</span><span class="p">(</span><span class="s1">&#39;MYC&#39;</span><span class="p">))</span> <span class="c1"># number of MYC targets in the network</span>
+<span class="n">n_SERPINA12</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">network_interactome</span><span class="o">.</span><span class="n">get_reg</span><span class="p">(</span><span class="s1">&#39;SERPINA12&#39;</span><span class="p">))</span> <span class="c1"># number of SERPINA12 targets in the network</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The number of targets of MYC and SERPINA12 is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_MYC</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; and &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_SERPINA12</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;, respectively.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The number of targets of MYC and SERPINA12 is 118 and 144, respectively.
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-pyther">
+<h2>Convert the gene expression signature into a protein activity matrix using pyther<a class="headerlink" href="#Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-pyther" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pyther</span></code> transforms a gene expression signature into a protein activity matrix by enriched regulon analysis. <code class="docutils literal notranslate"><span class="pre">pyther</span></code> allows using <a class="reference external" href="https://www.nature.com/articles/ng.3593">aREA</a> (default) and <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">NaRnEA</a> (by setting <code class="docutils literal notranslate"><span class="pre">enrichment=&quot;narnea&quot;</span></code> ) as enrichment methods. We will see how to employ the two methodologies.</p>
+<div class="section" id="Method-1---protein-activity-inference-using-aREA">
+<h3>Method 1 - protein activity inference using aREA<a class="headerlink" href="#Method-1---protein-activity-inference-using-aREA" title="Permalink to this heading"></a></h3>
+<p>As we have seen (section above), different regulators can potentially have different number of targets. We prune each regulon to have the same number of targets (50 in this case). This step is advisable to avoid regulators with an exceedingly number of targets to dominate those with fewer when computing the NES, thus making NES scores comparable.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">network_pruned</span> <span class="o">=</span> <span class="n">network_interactome</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># generate a copy of the unpruned network before pruning it</span>
+<span class="n">network_pruned</span><span class="o">.</span><span class="n">prune</span><span class="p">(</span><span class="n">cutoff</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span><span class="n">eliminate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># prune interactome to have exactly 50 targets</span>
+</pre></div>
+</div>
+</div>
+<p>Now all the regulators in the network have exactly 50 transcriptional targets.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_MYC</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">network_pruned</span><span class="o">.</span><span class="n">get_reg</span><span class="p">(</span><span class="s1">&#39;MYC&#39;</span><span class="p">))</span> <span class="c1"># number of MYC targets in the network</span>
+<span class="n">n_SERPINA12</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">network_pruned</span><span class="o">.</span><span class="n">get_reg</span><span class="p">(</span><span class="s1">&#39;SERPINA12&#39;</span><span class="p">))</span> <span class="c1"># number of SERPINA12 targets in the network</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of MYC targets: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_MYC</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Number of SERPINA12 targets: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_SERPINA12</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Number of MYC targets: 50
+Number of SERPINA12 targets: 50
+</pre></div></div>
+</div>
+<div class="alert alert-block alert-success"><p>Run <code class="docutils literal notranslate"><span class="pre">pyther</span></code> to compute the protein activity matrix (aREA method).</p>
+</div><p>Mandatory inputs to <code class="docutils literal notranslate"><span class="pre">pyther</span></code> are a gene expression signature and a gene regulatory network. We will set the output output to be an <code class="docutils literal notranslate"><span class="pre">ndarray</span></code> (The default output would be an AnnData object).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ProtAct_aREA</span> <span class="o">=</span> <span class="n">pyther</span><span class="o">.</span><span class="n">pyther</span><span class="p">(</span><span class="n">gex_data</span><span class="o">=</span><span class="n">gene_expr_signature</span><span class="p">,</span> <span class="c1"># gene expression signature</span>
+                             <span class="n">interactome</span><span class="o">=</span><span class="n">network_pruned</span><span class="p">,</span> <span class="c1"># gene regulatory network</span>
+                             <span class="n">enrichment</span> <span class="o">=</span> <span class="s2">&quot;area&quot;</span><span class="p">,</span>
+                             <span class="n">output_type</span><span class="o">=</span><span class="s2">&quot;ndarray&quot;</span><span class="p">,</span>
+                             <span class="n">njobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                             <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Preparing the association scores
+Computing regulons enrichment with aREA
+Rank transforming the data
+Computing the likelihood matrix
+Computing the modes matrix
+Preparing the 1-tailed / 2-tailed matrices
+Computing enrichment
+Integrating enrichment
+</pre></div></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">ProtAct_aREA</span></code> contains the activity of each regulatory protein - computed as a Normalized Enrichment Score (NES) - for each single cell.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ProtAct_aREA</span> <span class="c1"># display the protein activity matrix</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>regulator</th>
+      <th>AATF</th>
+      <th>ABCA1</th>
+      <th>ABCA12</th>
+      <th>ABCA3</th>
+      <th>ABCA7</th>
+      <th>ABCA8</th>
+      <th>ABCB1</th>
+      <th>ABCB11</th>
+      <th>ABCB4</th>
+      <th>ABCB5</th>
+      <th>...</th>
+      <th>ZSWIM5</th>
+      <th>ZSWIM6</th>
+      <th>ZSWIM7</th>
+      <th>ZWINT</th>
+      <th>ZXDA</th>
+      <th>ZXDB</th>
+      <th>ZXDC</th>
+      <th>ZYX</th>
+      <th>ZZEF1</th>
+      <th>ZZZ3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>T1_AACACGTCAATGACCT</th>
+      <td>-0.039933</td>
+      <td>-0.513357</td>
+      <td>-0.060472</td>
+      <td>0.029355</td>
+      <td>0.065028</td>
+      <td>-0.010176</td>
+      <td>-0.034340</td>
+      <td>-0.002353</td>
+      <td>0.022366</td>
+      <td>0.001244</td>
+      <td>...</td>
+      <td>-0.299727</td>
+      <td>0.037092</td>
+      <td>-0.038729</td>
+      <td>0.198784</td>
+      <td>0.024052</td>
+      <td>-1.026783</td>
+      <td>-0.209181</td>
+      <td>-0.071998</td>
+      <td>0.008095</td>
+      <td>-0.034638</td>
+    </tr>
+    <tr>
+      <th>T1_AACCATGCACAACTGT</th>
+      <td>-0.011776</td>
+      <td>-1.068924</td>
+      <td>-0.018706</td>
+      <td>0.014480</td>
+      <td>-0.003866</td>
+      <td>-0.038899</td>
+      <td>-0.039349</td>
+      <td>-0.331106</td>
+      <td>-0.035347</td>
+      <td>0.336390</td>
+      <td>...</td>
+      <td>0.010091</td>
+      <td>-0.027395</td>
+      <td>0.026021</td>
+      <td>0.364444</td>
+      <td>0.023505</td>
+      <td>-0.944922</td>
+      <td>-0.056033</td>
+      <td>-0.001513</td>
+      <td>-0.003964</td>
+      <td>-0.003518</td>
+    </tr>
+    <tr>
+      <th>T1_AACCATGTCTGATTCT</th>
+      <td>-0.028553</td>
+      <td>1.330032</td>
+      <td>-0.004081</td>
+      <td>0.006825</td>
+      <td>0.083852</td>
+      <td>-0.115756</td>
+      <td>-0.177377</td>
+      <td>0.773305</td>
+      <td>-0.036582</td>
+      <td>-0.000985</td>
+      <td>...</td>
+      <td>-0.017797</td>
+      <td>0.022675</td>
+      <td>0.553827</td>
+      <td>-0.100412</td>
+      <td>0.156821</td>
+      <td>-1.508245</td>
+      <td>-0.577091</td>
+      <td>-0.037150</td>
+      <td>0.007939</td>
+      <td>0.037444</td>
+    </tr>
+    <tr>
+      <th>T1_AACCATGTCTGTCCGT</th>
+      <td>-0.014895</td>
+      <td>-0.915240</td>
+      <td>-0.045044</td>
+      <td>0.014684</td>
+      <td>0.015371</td>
+      <td>-0.017883</td>
+      <td>-0.037444</td>
+      <td>-0.424763</td>
+      <td>0.024829</td>
+      <td>0.027476</td>
+      <td>...</td>
+      <td>-0.004947</td>
+      <td>-0.021320</td>
+      <td>0.001817</td>
+      <td>0.001134</td>
+      <td>0.051330</td>
+      <td>1.204289</td>
+      <td>-0.133911</td>
+      <td>-0.007055</td>
+      <td>0.002797</td>
+      <td>0.036863</td>
+    </tr>
+    <tr>
+      <th>T1_AACCGCGGTACTCGCG</th>
+      <td>-0.036032</td>
+      <td>0.510231</td>
+      <td>0.000235</td>
+      <td>-0.013971</td>
+      <td>0.038972</td>
+      <td>-0.043377</td>
+      <td>-0.031405</td>
+      <td>0.588168</td>
+      <td>0.040598</td>
+      <td>-0.003533</td>
+      <td>...</td>
+      <td>-0.014752</td>
+      <td>-0.059616</td>
+      <td>-0.482996</td>
+      <td>-0.094831</td>
+      <td>-0.079732</td>
+      <td>0.980695</td>
+      <td>0.000199</td>
+      <td>-0.073101</td>
+      <td>0.006302</td>
+      <td>-0.007790</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>T24_TTTCCTCCAGACAAGC</th>
+      <td>0.055305</td>
+      <td>0.341894</td>
+      <td>-0.050933</td>
+      <td>-0.012951</td>
+      <td>0.330071</td>
+      <td>-0.363238</td>
+      <td>-0.036886</td>
+      <td>1.088231</td>
+      <td>-0.017743</td>
+      <td>-0.056507</td>
+      <td>...</td>
+      <td>-0.807568</td>
+      <td>-0.077548</td>
+      <td>0.030926</td>
+      <td>-0.059328</td>
+      <td>-0.119481</td>
+      <td>0.833767</td>
+      <td>1.135612</td>
+      <td>-0.014460</td>
+      <td>-0.007370</td>
+      <td>-0.014418</td>
+    </tr>
+    <tr>
+      <th>T24_TTTGCGCCAATCGAAA</th>
+      <td>-0.004649</td>
+      <td>1.165203</td>
+      <td>-0.035998</td>
+      <td>0.003956</td>
+      <td>0.110806</td>
+      <td>0.246218</td>
+      <td>-0.024395</td>
+      <td>1.978674</td>
+      <td>-0.012702</td>
+      <td>0.047694</td>
+      <td>...</td>
+      <td>-0.008036</td>
+      <td>-0.014472</td>
+      <td>0.216086</td>
+      <td>-0.027095</td>
+      <td>-0.029380</td>
+      <td>-0.593994</td>
+      <td>0.005890</td>
+      <td>-0.002650</td>
+      <td>-0.083207</td>
+      <td>-0.063111</td>
+    </tr>
+    <tr>
+      <th>T24_TTTGCGCTCTTATCTG</th>
+      <td>0.043928</td>
+      <td>1.225162</td>
+      <td>-0.050975</td>
+      <td>0.013500</td>
+      <td>0.076413</td>
+      <td>0.000560</td>
+      <td>-0.017487</td>
+      <td>-1.389864</td>
+      <td>0.028424</td>
+      <td>-0.141229</td>
+      <td>...</td>
+      <td>-0.006508</td>
+      <td>0.007948</td>
+      <td>-0.087531</td>
+      <td>0.155677</td>
+      <td>0.658833</td>
+      <td>-0.711236</td>
+      <td>1.666220</td>
+      <td>-0.036570</td>
+      <td>0.017048</td>
+      <td>0.051186</td>
+    </tr>
+    <tr>
+      <th>T24_TTTGGTTAGACACTAA</th>
+      <td>0.082392</td>
+      <td>1.454482</td>
+      <td>-0.031634</td>
+      <td>0.034216</td>
+      <td>0.031895</td>
+      <td>-0.002404</td>
+      <td>0.006009</td>
+      <td>-1.012444</td>
+      <td>0.041352</td>
+      <td>-0.080170</td>
+      <td>...</td>
+      <td>0.023045</td>
+      <td>-0.004660</td>
+      <td>-0.044410</td>
+      <td>0.613269</td>
+      <td>0.012293</td>
+      <td>0.731556</td>
+      <td>-0.049039</td>
+      <td>-0.058118</td>
+      <td>-0.000430</td>
+      <td>0.003444</td>
+    </tr>
+    <tr>
+      <th>T24_TTTGTCAAGATGTCGG</th>
+      <td>-0.015526</td>
+      <td>1.361928</td>
+      <td>-0.010664</td>
+      <td>0.031131</td>
+      <td>0.068631</td>
+      <td>-0.021524</td>
+      <td>-0.037397</td>
+      <td>1.542451</td>
+      <td>0.024186</td>
+      <td>-0.033713</td>
+      <td>...</td>
+      <td>-0.034343</td>
+      <td>-0.054474</td>
+      <td>0.037375</td>
+      <td>0.168289</td>
+      <td>0.337348</td>
+      <td>1.768410</td>
+      <td>-0.506183</td>
+      <td>-0.052735</td>
+      <td>0.274719</td>
+      <td>0.056558</td>
+    </tr>
+  </tbody>
+</table>
+<p>11315 rows × 6453 columns</p>
+</div></div>
+</div>
+</div>
+<div class="section" id="Method-2---protein-activity-inference-using-(matrix)-NaRnEA">
+<h3>Method 2 - protein activity inference using (matrix)-NaRnEA<a class="headerlink" href="#Method-2---protein-activity-inference-using-(matrix)-NaRnEA" title="Permalink to this heading"></a></h3>
+<div class="alert alert-block alert-success"><p>Run <code class="docutils literal notranslate"><span class="pre">pyther</span></code> to compute the protein activity matrix (matrix-NaRnEA method).</p>
+</div><p>Compute the protein activity using <code class="docutils literal notranslate"><span class="pre">pyther</span></code> with NaRnEA as the enrichment method. Unlike aREA, NaRnEA is designed to run with regulons of different sizes, i.e. different number of targets per regulator. Comment on modes to compute the qnorm with C++ or approx.</p>
+<p>In this example, we will set the output to be an <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> object (default).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ProtAct_NaRnEA</span> <span class="o">=</span> <span class="n">pyther</span><span class="o">.</span><span class="n">pyther</span><span class="p">(</span><span class="n">gex_data</span><span class="o">=</span><span class="n">gene_expr_signature</span><span class="p">,</span> <span class="c1"># gene expression signature</span>
+                                 <span class="n">interactome</span><span class="o">=</span><span class="n">network_interactome</span><span class="p">,</span> <span class="c1"># gene regulatory network</span>
+                                 <span class="n">enrichment</span> <span class="o">=</span> <span class="s2">&quot;narnea&quot;</span><span class="p">,</span>
+                                 <span class="n">njobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                 <span class="n">output_type</span><span class="o">=</span><span class="s2">&quot;anndata&quot;</span><span class="p">,</span>
+                                 <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Preparing the association scores
+Computing regulons enrichment with NaRnEa
+reordering genes
+Calculating DES...
+Calculating UES...
+Calculating NES...
+Calculating PES...
+</pre></div></div>
+</div>
+<p>Show the output type and length of <code class="docutils literal notranslate"><span class="pre">ProtAct_NaRnEA</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ProtAct_NaRnEA</span> <span class="c1"># display the protein activity matrix as AnnData object</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+AnnData object with n_obs × n_vars = 11315 × 6603
+    uns: &#39;gex_data&#39;
+    layers: &#39;pes&#39;
+</pre></div></div>
+</div>
+<p>When using NaRnEA, <code class="docutils literal notranslate"><span class="pre">pyther</span></code> returns an additional layer, <code class="docutils literal notranslate"><span class="pre">pes</span></code> that stores the Proportional Enrichment Scores (PES) for regulator, a measure bound in the interval <span class="math notranslate nohighlight">\(-1 \le PES \le 1\)</span> that can be used as a measure of effect size. For further details, see <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/36981431/">Griffin et al., 2022</a>. Display NES and PES protein activity matrices.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ProtAct_NaRnEA</span><span class="o">.</span><span class="n">to_df</span><span class="p">()</span> <span class="c1"># NES matrix</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>AAMP</th>
+      <th>AATF</th>
+      <th>ABCA1</th>
+      <th>ABCA12</th>
+      <th>ABCA3</th>
+      <th>ABCA7</th>
+      <th>ABCA8</th>
+      <th>ABCB1</th>
+      <th>ABCB11</th>
+      <th>ABCB4</th>
+      <th>...</th>
+      <th>ZSWIM5</th>
+      <th>ZSWIM6</th>
+      <th>ZSWIM7</th>
+      <th>ZWINT</th>
+      <th>ZXDA</th>
+      <th>ZXDB</th>
+      <th>ZXDC</th>
+      <th>ZYX</th>
+      <th>ZZEF1</th>
+      <th>ZZZ3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>T1_AACACGTCAATGACCT</th>
+      <td>5.327945</td>
+      <td>-3.829106</td>
+      <td>-1.332991</td>
+      <td>1.873096</td>
+      <td>-0.892105</td>
+      <td>6.755131</td>
+      <td>-1.064186</td>
+      <td>-0.214509</td>
+      <td>0.655739</td>
+      <td>-2.730240</td>
+      <td>...</td>
+      <td>-0.561347</td>
+      <td>3.032530</td>
+      <td>-4.234940</td>
+      <td>-4.994237</td>
+      <td>0.554516</td>
+      <td>-2.147837</td>
+      <td>-2.542359</td>
+      <td>6.295967</td>
+      <td>2.433687</td>
+      <td>-3.778648</td>
+    </tr>
+    <tr>
+      <th>T1_AACCATGCACAACTGT</th>
+      <td>-5.766196</td>
+      <td>-5.639013</td>
+      <td>2.082483</td>
+      <td>-1.304688</td>
+      <td>-0.585171</td>
+      <td>-5.065806</td>
+      <td>0.758858</td>
+      <td>-0.530448</td>
+      <td>-0.278866</td>
+      <td>-3.444015</td>
+      <td>...</td>
+      <td>0.304809</td>
+      <td>-3.790693</td>
+      <td>-4.527736</td>
+      <td>-4.580476</td>
+      <td>0.387778</td>
+      <td>-1.847651</td>
+      <td>1.663134</td>
+      <td>5.029084</td>
+      <td>-2.721949</td>
+      <td>-3.973836</td>
+    </tr>
+    <tr>
+      <th>T1_AACCATGTCTGATTCT</th>
+      <td>-2.802891</td>
+      <td>3.993644</td>
+      <td>-3.051991</td>
+      <td>-2.714661</td>
+      <td>-0.384352</td>
+      <td>3.662242</td>
+      <td>0.521085</td>
+      <td>-0.527517</td>
+      <td>0.372198</td>
+      <td>-1.648475</td>
+      <td>...</td>
+      <td>0.454476</td>
+      <td>3.489575</td>
+      <td>4.389804</td>
+      <td>-5.389578</td>
+      <td>0.883337</td>
+      <td>1.698302</td>
+      <td>2.500381</td>
+      <td>5.306106</td>
+      <td>-3.180748</td>
+      <td>2.932764</td>
+    </tr>
+    <tr>
+      <th>T1_AACCATGTCTGTCCGT</th>
+      <td>5.836132</td>
+      <td>-5.163541</td>
+      <td>-1.977321</td>
+      <td>1.141605</td>
+      <td>0.463444</td>
+      <td>-6.424187</td>
+      <td>-0.517844</td>
+      <td>-0.151439</td>
+      <td>0.292964</td>
+      <td>2.459056</td>
+      <td>...</td>
+      <td>0.677739</td>
+      <td>-4.344269</td>
+      <td>-4.531244</td>
+      <td>-3.883833</td>
+      <td>0.974688</td>
+      <td>3.148598</td>
+      <td>-1.666538</td>
+      <td>6.374284</td>
+      <td>-2.399883</td>
+      <td>-4.054550</td>
+    </tr>
+    <tr>
+      <th>T1_AACCGCGGTACTCGCG</th>
+      <td>-4.609296</td>
+      <td>-4.227212</td>
+      <td>-1.493042</td>
+      <td>1.699813</td>
+      <td>-0.501248</td>
+      <td>-3.764099</td>
+      <td>-1.001384</td>
+      <td>0.410246</td>
+      <td>-0.586248</td>
+      <td>3.430812</td>
+      <td>...</td>
+      <td>1.612769</td>
+      <td>-3.468153</td>
+      <td>5.620489</td>
+      <td>-5.189224</td>
+      <td>-1.049103</td>
+      <td>1.246936</td>
+      <td>1.916292</td>
+      <td>4.120426</td>
+      <td>-2.854428</td>
+      <td>-3.290125</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>T24_TTTCCTCCAGACAAGC</th>
+      <td>-3.944360</td>
+      <td>1.750139</td>
+      <td>1.451235</td>
+      <td>1.311981</td>
+      <td>-1.013225</td>
+      <td>3.335825</td>
+      <td>-1.223036</td>
+      <td>-1.361282</td>
+      <td>1.000266</td>
+      <td>-2.621334</td>
+      <td>...</td>
+      <td>-1.175710</td>
+      <td>-2.760639</td>
+      <td>-2.704699</td>
+      <td>7.001897</td>
+      <td>-0.767698</td>
+      <td>-1.361584</td>
+      <td>-1.866684</td>
+      <td>1.358097</td>
+      <td>-3.493935</td>
+      <td>3.254662</td>
+    </tr>
+    <tr>
+      <th>T24_TTTGCGCCAATCGAAA</th>
+      <td>3.347529</td>
+      <td>4.500856</td>
+      <td>1.888104</td>
+      <td>1.250957</td>
+      <td>0.436190</td>
+      <td>4.848531</td>
+      <td>-0.517327</td>
+      <td>0.351717</td>
+      <td>-0.559568</td>
+      <td>2.491276</td>
+      <td>...</td>
+      <td>0.848876</td>
+      <td>4.110682</td>
+      <td>-4.246705</td>
+      <td>-3.352188</td>
+      <td>0.562731</td>
+      <td>-1.935355</td>
+      <td>-3.241285</td>
+      <td>-4.374495</td>
+      <td>-2.481064</td>
+      <td>-3.616688</td>
+    </tr>
+    <tr>
+      <th>T24_TTTGCGCTCTTATCTG</th>
+      <td>5.555337</td>
+      <td>-6.153196</td>
+      <td>1.372226</td>
+      <td>2.919869</td>
+      <td>-0.469186</td>
+      <td>-4.349864</td>
+      <td>-0.890229</td>
+      <td>0.190666</td>
+      <td>-0.334211</td>
+      <td>4.079427</td>
+      <td>...</td>
+      <td>0.413367</td>
+      <td>-3.362867</td>
+      <td>-3.973336</td>
+      <td>-4.882912</td>
+      <td>-0.877738</td>
+      <td>-1.255162</td>
+      <td>-1.605664</td>
+      <td>-5.820206</td>
+      <td>-3.754081</td>
+      <td>-3.087651</td>
+    </tr>
+    <tr>
+      <th>T24_TTTGGTTAGACACTAA</th>
+      <td>5.937774</td>
+      <td>-5.224112</td>
+      <td>1.148214</td>
+      <td>2.144821</td>
+      <td>0.292466</td>
+      <td>-4.405517</td>
+      <td>0.710239</td>
+      <td>0.310628</td>
+      <td>-0.301723</td>
+      <td>2.331352</td>
+      <td>...</td>
+      <td>-1.071508</td>
+      <td>-3.368961</td>
+      <td>-5.275390</td>
+      <td>-4.463356</td>
+      <td>-0.697124</td>
+      <td>3.595052</td>
+      <td>-2.047085</td>
+      <td>4.147670</td>
+      <td>-2.876362</td>
+      <td>-3.277021</td>
+    </tr>
+    <tr>
+      <th>T24_TTTGTCAAGATGTCGG</th>
+      <td>3.742025</td>
+      <td>3.603370</td>
+      <td>3.579133</td>
+      <td>-1.779998</td>
+      <td>0.911138</td>
+      <td>3.516317</td>
+      <td>-0.814036</td>
+      <td>-0.395228</td>
+      <td>-0.732801</td>
+      <td>1.899046</td>
+      <td>...</td>
+      <td>-0.724941</td>
+      <td>-3.660233</td>
+      <td>-3.828519</td>
+      <td>-4.478890</td>
+      <td>1.014017</td>
+      <td>-1.623926</td>
+      <td>-3.044723</td>
+      <td>3.373294</td>
+      <td>-4.510931</td>
+      <td>-2.959467</td>
+    </tr>
+  </tbody>
+</table>
+<p>11315 rows × 6603 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ProtAct_NaRnEA</span><span class="o">.</span><span class="n">to_df</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="s2">&quot;pes&quot;</span><span class="p">)</span> <span class="c1"># PES matrix</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>AAMP</th>
+      <th>AATF</th>
+      <th>ABCA1</th>
+      <th>ABCA12</th>
+      <th>ABCA3</th>
+      <th>ABCA7</th>
+      <th>ABCA8</th>
+      <th>ABCB1</th>
+      <th>ABCB11</th>
+      <th>ABCB4</th>
+      <th>...</th>
+      <th>ZSWIM5</th>
+      <th>ZSWIM6</th>
+      <th>ZSWIM7</th>
+      <th>ZWINT</th>
+      <th>ZXDA</th>
+      <th>ZXDB</th>
+      <th>ZXDC</th>
+      <th>ZYX</th>
+      <th>ZZEF1</th>
+      <th>ZZZ3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>T1_AACACGTCAATGACCT</th>
+      <td>0.348869</td>
+      <td>-0.343762</td>
+      <td>-0.110863</td>
+      <td>0.130743</td>
+      <td>-0.070393</td>
+      <td>0.429836</td>
+      <td>-0.083036</td>
+      <td>-0.016585</td>
+      <td>0.048539</td>
+      <td>-0.204628</td>
+      <td>...</td>
+      <td>-0.042109</td>
+      <td>0.199476</td>
+      <td>-0.374441</td>
+      <td>-0.424743</td>
+      <td>0.045133</td>
+      <td>-0.184836</td>
+      <td>-0.209920</td>
+      <td>0.377255</td>
+      <td>0.157716</td>
+      <td>-0.348309</td>
+    </tr>
+    <tr>
+      <th>T1_AACCATGCACAACTGT</th>
+      <td>-0.528985</td>
+      <td>-0.529745</td>
+      <td>0.129780</td>
+      <td>-0.112411</td>
+      <td>-0.045484</td>
+      <td>-0.476095</td>
+      <td>0.050026</td>
+      <td>-0.039604</td>
+      <td>-0.022121</td>
+      <td>-0.246433</td>
+      <td>...</td>
+      <td>0.023831</td>
+      <td>-0.344766</td>
+      <td>-0.417133</td>
+      <td>-0.411367</td>
+      <td>0.030728</td>
+      <td>-0.163514</td>
+      <td>0.107172</td>
+      <td>0.263967</td>
+      <td>-0.233501</td>
+      <td>-0.380075</td>
+    </tr>
+    <tr>
+      <th>T1_AACCATGTCTGATTCT</th>
+      <td>-0.237848</td>
+      <td>0.282956</td>
+      <td>-0.249395</td>
+      <td>-0.227694</td>
+      <td>-0.030584</td>
+      <td>0.261185</td>
+      <td>0.038871</td>
+      <td>-0.042016</td>
+      <td>0.029066</td>
+      <td>-0.128803</td>
+      <td>...</td>
+      <td>0.036971</td>
+      <td>0.254114</td>
+      <td>0.310455</td>
+      <td>-0.427258</td>
+      <td>0.073448</td>
+      <td>0.121923</td>
+      <td>0.187542</td>
+      <td>0.360094</td>
+      <td>-0.258316</td>
+      <td>0.218576</td>
+    </tr>
+    <tr>
+      <th>T1_AACCATGTCTGTCCGT</th>
+      <td>0.357353</td>
+      <td>-0.476673</td>
+      <td>-0.165278</td>
+      <td>0.075627</td>
+      <td>0.031755</td>
+      <td>-0.593634</td>
+      <td>-0.040014</td>
+      <td>-0.011453</td>
+      <td>0.020916</td>
+      <td>0.187330</td>
+      <td>...</td>
+      <td>0.053423</td>
+      <td>-0.390363</td>
+      <td>-0.410869</td>
+      <td>-0.341585</td>
+      <td>0.077991</td>
+      <td>0.191551</td>
+      <td>-0.137638</td>
+      <td>0.352367</td>
+      <td>-0.204059</td>
+      <td>-0.382293</td>
+    </tr>
+    <tr>
+      <th>T1_AACCGCGGTACTCGCG</th>
+      <td>-0.407796</td>
+      <td>-0.377861</td>
+      <td>-0.124176</td>
+      <td>0.119877</td>
+      <td>-0.039662</td>
+      <td>-0.337172</td>
+      <td>-0.078353</td>
+      <td>0.031478</td>
+      <td>-0.047480</td>
+      <td>0.267631</td>
+      <td>...</td>
+      <td>0.129462</td>
+      <td>-0.305022</td>
+      <td>0.360090</td>
+      <td>-0.439009</td>
+      <td>-0.082259</td>
+      <td>0.081976</td>
+      <td>0.134811</td>
+      <td>0.250632</td>
+      <td>-0.239141</td>
+      <td>-0.302241</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>T24_TTTCCTCCAGACAAGC</th>
+      <td>-0.328229</td>
+      <td>0.130586</td>
+      <td>0.111119</td>
+      <td>0.102934</td>
+      <td>-0.081034</td>
+      <td>0.250359</td>
+      <td>-0.096691</td>
+      <td>-0.110021</td>
+      <td>0.080107</td>
+      <td>-0.208949</td>
+      <td>...</td>
+      <td>-0.094689</td>
+      <td>-0.229202</td>
+      <td>-0.221325</td>
+      <td>0.485909</td>
+      <td>-0.063650</td>
+      <td>-0.110826</td>
+      <td>-0.152276</td>
+      <td>0.097389</td>
+      <td>-0.279884</td>
+      <td>0.254283</td>
+    </tr>
+    <tr>
+      <th>T24_TTTGCGCCAATCGAAA</th>
+      <td>0.245833</td>
+      <td>0.322864</td>
+      <td>0.140398</td>
+      <td>0.095364</td>
+      <td>0.033130</td>
+      <td>0.350021</td>
+      <td>-0.040649</td>
+      <td>0.027898</td>
+      <td>-0.045677</td>
+      <td>0.198549</td>
+      <td>...</td>
+      <td>0.069061</td>
+      <td>0.302551</td>
+      <td>-0.352562</td>
+      <td>-0.262604</td>
+      <td>0.046824</td>
+      <td>-0.159023</td>
+      <td>-0.264329</td>
+      <td>-0.353943</td>
+      <td>-0.200182</td>
+      <td>-0.315115</td>
+    </tr>
+    <tr>
+      <th>T24_TTTGCGCTCTTATCTG</th>
+      <td>0.370068</td>
+      <td>-0.547986</td>
+      <td>0.094530</td>
+      <td>0.206557</td>
+      <td>-0.037103</td>
+      <td>-0.388237</td>
+      <td>-0.069612</td>
+      <td>0.014642</td>
+      <td>-0.027056</td>
+      <td>0.318304</td>
+      <td>...</td>
+      <td>0.033178</td>
+      <td>-0.294894</td>
+      <td>-0.348749</td>
+      <td>-0.411278</td>
+      <td>-0.068900</td>
+      <td>-0.107469</td>
+      <td>-0.132508</td>
+      <td>-0.503978</td>
+      <td>-0.313703</td>
+      <td>-0.282752</td>
+    </tr>
+    <tr>
+      <th>T24_TTTGGTTAGACACTAA</th>
+      <td>0.379612</td>
+      <td>-0.474672</td>
+      <td>0.076573</td>
+      <td>0.146992</td>
+      <td>0.020565</td>
+      <td>-0.400918</td>
+      <td>0.049243</td>
+      <td>0.023502</td>
+      <td>-0.024292</td>
+      <td>0.180007</td>
+      <td>...</td>
+      <td>-0.079497</td>
+      <td>-0.299638</td>
+      <td>-0.471610</td>
+      <td>-0.385100</td>
+      <td>-0.053803</td>
+      <td>0.228075</td>
+      <td>-0.169294</td>
+      <td>0.241421</td>
+      <td>-0.242938</td>
+      <td>-0.305075</td>
+    </tr>
+    <tr>
+      <th>T24_TTTGTCAAGATGTCGG</th>
+      <td>0.265630</td>
+      <td>0.248794</td>
+      <td>0.259276</td>
+      <td>-0.150173</td>
+      <td>0.067991</td>
+      <td>0.244484</td>
+      <td>-0.064017</td>
+      <td>-0.031304</td>
+      <td>-0.059782</td>
+      <td>0.150526</td>
+      <td>...</td>
+      <td>-0.056500</td>
+      <td>-0.313166</td>
+      <td>-0.325563</td>
+      <td>-0.361914</td>
+      <td>0.084008</td>
+      <td>-0.135915</td>
+      <td>-0.250073</td>
+      <td>0.222649</td>
+      <td>-0.369884</td>
+      <td>-0.263428</td>
+    </tr>
+  </tbody>
+</table>
+<p>11315 rows × 6603 columns</p>
+</div></div>
+</div>
+<p>Notice that when setting the <code class="docutils literal notranslate"><span class="pre">pyther</span></code> output to be an object of class <code class="docutils literal notranslate"><span class="pre">AnnData</span></code>, the input gene expression <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> is stored under the attribute <code class="docutils literal notranslate"><span class="pre">gex_data</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ProtAct_NaRnEA</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;gex_data&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">to_df</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>RP11-206L10.2</th>
+      <th>RP11-54O7.3</th>
+      <th>HES4</th>
+      <th>ISG15</th>
+      <th>AGRN</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>T1_AACACGTCAATGACCT</th>
+      <td>-0.068999</td>
+      <td>-0.023360</td>
+      <td>-0.616169</td>
+      <td>-1.668614</td>
+      <td>7.155818</td>
+    </tr>
+    <tr>
+      <th>T1_AACCATGCACAACTGT</th>
+      <td>-0.051544</td>
+      <td>-0.014172</td>
+      <td>2.159164</td>
+      <td>-0.277659</td>
+      <td>-0.480383</td>
+    </tr>
+    <tr>
+      <th>T1_AACCATGTCTGATTCT</th>
+      <td>-0.081841</td>
+      <td>-0.030217</td>
+      <td>-0.731943</td>
+      <td>-0.967582</td>
+      <td>0.156287</td>
+    </tr>
+    <tr>
+      <th>T1_AACCATGTCTGTCCGT</th>
+      <td>-0.053397</td>
+      <td>-0.015141</td>
+      <td>-0.466018</td>
+      <td>0.654629</td>
+      <td>-0.501795</td>
+    </tr>
+    <tr>
+      <th>T1_AACCGCGGTACTCGCG</th>
+      <td>-0.073019</td>
+      <td>-0.025496</td>
+      <td>-0.653355</td>
+      <td>-1.721549</td>
+      <td>1.645273</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</div>
+</div>
+<div class="section" id="Step-4.-Analyze-single-cells-at-the-Protein-Activity-level">
+<h2>Step 4. Analyze single-cells at the Protein Activity level<a class="headerlink" href="#Step-4.-Analyze-single-cells-at-the-Protein-Activity-level" title="Permalink to this heading"></a></h2>
+<p>We present some basic, but instructive analyses at the protein activity matrix. Start by running Principal Components Analysis (PCA) on the PES matrix, to reduce the dimensionality of the dataset. Use the PCA function avaiable through <code class="docutils literal notranslate"><span class="pre">pyther.tl</span></code>, a module that provides several wrappers to <code class="docutils literal notranslate"><span class="pre">scanpy.tl</span></code> which simplifies the transformation of protein activity data. For instance, functions from <code class="docutils literal notranslate"><span class="pre">pyther.tl</span></code> allow subsetting the class of regulatory proteins to analyze. Run PCA using by
+projecting the PES of transcriptional regulators (TFs) and co-transcriptional regulators (coTFs) only by setting <code class="docutils literal notranslate"><span class="pre">filter_by_feature_groups=[&quot;tfs&quot;,</span> <span class="pre">&quot;cotfs&quot;]</span></code>. Possible options for this parameter are <code class="docutils literal notranslate"><span class="pre">[&quot;tfs&quot;,</span> <span class="pre">&quot;cotfs&quot;,</span> <span class="pre">&quot;sig&quot;,</span> <span class="pre">&quot;surface&quot;]</span></code>, where the latter refer to signaling proteins and surface markers, respectively.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pyther</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;pes&quot;</span><span class="p">,</span> <span class="n">filter_by_feature_groups</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;tfs&quot;</span><span class="p">,</span> <span class="s2">&quot;cotfs&quot;</span><span class="p">],</span> <span class="n">zero_center</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="n">svd_solver</span><span class="o">=</span><span class="s1">&#39;arpack&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Compute the neighbors graph of cells using the PCA representation of the protein activity matrix. For sake of simplicity, we set 10 nearest neightbors and 50 principal components. Typically, these parameters need tuning.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[78]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;euclidean&quot;</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Cluster at protein activity using the Leiden algorithm with <code class="docutils literal notranslate"><span class="pre">resolution=0.2</span></code> (in real applications this parameter should be optimized) How does the leiden option with tfs and cotfs exactly work?.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[81]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/tools/_leiden.py:158: ImplicitModificationWarning: Trying to modify attribute `.obs` of view, initializing view as actual.
+  adata.obs[key_added] = pd.Categorical(
+</pre></div></div>
+</div>
+<p>Generate a <a class="reference external" href="https://arxiv.org/abs/1802.03426">UMAP</a> embedding of the previously computed graph, filtering by <code class="docutils literal notranslate"><span class="pre">&quot;tfs&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;cotfs&quot;</span></code>. In this example, we focus on TFs and coTFs because we are interested in proteins involved in transcriptional regulation and that are mechanistic determinants of cell state, as shown in <a class="reference external" href="https://www.sciencedirect.com/science/article/pii/S0092867420316172?via%3Dihub">Paull et al., 2021</a> and <a class="reference external" href="https://www.nature.com/articles/nrc.2016.124">Califano &amp; Alvarez,
+2016</a> .</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[83]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pyther</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="n">filter_by_feature_groups</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;tfs&#39;</span><span class="p">,</span> <span class="s1">&#39;cotfs&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/tools/_umap.py:166: ImplicitModificationWarning: Trying to modify attribute `._uns` of view, initializing view as actual.
+  adata.uns[&#39;umap&#39;] = {&#39;params&#39;: {&#39;a&#39;: a, &#39;b&#39;: b}}
+</pre></div></div>
+</div>
+<p>Display the 2-dimensional UMAP embedding with the corresponding function from the <code class="docutils literal notranslate"><span class="pre">pyther.pl</span></code>, a module that provides wrappers for <code class="docutils literal notranslate"><span class="pre">scanpy.pl</span></code> functions for enhanced visualization of key protein activity features. Color by cluster.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[84]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">set_figure_params</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+<span class="n">n_cells</span> <span class="o">=</span> <span class="n">ProtAct_NaRnEA</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">dot_size</span> <span class="o">=</span> <span class="mi">120000</span> <span class="o">/</span> <span class="n">n_cells</span><span class="o">*</span><span class="mi">2</span>
+<span class="n">pyther</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;leiden&#39;</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;Set1&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">dot_size</span><span class="p">,</span><span class="n">add_outline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:369: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:379: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  cax = scatter(
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/Tutorial-1_43_1.png" class="no-scaled-link" src="_images/Tutorial-1_43_1.png" style="width: 364px; height: 333px;" />
+</div>
+</div>
+<p>Find the regulatory proteins predicted to be most active for each cell type by integrating the NES of each regulatory protein across all cells of a given cell type using the Stouffer’s method:</p>
+<div class="math notranslate nohighlight">
+\[NES^C_j = \frac{\sum_{k \in C}NES_{k,j}}{\sqrt{n^C}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(NES^C_j\)</span> denotes the integrated NES for regulator <span class="math notranslate nohighlight">\(j\)</span> in cluster/cell type <span class="math notranslate nohighlight">\(C\)</span>, <span class="math notranslate nohighlight">\(NES_{k,j}\)</span> is the NES of regulator <span class="math notranslate nohighlight">\(j\)</span> in cluster/cell type <span class="math notranslate nohighlight">\(C\)</span> and <span class="math notranslate nohighlight">\(n^C\)</span> is the number of cells in cluster <span class="math notranslate nohighlight">\(C\)</span>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[59]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">NES_integrated</span> <span class="o">=</span> <span class="n">pyther</span><span class="o">.</span><span class="n">compute_cluster_stouffer_anndata</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="s2">&quot;leiden&quot;</span><span class="p">)</span> <span class="c1"># Stouffer integration</span>
+</pre></div>
+</div>
+</div>
+<p>Analogously, <code class="docutils literal notranslate"><span class="pre">compute_cluster_stouffer</span></code>, can be used to perform the same operations in Pandas DataFrames. Remove ribosomal proteins from the above matrix (ribosomal protein genes are among the most highly expressed genes in most cell types).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[60]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filtered_proteins</span> <span class="o">=</span> <span class="n">NES_integrated</span><span class="o">.</span><span class="n">var_names</span><span class="p">[</span><span class="o">~</span><span class="n">NES_integrated</span><span class="o">.</span><span class="n">var_names</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;RP&#39;</span><span class="p">)]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span> <span class="c1"># Exclude columns starting with &#39;RP&#39; from integrated matrix</span>
+<span class="n">NES_integrated</span> <span class="o">=</span> <span class="n">NES_integrated</span><span class="p">[:,</span><span class="n">filtered_proteins</span><span class="p">]</span> <span class="c1"># remove ribosomal proteins from the AnnData object</span>
+</pre></div>
+</div>
+</div>
+<p>Slice <code class="docutils literal notranslate"><span class="pre">NES_integrated</span></code> to contain only on TFs and coTFs and focus only on these proteins.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[140]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">TFs_list</span> <span class="o">=</span> <span class="n">pyther</span><span class="o">.</span><span class="n">load</span><span class="o">.</span><span class="n">load_TFs</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">)</span> <span class="c1"># load list of TFs</span>
+<span class="n">coTFs_list</span> <span class="o">=</span> <span class="n">pyther</span><span class="o">.</span><span class="n">load</span><span class="o">.</span><span class="n">load_coTFs</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">)</span> <span class="c1"># load list of coTFs</span>
+<span class="n">TFs_coTFs</span> <span class="o">=</span> <span class="n">TFs_list</span> <span class="o">+</span> <span class="n">coTFs_list</span> <span class="c1"># concatenate TFs and coTFs</span>
+
+<span class="n">NES_integrated</span> <span class="o">=</span> <span class="n">NES_integrated</span><span class="p">[:,</span><span class="n">NES_integrated</span><span class="o">.</span><span class="n">var_names</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">TFs_coTFs</span><span class="p">)]</span> <span class="c1"># slice NES_integrated to have only TFs and coTFs</span>
+</pre></div>
+</div>
+</div>
+<p>Extract the 5 most activated regulatory protein in each cluster</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[141]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">active_proteins</span> <span class="o">=</span> <span class="n">NES_integrated</span><span class="o">.</span><span class="n">to_df</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">nlargest</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># the top 10 most activated proteins in each cell type</span>
+<span class="n">active_proteins</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[141]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0    [NFKBIZ, LRRFIP1, AGRN, MMP14, NFE2L2, KMT2A, ...
+1    [PFDN5, NACA, BTF3, ZNF90, YBX1, NME2, POLR2L,...
+2    [CREB3L1, JUND, MUC1, CDH1, ONECUT2, ELF3, LMO...
+3    [BTF3, PFDN5, ZNF581, YBX1, NACA, HMGA1, ZNF90...
+4    [ENO1, PTOV1, CEBPB, UBE2I, JUN, JUNB, SLC2A4R...
+5    [KLF2, ATP8B1, MYRF, ZBTB44, FOXQ1, HDGF, KLF5...
+dtype: object
+</pre></div></div>
+</div>
+<p>Show the top activated proteins on a heatmap</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[149]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">protein_set</span> <span class="o">=</span> <span class="n">active_proteins</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="c1"># protein set to display on the heatmap</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">pyther</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="n">protein_set</span><span class="p">,</span> <span class="n">groupby</span><span class="o">=</span><span class="s2">&quot;leiden&quot;</span><span class="p">,</span><span class="n">vmin</span><span class="o">=-</span><span class="mi">15</span><span class="p">,</span><span class="n">vmax</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">vcenter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;RdBu_r&quot;</span><span class="p">,</span><span class="n">dendrogram</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">swap_axes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_gene_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/Tutorial-1_53_0.png" class="no-scaled-link" src="_images/Tutorial-1_53_0.png" style="width: 758px; height: 338px;" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[154]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pyther</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">dotplot</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="n">protein_set</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;pes&quot;</span><span class="p">,</span><span class="n">groupby</span><span class="o">=</span><span class="s1">&#39;leiden&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;RdBu_r&quot;</span><span class="p">,</span> <span class="n">vcenter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">dendrogram</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_dotplot.py:749: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39;, &#39;norm&#39; will be ignored
+  dot_ax.scatter(x, y, **kwds)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/Tutorial-1_54_1.png" class="no-scaled-link" src="_images/Tutorial-1_54_1.png" style="width: 1702px; height: 348px;" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[156]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">help</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on function leiden in module scanpy.tools._leiden:
+
+leiden(adata: anndata._core.anndata.AnnData, resolution: float = 1, *, restrict_to: Optional[Tuple[str, Sequence[str]]] = None, random_state: Union[NoneType, int, numpy.random.mtrand.RandomState] = 0, key_added: str = &#39;leiden&#39;, adjacency: Optional[scipy.sparse._matrix.spmatrix] = None, directed: bool = True, use_weights: bool = True, n_iterations: int = -1, partition_type: Optional[Type[leidenalg.VertexPartition.MutableVertexPartition]] = None, neighbors_key: Optional[str] = None, obsp: Optional[str] = None, copy: bool = False, **partition_kwargs) -&gt; Optional[anndata._core.anndata.AnnData]
+    Cluster cells into subgroups [Traag18]_.
+
+    Cluster cells using the Leiden algorithm [Traag18]_,
+    an improved version of the Louvain algorithm [Blondel08]_.
+    It has been proposed for single-cell analysis by [Levine15]_.
+
+    This requires having ran :func:`~scanpy.pp.neighbors` or
+    :func:`~scanpy.external.pp.bbknn` first.
+
+    Parameters
+    ----------
+    adata
+        The annotated data matrix.
+    resolution
+        A parameter value controlling the coarseness of the clustering.
+        Higher values lead to more clusters.
+        Set to `None` if overriding `partition_type`
+        to one that doesn’t accept a `resolution_parameter`.
+    random_state
+        Change the initialization of the optimization.
+    restrict_to
+        Restrict the clustering to the categories within the key for sample
+        annotation, tuple needs to contain `(obs_key, list_of_categories)`.
+    key_added
+        `adata.obs` key under which to add the cluster labels.
+    adjacency
+        Sparse adjacency matrix of the graph, defaults to neighbors connectivities.
+    directed
+        Whether to treat the graph as directed or undirected.
+    use_weights
+        If `True`, edge weights from the graph are used in the computation
+        (placing more emphasis on stronger edges).
+    n_iterations
+        How many iterations of the Leiden clustering algorithm to perform.
+        Positive values above 2 define the total number of iterations to perform,
+        -1 has the algorithm run until it reaches its optimal clustering.
+    partition_type
+        Type of partition to use.
+        Defaults to :class:`~leidenalg.RBConfigurationVertexPartition`.
+        For the available options, consult the documentation for
+        :func:`~leidenalg.find_partition`.
+    neighbors_key
+        Use neighbors connectivities as adjacency.
+        If not specified, leiden looks .obsp[&#39;connectivities&#39;] for connectivities
+        (default storage place for pp.neighbors).
+        If specified, leiden looks
+        .obsp[.uns[neighbors_key][&#39;connectivities_key&#39;]] for connectivities.
+    obsp
+        Use .obsp[obsp] as adjacency. You can&#39;t specify both
+        `obsp` and `neighbors_key` at the same time.
+    copy
+        Whether to copy `adata` or modify it inplace.
+    **partition_kwargs
+        Any further arguments to pass to `~leidenalg.find_partition`
+        (which in turn passes arguments to the `partition_type`).
+
+    Returns
+    -------
+    `adata.obs[key_added]`
+        Array of dim (number of samples) that stores the subgroup id
+        (`&#39;0&#39;`, `&#39;1&#39;`, ...) for each cell.
+    `adata.uns[&#39;leiden&#39;][&#39;params&#39;]`
+        A dict with the values for the parameters `resolution`, `random_state`,
+        and `n_iterations`.
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[157]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">?</span>sc.pp.neighbors
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">Signature:</span>
+sc<span class="ansi-blue-fg">.</span>pp<span class="ansi-blue-fg">.</span>neighbors<span class="ansi-blue-fg">(</span>
+    adata<span class="ansi-blue-fg">:</span> anndata<span class="ansi-blue-fg">.</span>_core<span class="ansi-blue-fg">.</span>anndata<span class="ansi-blue-fg">.</span>AnnData<span class="ansi-blue-fg">,</span>
+    n_neighbors<span class="ansi-blue-fg">:</span> int <span class="ansi-blue-fg">=</span> <span class="ansi-cyan-fg">15</span><span class="ansi-blue-fg">,</span>
+    n_pcs<span class="ansi-blue-fg">:</span> Optional<span class="ansi-blue-fg">[</span>int<span class="ansi-blue-fg">]</span> <span class="ansi-blue-fg">=</span> <span class="ansi-green-fg">None</span><span class="ansi-blue-fg">,</span>
+    use_rep<span class="ansi-blue-fg">:</span> Optional<span class="ansi-blue-fg">[</span>str<span class="ansi-blue-fg">]</span> <span class="ansi-blue-fg">=</span> <span class="ansi-green-fg">None</span><span class="ansi-blue-fg">,</span>
+    knn<span class="ansi-blue-fg">:</span> bool <span class="ansi-blue-fg">=</span> <span class="ansi-green-fg">True</span><span class="ansi-blue-fg">,</span>
+    random_state<span class="ansi-blue-fg">:</span> Union<span class="ansi-blue-fg">[</span>NoneType<span class="ansi-blue-fg">,</span> int<span class="ansi-blue-fg">,</span> numpy<span class="ansi-blue-fg">.</span>random<span class="ansi-blue-fg">.</span>mtrand<span class="ansi-blue-fg">.</span>RandomState<span class="ansi-blue-fg">]</span> <span class="ansi-blue-fg">=</span> <span class="ansi-cyan-fg">0</span><span class="ansi-blue-fg">,</span>
+    method<span class="ansi-blue-fg">:</span> Optional<span class="ansi-blue-fg">[</span>Literal<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#39;umap&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;gauss&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;rapids&#39;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">]</span> <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">&#39;umap&#39;</span><span class="ansi-blue-fg">,</span>
+    metric<span class="ansi-blue-fg">:</span> Union<span class="ansi-blue-fg">[</span>Literal<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#39;cityblock&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;cosine&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;euclidean&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;l1&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;l2&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;manhattan&#39;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">,</span> Literal<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#39;braycurtis&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;canberra&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;chebyshev&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;correlation&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;dice&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;hamming&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;jaccard&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;kulsinski&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;mahalanobis&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;minkowski&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;rogerstanimoto&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;russellrao&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;seuclidean&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;sokalmichener&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;sokalsneath&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;sqeuclidean&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;yule&#39;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">,</span> Callable<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">[</span>numpy<span class="ansi-blue-fg">.</span>ndarray<span class="ansi-blue-fg">,</span> numpy<span class="ansi-blue-fg">.</span>ndarray<span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">,</span> float<span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">]</span> <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">&#39;euclidean&#39;</span><span class="ansi-blue-fg">,</span>
+    metric_kwds<span class="ansi-blue-fg">:</span> Mapping<span class="ansi-blue-fg">[</span>str<span class="ansi-blue-fg">,</span> Any<span class="ansi-blue-fg">]</span> <span class="ansi-blue-fg">=</span> mappingproxy<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">{</span><span class="ansi-blue-fg">}</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">,</span>
+    key_added<span class="ansi-blue-fg">:</span> Optional<span class="ansi-blue-fg">[</span>str<span class="ansi-blue-fg">]</span> <span class="ansi-blue-fg">=</span> <span class="ansi-green-fg">None</span><span class="ansi-blue-fg">,</span>
+    copy<span class="ansi-blue-fg">:</span> bool <span class="ansi-blue-fg">=</span> <span class="ansi-green-fg">False</span><span class="ansi-blue-fg">,</span>
+<span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">-&gt;</span> Optional<span class="ansi-blue-fg">[</span>anndata<span class="ansi-blue-fg">.</span>_core<span class="ansi-blue-fg">.</span>anndata<span class="ansi-blue-fg">.</span>AnnData<span class="ansi-blue-fg">]</span>
+<span class="ansi-red-fg">Docstring:</span>
+Compute a neighborhood graph of observations [McInnes18]_.
+
+The neighbor search efficiency of this heavily relies on UMAP [McInnes18]_,
+which also provides a method for estimating connectivities of data points -
+the connectivity of the manifold (`method==&#39;umap&#39;`). If `method==&#39;gauss&#39;`,
+connectivities are computed according to [Coifman05]_, in the adaption of
+[Haghverdi16]_.
+
+Parameters
+----------
+adata : AnnData
+    Annotated data matrix.
+n_neighbors : int, optional (default: 15)
+    The size of local neighborhood (in terms of number of neighboring data
+    points) used for manifold approximation. Larger values result in more
+    global views of the manifold, while smaller values result in more local
+    data being preserved. In general values should be in the range 2 to 100.
+    If `knn` is `True`, number of nearest neighbors to be searched. If `knn`
+    is `False`, a Gaussian kernel width is set to the distance of the
+    `n_neighbors` neighbor.
+n_pcs : Optional, optional (default: None)
+    Use this many PCs. If `n_pcs==0` use `.X` if `use_rep is None`.
+use_rep : Optional, optional (default: None)
+    Use the indicated representation. `&#39;X&#39;` or any key for `.obsm` is valid.
+    If `None`, the representation is chosen automatically:
+    For `.n_vars` &lt; 50, `.X` is used, otherwise &#39;X_pca&#39; is used.
+    If &#39;X_pca&#39; is not present, it’s computed with default parameters.
+knn : bool, optional (default: True)
+    If `True`, use a hard threshold to restrict the number of neighbors to
+    `n_neighbors`, that is, consider a knn graph. Otherwise, use a Gaussian
+    Kernel to assign low weights to neighbors more distant than the
+    `n_neighbors` nearest neighbor.
+random_state : Union, optional (default: 0)
+    A numpy random seed.
+method : Optional, optional (default: &#39;umap&#39;)
+    Use &#39;umap&#39; [McInnes18]_ or &#39;gauss&#39; (Gauss kernel following [Coifman05]_
+    with adaptive width [Haghverdi16]_) for computing connectivities.
+    Use &#39;rapids&#39; for the RAPIDS implementation of UMAP (experimental, GPU
+    only).
+metric : Union, optional (default: &#39;euclidean&#39;)
+    A known metric’s name or a callable that returns a distance.
+metric_kwds : Mapping, optional (default: mappingproxy({}))
+    Options for the metric.
+key_added : Optional, optional (default: None)
+    If not specified, the neighbors data is stored in .uns[&#39;neighbors&#39;],
+    distances and connectivities are stored in .obsp[&#39;distances&#39;] and
+    .obsp[&#39;connectivities&#39;] respectively.
+    If specified, the neighbors data is added to .uns[key_added],
+    distances are stored in .obsp[key_added+&#39;_distances&#39;] and
+    connectivities in .obsp[key_added+&#39;_connectivities&#39;].
+copy : bool, optional (default: False)
+    Return a copy instead of writing to adata.
+
+Returns
+-------
+Depending on `copy`, updates or returns `adata` with the following:
+
+See `key_added` parameter description for the storage path of
+connectivities and distances.
+
+**connectivities** : sparse matrix of dtype `float32`.
+    Weighted adjacency matrix of the neighborhood graph of data
+    points. Weights should be interpreted as connectivities.
+**distances** : sparse matrix of dtype `float32`.
+    Instead of decaying weights, this stores distances for each pair of
+    neighbors.
+
+Notes
+-----
+If `method=&#39;umap&#39;`, it&#39;s highly recommended to install pynndescent ``pip install pynndescent``.
+Installing `pynndescent` can significantly increase performance,
+and in later versions it will become a hard dependency.
+<span class="ansi-red-fg">File:</span>      ~/mambaforge/lib/python3.10/site-packages/scanpy/neighbors/__init__.py
+<span class="ansi-red-fg">Type:</span>      function
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[158]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">help</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on function umap in module scanpy.plotting._tools.scatterplots:
+
+umap(adata: anndata._core.anndata.AnnData, *, color: Union[str, Sequence[str], NoneType] = None, gene_symbols: Optional[str] = None, use_raw: Optional[bool] = None, sort_order: bool = True, edges: bool = False, edges_width: float = 0.1, edges_color: Union[str, Sequence[float], Sequence[str]] = &#39;grey&#39;, neighbors_key: Optional[str] = None, arrows: bool = False, arrows_kwds: Optional[Mapping[str, Any]] = None, groups: Optional[str] = None, components: Union[str, Sequence[str]] = None, dimensions: Union[Tuple[int, int], Sequence[Tuple[int, int]], NoneType] = None, layer: Optional[str] = None, projection: Literal[&#39;2d&#39;, &#39;3d&#39;] = &#39;2d&#39;, scale_factor: Optional[float] = None, color_map: Union[matplotlib.colors.Colormap, str, NoneType] = None, cmap: Union[matplotlib.colors.Colormap, str, NoneType] = None, palette: Union[str, Sequence[str], cycler.Cycler, NoneType] = None, na_color: Union[str, Tuple[float, ...]] = &#39;lightgray&#39;, na_in_legend: bool = True, size: Union[float, Sequence[float], NoneType] = None, frameon: Optional[bool] = None, legend_fontsize: Union[int, float, Literal[&#39;xx-small&#39;, &#39;x-small&#39;, &#39;small&#39;, &#39;medium&#39;, &#39;large&#39;, &#39;x-large&#39;, &#39;xx-large&#39;], NoneType] = None, legend_fontweight: Union[int, Literal[&#39;light&#39;, &#39;normal&#39;, &#39;medium&#39;, &#39;semibold&#39;, &#39;bold&#39;, &#39;heavy&#39;, &#39;black&#39;]] = &#39;bold&#39;, legend_loc: str = &#39;right margin&#39;, legend_fontoutline: Optional[int] = None, colorbar_loc: Optional[str] = &#39;right&#39;, vmax: Union[str, float, Callable[[Sequence[float]], float], Sequence[Union[str, float, Callable[[Sequence[float]], float]]], NoneType] = None, vmin: Union[str, float, Callable[[Sequence[float]], float], Sequence[Union[str, float, Callable[[Sequence[float]], float]]], NoneType] = None, vcenter: Union[str, float, Callable[[Sequence[float]], float], Sequence[Union[str, float, Callable[[Sequence[float]], float]]], NoneType] = None, norm: Union[matplotlib.colors.Normalize, Sequence[matplotlib.colors.Normalize], NoneType] = None, add_outline: Optional[bool] = False, outline_width: Tuple[float, float] = (0.3, 0.05), outline_color: Tuple[str, str] = (&#39;black&#39;, &#39;white&#39;), ncols: int = 4, hspace: float = 0.25, wspace: Optional[float] = None, title: Union[str, Sequence[str], NoneType] = None, show: Optional[bool] = None, save: Union[bool, str, NoneType] = None, ax: Optional[matplotlib.axes._axes.Axes] = None, return_fig: Optional[bool] = None, **kwargs) -&gt; Union[matplotlib.axes._axes.Axes, List[matplotlib.axes._axes.Axes], NoneType]
+    Scatter plot in UMAP basis.
+
+    Parameters
+    ----------
+    adata
+        Annotated data matrix.
+    color
+        Keys for annotations of observations/cells or variables/genes, e.g.,
+        `&#39;ann1&#39;` or `[&#39;ann1&#39;, &#39;ann2&#39;]`.
+    gene_symbols
+        Column name in `.var` DataFrame that stores gene symbols. By default `var_names`
+        refer to the index column of the `.var` DataFrame. Setting this option allows
+        alternative names to be used.
+    use_raw
+        Use `.raw` attribute of `adata` for coloring with gene expression. If `None`,
+        defaults to `True` if `layer` isn&#39;t provided and `adata.raw` is present.
+    layer
+        Name of the AnnData object layer that wants to be plotted. By default
+        adata.raw.X is plotted. If `use_raw=False` is set, then `adata.X` is plotted.
+        If `layer` is set to a valid layer name, then the layer is plotted. `layer`
+        takes precedence over `use_raw`.
+    edges
+        Show edges.
+    edges_width
+        Width of edges.
+    edges_color
+        Color of edges. See :func:`~networkx.drawing.nx_pylab.draw_networkx_edges`.
+    neighbors_key
+        Where to look for neighbors connectivities.
+        If not specified, this looks .obsp[&#39;connectivities&#39;] for connectivities
+        (default storage place for pp.neighbors).
+        If specified, this looks
+        .obsp[.uns[neighbors_key][&#39;connectivities_key&#39;]] for connectivities.
+    arrows
+        Show arrows (deprecated in favour of `scvelo.pl.velocity_embedding`).
+    arrows_kwds
+        Passed to :meth:`~matplotlib.axes.Axes.quiver`
+    sort_order
+        For continuous annotations used as color parameter, plot data points
+        with higher values on top of others.
+    groups
+        Restrict to a few categories in categorical observation annotation.
+        The default is not to restrict to any groups.
+    dimensions
+        0-indexed dimensions of the embedding to plot as integers. E.g. [(0, 1), (1, 2)].
+        Unlike `components`, this argument is used in the same way as `colors`, e.g. is
+        used to specify a single plot at a time. Will eventually replace the components
+        argument.
+    components
+        For instance, `[&#39;1,2&#39;, &#39;2,3&#39;]`. To plot all available components use
+        `components=&#39;all&#39;`.
+    projection
+        Projection of plot (default: `&#39;2d&#39;`).
+    legend_loc
+        Location of legend, either `&#39;on data&#39;`, `&#39;right margin&#39;` or a valid keyword
+        for the `loc` parameter of :class:`~matplotlib.legend.Legend`.
+    legend_fontsize
+        Numeric size in pt or string describing the size.
+        See :meth:`~matplotlib.text.Text.set_fontsize`.
+    legend_fontweight
+        Legend font weight. A numeric value in range 0-1000 or a string.
+        Defaults to `&#39;bold&#39;` if `legend_loc == &#39;on data&#39;`, otherwise to `&#39;normal&#39;`.
+        See :meth:`~matplotlib.text.Text.set_fontweight`.
+    legend_fontoutline
+        Line width of the legend font outline in pt. Draws a white outline using
+        the path effect :class:`~matplotlib.patheffects.withStroke`.
+    colorbar_loc
+        Where to place the colorbar for continous variables. If `None`, no colorbar
+        is added.
+    size
+        Point size. If `None`, is automatically computed as 120000 / n_cells.
+        Can be a sequence containing the size for each cell. The order should be
+        the same as in adata.obs.
+    color_map
+        Color map to use for continous variables. Can be a name or a
+        :class:`~matplotlib.colors.Colormap` instance (e.g. `&#34;magma`&#34;, `&#34;viridis&#34;`
+        or `mpl.cm.cividis`), see :func:`~matplotlib.cm.get_cmap`.
+        If `None`, the value of `mpl.rcParams[&#34;image.cmap&#34;]` is used.
+        The default `color_map` can be set using :func:`~scanpy.set_figure_params`.
+    palette
+        Colors to use for plotting categorical annotation groups.
+        The palette can be a valid :class:`~matplotlib.colors.ListedColormap` name
+        (`&#39;Set2&#39;`, `&#39;tab20&#39;`, …), a :class:`~cycler.Cycler` object, a dict mapping
+        categories to colors, or a sequence of colors. Colors must be valid to
+        matplotlib. (see :func:`~matplotlib.colors.is_color_like`).
+        If `None`, `mpl.rcParams[&#34;axes.prop_cycle&#34;]` is used unless the categorical
+        variable already has colors stored in `adata.uns[&#34;{var}_colors&#34;]`.
+        If provided, values of `adata.uns[&#34;{var}_colors&#34;]` will be set.
+    na_color
+        Color to use for null or masked values. Can be anything matplotlib accepts as a
+        color. Used for all points if `color=None`.
+    na_in_legend
+        If there are missing values, whether they get an entry in the legend. Currently
+        only implemented for categorical legends.
+    frameon
+        Draw a frame around the scatter plot. Defaults to value set in
+        :func:`~scanpy.set_figure_params`, defaults to `True`.
+    title
+        Provide title for panels either as string or list of strings,
+        e.g. `[&#39;title1&#39;, &#39;title2&#39;, ...]`.
+
+    vmin
+        The value representing the lower limit of the color scale. Values smaller than vmin are plotted
+        with the same color as vmin. vmin can be a number, a string, a function or `None`. If
+        vmin is a string and has the format `pN`, this is interpreted as a vmin=percentile(N).
+        For example vmin=&#39;p1.5&#39; is interpreted as the 1.5 percentile. If vmin is function, then
+        vmin is interpreted as the return value of the function over the list of values to plot.
+        For example to set vmin tp the mean of the values to plot, `def my_vmin(values): return
+        np.mean(values)` and then set `vmin=my_vmin`. If vmin is None (default) an automatic
+        minimum value is used as defined by matplotlib `scatter` function. When making multiple
+        plots, vmin can be a list of values, one for each plot. For example `vmin=[0.1, &#39;p1&#39;, None, my_vmin]`
+    vmax
+        The value representing the upper limit of the color scale. The format is the same as for `vmin`.
+    vcenter
+        The value representing the center of the color scale. Useful for diverging colormaps.
+        The format is the same as for `vmin`.
+        Example: sc.pl.umap(adata, color=&#39;TREM2&#39;, vcenter=&#39;p50&#39;, cmap=&#39;RdBu_r&#39;)
+    add_outline
+        If set to True, this will add a thin border around groups of dots. In some situations
+        this can enhance the aesthetics of the resulting image
+    outline_color
+        Tuple with two valid color names used to adjust the add_outline. The first color is the
+        border color (default: black), while the second color is a gap color between the
+        border color and the scatter dot (default: white).
+    outline_width
+        Tuple with two width numbers used to adjust the outline. The first value is the width
+        of the border color as a fraction of the scatter dot size (default: 0.3). The second value is
+        width of the gap color (default: 0.05).
+    ncols
+        Number of panels per row.
+    wspace
+        Adjust the width of the space between multiple panels.
+    hspace
+        Adjust the height of the space between multiple panels.
+    return_fig
+        Return the matplotlib figure.
+    kwargs
+        Arguments to pass to :func:`matplotlib.pyplot.scatter`,
+        for instance: the maximum and minimum values (e.g. `vmin=-2, vmax=5`).
+    show
+         Show the plot, do not return axis.
+    save
+        If `True` or a `str`, save the figure.
+        A string is appended to the default filename.
+        Infer the filetype if ending on {`&#39;.pdf&#39;`, `&#39;.png&#39;`, `&#39;.svg&#39;`}.
+    ax
+        A matplotlib axes object. Only works if plotting a single component.
+
+    Returns
+    -------
+    If `show==False` a :class:`~matplotlib.axes.Axes` or a list of it.
+
+    Examples
+    --------
+
+    .. plot::
+        :context: close-figs
+
+        import scanpy as sc
+        adata = sc.datasets.pbmc68k_reduced()
+        sc.pl.umap(adata)
+
+    Colour points by discrete variable (Louvain clusters).
+
+    .. plot::
+        :context: close-figs
+
+        sc.pl.umap(adata, color=&#34;louvain&#34;)
+
+    Colour points by gene expression.
+
+    .. plot::
+        :context: close-figs
+
+        sc.pl.umap(adata, color=&#34;HES4&#34;)
+
+    Plot muliple umaps for different gene expressions.
+
+    .. plot::
+        :context: close-figs
+
+        sc.pl.umap(adata, color=[&#34;HES4&#34;, &#34;TNFRSF4&#34;])
+
+    .. currentmodule:: scanpy
+
+    See also
+    --------
+    tl.umap
+
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyther.NaRnEA.html" class="btn btn-neutral float-left" title="NaRnEA.NaRnEA_classic" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Tutorial-2.html" class="btn btn-neutral float-right" title="Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, ..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
