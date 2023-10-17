@@ -5,7 +5,7 @@
 
 ```{toctree}
 :caption: 'Contents'
-:maxdepth: 6
+:maxdepth: 4
 
 pyther
 pyther.aREA
@@ -15,4 +15,7 @@ pyther.NaRnEA
 ```{toctree}
 :caption: 'Tutorials'
 :maxdepth: 2
+
+Tutorial-1.ipynb
+Tutorial-2.ipynb
 ```
