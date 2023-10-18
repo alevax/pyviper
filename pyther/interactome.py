@@ -534,7 +534,7 @@ class Interactome:
         """\
         Translate the targets of the Interactome.  The current name format of
         the targets should be one of the following:
-            mouse_symbol, mouse_ensembl, human_symbol, or human_ensembl
+            mouse_symbol, mouse_ensembl, mouse_entrez, human_symbol, human_ensembl or human_entrez
 
         It is recommended to do this before pruning to ensure a consistent number
         of targets because if targets do not have a translation, they will be
@@ -545,7 +545,7 @@ class Interactome:
         ----------
         desired_format
             Desired format can be one of four strings: "mouse_symbol",
-            "mouse_ensembl", "human_symbol", or "human_ensembl".
+            "mouse_ensembl", "mouse_entrez", "human_symbol", "human_ensembl" or "human_entrez".
         """
         self.net_table = self.__translate_net_table_column(
             net_table = self.net_table,
@@ -557,13 +557,13 @@ class Interactome:
         """\
         Translate the regulators of the Interactome. The current name format of
         the regulators should be one of the following:
-            mouse_symbol, mouse_ensembl, human_symbol, or human_ensembl
+            mouse_symbol, mouse_ensembl, mouse_entrez, human_symbol, human_ensembl or human_entrez
 
         Parameters
         ----------
         desired_format
             Desired format can be one of four strings: "mouse_symbol",
-            "mouse_ensembl", "human_symbol", or "human_ensembl".
+            "mouse_ensembl", "mouse_entrez", "human_symbol", "human_ensembl" or "human_entrez".
         """
         self.net_table = self.__translate_net_table_column(
             net_table = self.net_table,
