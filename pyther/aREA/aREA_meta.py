@@ -49,7 +49,7 @@ def consolidate_meta_aREA_results(netMets, mvws = 1, verbose = True):
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 
-def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets = 30, mvws = 1, njobs = 1, verbose = True):
+def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets = 30, mvws = 1, verbose = True):
     """\
     Allows the individual to infer normalized enrichment scores from gene
     expression data using the Analytical Ranked Enrichment Analysis (aREA)[1]
@@ -92,9 +92,6 @@ def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets =
         with the same epigenetics), while a higher number (e.g. 10) results in
         networks being treated as separate (useful for multiple networks of
         different celltypes with different epigenetics).
-    njobs (default: 1)
-        For metaViper. When using multiple networks, assign jobs to different
-        networks.
     verbose (default: True)
         Whether extended output about the progress of the algorithm should be
         given.
@@ -118,27 +115,17 @@ def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets =
     if isinstance(interactome, Interactome):
         preOp = aREA_classic(gex_data, interactome, layer, eset_filter, min_targets, verbose)
     elif len(interactome) == 1:
-       preOp = aREA_classic(gex_data, interactome[0], layer, eset_filter, min_targets, verbose)
-    elif njobs == 1:
+        preOp = aREA_classic(gex_data, interactome[0], layer, eset_filter, min_targets, verbose)
+    else:
         # netMets = [aREA(gex_data, iObj, eset_filter, layer) for iObj in interactome]
         netMets = []
         tot_nets = len(interactome)
         n_completed_nets = 0
         if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
         for iObj in interactome:
-          netMets.append(aREA_classic(gex_data, iObj, layer, eset_filter, min_targets, verbose))
-          n_completed_nets = n_completed_nets + 1
-          if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
+            netMets.append(aREA_classic(gex_data, iObj, layer, eset_filter, min_targets, verbose))
+            n_completed_nets = n_completed_nets + 1
+            if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
         preOp = consolidate_meta_aREA_results(netMets, mvws, verbose)
-    else:
-        joblib_verbose = 0
-        if verbose:
-            print("Computing regulons enrichment with aREA")
-            joblib_verbose = 11
-        # n_jobs need to be decided.
-        netMets = Parallel(n_jobs = njobs, verbose = joblib_verbose)(
-            (delayed)(aREA)(gex_data, iObj, eset_filter, layer, verbose)
-            for iObj in interactome
-            )
-        preOp = consolidate_meta_aREA_results(netMets, mvws, verbose)
+
     return preOp

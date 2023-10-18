@@ -1,7 +1,6 @@
 ### ---------- IMPORT DEPENDENCIES ----------
 import pandas as pd
 # from pyther_classes import * # is this necessary to import?
-from joblib import Parallel, delayed
 from .NaRnEA_classic import *
 from .._helpers_meta import *
 from ..interactome import Interactome
@@ -128,7 +127,7 @@ def integrate_NaRnEA_xes_mats(results, bg_matrix, net_weight, xes_type = 'pes'):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def NaRnEA(gex_data, interactome, layer = None, eset_filter = False, min_targets = 30, njobs = 1, verbose = True):
+def NaRnEA(gex_data, interactome, layer = None, eset_filter = False, min_targets = 30, verbose = True):
     """\
     Allows the individual to infer normalized enrichment scores and proportional
     enrichment scores from gene expression data using the Nonparametric
@@ -163,9 +162,6 @@ def NaRnEA(gex_data, interactome, layer = None, eset_filter = False, min_targets
         will be culled from the network (via the Interactome.cull method). The
         reason users may choose to use this threshold is because adequate
         targets are needed to accurately predict enrichment.
-    njobs (default: 1)
-        For metaViper. When using multiple networks, assign jobs to different
-        networks.
     verbose (default: True)
         Whether extended output about the progress of the algorithm should be
         given.
@@ -186,23 +182,17 @@ def NaRnEA(gex_data, interactome, layer = None, eset_filter = False, min_targets
         return NaRnEA_classic(gex_data, interactome, layer, eset_filter, min_targets, verbose)
     elif len(interactome) == 1:
         return NaRnEA_classic(gex_data, interactome[0], layer, eset_filter, min_targets, verbose)
-    elif njobs == 1:
+    else:
         # results = [NaRnEA(gex_data, iObj, verbose = verbose) for iObj in interactome]
         results = []
         tot_nets = len(interactome)
         n_completed_nets = 0
         if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
         for iObj in interactome:
-          results.append(NaRnEA_classic(gex_data, iObj, layer, eset_filter, min_targets, verbose))
-          n_completed_nets = n_completed_nets + 1
-          if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
-
-    else:
-        results = Parallel(n_jobs = njobs)(
-            (delayed)(NaRnEA)(gex_data,iObj,layer)
-            for iObj in interactome
-            )
-
+            results.append(NaRnEA_classic(gex_data, iObj, layer, eset_filter, min_targets, verbose))
+            n_completed_nets = n_completed_nets + 1
+            if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
+                
     if verbose: print('Integrating results')
 
     net_weight = get_net_weight(results)

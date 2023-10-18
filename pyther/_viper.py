@@ -65,7 +65,7 @@ def viper(gex_data,
           mvws=1,
           min_targets=30,
           njobs=1,
-          batch_size=1000,
+          batch_size=None,
           verbose=True,
           output_as_anndata=True,
           transfer_obs=True,
@@ -120,9 +120,8 @@ def viper(gex_data,
         reason users may choose to use this threshold is because adequate
         targets are needed to accurately predict enrichment.
     njobs (default: 1)
-        For metaViper. When using multiple networks, assign jobs to different
-        networks.
-    batch_size (default: 1000)
+        Number of cores to distribute sample batches into.
+    batch_size (default: None)
         Maximum number of samples to process at once.
     verbose (default: True)
         Whether extended output about the progress of the algorithm should be
@@ -165,7 +164,8 @@ def viper(gex_data,
     gex_data_original = gex_data
     gex_data = gex_data_original.copy()
     
-    n_batches = int(np.ceil(gex_data.shape[0] / batch_size))
+    if batch_size is None:
+        n_batches = int(np.ceil(gex_data.shape[0] / batch_size))
     
     pd.options.mode.chained_assignment = None
 
@@ -193,30 +193,44 @@ def viper(gex_data,
         enrichment = enrichment.lower()
     if enrichment == 'area':
         if verbose: print("Computing regulons enrichment with aREA")
-            
-        preOp = Parallel(njobs)(
-            delayed(aREA)(
-                gex_data[batch_i*batch_size:batch_i*batch_size+batch_size], 
+        
+        if njobs==1:
+            preOp = aREA(
+                gex_data, 
                 interactome, layer, eset_filter,
-                min_targets, mvws, njobs, verbose
-            ) for batch_i in range(n_batches)
-        )
-        preOp = pd.concat(preOp)
+                min_targets, mvws, verbose
+            )
+        else:
+            preOp = Parallel(njobs)(
+                delayed(aREA)(
+                    gex_data[batch_i*batch_size:batch_i*batch_size+batch_size], 
+                    interactome, layer, eset_filter,
+                    min_targets, mvws, verbose
+                ) for batch_i in range(n_batches)
+            )
+            preOp = pd.concat(preOp)
         
     elif enrichment == 'narnea':
         if verbose: print("Computing regulons enrichment with NaRnEa")
 
-        results = Parallel(njobs)(
-            delayed(NaRnEA)(
-                gex_data[batch_i*batch_size:batch_i*batch_size+batch_size], 
+        if njobs==1:
+            preOp = NaRnEA(
+                gex_data, 
                 interactome, layer, eset_filter,
-                min_targets, njobs, verbose
-            ) for batch_i in range(n_batches)
-        )
-        preOp = {
-            "nes": pd.concat([res["nes"] for res in results]),
-            "pes": pd.concat([res["pes"] for res in results])
-        }
+                min_targets, verbose
+            )
+        else:
+            results = Parallel(njobs)(
+                delayed(NaRnEA)(
+                    gex_data[batch_i*batch_size:batch_i*batch_size+batch_size], 
+                    interactome, layer, eset_filter,
+                    min_targets, verbose
+                ) for batch_i in range(n_batches)
+            )
+            preOp = {
+                "nes": pd.concat([res["nes"] for res in results]),
+                "pes": pd.concat([res["pes"] for res in results])
+            }
 
     else:
         raise ValueError("Unsupported enrichment type:" + str(enrichment))
