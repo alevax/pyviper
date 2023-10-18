@@ -553,7 +553,7 @@ class Interactome:
             column_name = 'target'
         )
 
-    def translate_regulators(interactome, desired_format):
+    def translate_regulators(self, desired_format):
         """\
         Translate the regulators of the Interactome. The current name format of
         the regulators should be one of the following:
