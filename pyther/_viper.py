@@ -65,7 +65,7 @@ def viper(gex_data,
           mvws=1,
           min_targets=30,
           njobs=1,
-          batch_size=None,
+          batch_size=10000,
           verbose=True,
           output_as_anndata=True,
           transfer_obs=True,
@@ -121,8 +121,9 @@ def viper(gex_data,
         targets are needed to accurately predict enrichment.
     njobs (default: 1)
         Number of cores to distribute sample batches into.
-    batch_size (default: None)
-        Maximum number of samples to process at once.
+    batch_size (default: 10000)
+        Maximum number of samples to process at once. Set to None to split all 
+        samples across provided `njobs`.
     verbose (default: True)
         Whether extended output about the progress of the algorithm should be
         given.
@@ -164,9 +165,13 @@ def viper(gex_data,
     gex_data_original = gex_data
     gex_data = gex_data_original.copy()
     
+    n_samples = gex_data.shape[0]
     if batch_size is None:
-        n_batches = int(np.ceil(gex_data.shape[0] / batch_size))
-    
+        batch_size = int(np.ceil(n_samples/njobs))
+        n_batches = njobs
+    else:
+        n_batches = int(np.ceil(n_samples/batch_size))    
+        
     pd.options.mode.chained_assignment = None
 
     if verbose: print("Preparing the association scores")
