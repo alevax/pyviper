@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import scanpy as sc
 from scipy.stats import norm
+from statsmodels.stats import multitest
 from ._filtering_funcs import *
 from ._filtering_funcs import _get_anndata_filtered_by_feature_group
 from ._helpers import _adjust_p_values
@@ -156,7 +157,7 @@ def nes_to_pval_df(dat_df,adjust=True):
     Parameters
     ----------
     dat_df
-        A pandas dataframe containing protein activity (NES), pathways (NES) data or 
+        A pd.Series or pd.DataFrame containing protein activity (NES), pathways (NES) data or 
         Stouffer-integrated NES data, where rows are observations/samples (e.g. cells or groups) and 
         columns are features (e.g. proteins or pathways).
     adjust
@@ -165,7 +166,7 @@ def nes_to_pval_df(dat_df,adjust=True):
     
     Returns
     -------
-    A pd.DataFrame objects of (adjusted) p-values.
+    A pd.Series or pd.DataFrame objects of (adjusted) p-values.
 
     References
     ----------
@@ -178,22 +179,21 @@ def nes_to_pval_df(dat_df,adjust=True):
 
     if dat_df.ndim == 1:
     # Calculate P values and corrected P values
- 
+        if adjust==True:
+            _, p_values_array, _, _ = multitest.multipletests(p_values_array, method='fdr_bh')
+            # Generate pd.DataFrames for (adjusted) p values 
+        p_values_df = pd.Series(p_values_array, index=dat_df.index)
+
     elif dat_df.ndim == 2:
     # Calculate P values and corrected P values
         if adjust==True:
             # correct p value 
-            p_values_array = np.apply_along_axis(_adjust_p_values, axis=1, arr=dat_df, adjust=True)
-        elif adjust==False:
-            # do not correct for p value
-            p_values_array = np.apply_along_axis(_adjust_p_values, axis=1, arr=dat_df, adjust=False)
-        else:
-            raise ValueError("Parameter adjust must be either True or False [bool]") 
+            p_values_array = np.apply_along_axis(_adjust_p_values, axis=1, arr=p_values_array)
+        
+        # Generate pd.DataFrames for (adjusted) p values 
+        p_values_df = pd.DataFrame(p_values_array, index=dat_df.index, columns=dat_df.columns)
     else:
         raise ValueError("dat_df must have 1 or 2 dimensions.") 
-
-    # Generate pd.DataFrames for p values and corrected p values
-    p_values_df = pd.DataFrame(p_values_array, index=dat_df.index, columns=dat_df.columns)
 
     return p_values_df 
 
