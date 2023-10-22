@@ -4,6 +4,7 @@ import numpy as np
 import scanpy as sc
 from ._filtering_funcs import *
 from ._filtering_funcs import _get_anndata_filtered_by_feature_group
+from ._helpers import _adjust_p_values
 
 ### ---------- EXPORT LIST ----------
 __all__ = []
@@ -75,9 +76,13 @@ def stouffer(adata, obs_column_name, layer = None, filter_by_feature_groups=["tf
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
     obs_column_name
-        The name of the column of observations to use as clusters
+        The name of the column of observations to use as clusters.
     layer (default: None)
         The layer to use as input data to compute the signatures.
+    filter_by_feature_groups (default: ["tfs", "cotfs"])
+        The selected regulators, such that all other regulators are filtered out
+        from the input data. If None, all regulators will be included. Regulator
+        sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
 
     Returns
     -------
@@ -140,3 +145,45 @@ def stouffer_clusters_df(dat_df, cluster_vector):
     result_df = pd.DataFrame(stouffer_scores, index=unique_clusters, columns=dat_df.columns)
 
     return result_df
+
+
+
+def nes_to_pval_df(dat_df,adjust=True):
+    """\
+    Compute (adjusted) p-value associated to the viper-computed NES in a pd.DataFrame.
+
+    Parameters
+    ----------
+    dat_df
+        A pandas dataframe containing protein activity (NES), pathways (NES) data or 
+        Stouffer-integrated NES data, where rows are observations/samples (e.g. cells or groups) and 
+        columns are features (e.g. proteins or pathways).
+    adjust
+        If `True`, returns adjusted p values using FDR Benjamini-Hochberg procedure.
+        If `False`, does not adjust p values
+    
+    Returns
+    -------
+    A pd.DataFrame objects of (adjusted) p-values.
+
+    References
+    Benjamini, Y., & Hochberg, Y. (1995). Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. Journal of the Royal Statistical Society. Series B (Methodological), 57(1), 289–300. http://www.jstor.org/stable/2346101
+    """
+   
+    # Calculate P values and corrected P values
+    if adjust==True:
+        # correct p value 
+        p_values_array = np.apply_along_axis(_adjust_p_values, axis=1, arr=dat_df, adjust=True)
+    elif adjust==False:
+        # do not correct for p value
+        p_values_array = np.apply_along_axis(_adjust_p_values, axis=1, arr=dat_df, adjust=False)
+    else:
+        raise ValueError("Parameter adjust must be either True or False [bool]") 
+
+    # Generate pd.DataFrames for p values and corrected p values
+    p_values_df = pd.DataFrame(p_values_array, index=dat_df.index, columns=dat_df.columns)
+
+    return p_values_df 
+
+
+    

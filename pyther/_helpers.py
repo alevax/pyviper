@@ -2,6 +2,8 @@
 import pandas as pd
 import numpy as np
 import anndata
+from scipy.stats import norm
+from statsmodels.stats import multitest
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
@@ -26,6 +28,22 @@ def mat_to_anndata(mat):
                                var=mat_features,
                                dtype=np.float64)
     return(pax_data)
+
+def _adjust_p_values(k, adjust=True):
+	# Helper function for *nes_to_pval* in module "tl" 
+	# Compute p values from 1 - cdf(|NES|) 
+    p_values = 2 * norm.sf(np.abs(k))
+
+    # correct p values with FDR
+    if adjust==True:
+        _, corrected_p_values, _, _ = multitest.multipletests(p_values, method='fdr_bh')
+        return corrected_p_values
+    else:
+        return p_values 
+
+
+
+
 
 # def slice_concat(inner_function, gex_data ,bins = 10, write_local = True, **kwargs):
 #     #kwargs are the parameters for the inner function.
