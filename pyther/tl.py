@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 import scanpy as sc
+from scipy.stats import norm
 from ._filtering_funcs import *
 from ._filtering_funcs import _get_anndata_filtered_by_feature_group
 from ._helpers import _adjust_p_values
@@ -167,18 +168,29 @@ def nes_to_pval_df(dat_df,adjust=True):
     A pd.DataFrame objects of (adjusted) p-values.
 
     References
-    Benjamini, Y., & Hochberg, Y. (1995). Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. Journal of the Royal Statistical Society. Series B (Methodological), 57(1), 289–300. http://www.jstor.org/stable/2346101
+    ----------
+    Benjamini, Y., & Hochberg, Y. (1995). Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. 
+        Journal of the Royal Statistical Society. Series B (Methodological), 57(1), 289–300. 
+        http://www.jstor.org/stable/2346101
     """
-   
+    
+    p_values_array = 2 * norm.sf(np.abs(dat_df))
+
+    if dat_df.ndim == 1:
     # Calculate P values and corrected P values
-    if adjust==True:
-        # correct p value 
-        p_values_array = np.apply_along_axis(_adjust_p_values, axis=1, arr=dat_df, adjust=True)
-    elif adjust==False:
-        # do not correct for p value
-        p_values_array = np.apply_along_axis(_adjust_p_values, axis=1, arr=dat_df, adjust=False)
+ 
+    elif dat_df.ndim == 2:
+    # Calculate P values and corrected P values
+        if adjust==True:
+            # correct p value 
+            p_values_array = np.apply_along_axis(_adjust_p_values, axis=1, arr=dat_df, adjust=True)
+        elif adjust==False:
+            # do not correct for p value
+            p_values_array = np.apply_along_axis(_adjust_p_values, axis=1, arr=dat_df, adjust=False)
+        else:
+            raise ValueError("Parameter adjust must be either True or False [bool]") 
     else:
-        raise ValueError("Parameter adjust must be either True or False [bool]") 
+        raise ValueError("dat_df must have 1 or 2 dimensions.") 
 
     # Generate pd.DataFrames for p values and corrected p values
     p_values_df = pd.DataFrame(p_values_array, index=dat_df.index, columns=dat_df.columns)
