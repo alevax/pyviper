@@ -52,5 +52,5 @@ def load_sig(species = None, path_to_sig = None):
     return(sig_list)
 
 def load_surf(species = None, path_to_surf = None):
-    surf_list = _load_regulators("surface", species, path_to_surf)
+    surf_list = _load_regulators("surf", species, path_to_surf)
     return(surf_list)

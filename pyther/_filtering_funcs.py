@@ -35,10 +35,13 @@ def __get_features_indices(adata, features_list):
     features_indices = [i for i, x in enumerate(true_false_list) if x]
     return(features_indices)
 
-def __get_features_list(adata, feature_groups="all"):
+def __get_features_list(adata, feature_groups=None):
     if(type(feature_groups) is str):
         feature_groups = [feature_groups]
-    if feature_groups is not None or "all" not in feature_groups:
+
+    if feature_groups is None:
+        features_list = adata.var_names
+    else:
         feature_groups = [x.lower() for x in feature_groups]
         features_list = list()
         if "tfs" in feature_groups or "tf" in feature_groups:
@@ -54,8 +57,7 @@ def __get_features_list(adata, feature_groups="all"):
             surf = load_surf()
             features_list.extend(surf)
         features_list = __intersection(features_list, list(adata.var_names))
-    else:
-        features_list = adata.var_names
+
     return(features_list)
 
 def __mat_to_anndata(mat):
@@ -81,7 +83,7 @@ def __mat_to_anndata(mat):
 # -----------------------------------------------------------------------------
 
 # ------------------------- GET ANNDATA OBJECT FILTERED -----------------------
-def _get_anndata_filtered_by_feature_group(adata, layer = None, feature_groups="all"): #["TFs", "CoTFs", "sig", "surf"],
+def _get_anndata_filtered_by_feature_group(adata, layer = None, feature_groups=None): #["TFs", "CoTFs", "sig", "surf"],
     features_list = __get_features_list(adata, feature_groups)
     adata_filt = __get_anndata_filtered_by_feature_list(adata, layer, features_list)
     return(adata_filt)
