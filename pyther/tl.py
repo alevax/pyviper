@@ -15,7 +15,7 @@ __all__ = []
 def pca(adata,
         *,
         layer=None,
-        filter_by_feature_groups=["tfs", "cotfs"], # ["tfs", "cotfs", "sig", "surf"],
+        filter_by_feature_groups=None, # ["tfs", "cotfs", "sig", "surf"],
         **kwargs):
     """\
     A wrapper for the scanpy function sc.tl.pca.
@@ -26,7 +26,7 @@ def pca(adata,
         Gene expression, protein activity or pathways stored in an anndata object.
     layer (default: None)
         The layer to use as input data.
-    filter_by_feature_groups (default: ["tfs", "cotfs"])
+    filter_by_feature_groups (default: None)
         The selected regulators, such that all other regulators are filtered out
         from the input data. If None, all regulators will be included. Regulator
         sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
@@ -34,6 +34,7 @@ def pca(adata,
         Arguments to provide to the sc.tl.pca function.
     """
     adata_filt = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
+    print(adata_filt.shape)
 
     sc.tl.pca(adata_filt, **kwargs)
     adata.obsm["X_pca"] = adata_filt.obsm["X_pca"]
@@ -43,7 +44,7 @@ def dendrogram(adata,
                groupby,
                key_added=None,
                layer=None,
-               filter_by_feature_groups=["tfs", "cotfs"], # ["tfs", "cotfs", "sig", "surf"],
+               filter_by_feature_groups=None, # ["tfs", "cotfs", "sig", "surf"],
                **kwargs):
     """\
     A wrapper for the scanpy function sc.tl.dendrogram.
@@ -56,7 +57,7 @@ def dendrogram(adata,
         The key in adata.uns where the dendrogram should be stored.
     layer (default: None)
         The layer to use as input data.
-    filter_by_feature_groups (default: ["tfs", "cotfs"])
+    filter_by_feature_groups (default: None)
         The selected regulators, such that all other regulators are filtered out
         from the input data. If None, all regulators will be included. Regulator
         sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
@@ -69,7 +70,7 @@ def dendrogram(adata,
     sc.tl.dendrogram(adata_filt, groupby, **kwargs, key_added = key_added)
     adata.uns[key_added] = adata_filt.uns[key_added]
 
-def stouffer(adata, obs_column_name, layer = None, filter_by_feature_groups=["tfs", "cotfs"]):
+def stouffer(adata, obs_column_name, layer = None, filter_by_feature_groups=None):
     """\
     Compute a stouffer signature on each of your clusters in an anndata object.
 
@@ -81,7 +82,7 @@ def stouffer(adata, obs_column_name, layer = None, filter_by_feature_groups=["tf
         The name of the column of observations to use as clusters.
     layer (default: None)
         The layer to use as input data to compute the signatures.
-    filter_by_feature_groups (default: ["tfs", "cotfs"])
+    filter_by_feature_groups (default: None)
         The selected regulators, such that all other regulators are filtered out
         from the input data. If None, all regulators will be included. Regulator
         sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
