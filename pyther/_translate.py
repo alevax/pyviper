@@ -65,11 +65,16 @@ def _translate_genes_array(current_gene_names, desired_format):
     positions = np.searchsorted(dict_column_current_format, current_gene_names)
 
     # Identify input values that have no translation available
-    mask = (positions < len(dict_column_current_format)) & (dict_column_current_format[positions] == current_gene_names)
+    # These two lines of code are essentially:
+        # mask = (positions < len(dict_column_current_format)) & (dict_column_current_format[positions] == current_gene_names)
+    # But dict_column_current_format[positions] causes error when positions = len(dict_column_current_format), which
+    # happens if we have elements sorted to the end, such as with "A", "B", "C" with element "D".
+    mask = (positions < len(dict_column_current_format))
+    mask[mask][dict_column_current_format[positions[mask]] != current_gene_names[mask]] = False
 
     # Get translated values
     translation = np.array([None] * len(current_gene_names))
-    translation[mask] = dict_column_desired_format[positions][mask]
+    translation[mask] = dict_column_desired_format[positions[mask]]
 
     return translation
 
