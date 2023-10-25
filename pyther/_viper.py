@@ -122,7 +122,7 @@ def viper(gex_data,
     njobs (default: 1)
         Number of cores to distribute sample batches into.
     batch_size (default: 10000)
-        Maximum number of samples to process at once. Set to None to split all 
+        Maximum number of samples to process at once. Set to None to split all
         samples across provided `njobs`.
     verbose (default: True)
         Whether extended output about the progress of the algorithm should be
@@ -164,14 +164,14 @@ def viper(gex_data,
 
     gex_data_original = gex_data
     gex_data = gex_data_original.copy()
-    
+
     n_samples = gex_data.shape[0]
-    if batch_size is None:
+    if batch_size is None or batch_size >= n_samples:
         batch_size = int(np.ceil(n_samples/njobs))
         n_batches = njobs
     else:
-        n_batches = int(np.ceil(n_samples/batch_size))    
-        
+        n_batches = int(np.ceil(n_samples/batch_size))
+
     pd.options.mode.chained_assignment = None
 
     if verbose: print("Preparing the association scores")
@@ -198,36 +198,36 @@ def viper(gex_data,
         enrichment = enrichment.lower()
     if enrichment == 'area':
         if verbose: print("Computing regulons enrichment with aREA")
-        
+
         if njobs==1:
             preOp = aREA(
-                gex_data, 
+                gex_data,
                 interactome, layer, eset_filter,
                 min_targets, mvws, verbose
             )
         else:
             preOp = Parallel(njobs)(
                 delayed(aREA)(
-                    gex_data[batch_i*batch_size:batch_i*batch_size+batch_size], 
+                    gex_data[batch_i*batch_size:batch_i*batch_size+batch_size],
                     interactome, layer, eset_filter,
                     min_targets, mvws, verbose
                 ) for batch_i in range(n_batches)
             )
             preOp = pd.concat(preOp)
-        
+
     elif enrichment == 'narnea':
         if verbose: print("Computing regulons enrichment with NaRnEa")
 
         if njobs==1:
             preOp = NaRnEA(
-                gex_data, 
+                gex_data,
                 interactome, layer, eset_filter,
                 min_targets, verbose
             )
         else:
             results = Parallel(njobs)(
                 delayed(NaRnEA)(
-                    gex_data[batch_i*batch_size:batch_i*batch_size+batch_size], 
+                    gex_data[batch_i*batch_size:batch_i*batch_size+batch_size],
                     interactome, layer, eset_filter,
                     min_targets, verbose
                 ) for batch_i in range(n_batches)

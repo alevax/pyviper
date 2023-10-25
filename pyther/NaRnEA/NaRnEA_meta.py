@@ -43,7 +43,8 @@ def find_max_absolute_value_df(dataframes):
     # Calculate the existance of any nan values along the last axis (axis=-1)
     nan_present_indices = np.isnan(stacked_data).any(axis=-1)
 
-    # Replace values in absolute_max_indices with NaN wherever NaN is present in nan_present_indices
+    # Replace values in absolute_max_indices with NaN wherever NaN is present in
+    # nan_present_indices to remove voting power for those regulators
     absolute_max_indices[nan_present_indices] = np.nan
 
     # Create a DataFrame with the same row and column names
@@ -51,15 +52,12 @@ def find_max_absolute_value_df(dataframes):
 
     return result_df
 
-def calculate_value_proportions(result_df):
+def calculate_value_proportions(result_df, n_nets):
     # Convert the DataFrame to a NumPy array
     result_array = result_df.values
 
-    # Calculate the maximum value in the result array, ignore NaN values
-    max_value = int(np.nanmax(result_array))
-
     # Initialize an empty NumPy array to store proportions
-    proportions_array = np.zeros((result_array.shape[0], max_value + 1))
+    proportions_array = np.zeros((result_array.shape[0], n_nets))
 
     # Count the occurrences of each value in each row, ignore NaN values
     for i, row in enumerate(result_array):
@@ -68,17 +66,19 @@ def calculate_value_proportions(result_df):
         proportions_array[i, unique_values.astype(int)] = counts / len(integer_values)
 
     # Convert the proportions array to a DataFrame
-    proportions_df = pd.DataFrame(proportions_array, columns=range(max_value + 1), index=result_df.index)
+    proportions_df = pd.DataFrame(proportions_array, columns=range(n_nets), index=result_df.index)
 
     return proportions_df
 
 def get_net_weight(results):
+    # Get the total number of networks
+    n_nets = len(results)
     # Resize the PES matrices so they have the same size, column names and row names
     resized_pes_list = get_resized_pes(results)
     # Stack the resized PES matrices: along the z axis, calculate position of max abs value
     max_abs_vals_df = find_max_absolute_value_df(resized_pes_list)
     # For each sample, calculate the proportion of max abs values from each network
-    net_weight = calculate_value_proportions(max_abs_vals_df).sort_index()
+    net_weight = calculate_value_proportions(max_abs_vals_df, n_nets).sort_index()
 
     net_weight.index.name = 'index'
     net_weight.columns.name = 'net'
@@ -192,7 +192,7 @@ def NaRnEA(gex_data, interactome, layer = None, eset_filter = False, min_targets
             results.append(NaRnEA_classic(gex_data, iObj, layer, eset_filter, min_targets, verbose))
             n_completed_nets = n_completed_nets + 1
             if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
-                
+
     if verbose: print('Integrating results')
 
     net_weight = get_net_weight(results)
