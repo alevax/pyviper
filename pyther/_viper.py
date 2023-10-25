@@ -6,6 +6,7 @@ from .aREA.aREA_meta import aREA
 from .NaRnEA.NaRnEA_meta import NaRnEA
 from .pp import rank_norm
 from joblib import Parallel, delayed
+from multiprocessing import cpu_count
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['viper']
@@ -161,6 +162,11 @@ def viper(gex_data,
     [2] Griffin, A. T., Vlahos, L. J., Chiuzan, C., & Califano, A. (2023). NaRnEA:
     An Information Theoretic Framework for Gene Set Analysis. Entropy, 25(3), 542.
     """
+
+    n_max_cores = cpu_count()
+    if njobs > n_max_cores:
+        raise ValueError('njobs (' + str(njobs) + ') is larger than the ' +
+                         'number of CPU cores (' + str(n_max_cores) + ').')
 
     gex_data_original = gex_data
     gex_data = gex_data_original.copy()
