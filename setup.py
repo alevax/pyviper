@@ -22,6 +22,7 @@ setuptools.setup(
         "anndata",
         "pandas",
         "numpy",
-        "joblib"
+        "joblib",
+        "statsmodels"
     ]
 )
