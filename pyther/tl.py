@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 import scanpy as sc
+from scipy.stats import rankdata
 from scipy.stats import norm
 from statsmodels.stats import multitest
 from ._filtering_funcs import *
@@ -399,3 +400,68 @@ def OncoMatch(pax_data_to_test,
     om = pd.DataFrame(om, index = vpmat_to_test.index, columns = vpmat_for_cMRs.index)
 
     return om
+
+
+
+def sigT(x, slope = 20, inflection = 0.5):
+    return (1 - 1/(1 + np.exp(slope * (x - inflection))))    
+
+
+
+def viper_similarity(adata, 
+                     nn = None, 
+                     ws = [4, 2], 
+                     alternative=['two-sided','greater','less']):
+    
+    mat = adata.to_df()
+
+    if np.min(mat)>=0 :
+        mat = rankdata(mat,axis=1)
+        mat = norm.ppf(mat/(np.sum(mat.isna()==False,axis = 1)+1))
+    
+    mat[mat.isna()] =0 # will this work?
+
+    xw = mat
+
+    if nn == None:
+        if alternative == 'greater':
+            xw[xw < 0] = 0
+        elif alternative == 'less' :
+            xw[xw > 0] = 0
+
+        if len(ws) == 1:
+            xw = np.transpose(xw)/np.max(np.abs(mat), axis = 1)
+            xw = np.sign(xw) * np.abs(xw) ** ws
+
+        else:
+            ws[1] = 1/(ws[1] - ws[0]) * np.log(1/0.9 -1)
+            xw = np.sign(xw) *sigT(np.abs(mat),ws[1],ws[0]) #why it's 1, 0 instead of 0,1
+    
+    else:
+        if alternative == 'greater':
+            xw = rankdata(-mat,axis=1)
+            mat[xw > nn] = None
+        elif alternative == 'less' :
+            xw = rankdata(mat,axis=1)
+            mat[xw > nn] = None
+        else:
+            xw = rankdata(mat,axis=1)
+            mat[xw > nn/2 & xw <(len(xw) - nn/2 +1)] = None
+    
+    nes = np.sqrt(np.sum(xw**2, axis = 1))
+    xw = xw.transpose()/np.sum(np.abs(xw),axis = 1)
+                
+    t2 = norm.ppf(rankdata(xw.transpose(), axis = 1)/(mat.shape[1]+1))
+    vp = np.matmul(t2, xw)
+
+    vp = vp * nes
+
+    tmp = np.array([vp.values[np.triu_indices(vp.shape[0], 1)],vp.T.values[np.triu_indices(vp.shape[0], 1)]])
+    tmp = np.sum(tmp * tmp ** 2, axis=0) / np.sum(tmp ** 2, axis=0)
+
+    vp.values[np.triu_indices(vp.shape[0], 1)] = tmp
+    vp = vp.T
+    vp.values[np.triu_indices(vp.shape[0], 1)] = tmp
+    vp.columns = vp.index
+
+    return vp
