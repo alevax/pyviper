@@ -411,7 +411,9 @@ def sigT(x, slope = 20, inflection = 0.5):
 def viper_similarity(adata, 
                      nn = None, 
                      ws = [4, 2], 
-                     alternative=['two-sided','greater','less']):
+                     alternative=['two-sided','greater','less'],
+                     layer=None,
+                     filter_by_feature_groups=None):
     
     mat = adata.to_df()
 
@@ -464,4 +466,7 @@ def viper_similarity(adata,
     vp.values[np.triu_indices(vp.shape[0], 1)] = tmp
     vp.columns = vp.index
 
-    return vp
+    adata = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
+    adata.uns['viper_similarity'] = vp
+    
+    return adata
