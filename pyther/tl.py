@@ -404,23 +404,23 @@ def OncoMatch(pax_data_to_test,
 
 
 def sigT(x, slope = 20, inflection = 0.5):
-    return (1 - 1/(1 + np.exp(slope * (x - inflection))))    
+    return (1 - 1/(1 + np.exp(slope * (x - inflection))))
 
 
 
-def viper_similarity(adata, 
-                     nn = None, 
-                     ws = [4, 2], 
+def viper_similarity(adata,
+                     nn = None,
+                     ws = [4, 2],
                      alternative=['two-sided','greater','less'],
                      layer=None,
                      filter_by_feature_groups=None):
-    
-    mat = adata.to_df()
+
+    mat = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups).to_df()
 
     if np.min(mat)>=0 :
         mat = rankdata(mat,axis=1)
         mat = norm.ppf(mat/(np.sum(mat.isna()==False,axis = 1)+1))
-    
+
     mat[mat.isna()] =0 # will this work?
 
     xw = mat
@@ -438,7 +438,7 @@ def viper_similarity(adata,
         else:
             ws[1] = 1/(ws[1] - ws[0]) * np.log(1/0.9 -1)
             xw = np.sign(xw) *sigT(np.abs(mat),ws[1],ws[0]) #why it's 1, 0 instead of 0,1
-    
+
     else:
         if alternative == 'greater':
             xw = rankdata(-mat,axis=1)
@@ -449,10 +449,10 @@ def viper_similarity(adata,
         else:
             xw = rankdata(mat,axis=1)
             mat[xw > nn/2 & xw <(len(xw) - nn/2 +1)] = None
-    
+
     nes = np.sqrt(np.sum(xw**2, axis = 1))
     xw = xw.transpose()/np.sum(np.abs(xw),axis = 1)
-                
+
     t2 = norm.ppf(rankdata(xw.transpose(), axis = 1)/(mat.shape[1]+1))
     vp = np.matmul(t2, xw)
 
@@ -466,7 +466,6 @@ def viper_similarity(adata,
     vp.values[np.triu_indices(vp.shape[0], 1)] = tmp
     vp.columns = vp.index
 
-    adata = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
-    adata.uns['viper_similarity'] = vp
-    
+    adata.obsp['viper_similarity'] = vp
+
     return adata
