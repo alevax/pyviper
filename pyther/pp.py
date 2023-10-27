@@ -104,6 +104,112 @@ def rank_norm(x, NUM_FUN=np.median, DEM_FUN = _mad_from_R, layer_input = None, l
     return(x)
 
 
+def __sigT(x, slope = 20, inflection = 0.5):
+    return (1 - 1/(1 + np.exp(slope * (x - inflection))))
+
+def viper_similarity(adata,
+                     nn = None,
+                     ws = [4, 2],
+                     alternative=['two-sided','greater','less'],
+                     layer=None,
+                     filter_by_feature_groups=None):
+    """\
+    If ws is a single number, weighting is performed using an exponential function.
+    If ws is a 2 numbers vector, weighting is performed with a symmetric sigmoid
+    function using the first element as inflection point and the second as trend.
+
+    Parameters
+    ----------
+    adata
+        An anndata.AnnData containing protein activity (NES), where rows are
+        observations/samples (e.g. cells or groups) and columns are features
+        (e.g. proteins or pathways).
+    nn (default: None)
+        Optional number of top regulators to consider for computing the similarity
+    ws (default: [4, 2])
+        Number indicating the weighting exponent for the signature, or vector of
+        2 numbers indicating the inflection point and the value corresponding to
+        a weighting score of .1 for a sigmoid transformation, only used if nn is
+        ommited.
+    alternative (default: 'two-sided')
+        Character string indicating whether the most active (greater), less
+        active (less) or both tails (two.sided) of the signature should be used
+        for computing the similarity.
+    layer (default: None)
+        The layer to use as input data to compute the signatures.
+    filter_by_feature_groups (default: None)
+        The selected regulators, such that all other regulators are filtered out
+        from the input data. If None, all regulators will be included. Regulator
+        sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
+
+    Returns
+    -------
+    The original anndata.AnnData object where adata.obsp['viper_similarity']
+    contains a signature-based distance numpy.ndarray.
+
+    References
+    ----------
+    Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H.,
+    & Califano, A. (2016). Functional characterization of somatic mutations in
+    cancer using network-based inference of protein activity. Nature genetics,
+    48(8), 838-847.
+    """
+
+    mat = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups).to_df()
+
+    if np.min(mat)>=0 :
+        mat = rankdata(mat,axis=1)
+        mat = norm.ppf(mat/(np.sum(mat.isna()==False,axis = 1)+1))
+
+    mat[mat.isna()] =0 # will this work?
+
+    xw = mat
+
+    if nn == None:
+        if alternative == 'greater':
+            xw[xw < 0] = 0
+        elif alternative == 'less' :
+            xw[xw > 0] = 0
+
+        if len(ws) == 1:
+            xw = np.transpose(xw)/np.max(np.abs(mat), axis = 1)
+            xw = np.sign(xw) * np.abs(xw) ** ws
+
+        else:
+            ws[1] = 1/(ws[1] - ws[0]) * np.log(1/0.9 -1)
+            xw = np.sign(xw) *__sigT(np.abs(mat),ws[1],ws[0]) #why it's 1, 0 instead of 0,1
+
+    else:
+        if alternative == 'greater':
+            xw = rankdata(-mat,axis=1)
+            mat[xw > nn] = None
+        elif alternative == 'less' :
+            xw = rankdata(mat,axis=1)
+            mat[xw > nn] = None
+        else:
+            xw = rankdata(mat,axis=1)
+            mat[xw > nn/2 & xw <(len(xw) - nn/2 +1)] = None
+
+    nes = np.sqrt(np.sum(xw**2, axis = 1))
+    xw = xw.transpose()/np.sum(np.abs(xw),axis = 1)
+
+    t2 = norm.ppf(rankdata(xw.transpose(), axis = 1)/(mat.shape[1]+1))
+    vp = np.matmul(t2, xw)
+
+    vp = vp * nes
+
+    tmp = np.array([vp.values[np.triu_indices(vp.shape[0], 1)],vp.T.values[np.triu_indices(vp.shape[0], 1)]])
+    tmp = np.sum(tmp * tmp ** 2, axis=0) / np.sum(tmp ** 2, axis=0)
+
+    vp.values[np.triu_indices(vp.shape[0], 1)] = tmp
+    vp = vp.T
+    vp.values[np.triu_indices(vp.shape[0], 1)] = tmp
+    vp.columns = vp.index
+
+    adata.obsp['viper_similarity'] = vp
+
+    return adata
+
 def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=50, is_for_viper=True, with_count_values=False,
                        to_dataframe = True):
     if net_df is None:
@@ -172,25 +278,25 @@ def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=
                 if with_count_values:
                     tmp_regul = {'likelihood': {}, 'tfmode': {}, 'subnets':{}}
                     for index, row in tmp_net_data.iterrows():
-                    
+
                         tmp_regul['likelihood'][row["target.values"]] = row['aw.values']
                         tmp_regul['tfmode'][row["target.values"]] = row['am.values']
                         tmp_regul['subnets'][row["target.values"]] = row['count.values']
-                        
+
                 else:
                     tmp_regul = {'likelihood': {}, 'tfmode': {}}
                     for index, row in tmp_net_data.iterrows():
                         tmp_regul['likelihood'][row["target.values"]] = row['aw.values']
                         tmp_regul['tfmode'][row["target.values"]] = row['am.values']
-                    
-                    
+
+
             else:
                 tmp_regul = {'am': {}, 'aw': {}}
                 for index, row in tmp_net_data.iterrows():
                     tmp_regul['am'][row["target.values"]] = row['aw.values']
                     tmp_regul['aw'][row["target.values"]] = row['am.values']
 
-                    
+
 
             regul[mri] = tmp_regul
     return regul
