@@ -255,7 +255,8 @@ def OncoMatch(pax_data_to_test,
               both_ways = False,
               om_max_NES_threshold = 30,
               om_min_logp_threshold = 0,
-              enrichment = 'area'):
+              enrichment = 'area',
+              key_added = 'om'):
     """\
     The OncoMatch function that computes -log10 p-values for each sample in pax_data_to_test
     of the MRs of each sample in pax_data_for_cMRs.
@@ -282,7 +283,8 @@ def OncoMatch(pax_data_to_test,
         this value are set to 0.
     enrichment (default: 'area')
         The method of compute enrichment. 'area' or 'narnea'
-
+    key_added (default: 'om')
+        The slot in pax_data_to_test.obsm to store the oncomatch results.
     Returns
     -------
     A pd.DataFrame objects of -log10 p-values with shape n_samples in
@@ -399,4 +401,4 @@ def OncoMatch(pax_data_to_test,
 
     om = pd.DataFrame(om, index = vpmat_to_test.index, columns = vpmat_for_cMRs.index)
 
-    return om
+    pax_data_to_test.obsm[key_added] = om
