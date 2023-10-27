@@ -403,7 +403,7 @@ def OncoMatch(pax_data_to_test,
 
 
 
-def sigT(x, slope = 20, inflection = 0.5):
+def __sigT(x, slope = 20, inflection = 0.5):
     return (1 - 1/(1 + np.exp(slope * (x - inflection))))
 
 
@@ -414,6 +414,47 @@ def viper_similarity(adata,
                      alternative=['two-sided','greater','less'],
                      layer=None,
                      filter_by_feature_groups=None):
+    """\
+    If ws is a single number, weighting is performed using an exponential function.
+    If ws is a 2 numbers vector, weighting is performed with a symmetric sigmoid
+    function using the first element as inflection point and the second as trend.
+
+    Parameters
+    ----------
+    adata
+        An anndata.AnnData containing protein activity (NES), where rows are
+        observations/samples (e.g. cells or groups) and columns are features
+        (e.g. proteins or pathways).
+    nn (default: None)
+        Optional number of top regulators to consider for computing the similarity
+    ws (default: [4, 2])
+        Number indicating the weighting exponent for the signature, or vector of
+        2 numbers indicating the inflection point and the value corresponding to
+        a weighting score of .1 for a sigmoid transformation, only used if nn is
+        ommited.
+    alternative (default: 'two-sided')
+        Character string indicating whether the most active (greater), less
+        active (less) or both tails (two.sided) of the signature should be used
+        for computing the similarity.
+    layer (default: None)
+        The layer to use as input data to compute the signatures.
+    filter_by_feature_groups (default: None)
+        The selected regulators, such that all other regulators are filtered out
+        from the input data. If None, all regulators will be included. Regulator
+        sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
+
+    Returns
+    -------
+    The original anndata.AnnData object where adata.obsp['viper_similarity']
+    contains a signature-based distance numpy.ndarray.
+
+    References
+    ----------
+    Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H.,
+    & Califano, A. (2016). Functional characterization of somatic mutations in
+    cancer using network-based inference of protein activity. Nature genetics,
+    48(8), 838-847.
+    """
 
     mat = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups).to_df()
 
@@ -437,7 +478,7 @@ def viper_similarity(adata,
 
         else:
             ws[1] = 1/(ws[1] - ws[0]) * np.log(1/0.9 -1)
-            xw = np.sign(xw) *sigT(np.abs(mat),ws[1],ws[0]) #why it's 1, 0 instead of 0,1
+            xw = np.sign(xw) *__sigT(np.abs(mat),ws[1],ws[0]) #why it's 1, 0 instead of 0,1
 
     else:
         if alternative == 'greater':
