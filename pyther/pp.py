@@ -210,8 +210,8 @@ def viper_similarity(adata,
 
     return adata
 
-def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=50, is_for_viper=True, with_count_values=False,
-                       to_dataframe = True):
+def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=50,  with_count_values=False
+                       ):
     if net_df is None:
         net = pd.read_csv(net_file, sep='\t')
     else:
@@ -232,71 +232,27 @@ def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=
 
     ## Total MR set
     mr = net['regulator.values'].unique()
-    if to_dataframe:
-        regul = pd.DataFrame(columns=["regulator","target","mor","likelihood"])
-        for mri in mr:
-            tmp_net_data = net[net['regulator.values'] == mri].copy()
-            ## Sort interactions in decreasing order of count and MI
-            tmp_net_data.sort_values(by=['count.values', 'mi.values'], ascending=[False, False], inplace=True)
 
-            # print(tmp_net_data.shape)
-            ## Top 50 interactions
-            tmp_net_data = tmp_net_data.iloc[:min(regul_size, len(tmp_net_data))]
+    regul = pd.DataFrame(columns=["regulator","target","mor","likelihood"])
+    for mri in mr:
+        tmp_net_data = net[net['regulator.values'] == mri].copy()
+        ## Sort interactions in decreasing order of count and MI
+        tmp_net_data.sort_values(by=['count.values', 'mi.values'], ascending=[False, False], inplace=True)
 
-            ## Regulatory mode = spearman correlation score
-            tmp_net_data['am.values'] = tmp_net_data['scc.values']
+        # print(tmp_net_data.shape)
+        ## Top 50 interactions
+        tmp_net_data = tmp_net_data.iloc[:min(regul_size, len(tmp_net_data))]
 
-            if with_count_values:
-                tmp_net_data['count.values'] = tmp_net_data['count.values']
+        ## Regulatory mode = spearman correlation score
+        tmp_net_data['am.values'] = tmp_net_data['scc.values']
 
-            ## Regulatory weight = scaled MI
-            tmp_net_data['aw.values'] = tmp_net_data['mi.values'] / tmp_net_data['mi.values'].max()
+        if with_count_values:
+            tmp_net_data['count.values'] = tmp_net_data['count.values']
 
-            for index, row in tmp_net_data.iterrows():
-                regul.loc[len(regul.index)] = row.loc[["regulator.values", "target.values","aw.values","am.values"]].array
-    else:
-        regul = {}
-        for mri in mr:
-            ## Regulon for MR_i
-            tmp_net_data = net[net['regulator.values'] == mri].copy()
-            ## Sort interactions in decreasing order of count and MI
-            tmp_net_data.sort_values(by=['count.values', 'mi.values'], ascending=[False, False], inplace=True)
+        ## Regulatory weight = scaled MI
+        tmp_net_data['aw.values'] = tmp_net_data['mi.values'] / tmp_net_data['mi.values'].max()
 
-            # print(tmp_net_data.shape)
-            ## Top 50 interactions
-            tmp_net_data = tmp_net_data.iloc[:min(regul_size, len(tmp_net_data))]
+        for index, row in tmp_net_data.iterrows():
+            regul.loc[len(regul.index)] = row.loc[["regulator.values", "target.values","aw.values","am.values"]].array
 
-            ## Regulatory mode = spearman correlation score
-            tmp_net_data['am.values'] = tmp_net_data['scc.values']
-
-            if with_count_values:
-                tmp_net_data['count.values'] = tmp_net_data['count.values']
-
-            ## Regulatory weight = scaled MI
-            tmp_net_data['aw.values'] = tmp_net_data['mi.values'] / tmp_net_data['mi.values'].max()
-            if is_for_viper:
-                if with_count_values:
-                    tmp_regul = {'likelihood': {}, 'tfmode': {}, 'subnets':{}}
-                    for index, row in tmp_net_data.iterrows():
-
-                        tmp_regul['likelihood'][row["target.values"]] = row['aw.values']
-                        tmp_regul['tfmode'][row["target.values"]] = row['am.values']
-                        tmp_regul['subnets'][row["target.values"]] = row['count.values']
-
-                else:
-                    tmp_regul = {'likelihood': {}, 'tfmode': {}}
-                    for index, row in tmp_net_data.iterrows():
-                        tmp_regul['likelihood'][row["target.values"]] = row['aw.values']
-                        tmp_regul['tfmode'][row["target.values"]] = row['am.values']
-
-
-            else:
-                tmp_regul = {'am': {}, 'aw': {}}
-                for index, row in tmp_net_data.iterrows():
-                    tmp_regul['am'][row["target.values"]] = row['aw.values']
-                    tmp_regul['aw'][row["target.values"]] = row['am.values']
-
-
-
-            regul[mri] = tmp_regul
     return regul
