@@ -39,23 +39,22 @@ class Interactome:
             if input_type is None:
                 file_extension = os.path.splitext(file_path)[-1].lower()
                 input_type = file_extension[1:]
-
-                if input_type in ["csv", ".csv"]:
-                    self.net_table = pd.read_csv(file_path, sep=",")
-                elif input_type in ["tsv", ".tsv"]:
-                    self.net_table = pd.read_csv(file_path, sep="\t")
-                elif input_type in ["pkl", ".pkl", "pickle"]:
-                    with open(file_path, 'rb') as file:
-                        pkl_obj = pickle.load(file)
-                    if isinstance(pkl_obj, pd.core.frame.DataFrame):
-                        self.net_table = pkl_obj
-                    elif isinstance(pkl_obj, self. __class__):
-                        self.net_table = pkl_obj.net_table
-                        self.name = pkl_obj.name
-                    else:
-                        raise ValueError("Unsupported file type: {}".format(type(pkl_obj)))
+            if input_type in ["csv", ".csv"]:
+                self.net_table = pd.read_csv(file_path, sep=",")
+            elif input_type in ["tsv", ".tsv"]:
+                self.net_table = pd.read_csv(file_path, sep="\t")
+            elif input_type in ["pkl", ".pkl", "pickle"]:
+                with open(file_path, 'rb') as file:
+                    pkl_obj = pickle.load(file)
+                if isinstance(pkl_obj, pd.core.frame.DataFrame):
+                    self.net_table = pkl_obj
+                elif isinstance(pkl_obj, self. __class__):
+                    self.net_table = pkl_obj.net_table
+                    self.name = pkl_obj.name
                 else:
-                    raise ValueError("Unsupported file format: {}".format(input_type))
+                    raise ValueError("Unsupported file type: {}".format(type(pkl_obj)))
+            else:
+                raise ValueError("Unsupported file format: {}".format(input_type))
         else:
             self.net_table = net_table
         n_cols = self.net_table.shape[1]
