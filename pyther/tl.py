@@ -152,7 +152,7 @@ def stouffer_clusters_df(dat_df, cluster_vector):
 
 
 
-def nes_to_pval_df(dat_df,adjust=True):
+def nes_to_pval_df(dat_df,adjust=True,axs=1):
     """\
     Compute (adjusted) p-value associated to the viper-computed NES in a pd.DataFrame.
 
@@ -165,6 +165,9 @@ def nes_to_pval_df(dat_df,adjust=True):
     adjust (default: True)
         If `True`, returns adjusted p values using FDR Benjamini-Hochberg procedure.
         If `False`, does not adjust p values
+    axs (default: 1)
+        axis along which to perform the p-value correction (Used only if the input is a pd.DataFrame).
+        Possible values are 0 or 1.
 
     Returns
     -------
@@ -190,7 +193,7 @@ def nes_to_pval_df(dat_df,adjust=True):
     # Calculate P values and corrected P values
         if adjust==True:
             # correct p value
-            p_values_array = np.apply_along_axis(_adjust_p_values, axis=1, arr=p_values_array)
+            p_values_array = np.apply_along_axis(_adjust_p_values, axis=axs, arr=p_values_array)
 
         # Generate pd.DataFrames for (adjusted) p values
         p_values_df = pd.DataFrame(p_values_array, index=dat_df.index, columns=dat_df.columns)
