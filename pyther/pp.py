@@ -254,7 +254,7 @@ def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=
         tmp_net_data['aw.values'] = tmp_net_data['mi.values'] / tmp_net_data['mi.values'].max()
 
         for index, row in tmp_net_data.iterrows():
-            regul.loc[len(regul.index)] = row.loc[["regulator.values", "target.values","aw.values","am.values"]].array
+            regul.loc[len(regul.index)] = row.loc[["regulator.values", "target.values","am.values","aw.values"]].array
 
     return regul
                            
