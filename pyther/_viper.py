@@ -107,13 +107,17 @@ def viper(gex_data,
         Analytical Rank-based Enrichment Analysis (NaRnEA) function. Default ='area',
         alternative = 'narnea'.
     mvws (default: 1)
-        Number indicating either the exponent score for the metaViper weights.
+        (A) Number indicating either the exponent score for the metaViper weights.
         These are only applicable when enrichment = 'area' and are not used when
         enrichment = 'narnea'. Roughly, a lower number (e.g. 1) results in
         networks being treated as a consensus network (useful for multiple
         networks of the same celltype with the same epigenetics), while a higher
         number (e.g. 10) results in networks being treated as separate (useful
         for multiple networks of different celltypes with different epigenetics).
+        (B) The name of a column in gex_data that contains the manual assignments
+        of samples to networks using list position or network names.
+        (C) "auto": assign samples to networks based on how well each
+        network allows for sample enrichment.
     min_targets (default: 30)
         The minimum number of targets that each regulator in the interactome
         should contain. Regulators that contain fewer targets than this minimum
@@ -162,6 +166,9 @@ def viper(gex_data,
     [2] Griffin, A. T., Vlahos, L. J., Chiuzan, C., & Califano, A. (2023). NaRnEA:
     An Information Theoretic Framework for Gene Set Analysis. Entropy, 25(3), 542.
     """
+
+    if njobs != 1 and isinstance(mvws, str):
+        raise ValueError("Manual network assignment can only done with 1 core.")
 
     n_max_cores = cpu_count()
     if njobs > n_max_cores:
