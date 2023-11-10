@@ -46,7 +46,7 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     """
     # Filter out those with target less than min.targets
     interactome = interactome.copy()
-    interactome.cull(min_targets = min_targets)
+    interactome.cull(min_targets = min_targets, verbose = False)
 
     if (eset_filter):
         # This will affect the rankings of genes by eliminating those not present in the interactome
