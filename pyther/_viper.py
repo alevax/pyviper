@@ -184,7 +184,7 @@ def viper(gex_data,
         n_batches = njobs
     else:
         n_batches = int(np.ceil(n_samples/batch_size))
-        batch_size = int(np.ceil(n_samples/n_batches)
+        batch_size = int(np.ceil(n_samples/n_batches))
 
     pd.options.mode.chained_assignment = None
 
