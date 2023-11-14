@@ -10,7 +10,7 @@ from statsmodels.stats import multitest
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 def mat_to_anndata(mat):
-    # Helper function for *pyther* and *path_enr*
+    # Helper function for *pyviper* and *path_enr*
     # Create obs dataframe
     mat_sampleNames = pd.DataFrame(index=range(len(mat.index.values)),columns=range(0))
     mat_sampleNames.index = mat.index.values
@@ -21,7 +21,7 @@ def mat_to_anndata(mat):
     mat_features.index = mat.columns.values
     mat_features
 
-    # Convert the pandas dataframe from Pyther into a new Anndata object
+    # Convert the pandas dataframe from Pyviper into a new Anndata object
     pax_data = anndata.AnnData(X=mat,
                                obs=mat_sampleNames,
                                var=mat_features,

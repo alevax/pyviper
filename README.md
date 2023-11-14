@@ -1,17 +1,17 @@
-# Pyther
-[![pipy](https://img.shields.io/pypi/v/pyther?color=informational)](https://pypi.python.org/pypi/pyther)
+# Pyviper
+[![pipy](https://img.shields.io/pypi/v/pyviper?color=informational)](https://pypi.python.org/pypi/pyviper)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This package enabling network-based protein activity estimation on python. Functions are partly transplanted from R package [viper](https://www.bioconductor.org/packages/release/bioc/html/viper.html
 ).
 
-Find the package user-friendly documentation here: https://califano-lab.github.io/pyther/
+Find the package user-friendly documentation here: https://califano-lab.github.io/pyviper/
 
 ---
 
 ## Dependencies
 - `scanpy` for single cell pipeline
-- `pandas` and `anndata` for data computing and storage. 
+- `pandas` (>=1.3.0 & <2.0, due to `scanpy` incompatibility ([issue](https://github.com/scverse/scanpy/issues/2564))) and `anndata` for data computing and storage. 
 - `numpy` and `scipy`  for scientific computation.
 - `joblib` for parallel computing
 - `tqdm` show progress bar
@@ -19,12 +19,12 @@ Find the package user-friendly documentation here: https://califano-lab.github.i
 ## Installation
 ### pypi
 ```shell
-pip install pyther
+pip install pyviper
 ```
 ### local
 ```shell
-git clone https://github.com/alevax/pyther/tree/main
-cd pyther
+git clone https://github.com/alevax/pyviper/tree/main
+cd pyviper
 pip install -e .
 ```
 
@@ -32,7 +32,7 @@ pip install -e .
 ```python
 import pandas as pd
 import anndata
-import pyther
+import pyviper
 
 # load sample data
 ges = anndata.read_text("test/unit_tests/test_1/test_1_inputs/LNCaPWT_gExpr_GES.tsv").T
@@ -46,16 +46,16 @@ gene_annot = pd.read_csv("data/translate/human_genes.csv", index_col=0)
 gene_annot = gene_annot[["human_symbol","human_ensembl"]].drop_duplicates().set_index("human_symbol")["human_ensembl"].to_dict()
 network["target"] = network["target"].map(gene_annot)
 ## interactome
-network_interactome = pyther.Interactome('net', network)
+network_interactome = pyviper.Interactome('net', network)
 network_interactome.filter_targets(ges.var_names)
 
 # compute regulon activities
 ## area
-activity = pyther.viper(gex_data=ges, interactome=network_interactome, enrichment="area")
+activity = pyviper.viper(gex_data=ges, interactome=network_interactome, enrichment="area")
 print(activity.to_df())
 
 ## narnea
-activity = pyther.viper(gex_data=ges, interactome=network_interactome, enrichment="narnea")
+activity = pyviper.viper(gex_data=ges, interactome=network_interactome, enrichment="narnea")
 print(activity.to_df())
 ```
 
@@ -65,8 +65,8 @@ print(activity.to_df())
 
 ## Structure and rationale
 
-The main functions available from `pyther` are:
-- `pyther`: "pyther" function for Virtual Inference of Protein Activity by Enriched Regulon Analysis (VIPER). The function allows using 2 enrichment algorithms, aREA and (matrix)-NaRnEA (see below)
+The main functions available from `pyviper` are:
+- `pyviper`: "pyviper" function for Virtual Inference of Protein Activity by Enriched Regulon Analysis (VIPER). The function allows using 2 enrichment algorithms, aREA and (matrix)-NaRnEA (see below)
 - `aREA`: computes [aREA](https://www.nature.com/articles/ng.3593) (analytic rank-based enrichment analysis) and meta-aREA
 - `NaRnEA`: computes [matrix-NaRnEA](https://www.biorxiv.org/content/10.1101/2021.05.20.445002v5), a vectorized, implementation of [NaRnEA](https://www.mdpi.com/1099-4300/25/3/542)
 - `path_enr`: computes pathway enrichment
@@ -74,15 +74,15 @@ The main functions available from `pyther` are:
 - `translate-adata_index`: for mouse-to-human and human-to-mouse
 
 Additionally, the following submodules are available:
-- `pyther.load`: submodule containing several utility functions useful for different analyses, including `load_msigdb_regulon`, `load_TFs` etc
-- `pyther.pl`: submodule containing pyther-wrappers for `scanpy` plotting
-- `pyther.tl`: submodule containing pyther-wrapper for `scanpy` data transformation
+- `pyviper.load`: submodule containing several utility functions useful for different analyses, including `load_msigdb_regulon`, `load_TFs` etc
+- `pyviper.pl`: submodule containing pyviper-wrappers for `scanpy` plotting
+- `pyviper.tl`: submodule containing pyviper-wrapper for `scanpy` data transformation
 
 ## Contact
 Please, report any issues that you experience through this repository ["Issues"]().
 
 ## License
-`pyther` is distributed under a MIT License (see [LICENSE]()).
+`pyviper` is distributed under a MIT License (see [LICENSE]()).
 
 
 ## Citation

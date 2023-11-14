@@ -1,6 +1,5 @@
 ### ---------- IMPORT DEPENDENCIES ----------
 import pandas as pd
-# from pyther_classes import * # is this necessary to import?
 from .NaRnEA_classic import *
 from .._helpers_meta import *
 from ..interactome import Interactome

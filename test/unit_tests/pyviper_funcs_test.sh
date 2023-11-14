@@ -21,8 +21,8 @@ Rscript test_scripts/GENERAL_convert_to_csv_forTesting.R \
 --ext=tsv \
 --out_dir=test_1/test_1_outputs/
 
-echo "BASH running test_Pyther.py."
-python3 test_scripts/test_Pyther.py \
+echo "BASH running test_pyviper.py."
+python3 test_scripts/test_pyviper.py \
 --ges=test_1/test_1_inputs/LNCaPWT_gExpr_GES.tsv \
 --interactome=test_1/test_1_outputs/LNCaPWT_network.tsv \
 --viper_tsv=test_1/test_1_outputs/LNCaPWT_aREA_PAct.tsv \
@@ -50,8 +50,8 @@ Rscript test_scripts/GENERAL_convert_to_csv_forTesting.R \
 --ext=tsv \
 --out_dir=test_2/test_2_outputs/
 
-echo "BASH running test_Pyther.py."
-python3 test_scripts/test_Pyther.py \
+echo "BASH running test_pyviper.py."
+python3 test_scripts/test_pyviper.py \
 --ges=test_2/test_2_inputs/LCRN1_gExpr_GES.tsv \
 --interactome=test_2/test_2_outputs/LCRN1_network.tsv \
 --viper_tsv=test_2/test_2_outputs/LCRN1_aREA_PAct.tsv \
@@ -79,8 +79,8 @@ Rscript test_scripts/GENERAL_convert_to_csv_forTesting.R \
 --ext=tsv \
 --out_dir=test_3/test_3_outputs/
 
-echo "BASH running test_Pyther.py."
-python3 test_scripts/test_Pyther.py \
+echo "BASH running test_pyviper.py."
+python3 test_scripts/test_pyviper.py \
 --ges=test_3/test_3_inputs/AJ081_gExpr_GES.tsv \
 --interactome=test_3/test_3_outputs/AJ081_network.tsv \
 --viper_tsv=test_3/test_3_outputs/AJ081_aREA_PAct.tsv \

@@ -1,14 +1,14 @@
-print("Running test_Pyther.py...")
+print("Running test_pyviper.py...")
 # some_file.py
 import sys, os
 from optparse import OptionParser
 # insert at 1, 0 is the script path (or '' in REPL)
-# sys.path.insert(1, '/Users/AlexanderWang/Desktop/Califano_Lab_Fall_2021/Pyther_project/pyther_main/libs/')
+# sys.path.insert(1, '/Users/AlexanderWang/Desktop/Califano_Lab_Fall_2021/pyviper_project/pyviper_main/libs/')
 path_to_this_file = str(os.path.abspath(os.getcwd()))
 sys.path.insert(1, path_to_this_file + "/../../libs/")
 
-from pyther_classes import *
-from pyther_fn import *
+from pyviper_classes import *
+from pyviper_fn import *
 
 def getStoufferSig(mat):
     my_sig = mat.sum(axis=0)/sqrt(mat.shape[1]*2)
@@ -70,7 +70,7 @@ print("Loading gene expression signature...")
 gesObj = anndata.read_csv(options.ges, delimiter = '\t')
 
 print("Tranposing GES...")
-print("(Pyther assumes rows are samples and columns are genes)")
+print("(pyviper assumes rows are samples and columns are genes)")
 gesObj = anndata.AnnData.transpose(gesObj)
 
 # run aREA
@@ -81,7 +81,7 @@ print("Tranposing NES matrix...")
 nesMat = pd.DataFrame.transpose(nesMat)
 nesMat.columns = gesObj.obs_names
 
-print("Computing correlation between Pyther and VIPER...")
+print("Computing correlation between pyviper and VIPER...")
 nesMat_sig = getStoufferSig(nesMat)
 vip_mat_sig = getStoufferSig(vip_mat)
 cor_res = pd.Series.corr(nesMat_sig, vip_mat_sig, method = "spearman")
@@ -91,8 +91,8 @@ print("Correlation is " + str(cor_res))
 print("Saving results...")
 # Opening and Closing a file "MyFile.txt"
 # for object name file1.
-# file1 = open(options.out_dir + getMyDateTimeString() + "_Pyther_VIPER_corr.txt","a")
-file1 = open(options.out_dir + options.out_project_name + "_Pyther_VIPER_corr.txt","a")
+# file1 = open(options.out_dir + getMyDateTimeString() + "_pyviper_VIPER_corr.txt","a")
+file1 = open(options.out_dir + options.out_project_name + "_pyviper_VIPER_corr.txt","a")
 file1.writelines(str(cor_res))
 file1.close()
 # adata_final_filename = os.path.join(options.out_dir, options.out_project_name + "_nesMat.h5ad")

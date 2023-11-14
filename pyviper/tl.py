@@ -12,7 +12,7 @@ from ._helpers import _adjust_p_values
 ### ---------- EXPORT LIST ----------
 __all__ = []
 
-# ------------------------ SCANPY TOOLS PYTHER WRAPPERS -----------------------
+# ------------------------ SCANPY TOOLS PYVIPER WRAPPERS -----------------------
 def pca(adata,
         *,
         layer=None,
