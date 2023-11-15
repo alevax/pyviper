@@ -4,6 +4,11 @@ import numpy as np
 import anndata
 import string
 from scipy.stats import rankdata
+import string
+import random
+import scanpy as sc
+from tqdm.auto import tqdm
+import os
 
 ### ---------- EXPORT LIST ----------
 __all__ = []
@@ -331,7 +336,7 @@ def generateRandomCellID(prefix='',chars=string.ascii_uppercase + string.digits,
 def generateMetacellAnnData(arg0, n_metacells_per_cluster=500, n_metacells=1000, n_cells_per_metacell=10,
                             n_neighbors = 15,
                             cluster_label="clusters" , method="proportional", experiment_dir_path="",
-                            use_decay = False, decay_factor = 0.1):
+                            use_decay = False, decay_factor = 0.1, seed = 42):
     '''
     Generate an AnnData object representing metacells from an input AnnData object.
 
@@ -346,7 +351,7 @@ def generateMetacellAnnData(arg0, n_metacells_per_cluster=500, n_metacells=1000,
         experiment_dir_path (str): Path to the directory to save the generated data.
         use_decay (bool): If True, use probability decay during metacell generation.
         decay_factor (float): Decay factor for probability during metacell generation.
-
+        seed (int): Seed for random number generation. 
     Returns:
         anndata.AnnData: AnnData object representing the generated metacells.
 
@@ -368,6 +373,9 @@ def generateMetacellAnnData(arg0, n_metacells_per_cluster=500, n_metacells=1000,
     _adata = arg0.copy()
     n_var = _adata.shape[1]
 
+    #check for missing columns
+    if "silhouette_score" not in _adata.obs.columns:
+        raise Exception("Please provide silhouette score as a column in adata observations.")
     gq_cell_counts = {}
     # sc.pp.neighbors(_adata, n_neighbors=51, n_pcs=30)
 
@@ -385,7 +393,7 @@ def generateMetacellAnnData(arg0, n_metacells_per_cluster=500, n_metacells=1000,
         
   
 
-    random.seed(42)
+    random.seed(seed)
     list_of_matrices = list()
 
     for a_cluster, cluster_iterations in cluster_perc_dict.items():
