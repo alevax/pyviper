@@ -374,6 +374,7 @@ def generateMetacellAnnData(arg0, n_metacells_per_cluster=500, n_metacells=1000,
     var_names = _adata.var_names.tolist()
 
     #for the proportional approach, it is necessary to have the distribution of the clusters
+    _adata.obs[cluster_label] = _adata.obs[cluster_label].astype('category')
     cluster_perc_dict = {i: [] for i in _adata.obs[cluster_label].cat.categories.to_list()}
     tot_cells = len(_adata.obs)
     for a_cluster in _adata.obs[cluster_label].cat.categories:
