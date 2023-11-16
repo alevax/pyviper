@@ -1,6 +1,6 @@
 ### ---------- IMPORT DEPENDENCIES ----------
 from tqdm import tqdm
-from ._load._load_translate import load_mouse2human, load_human2mouse
+from ._load._load_translate import load_human2mouse
 import numpy as np
 
 ### ---------- EXPORT LIST ----------
@@ -42,9 +42,12 @@ def __detect_name_type(input_array):
     return(gene_name_format)
 
 def _translate_genes_array(current_gene_names, desired_format):
-    if desired_format in ['human_symbol', 'human_ensembl', 'human_entrez']:
-        translate_df = load_mouse2human()
-    elif desired_format in ['mouse_symbol', 'mouse_ensembl', 'mouse_entrez']:
+    # if desired_format in ['human_symbol', 'human_ensembl', 'human_entrez']:
+    #     translate_df = load_mouse2human()
+    # elif desired_format in ['mouse_symbol', 'mouse_ensembl', 'mouse_entrez']:
+    #     translate_df = load_human2mouse()
+    if desired_format in ['human_symbol', 'human_ensembl', 'human_entrez',
+                          'mouse_symbol', 'mouse_ensembl', 'mouse_entrez']:
         translate_df = load_human2mouse()
     else:
         raise ValueError("Error: desired_format is not one the following:"
@@ -70,7 +73,13 @@ def _translate_genes_array(current_gene_names, desired_format):
     # But dict_column_current_format[positions] causes error when positions = len(dict_column_current_format), which
     # happens if we have elements sorted to the end, such as with "A", "B", "C" with element "D".
     mask = (positions < len(dict_column_current_format))
-    mask[mask][dict_column_current_format[positions[mask]] != current_gene_names[mask]] = False
+    selected_elements = mask[mask]
+    selected_elements[dict_column_current_format[positions[mask]] != current_gene_names[mask]] = False
+    if desired_format == 'mouse_entrez':
+        selected_elements[dict_column_desired_format[positions[mask]] == -1] = False
+    if current_format == 'mouse_entrez':
+        selected_elements[dict_column_current_format[positions[mask]] == -1] = False
+    mask[mask] = selected_elements
 
     # Get translated values
     translation = np.array([None] * len(current_gene_names))

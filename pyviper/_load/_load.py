@@ -4,27 +4,28 @@ from ._load_regulators import *
 from ._load_msigdb import *
 
 ### EXPORT LIST
-__all__ = ['mouse2human', 'human2mouse',
+__all__ = [#'mouse2human',
+           'human2mouse',
            'TFs', 'coTFs', 'sig', 'surf',
            'msigdb_regulon']
 
-def mouse2human():
-    """\
-    Retrieves the mouse to human translation pd.DataFrame from pyVIPER's data
-    folder. This dataframe contains four columns:
-        human_symbol, human_ensembl, mouse_ensembl, mouse_symbol
-
-    Returns
-    -------
-    A dataframe of :class:`~pandas.core.frame.DataFrame`.
-    """
-    return load_mouse2human()
+# def mouse2human():
+#     """\
+#     Retrieves the mouse to human translation pd.DataFrame from pyVIPER's data
+#     folder. This dataframe contains four columns:
+#         human_symbol, human_ensembl, mouse_ensembl, mouse_symbol
+#
+#     Returns
+#     -------
+#     A dataframe of :class:`~pandas.core.frame.DataFrame`.
+#     """
+#     return load_mouse2human()
 
 def human2mouse():
     """\
     Retrieves the human to mouse translation pd.DataFrame from pyVIPER's data
-    folder. This dataframe contains four columns:
-    mouse_symbol, mouse_ensembl, human_symbol, human_ensembl
+    folder. This dataframe contains six columns:
+    human_symbol, mouse_symbol, human_ensembl, mouse_ensembl, human_entrez, mouse_entrez
 
     Returns
     -------
