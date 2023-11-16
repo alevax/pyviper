@@ -47,7 +47,7 @@ def __get_net_score_per_sample(vpdf, n_mrs = 50):
     vpmat = vpdf.values
     n_cols = vpmat.shape[1]
 
-    # For each sample, sort neighbors by distance.
+    # For each sample, sort MRs by distance.
     vpmat_ranked = np.apply_along_axis(
         __rank_column,
         axis=1,

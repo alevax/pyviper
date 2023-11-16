@@ -412,7 +412,9 @@ class Interactome:
             Report the number of regulators removed during filtering
         """
         # Get the number of regulators before filtering
-        if verbose: n_regulators_initial = len(self.net_table["regulator"])
+        if verbose:
+            n_regs_initial = len(self.net_table["regulator"])
+            n_targets_initial = len(self.net_table["target"])
 
         if regulators_keep is not None:
             if self.__check_if_reg_names_are_groups(regulators_keep) is True:
@@ -426,6 +428,9 @@ class Interactome:
 
         # Report the number of regulators removed during filtering
         if verbose:
+            n_targets_final = len(self.net_table["target"])
+            n_targets_removed = n_targets_initial - n_targets_final
+            print("Removed " + str(n_targets_removed) + " targets.")
             n_regs_final = len(self.net_table["regulator"].unique())
             n_regs_removed = n_regs_initial - n_regs_final
             print("Removed " + str(n_regs_removed) + " regulators.")
