@@ -225,7 +225,7 @@ def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets =
                 if(verbose): print("Integrating NES matrices together with mvws=" + str(mvws) + "...")
                 preOp = consolidate_meta_aREA_results_by_weights(netMats, mvws)
             elif mvws == "auto":
-                if(verbose): print("Integrating NES matrices together by network matching...")
+                if(verbose): print("Integrating NES matrices together by automatic network matching...")
                 preOp = consolidate_meta_aREA_results_by_network_matching(netMats)
 
     return preOp
