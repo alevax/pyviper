@@ -173,7 +173,7 @@ def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets =
 
     # We want all if/else conditions in case
     # users or testers run this function directly
-    if isinstance(mvws, str):
+    if isinstance(mvws, str) and mvws != "auto":
         # network manual assignment
         if(verbose): print("Running VIPER using manual network matching annotation...")
         netMats = []
