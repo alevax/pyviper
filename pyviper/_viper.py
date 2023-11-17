@@ -121,7 +121,7 @@ def viper(gex_data,
     min_targets (default: 30)
         The minimum number of targets that each regulator in the interactome
         should contain. Regulators that contain fewer targets than this minimum
-        will be culled from the network (via the Interactome.cull method). The
+        will be pruned from the network (via the Interactome.prune method). The
         reason users may choose to use this threshold is because adequate
         targets are needed to accurately predict enrichment.
     njobs (default: 1)

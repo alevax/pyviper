@@ -476,10 +476,10 @@ class Interactome:
                 n_targets_removed = n_targets_initial - n_targets_final
                 print("Removed " + str(n_targets_removed) + " targets.")
 
-    def prune(self, max_targets = 50, eliminate = True, verbose = True):
+    def prune(self, max_targets = 50, min_targets = None, eliminate = True, verbose = True):
         """\
         Prune the Interactome by eliminating extra targets from regulators and,
-        with eliminate = True, cull regulators with too few targets from the
+        with eliminate = True, remove regulators with too few targets from the
         network. Note that by ensuring the pruned networks contains the same
         number of targets for each regulator, NES scores are comparable. If one
         regulator has more targest than another, than its NES score will be
@@ -489,39 +489,52 @@ class Interactome:
         ----------
         max_targets (default: 50)
             The maximum number of targets that each regulon is allowed.
+        min_targets (default: None)
+            The minimum number of targets that each regulon is required.
         eliminate (default: True)
             If eliminate = True, then any regulators with fewer targets than
-            max_targets will be culled from the network. In other words, after
+            max_targets will be removed from the network. In other words, after
             pruning, all regulators will have exactly max_targets number of
-            targets. This ensures all NES scores are comparable with aREA.
+            targets. This essentially sets min_targets equal to max_targets
+            and ensures all NES scores are comparable with aREA.
         verbose (default: True)
             Report the number of targets and regulators removed during pruning
         """
-        # Sort the DataFrame by 'regulator' and 'likelihood' columns
-        sorted_df = self.net_table.sort_values(by=['regulator', 'likelihood'], ascending=[True, False])
-
         # Get the number of targets and regulators before pruning
         if verbose:
                 n_targets_initial = len(self.net_table["target"])
                 n_regs_initial = len(self.net_table["regulator"].unique())
 
-        # Group by 'regulator' and apply a function to keep the top 'max_targets' rows in each group
-        pruned_df = sorted_df.groupby('regulator').apply(lambda x: x.iloc[:max_targets])
+        net_table = self.net_table
 
-        # Reset the index to flatten the grouped DataFrame
-        pruned_df = pruned_df.reset_index(drop=True)
+        if max_targets is not None:
+            # Sort the DataFrame by 'regulator' and 'likelihood' columns
+            sorted_df = net_table.sort_values(by=['regulator', 'likelihood'], ascending=[True, False])
 
-        if eliminate:
+            # Group by 'regulator' and apply a function to keep the top 'max_targets' rows in each group
+            pruned_df = sorted_df.groupby('regulator').apply(lambda x: x.iloc[:max_targets])
+
+            # Reset the index to flatten the grouped DataFrame
+            pruned_df = pruned_df.reset_index(drop=True)
+
+            # Update net_table
+            net_table = pruned_df
+
+        if eliminate: min_targets = max_targets
+        if min_targets is not None:
             # Count the number of targets for each regulator
-            regulator_counts = pruned_df['regulator'].value_counts()
+            regulator_counts = net_table['regulator'].value_counts()
 
             # Get the list of regulators with enough targets
-            regulators_to_keep = regulator_counts[regulator_counts == max_targets].index
+            regulators_to_keep = regulator_counts[regulator_counts >= min_targets].index
 
             # Filter the DataFrame to keep only those regulators
-            pruned_df = pruned_df[pruned_df['regulator'].isin(regulators_to_keep)]
+            pruned_df = net_table[net_table['regulator'].isin(regulators_to_keep)]
 
-        self.net_table = pruned_df
+            # Update net_table
+            net_table = pruned_df
+
+        self.net_table = net_table
 
         # Report the number of targets and regulators after pruning
         if verbose:
@@ -531,41 +544,6 @@ class Interactome:
                 n_regs_final = len(self.net_table["regulator"].unique())
                 n_regs_removed = n_regs_initial - n_regs_final
                 print("Removed " + str(n_regs_removed) + " regulators.")
-
-    def cull(self, min_targets = 30, verbose = True):
-        """\
-        Cull the Interactome by eliminating regulators with fewer targets than
-        min_targets. Users may wish to use this function because an adequate
-        number of targets is needed to accurately predict enrichment scores.
-
-        Parameters
-        ----------
-        min_targets (default: 30)
-            The minimum number of targets that each regulon is required.
-        verbose (default: True)
-            Report the number of targets removed during culling
-        """
-        net_table = self.net_table
-
-        # Get the number of regulators before culling
-        if verbose: n_regs_initial = len(self.net_table["regulator"].unique())
-
-        # Count the number of targets for each regulator
-        regulator_counts = net_table['regulator'].value_counts()
-
-        # Get the list of regulators with enough targets
-        regulators_to_keep = regulator_counts[regulator_counts >= min_targets].index
-
-        # Filter the DataFrame to keep only those regulators
-        culled_df = net_table[net_table['regulator'].isin(regulators_to_keep)]
-
-        self.net_table = culled_df
-
-        # Report how many regulators were removed during culling
-        if verbose:
-            n_regs_final = len(self.net_table["regulator"].unique())
-            n_regs_removed = n_regs_initial - n_regs_final
-            print("Removed " + str(n_regs_removed) + " regulators.")
 
     ### ---------- HELPER FUNCTION ----------
     def __translate_net_table_column(self, net_table, desired_format, column_name):
@@ -599,7 +577,7 @@ class Interactome:
         verbose (default: True)
             Report the number of targets successfully and unsucessfully translated
         """
-        # Get the number of regulators before culling
+        # Get the number of regulators before translation
         if verbose: n_targets_initial = len(self.net_table["target"].unique())
 
         self.net_table = self.__translate_net_table_column(
@@ -608,7 +586,7 @@ class Interactome:
             column_name = 'target'
         )
 
-        # Report how many regulators were removed during culling
+        # Report how many regulators were removed during translation
         if verbose:
             n_targets_final = len(self.net_table["target"].unique())
             n_targets_removed = n_targets_initial - n_targets_final
@@ -629,7 +607,7 @@ class Interactome:
         verbose (default: True)
             Report the number of regulators successfully and unsucessfully translated
         """
-        # Get the number of regulators before culling
+        # Get the number of regulators before translation
         if verbose: n_regs_initial = len(self.net_table["regulator"].unique())
 
         self.net_table = self.__translate_net_table_column(
@@ -638,7 +616,7 @@ class Interactome:
             column_name = 'regulator'
         )
 
-        # Report how many regulators were removed during culling
+        # Report how many regulators were removed during translation
         if verbose:
             n_regs_final = len(self.net_table["regulator"].unique())
             n_regs_removed = n_regs_initial - n_regs_final
