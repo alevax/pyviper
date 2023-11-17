@@ -4,7 +4,7 @@ from ._load._load_translate import load_human2mouse
 import numpy as np
 
 ### ---------- EXPORT LIST ----------
-__all__ = ['translate_adata_index']
+__all__ = ['translate_adata_index', '_detect_name_type']
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
@@ -12,7 +12,7 @@ __all__ = ['translate_adata_index']
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def __detect_name_type(input_array):
+def _detect_name_type(input_array):
     nrow = len(input_array)
     if nrow == 0: return(None) #redundant: case handled by 0-length for loop
     found_match = False
@@ -54,7 +54,7 @@ def _translate_genes_array(current_gene_names, desired_format):
                          + "\n\t\t mouse_symbol, mouse_ensembl, mouse_entrez,"
                          + "\n\t\t human_symbol, human_ensembl, human_entrez")
 
-    current_format = __detect_name_type(current_gene_names)
+    current_format = _detect_name_type(current_gene_names)
     if current_format is None:
         raise ValueError("Error: could not detect current_format as one of the following:"
                          + "\n\t\t mouse_symbol, mouse_ensembl, mouse_entrez,"
@@ -116,7 +116,7 @@ def translate_adata_index(adata, desired_format, eliminate = True):
     # So all translation happen on a new adata that is returned. Otherwise, we
     # edit the original, but eliminate doesn't work if the output isn't taken.
     adata = adata.copy()
-    current_format = __detect_name_type(adata.var.index.values)
+    current_format = _detect_name_type(adata.var.index.values)
     adata.var[current_format] = adata.var.index.values
     adata.var[desired_format] = _translate_genes_array(adata.var[current_format], desired_format)
     adata.var.set_index(desired_format, inplace=True)
