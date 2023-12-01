@@ -8,6 +8,8 @@ from statsmodels.stats import multitest
 from ._filtering_funcs import *
 from ._filtering_funcs import _get_anndata_filtered_by_feature_group
 from ._helpers import _adjust_p_values
+from ._viper import viper
+from .interactome import Interactome
 
 ### ---------- EXPORT LIST ----------
 __all__ = []
@@ -227,6 +229,7 @@ def _generate_interactome_from_pax_data(pax_data,
     if is_symmetric:
         # Slice the top n_top/2 rows and bottom n_top/2 rows
         # Get the top 25 and bottom 25 rows
+        n_top_half = int(n_top/2)
         selected_column_indices = list(range(0,n_top_half)) + list(range(n_mrs-n_top_half,n_mrs))
         cell_i_mor = np.concatenate((np.ones(n_top_half), np.full(n_top_half, -1)))
     else:
@@ -248,7 +251,7 @@ def _generate_interactome_from_pax_data(pax_data,
             'likelihood': 1
         })
 
-    return pyther.Interactome(interactome_name, net_table)
+    return Interactome(interactome_name, net_table)
 
 
 
@@ -335,20 +338,20 @@ def OncoMatch(pax_data_to_test,
             n_top = tcm_size
         )
 
-        om_t = pyther.viper(gex_data = anndata.AnnData(vpmat_to_test, dtype='float64'),
-                            interactome = interactome_cMRs,
-                            enrichment = enrichment,
-                            min_targets = 0,
-                            output_as_anndata=False,
-                            verbose = False)
+        om_t = viper(gex_data=anndata.AnnData(vpmat_to_test, dtype='float64'),
+                     interactome=interactome_cMRs,
+                     enrichment=enrichment,
+                     min_targets=0,
+                     output_as_anndata=False,
+                     verbose=False)
         if enrichment == 'narnea': om_t = om_t['nes']
 
-        om_q = pyther.viper(gex_data = anndata.AnnData(vpmat_for_cMRs, dtype='float64'),
-                            interactome = interactome_test,
-                            enrichment = enrichment,
-                            min_targets = 0,
-                            output_as_anndata=False,
-                            verbose = False)
+        om_q = viper(gex_data=anndata.AnnData(vpmat_for_cMRs, dtype='float64'),
+                     interactome=interactome_test,
+                     enrichment=enrichment,
+                     min_targets=0,
+                     output_as_anndata=False,
+                     verbose=False)
         if enrichment == 'narnea': om_q = om_q['nes']
 
         # Replace NaN (missing) values with 0 in om_t
@@ -374,12 +377,12 @@ def OncoMatch(pax_data_to_test,
             interactome_name = "vpmat_to_test",
             n_top = tcm_size
         )
-        om = pyther.viper(gex_data = anndata.AnnData(vpmat_to_test, dtype='float64'),
-                          interactome = interactome_cMRs,
-                          enrichment = enrichment,
-                          min_targets = 0,
-                          output_as_anndata=False,
-                          verbose = False)
+        om = viper(gex_data=anndata.AnnData(vpmat_to_test, dtype='float64'),
+                   interactome=interactome_cMRs,
+                   enrichment=enrichment,
+                   min_targets=0,
+                   output_as_anndata=False,
+                   verbose=False)
         if enrichment == 'narnea': om = om['nes']
 
         # Replace NaN (missing) values with 0 in om
