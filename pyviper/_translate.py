@@ -87,6 +87,14 @@ def _translate_genes_array(current_gene_names, desired_format):
 
     return translation
 
+def keep_first_duplicate_strings(arr):
+    arr[arr == None] = '-1'
+    _, index = np.unique(arr, return_index=True)
+    result = np.full_like(arr, fill_value=None, dtype=object)
+    result[index] = arr[index]
+    result[result == '-1'] = None
+    return result
+
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
 # ------------------------------- MAIN FUNCTION -------------------------------
@@ -119,13 +127,14 @@ def translate_adata_index(adata, desired_format, eliminate = True):
     current_format = _detect_name_type(adata.var.index.values)
     adata.var[current_format] = adata.var.index.values
     adata.var[desired_format] = _translate_genes_array(adata.var[current_format], desired_format)
-    adata.var.set_index(desired_format, inplace=True)
     # return adata
+    adata.var[desired_format] = keep_first_duplicate_strings(adata.var[desired_format].values)
     if eliminate:
-        adata = adata[:, adata.var.index.values != None]
+        adata = adata[:, adata.var[desired_format] != None]
         # Turn view of anndata into just anndata
         adata = adata.copy()
-        adata = adata[:, adata.var.index.values != "nan"]
+        adata = adata[:, adata.var[desired_format] != "nan"]
         # Turn view of anndata into just anndata
         adata = adata.copy()
+    adata.var.set_index(desired_format, inplace=True)
     return adata
