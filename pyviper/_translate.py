@@ -2,6 +2,7 @@
 from tqdm import tqdm
 from ._load._load_translate import load_human2mouse
 import numpy as np
+import pandas as pd
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['translate_adata_index', '_detect_name_type']
@@ -90,9 +91,9 @@ def _translate_genes_array(current_gene_names, desired_format):
 def keep_first_duplicate_strings(arr):
     arr[arr == None] = '-1'
     _, index = np.unique(arr, return_index=True)
-    result = np.full_like(arr, fill_value=None, dtype=object)
+    result = np.full_like(arr, fill_value=np.nan, dtype=object)
     result[index] = arr[index]
-    result[result == '-1'] = None
+    result[result == '-1'] = np.nan
     return result
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -125,15 +126,15 @@ def translate_adata_index(adata, desired_format, eliminate = True):
     # edit the original, but eliminate doesn't work if the output isn't taken.
     adata = adata.copy()
     current_format = _detect_name_type(adata.var.index.values)
-    adata.var[current_format] = adata.var.index.values
+    adata.var[current_format] = adata.var.index.values.astype(str)
     adata.var[desired_format] = _translate_genes_array(adata.var[current_format], desired_format)
     # return adata
     adata.var[desired_format] = keep_first_duplicate_strings(adata.var[desired_format].values)
     if eliminate:
-        adata = adata[:, adata.var[desired_format] != None]
-        # Turn view of anndata into just anndata
-        adata = adata.copy()
+        # adata = adata[:, adata.var[desired_format] != np.nan]
+        adata = adata[:, ~pd.isna(adata.var[desired_format])]
         adata = adata[:, adata.var[desired_format] != "nan"]
+        adata = adata[:, adata.var[desired_format] != "NaN"]
         # Turn view of anndata into just anndata
         adata = adata.copy()
     adata.var.set_index(desired_format, inplace=True)
