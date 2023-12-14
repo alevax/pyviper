@@ -80,6 +80,7 @@ Additionally, the following submodules are available:
 
 ## Contact
 Please, report any issues that you experience through this repository ["Issues"]().
+For any other info or queries: av2729@cumc.columbia.edu
 
 ## License
 `pyviper` is distributed under a MIT License (see [LICENSE]()).
@@ -89,4 +90,6 @@ Please, report any issues that you experience through this repository ["Issues"]
 
 
 ## References
+
+
   
