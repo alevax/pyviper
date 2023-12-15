@@ -1,4 +1,4 @@
-# Pyviper
+# pyVIPER (VIPER Analysis in Python for single-cell RNASeq)
 [![pipy](https://img.shields.io/pypi/v/pyviper?color=informational)](https://pypi.python.org/pypi/pyviper)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
