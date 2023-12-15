@@ -81,16 +81,16 @@ Additionally, the following submodules are available:
 ## Contact
 Please, report any issues that you experience through this repository ["Issues"]().
 
-For any other info or queries: av2729@cumc.columbia.edu
+For any other info or queries please write to Alessandro Vasciaveo (av2729@cumc.columbia.edu)
 
 ## License
 `pyviper` is distributed under a MIT License (see [LICENSE]()).
 
 
 ## Citation
-
+_Manuscript in review_
 
 ## References
-
+_Manuscript in review_
 
   
