@@ -2,8 +2,9 @@
 [![pipy](https://img.shields.io/pypi/v/pyviper?color=informational)](https://pypi.python.org/pypi/pyviper)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This package enabling network-based protein activity estimation on python. Functions are partly transplanted from R package [viper](https://www.bioconductor.org/packages/release/bioc/html/viper.html
-).
+This package enables network-based protein activity estimation on Python.
+It provides also interfaces for scanpy (single-cell RNASeq analysis in Python).
+Functions are partly transplanted from R package [viper](https://www.bioconductor.org/packages/release/bioc/html/viper.html).
 
 Find the package user-friendly documentation here: https://califano-lab.github.io/pyviper/
 
