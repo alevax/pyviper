@@ -9,3 +9,5 @@ from ._translate import *
 from .load import *
 from .pl import *
 from .tl import *
+
+__version__ = "1.0.0"
