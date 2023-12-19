@@ -6,7 +6,7 @@ This package enables network-based protein activity estimation on Python.
 It provides also interfaces for scanpy (single-cell RNASeq analysis in Python).
 Functions are partly transplanted from R package [viper](https://www.bioconductor.org/packages/release/bioc/html/viper.html).
 
-Find the package user-friendly documentation here: https://califano-lab.github.io/pyviper/
+Find the package user-friendly documentation here: https://alevax.github.io/pyviper/
 
 ---
 
@@ -18,7 +18,7 @@ Find the package user-friendly documentation here: https://califano-lab.github.i
 - `tqdm` show progress bar
 
 ## Installation
-### pypi
+### pypi (Not available yet)
 ```shell
 pip install pyviper
 ```
@@ -61,8 +61,9 @@ print(activity.to_df())
 ```
 
 ## Tutorials
-- [Analyzing scRNA-seq data at the Protein Activity Level]()
-- [Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach]()
+1. [Analyzing scRNA-seq data at the Protein Activity Level](https://alevax.github.io/pyviper/Tutorial-1.html)
+2. [Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach](https://alevax.github.io/pyviper/Tutorial-2.html)
+3. [Generating Metacells for ARACNe3 network generation and VIPER protein activity analysis](https://alevax.github.io/pyviper/Tutorial-3.html)
 
 ## Structure and rationale
 
@@ -80,18 +81,14 @@ Additionally, the following submodules are available:
 - `pyviper.tl`: submodule containing pyviper-wrapper for `scanpy` data transformation
 
 ## Contact
-Please, report any issues that you experience through this repository ["Issues"]().
+Please, report any issues that you experience through this repository ["Issues"](https://github.com/alevax/pyviper/issues).
 
 For any other info or queries please write to Alessandro Vasciaveo (av2729@cumc.columbia.edu)
 
 ## License
-`pyviper` is distributed under a MIT License (see [LICENSE]()).
+`pyviper` is distributed under a MIT License (see [LICENSE](https://github.com/alevax/pyviper/blob/main/LICENSE)).
 
 
 ## Citation
 _Manuscript in review_
 
-## References
-_Manuscript in review_
-
-  
