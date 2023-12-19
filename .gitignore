@@ -1,5 +1,6 @@
 .DS_Store
 
+dist/
 _build/
 _templace/
 _static/
