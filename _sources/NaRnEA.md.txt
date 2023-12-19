@@ -1,6 +1,0 @@
-# `NaRnEA`
-
-```{eval-rst}
-.. autofunction:: pyther.NaRnEA.NaRnEA_classic.NaRnEA_classic
-.. autofunction:: pyther.NaRnEA.NaRnEA_meta.NaRnEA_meta
-```

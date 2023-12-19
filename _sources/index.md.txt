@@ -5,11 +5,9 @@
 
 ```{toctree}
 :caption: 'Contents'
-:maxdepth: 4
+:maxdepth: 2
 
-pyther
-pyther.aREA
-pyther.NaRnEA
+pyviper
 ```
 
 ```{toctree}
@@ -18,4 +16,5 @@ pyther.NaRnEA
 
 Tutorial-1.ipynb
 Tutorial-2.ipynb
+Tutorial-3.ipynb
 ```

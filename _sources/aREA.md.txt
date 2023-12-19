@@ -1,6 +1,0 @@
-# `aREA`
-
-```{eval-rst}
-.. autofunction:: pyther.aREA.aREA_classic.aREA_classic
-.. autofunction:: pyther.aREA.aREA_meta.aREA_meta
-```

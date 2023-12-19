@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pyther &mdash; pyther 1.0.0 documentation</title>
+  <title>pyVIPER (VIPER Analysis in Python for single-cell RNASeq) &mdash; pyviper 1.0.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -20,7 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="config" href="pyther.html" /> 
+    <link rel="next" title="pyviper package" href="pyviper.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -32,7 +32,7 @@
           
           
           <a href="#" class="icon icon-home">
-            pyther
+            pyviper
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -44,21 +44,13 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="pyther.html">config</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.interactome">interactome</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.load">load</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.pl">pl</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.pp">pp</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.tl">tl</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.aREA.html">aREA.aREA_classic</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.aREA.html#module-pyther.aREA.aREA_meta">aREA.aREA_meta</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.NaRnEA.html">NaRnEA.NaRnEA_classic</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.NaRnEA.html#module-pyther.NaRnEA.NaRnEA_meta">NaRnEA.NaRnEA_meta</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyviper.html">pyviper package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-1.html">Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-2.html">Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-3.html">Tutorial 3 - Generating Metacells for ARACNe3 network generation and VIPER protein activity analysis</a></li>
 </ul>
 
         </div>
@@ -67,7 +59,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">pyther</a>
+          <a href="#">pyviper</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -75,7 +67,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Pyther</li>
+      <li class="breadcrumb-item active">pyVIPER (VIPER Analysis in Python for single-cell RNASeq)</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -85,18 +77,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="pyther">
-<h1>Pyther<a class="headerlink" href="#pyther" title="Permalink to this heading"></a></h1>
-<p><a class="reference external" href="https://pypi.python.org/pypi/pyther"><img alt="pipy" src="https://img.shields.io/pypi/v/pyther?color=informational" /></a>
+  <div class="section" id="pyviper-viper-analysis-in-python-for-single-cell-rnaseq">
+<h1>pyVIPER (VIPER Analysis in Python for single-cell RNASeq)<a class="headerlink" href="#pyviper-viper-analysis-in-python-for-single-cell-rnaseq" title="Permalink to this heading"></a></h1>
+<p><a class="reference external" href="https://pypi.python.org/pypi/pyviper"><img alt="pipy" src="https://img.shields.io/pypi/v/pyviper?color=informational" /></a>
 <a class="reference external" href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" /></a></p>
-<p>This package enabling network-based protein activity estimation on python. Functions are partly transplanted from R package <a class="reference external" href="https://www.bioconductor.org/packages/release/bioc/html/viper.html">viper</a>.</p>
-<p>Find the package user-friendly documentation here: https://califano-lab.github.io/pyther/</p>
+<p>This package enables network-based protein activity estimation on Python.
+It provides also interfaces for scanpy (single-cell RNASeq analysis in Python).
+Functions are partly transplanted from R package <a class="reference external" href="https://www.bioconductor.org/packages/release/bioc/html/viper.html">viper</a>.</p>
+<p>Find the package user-friendly documentation here: https://califano-lab.github.io/pyviper/</p>
 <hr class="docutils" />
 <div class="section" id="dependencies">
 <h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading"></a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">scanpy</span></code> for single cell pipeline</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pandas</span></code> and <code class="docutils literal notranslate"><span class="pre">anndata</span></code> for data computing and storage.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pandas</span></code> (&gt;=1.3.0 &amp; &lt;2.0, due to <code class="docutils literal notranslate"><span class="pre">scanpy</span></code> incompatibility (<a class="reference external" href="https://github.com/scverse/scanpy/issues/2564">issue</a>)) and <code class="docutils literal notranslate"><span class="pre">anndata</span></code> for data computing and storage.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">numpy</span></code> and <code class="docutils literal notranslate"><span class="pre">scipy</span></code>  for scientific computation.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">joblib</span></code> for parallel computing</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tqdm</span></code> show progress bar</p></li>
@@ -106,14 +100,14 @@
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
 <div class="section" id="pypi">
 <h3>pypi<a class="headerlink" href="#pypi" title="Permalink to this heading"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pyther
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pyviper
 </pre></div>
 </div>
 </div>
 <div class="section" id="local">
 <h3>local<a class="headerlink" href="#local" title="Permalink to this heading"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/alevax/pyther/tree/main
-<span class="nb">cd</span><span class="w"> </span>pyther
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/alevax/pyviper/tree/main
+<span class="nb">cd</span><span class="w"> </span>pyviper
 pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </pre></div>
 </div>
@@ -123,7 +117,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">anndata</span>
-<span class="kn">import</span> <span class="nn">pyther</span>
+<span class="kn">import</span> <span class="nn">pyviper</span>
 
 <span class="c1"># load sample data</span>
 <span class="n">ges</span> <span class="o">=</span> <span class="n">anndata</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="s2">&quot;test/unit_tests/test_1/test_1_inputs/LNCaPWT_gExpr_GES.tsv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
@@ -137,11 +131,16 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <span class="n">gene_annot</span> <span class="o">=</span> <span class="n">gene_annot</span><span class="p">[[</span><span class="s2">&quot;human_symbol&quot;</span><span class="p">,</span><span class="s2">&quot;human_ensembl&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;human_symbol&quot;</span><span class="p">)[</span><span class="s2">&quot;human_ensembl&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 <span class="n">network</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">gene_annot</span><span class="p">)</span>
 <span class="c1">## interactome</span>
-<span class="n">network_interactome</span> <span class="o">=</span> <span class="n">pyther</span><span class="o">.</span><span class="n">Interactome</span><span class="p">(</span><span class="s1">&#39;net&#39;</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span>
+<span class="n">network_interactome</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">Interactome</span><span class="p">(</span><span class="s1">&#39;net&#39;</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span>
 <span class="n">network_interactome</span><span class="o">.</span><span class="n">filter_targets</span><span class="p">(</span><span class="n">ges</span><span class="o">.</span><span class="n">var_names</span><span class="p">)</span>
 
 <span class="c1"># compute regulon activities</span>
-<span class="n">activity</span> <span class="o">=</span> <span class="n">pyther</span><span class="o">.</span><span class="n">viper</span><span class="p">(</span><span class="n">gex_data</span><span class="o">=</span><span class="n">ges</span><span class="p">,</span> <span class="n">interactome</span><span class="o">=</span><span class="n">network_interactome</span><span class="p">)</span>
+<span class="c1">## area</span>
+<span class="n">activity</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">viper</span><span class="p">(</span><span class="n">gex_data</span><span class="o">=</span><span class="n">ges</span><span class="p">,</span> <span class="n">interactome</span><span class="o">=</span><span class="n">network_interactome</span><span class="p">,</span> <span class="n">enrichment</span><span class="o">=</span><span class="s2">&quot;area&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">activity</span><span class="o">.</span><span class="n">to_df</span><span class="p">())</span>
+
+<span class="c1">## narnea</span>
+<span class="n">activity</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">viper</span><span class="p">(</span><span class="n">gex_data</span><span class="o">=</span><span class="n">ges</span><span class="p">,</span> <span class="n">interactome</span><span class="o">=</span><span class="n">network_interactome</span><span class="p">,</span> <span class="n">enrichment</span><span class="o">=</span><span class="s2">&quot;narnea&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">activity</span><span class="o">.</span><span class="n">to_df</span><span class="p">())</span>
 </pre></div>
 </div>
@@ -155,9 +154,9 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 </div>
 <div class="section" id="structure-and-rationale">
 <h2>Structure and rationale<a class="headerlink" href="#structure-and-rationale" title="Permalink to this heading"></a></h2>
-<p>The main functions available from <code class="docutils literal notranslate"><span class="pre">pyther</span></code> are:</p>
+<p>The main functions available from <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> are:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">pyther</span></code>: “pyther” function for Virtual Inference of Protein Activity by Enriched Regulon Analysis (VIPER). The function allows using 2 enrichment algorithms, aREA and (matrix)-NaRnEA (see below)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper</span></code>: “pyviper” function for Virtual Inference of Protein Activity by Enriched Regulon Analysis (VIPER). The function allows using 2 enrichment algorithms, aREA and (matrix)-NaRnEA (see below)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">aREA</span></code>: computes <a class="reference external" href="https://www.nature.com/articles/ng.3593">aREA</a> (analytic rank-based enrichment analysis) and meta-aREA</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">NaRnEA</span></code>: computes <a class="reference external" href="https://www.biorxiv.org/content/10.1101/2021.05.20.445002v5">matrix-NaRnEA</a>, a vectorized, implementation of <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">NaRnEA</a></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">path_enr</span></code>: computes pathway enrichment</p></li>
@@ -166,72 +165,40 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 </ul>
 <p>Additionally, the following submodules are available:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">pyther.load</span></code>: submodule containing several utility functions useful for different analyses, including <code class="docutils literal notranslate"><span class="pre">load_msigdb_regulon</span></code>, <code class="docutils literal notranslate"><span class="pre">load_TFs</span></code> etc</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pyther.pl</span></code>: submodule containing pyther-wrappers for <code class="docutils literal notranslate"><span class="pre">scanpy</span></code> plotting</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pyther.tl</span></code>: submodule containing pyther-wrapper for <code class="docutils literal notranslate"><span class="pre">scanpy</span></code> data transformation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.load</span></code>: submodule containing several utility functions useful for different analyses, including <code class="docutils literal notranslate"><span class="pre">load_msigdb_regulon</span></code>, <code class="docutils literal notranslate"><span class="pre">load_TFs</span></code> etc</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.pl</span></code>: submodule containing pyviper-wrappers for <code class="docutils literal notranslate"><span class="pre">scanpy</span></code> plotting</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.tl</span></code>: submodule containing pyviper-wrapper for <code class="docutils literal notranslate"><span class="pre">scanpy</span></code> data transformation</p></li>
 </ul>
 </div>
 <div class="section" id="contact">
 <h2>Contact<a class="headerlink" href="#contact" title="Permalink to this heading"></a></h2>
 <p>Please, report any issues that you experience through this repository <span class="xref myst">“Issues”</span>.</p>
+<p>For any other info or queries please write to Alessandro Vasciaveo (av2729&#64;cumc.columbia.edu)</p>
 </div>
 <div class="section" id="license">
 <h2>License<a class="headerlink" href="#license" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">pyther</span></code> is distributed under a BSD 3-Clause License (see <span class="xref myst">LICENSE</span>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">pyviper</span></code> is distributed under a MIT License (see <span class="xref myst">LICENSE</span>).</p>
 </div>
 <div class="section" id="citation">
 <h2>Citation<a class="headerlink" href="#citation" title="Permalink to this heading"></a></h2>
+<p><em>Manuscript in review</em></p>
 </div>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this heading"></a></h2>
+<p><em>Manuscript in review</em></p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="pyther.html">config</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="pyther.html#pyther.config.set_regulators_filepath"><code class="docutils literal notranslate"><span class="pre">set_regulators_filepath()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="pyther.html#pyther.config.set_regulators_species_to_use"><code class="docutils literal notranslate"><span class="pre">set_regulators_species_to_use()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.interactome">interactome</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome"><code class="docutils literal notranslate"><span class="pre">Interactome</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.copy"><code class="docutils literal notranslate"><span class="pre">Interactome.copy()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.cull"><code class="docutils literal notranslate"><span class="pre">Interactome.cull()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.filter_regulators"><code class="docutils literal notranslate"><span class="pre">Interactome.filter_regulators()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.filter_targets"><code class="docutils literal notranslate"><span class="pre">Interactome.filter_targets()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.get_reg"><code class="docutils literal notranslate"><span class="pre">Interactome.get_reg()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.get_regulonNames"><code class="docutils literal notranslate"><span class="pre">Interactome.get_regulonNames()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.get_targetSet"><code class="docutils literal notranslate"><span class="pre">Interactome.get_targetSet()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.icMat"><code class="docutils literal notranslate"><span class="pre">Interactome.icMat()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.icpVec"><code class="docutils literal notranslate"><span class="pre">Interactome.icpVec()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.integrate"><code class="docutils literal notranslate"><span class="pre">Interactome.integrate()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.morMat"><code class="docutils literal notranslate"><span class="pre">Interactome.morMat()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.prune"><code class="docutils literal notranslate"><span class="pre">Interactome.prune()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.save"><code class="docutils literal notranslate"><span class="pre">Interactome.save()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.size"><code class="docutils literal notranslate"><span class="pre">Interactome.size()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.translate_regulators"><code class="docutils literal notranslate"><span class="pre">Interactome.translate_regulators()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyther.html#pyther.interactome.Interactome.translate_targets"><code class="docutils literal notranslate"><span class="pre">Interactome.translate_targets()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.load">load</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.pl">pl</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.pp">pp</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.html#module-pyther.tl">tl</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.aREA.html">aREA.aREA_classic</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="pyther.aREA.html#pyther.aREA.aREA_classic.aREA_classic"><code class="docutils literal notranslate"><span class="pre">aREA_classic()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.aREA.html#module-pyther.aREA.aREA_meta">aREA.aREA_meta</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="pyther.aREA.html#pyther.aREA.aREA_meta.aREA"><code class="docutils literal notranslate"><span class="pre">aREA()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.NaRnEA.html">NaRnEA.NaRnEA_classic</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="pyther.NaRnEA.html#pyther.NaRnEA.NaRnEA_classic.NaRnEA_classic"><code class="docutils literal notranslate"><span class="pre">NaRnEA_classic()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="pyther.NaRnEA.html#module-pyther.NaRnEA.NaRnEA_meta">NaRnEA.NaRnEA_meta</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="pyther.NaRnEA.html#pyther.NaRnEA.NaRnEA_meta.NaRnEA"><code class="docutils literal notranslate"><span class="pre">NaRnEA()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyviper.html">pyviper package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.config">pyviper.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.interactome">pyviper.interactome</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.pl">pyviper.pl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.pp">pyviper.pp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.tl">pyviper.tl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.aREA.aREA_classic">pyviper.aREA.aREA_classic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.aREA.aREA_meta">pyviper.aREA.aREA_meta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.NaRnEA.NaRnEA_classic">pyviper.NaRnEA.NaRnEA_classic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.NaRnEA.NaRnEA_meta">pyviper.NaRnEA.NaRnEA_meta</a></li>
 </ul>
 </li>
 </ul>
@@ -240,20 +207,27 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-1.html">Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Tutorial-1.html#Setup-path-and-import-modules">Setup path and import modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Tutorial-1.html#Step-1.-Load-a-gene-expression-%22signature%22-at-the-single-cell-level">Step 1. Load a gene expression “signature” at the single-cell level</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Tutorial-1.html#Step-2.-Load-a-gene-regulatory-network-inferred-with-ARACNe">Step 2. Load a gene regulatory network inferred with ARACNe</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Tutorial-1.html#Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-pyther">Convert the gene expression signature into a protein activity matrix using pyther</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Tutorial-1.html#Step-4.-Analyze-single-cells-at-the-Protein-Activity-level">Step 4. Analyze single-cells at the Protein Activity level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-1.html#Install-PyVIPER">Install PyVIPER</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-1.html#Import-modules">Import modules</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-2.html">Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Tutorial-2.html#Setup-path-and-import-modules">Setup path and import modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-2.html#Install-PyVIPER">Install PyVIPER</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-2.html#Import-modules">Import modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tutorial-2.html#Step-1.-Load-a-gene-expression-matrix-and-associated-metadata">Step 1. Load a gene expression matrix and associated metadata</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tutorial-2.html#Step-2.-Preprocess-and-generate-a-gene-expression-signature-at-the-single-cell-level">Step 2. Preprocess and generate a gene expression signature at the single-cell level</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tutorial-2.html#Step-3.-Load-multiple-ARACNe-inferred-gene-regulatory-networks">Step 3. Load multiple ARACNe-inferred gene regulatory networks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Tutorial-2.html#Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-pyther-(metaVIPER-approach)">Convert the gene expression signature into a protein activity matrix using pyther (metaVIPER approach)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tutorial-2.html#Step-4.-Analyze-single-cells-at-the-Protein-Activity-level">Step 4. Analyze single-cells at the Protein Activity level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-2.html#Pathway-enrichment-analysis">Pathway enrichment analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-2.html#Key-takeaways">Key takeaways</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-3.html">Tutorial 3 - Generating Metacells for ARACNe3 network generation and VIPER protein activity analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-3.html#Install-Pyviper">Install Pyviper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-3.html#Import-modules">Import modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-3.html#Step-1.-Load-a-gene-expression-matrix-and-associated-metadata">Step 1. Load a gene expression matrix and associated metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-3.html#Step-2.-Perform-basic-preprocessing-and-clustering">Step 2. Perform basic preprocessing and clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-3.html#3.-Generate-Metacells">3. Generate Metacells</a></li>
 </ul>
 </li>
 </ul>
@@ -265,7 +239,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="pyther.html" class="btn btn-neutral float-right" title="config" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pyviper.html" class="btn btn-neutral float-right" title="pyviper package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

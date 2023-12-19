@@ -1,5 +1,0 @@
-# `Interactome`
-
-```{eval-rst}
-.. autoclass:: pyther.interactome.Interactome
-```
