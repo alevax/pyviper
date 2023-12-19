@@ -9,7 +9,7 @@ sys.path.insert(0, pathlib.Path(__file__).parents[1].resolve().as_posix())
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'pyther'
+project = 'pyviper'
 copyright = '2023, .'
 author = '.'
 release = '1.0.0'
