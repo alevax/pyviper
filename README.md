@@ -18,9 +18,9 @@ Find the package user-friendly documentation here: https://alevax.github.io/pyvi
 - `tqdm` show progress bar
 
 ## Installation
-### pypi (Not available yet)
+### pypi
 ```shell
-pip install pyviper
+pip install viper-in-python
 ```
 ### local
 ```shell

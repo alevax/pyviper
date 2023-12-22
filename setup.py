@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     description = fh.read()
 
 setuptools.setup(
-    name="python-viper",
+    name="viper-in-python",
     version="1.0.1",
     author="Alexander L.E. Wang & Zizhao Lin & Luca Zanella",
     author_email="aw3436@cumc.columbia.edu",
