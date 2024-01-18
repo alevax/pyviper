@@ -36,3 +36,37 @@ InteractomeToTable <- function(net.obj, out.file, is_a3_network=FALSE) {
 	}
 }
 
+
+TableToInteractome <- function(net_table){
+  blank_reg <- list(
+    c(),
+    c()
+  )
+  names(blank_reg) <- c("tfmode", "likelihood")
+  my_reg <- list()
+  pb = txtProgressBar(min = 0, max = nrow(net_table), initial = 0, style = 3)
+  for(i in 1:nrow(net_table)){
+    my_reg[[net_table[i,"regulator"]]] <- blank_reg
+    setTxtProgressBar(pb, i)
+  }
+  close(pb)
+
+  pb = txtProgressBar(min = 0, max = nrow(net_table), initial = 0, style = 3)
+  for (i in 1:nrow(net_table)){
+    new_w <- net_table[i,"likelihood"]
+    new_m <- net_table[i,"mor"]
+    names(new_w) <- net_table[i,"target"]
+    names(new_m) <- net_table[i,"target"]
+    my_reg[[net_table[i,"regulator"]]][["likelihood"]] <- c(
+      my_reg[[net_table[i,"regulator"]]][["likelihood"]],
+      new_w
+    )
+    my_reg[[net_table[i,"regulator"]]][["tfmode"]] <- c(
+      my_reg[[net_table[i,"regulator"]]][["tfmode"]],
+      new_m
+    )
+    setTxtProgressBar(pb, i)
+  }
+  close(pb)
+  return(my_reg)
+}
