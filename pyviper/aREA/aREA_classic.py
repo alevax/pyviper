@@ -46,7 +46,7 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     """
     # Filter out those with target less than min.targets
     interactome = interactome.copy()
-    interactome.prune(min_targets = min_targets, max_targets = None, eliminate = False, verbose = False)
+#    interactome.prune(min_targets = min_targets, max_targets = None, eliminate = False, verbose = False)
 
     if (eset_filter):
         # This will affect the rankings of genes by eliminating those not present in the interactome
@@ -57,6 +57,9 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
         gesMat = gex_data.X
     else:
         gesMat = gex_data.layers[layer]
+
+    interactome.prune(min_targets = min_targets, max_targets = None, eliminate = False, verbose = False)
+
 
     # ------------ find intersecting genes ------------
     # Use get_targetSet as part of the interactome class to get a list of all targets in the interactome
