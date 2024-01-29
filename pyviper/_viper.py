@@ -1,12 +1,15 @@
 ### ---------- IMPORT DEPENDENCIES ----------
 import pandas as pd
 import numpy as np
+
 from ._helpers import *
 from .aREA.aREA_meta import aREA
 from .NaRnEA.NaRnEA_meta import NaRnEA
 from .pp import rank_norm
 from joblib import Parallel, delayed
 from multiprocessing import cpu_count
+from scipy.stats import rankdata
+from scipy.stats import ttest_1samp
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['viper']
@@ -32,10 +35,11 @@ def apply_method_on_gex_data(gex_data, method = None, layer = None):
     if method == 'scale':
         gesMat = (gesMat - np.mean(gesMat,axis=0))/np.std(gesMat,axis=0)
     elif method == 'rank':
-        gesMat = rankdata(gesMat,axis=0)*(np.random.random(gesMat.shape)*2/10-0.1)
+        #gesMat = rankdata(gesMat,axis=0)*(np.random.random(gesMat.shape)*2/10-0.1)
+        gesMat = rankdata(gesMat,axis=0)
     elif method == 'mad':
         median = np.median(gesMat,axis=0)
-        gesMat = (gesMat-median)/np.median(np.abs(gesMat-median))
+        gesMat = (gesMat-median)/(np.median(np.abs(gesMat-median),axis=0)*1.4826)
     elif method == 'ttest':
         gesMat = np.array([sample_ttest(i, gesMat.copy()) for i in range(gex_data.shape[0])])
     elif method == "doublerank":
