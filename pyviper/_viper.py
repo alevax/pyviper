@@ -268,7 +268,8 @@ def viper(gex_data,
             op.layers['pes'] = preOp["pes"]
 
         if transfer_obs is True:
-            op.obs = op.obs.join(gex_data.obs)
+            #op.obs = op.obs.join(gex_data.obs)
+            op.obs = pd.concat([op.obs.copy(), gex_data.obs.copy()],axis=1)
         if store_input_data is True:
             # If input data was pax_data for pathway enrichment
             if 'gex_data' in gex_data_original.uns:
