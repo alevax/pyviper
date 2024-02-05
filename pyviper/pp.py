@@ -218,6 +218,7 @@ def viper_similarity(adata,
 
 def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=50,  with_count_values=False
                        ):
+    pd.options.mode.chained_assignment = None
     if net_df is None:
         net = pd.read_csv(net_file, sep='\t')
     else:
@@ -236,32 +237,20 @@ def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=
     ## Network filtering
     net = net[net['mi.values'] > MI_thres]
 
-    ## Total MR set
-    mr = net['regulator.values'].unique()
+    net.sort_values(by=['regulator.values','count.values','mi.values'],ascending=[True,False,False], inplace=True)
+    net = net.groupby('regulator.values').head(regul_size)
 
-    regul = pd.DataFrame(columns=["regulator","target","mor","likelihood"])
-    for mri in mr:
-        tmp_net_data = net[net['regulator.values'] == mri].copy()
-        ## Sort interactions in decreasing order of count and MI
-        tmp_net_data.sort_values(by=['count.values', 'mi.values'], ascending=[False, False], inplace=True)
+    reg_max = net.groupby(['regulator.values'])['mi.values'].transform('max')
 
-        # print(tmp_net_data.shape)
-        ## Top 50 interactions
-        tmp_net_data = tmp_net_data.iloc[:min(regul_size, len(tmp_net_data))]
+    op = pd.DataFrame({
+        'regulator': net['regulator.values'],
+        'target' : net['target.values'],
+        'mor': net['scc.values'],
+        'likelihood': net['mi.values']/reg_max
+        }
+    )
 
-        ## Regulatory mode = spearman correlation score
-        tmp_net_data['am.values'] = tmp_net_data['scc.values']
-
-        if with_count_values:
-            tmp_net_data['count.values'] = tmp_net_data['count.values']
-
-        ## Regulatory weight = scaled MI
-        tmp_net_data['aw.values'] = tmp_net_data['mi.values'] / tmp_net_data['mi.values'].max()
-
-        for index, row in tmp_net_data.iterrows():
-            regul.loc[len(regul.index)] = row.loc[["regulator.values", "target.values","am.values","aw.values"]].array
-
-    return regul
+    return op
                            
 def select_cells(n_cells_per_metacell,probability_weights, use_decay, decay_factor, num_cells_gq, adata_gq_cells):
     ''' 
