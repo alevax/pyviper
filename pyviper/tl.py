@@ -9,6 +9,7 @@ from ._filtering_funcs import *
 from ._filtering_funcs import _get_anndata_filtered_by_feature_group
 from ._helpers import _adjust_p_values
 from ._viper import viper
+from ._load._load import msigdb_regulon
 from .interactome import Interactome
 
 ### ---------- EXPORT LIST ----------
@@ -408,3 +409,102 @@ def OncoMatch(pax_data_to_test,
     om = pd.DataFrame(om, index = vpmat_to_test.index, columns = vpmat_for_cMRs.index)
 
     pax_data_to_test.obsm[key_added] = om
+
+def path_enr(gex_data,
+             pathway_interactome,
+             layer=None,
+             eset_filter=True,
+             method=None,  # [None, "scale", "rank", "mad", "ttest"],
+             enrichment='area',  # [None, 'area','narnea'],
+             mvws=1,
+             njobs=1,
+             batch_size=10000,
+             verbose=True,
+             output_as_anndata=True,
+             transfer_obs=True,
+             store_input_data=True
+             ):
+    """\
+    Run the variation of VIPER that is specific to pathway enrichment analysis:
+    a single interactome and min_targets is set to 0.
+
+    Parameters
+    ----------
+    gex_data
+        Gene expression stored in an anndata object (e.g. from Scanpy).
+    pathway_interactome
+        An object of class Interactome or one of the following strings that
+        corresponds to msigdb regulons: "c2", "c5", "c6", "c7", "h".
+    layer (default: None)
+        The layer in the anndata object to use as the gene expression input.
+    eset_filter (default: False)
+        Whether to filter out genes not present in the interactome (True) or to
+        keep this biological context (False). This will affect gene rankings.
+    method (default: None)
+        A method used to create a gene expression signature from gex_data.X. The
+        default of None is used when gex_data.X is already a gene expression
+        signature. Alternative inputs include "scale", "rank", "doublerank",
+        "mad", and "ttest".
+    enrichment (default: 'area')
+        The algorithm to use to calculate the enrichment. Choose betweeen
+        Analytical Ranked Enrichment Analysis (aREA) and Nonparametric
+        Analytical Rank-based Enrichment Analysis (NaRnEA) function. Default ='area',
+        alternative = 'narnea'.
+    mvws (default: 1)
+        (A) Number indicating either the exponent score for the metaViper weights.
+        These are only applicable when enrichment = 'area' and are not used when
+        enrichment = 'narnea'. Roughly, a lower number (e.g. 1) results in
+        networks being treated as a consensus network (useful for multiple
+        networks of the same celltype with the same epigenetics), while a higher
+        number (e.g. 10) results in networks being treated as separate (useful
+        for multiple networks of different celltypes with different epigenetics).
+        (B) The name of a column in gex_data that contains the manual assignments
+        of samples to networks using list position or network names.
+        (C) "auto": assign samples to networks based on how well each
+        network allows for sample enrichment.
+    njobs (default: 1)
+        Number of cores to distribute sample batches into.
+    batch_size (default: 10000)
+        Maximum number of samples to process at once. Set to None to split all
+        samples across provided `njobs`.
+    verbose (default: True)
+        Whether extended output about the progress of the algorithm should be
+        given.
+    output_as_anndata (default: True)
+        Way of delivering output.
+    transfer_obs (default: True)
+        Whether to transfer the observation metadata from the input anndata to
+        the output anndata. Thus, not applicable when output_as_anndata==False.
+    store_input_data (default: True)
+        Whether to store the input anndata in an unstructured data slot (.uns) of
+        the output anndata. Thus, not applicable when output_as_anndata==False.
+        If input anndata already contains 'gex_data' in .uns, the input will
+        assumed to be protein activity and will be stored in .uns as 'pax_data'.
+        Otherwise, the data will be stored as 'gex_data' in .uns.
+    """
+    if isinstance(pathway_interactome, str):
+        collection = pathway_interactome.lower()
+        if collection in ["c2", "c5", "c6", "c7", "h"]:
+            pathway_interactome = msigdb_regulon(collection)
+        else:
+            raise ValueError(
+                'pathway_interactome "' + str(pathway_interactome) + '" is not in "c2", "c5", "c6", "c7", "h".'
+            )
+
+    pathway_interactome.filter_targets(gex_data.var_names)
+    return viper(
+        gex_data,
+        pathway_interactome,
+        layer,
+        eset_filter,
+        method,
+        enrichment,
+        mvws,
+        0, #min_targets
+        njobs,
+        batch_size,
+        verbose,
+        output_as_anndata,
+        transfer_obs,
+        store_input_data
+    )
