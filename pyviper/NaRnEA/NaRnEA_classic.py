@@ -3,6 +3,7 @@ import pandas as pd
 from scipy.stats import rankdata
 from scipy.stats import norm
 import numpy as np
+import warnings
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['NaRnEA_classic']
@@ -167,8 +168,6 @@ def NaRnEA_classic(gex_data,
         tmp = np.unique(np.concatenate((interactome.get_targetSet(), interactome.get_regulonNames())))
         gex_data = gex_data[:,gex_data.var_names.isin(pd.Series(tmp))]
 
-    int_table = interactome.net_table
-
     pd.options.mode.chained_assignment = None
     exp_genes = list(gex_data.var.sort_index().index)
 
@@ -177,12 +176,15 @@ def NaRnEA_classic(gex_data,
     # filtered_table = int_table[int_table['target'].isin(exp_genes)]
     n_targets_not_in_exp_genes = np.count_nonzero(~np.isin(interactome.get_targetSet(), exp_genes))
     if n_targets_not_in_exp_genes > 0:
-        raise ValueError('interactome "' + str(interactome.name) + '" contains ' +
+        # raise ValueError(
+        warnings.warn('interactome "' + str(interactome.name) + '" contains ' +
                          str(n_targets_not_in_exp_genes) + " targets missing from gex_data.var.\n\t" +
                         "Please run interactome.filter_targets(gex_data.var_names) on your network to\n\t" +
                          "resolve this. It is highly recommend to do this on the unPruned network and\n\t"+
                          "then prune to the pruned network contains a consistent number of targets per\n\t"
                          "regulator, allow of which exist within gex_data.")
+        interactome.filter_targets(gex_data.var_names)
+    int_table = interactome.net_table
     filtered_table = int_table
 
     # why I need to remove that, there is no filtered_table[filtered_table['mor'] == -1]
