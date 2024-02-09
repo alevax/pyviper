@@ -216,7 +216,7 @@ def viper_similarity(adata,
 
     return adata
 
-def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=50,  with_count_values=False
+def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=50,  with_count_values=False, normalize_MI_per_regulon=True
                        ):
     pd.options.mode.chained_assignment = None
     if net_df is None:
@@ -240,8 +240,12 @@ def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=
     net.sort_values(by=['regulator.values','count.values','mi.values'],ascending=[True,False,False], inplace=True)
     net = net.groupby('regulator.values').head(regul_size)
 
-    reg_max = net.groupby(['regulator.values'])['mi.values'].transform('max')
+    if normalize_MI_per_regulon:
+        reg_max = net.groupby(['regulator.values'])['mi.values'].transform('max')        
+    else:
+        reg_max = net['mi.values'].max()
 
+    # print(reg_max)
     op = pd.DataFrame({
         'regulator': net['regulator.values'],
         'target' : net['target.values'],
