@@ -153,7 +153,28 @@ def stouffer_clusters_df(dat_df, cluster_vector):
 
     return result_df
 
+def add_layer_as_log_normalized_nes(adata,layer="mLog10"):
+    """\
+    Compute -log10(p-value) as tranformation of the viper-computed NES. 
+    This is added to a new layer named mLog10, where m stands for minus
 
+    Parameters
+    ----------
+    adata
+        AnnData containing protein activity (NES), pathways (NES) data or
+        Stouffer-integrated NES data, where rows are observations/samples (e.g. cells or groups) and
+        columns are features (e.g. proteins or pathways).
+
+    Returns
+    -------
+    AnnData object with one more layer added.
+    The layer is named mlog10
+
+    """
+
+	adata.layers[layer] = -1*np.log10(scipy.stats.norm.sf( adata.X ))
+	print("Added one more layer as {} to AnnData (returned)".format(layer))
+	return adata
 
 def nes_to_pval_df(dat_df,adjust=True,axs=1):
     """\
