@@ -171,10 +171,10 @@ def add_layer_as_log_normalized_nes(adata,layer="mLog10"):
     The layer is named mlog10
 
     """
+    adata.layers[layer] = -1*np.log10(scipy.stats.norm.sf(adata.X))
+    print("Added one more layer as {} to AnnData (returned)".format(layer))
+    return adata
 
-	adata.layers[layer] = -1*np.log10(scipy.stats.norm.sf( adata.X ))
-	print("Added one more layer as {} to AnnData (returned)".format(layer))
-	return adata
 
 def nes_to_pval_df(dat_df,adjust=True,axs=1):
     """\
