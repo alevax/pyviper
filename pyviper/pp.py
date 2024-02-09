@@ -216,7 +216,7 @@ def viper_similarity(adata,
 
     return adata
 
-def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=50,  with_count_values=False, normalize_MI_per_regulon=True):
+def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=50, with_count_values=False, normalize_MI_per_regulon=True):
     pd.options.mode.chained_assignment = None
     if net_df is None:
         net = pd.read_csv(net_file, sep='\t')
@@ -254,7 +254,7 @@ def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=
     )
 
     return op
-                           
+
 def select_cells(n_cells_per_metacell,probability_weights, use_decay, decay_factor, num_cells_gq, adata_gq_cells):
     ''' 
     Select a set of cells for a metacell based on specified probability weights. A good quality cell is defined as a cell with 
