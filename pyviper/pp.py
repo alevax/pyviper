@@ -216,7 +216,33 @@ def viper_similarity(adata,
 
     return adata
 
-def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=50, with_count_values=False, normalize_MI_per_regulon=True):
+def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=50, normalize_MI_per_regulon=True):
+    """\
+    Process an output from ARACNe3 to return a pd.DataFrame describing a gene regulatory network
+    with suitable columns for conversion to an object of Interactome class.
+
+    Parameters
+    ----------
+    net_file
+        A string containing the path to the ARACNe3 output
+    net_df (default: None)
+        Whether to passt a pd.DataFrame instead of the path
+    anno (default: None)
+        Gene ID annotation
+    MI_thres (default: 0)
+        Threshold on Mutual Information (MI) to select the regulators and target pairs
+    regul_size (default: 50)
+        Number of (top) targets to include in each regulon 
+    normalize_MI_per_regulon (default: True)
+        Whether to normalize MI values each regulon by the maximum value
+
+    Returns
+    -------
+    A pd.DataFrame containing an ARACNe3-inferred gene regulatory network with the
+    following 4 columns: "regulator", "target", "mor" (mode of regulation) and "likelihood".
+    """
+    
+    
     pd.options.mode.chained_assignment = None
     if net_df is None:
         net = pd.read_csv(net_file, sep='\t')
@@ -329,25 +355,40 @@ def generateMetacellAnnData(arg0, n_metacells_per_cluster=500, n_metacells=1000,
                             n_neighbors = 15,
                             cluster_label="clusters" , method="proportional", experiment_dir_path="",
                             use_decay = False, decay_factor = 0.1, seed = 42):
-    '''
+    """\
     Generate an AnnData object representing metacells from an input AnnData object.
 
-    Parameters:
-        arg0 (anndata.AnnData): Input AnnData object containing single-cell data.
-        n_metacells_per_cluster (int): Number of metacells to generate for each cluster.
-        n_metacells (int): Total number of metacells to generate.
-        n_cells_per_metacell (int): Number of cells to include in each metacell.
-        n_neighbors (int): Number of neighbors for computing cell-cell distances.
-        cluster_label (str): Name of the column in the obs attribute specifying cell clusters.
-        method (str): Method for generating metacells ("proportional", "absolute", "relative").
-        experiment_dir_path (str): Path to the directory to save the generated data.
-        use_decay (bool): If True, use probability decay during metacell generation.
-        decay_factor (float): Decay factor for probability during metacell generation.
-        seed (int): Seed for random number generation. 
-    Returns:
+    Parameters
+    ----------
+    arg0 (anndata.AnnData)
+    	Input AnnData object containing single-cell data.
+    n_metacells_per_cluster (int)
+    	Number of metacells to generate for each cluster.
+    n_metacells (int)
+        Total number of metacells to generate.
+    n_cells_per_metacell (int) 
+    	Number of cells to include in each metacell.
+    n_neighbors (int) 
+    	Number of neighbors for computing cell-cell distances.
+    cluster_label (str) 
+    	Name of the column in the obs attribute specifying cell clusters.
+    method (str) 
+    	Method for generating metacells ("proportional", "absolute", "relative").
+    experiment_dir_path (str) 
+    	Path to the directory to save the generated data.
+    use_decay (bool)
+    	If True, use probability decay during metacell generation.
+    decay_factor (float) 
+    	Decay factor for probability during metacell generation (1 means no penalty)
+    seed (int)
+    	Seed for random number generation. 
+    
+    Returns
+    ----------
         anndata.AnnData: AnnData object representing the generated metacells.
 
-    Method Differences:
+    Method Differences
+    ----------
         - "proportional": This method generates metacells based on the proportion of cells in each cluster.
           Metacells are created proportionally to the cluster sizes, and cell probabilities may decay.
         - "absolute": Metacells are generated with an absolute number of cells per metacell.
@@ -360,7 +401,7 @@ def generateMetacellAnnData(arg0, n_metacells_per_cluster=500, n_metacells=1000,
     AnnData object contains metacell data, and the generated metacells are saved in the specified
     `experiment_dir_path`.
 
-    '''
+    """
     
     _adata = arg0.copy()
     n_var = _adata.shape[1]
