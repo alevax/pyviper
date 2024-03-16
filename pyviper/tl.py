@@ -11,6 +11,8 @@ from ._helpers import _adjust_p_values
 from ._viper import viper
 from ._load._load import msigdb_regulon
 from .interactome import Interactome
+from ._rep_subsample_funcs import _representative_subsample_anndata
+from ._metacell_funcs import _representative_metacells_multiclusters
 
 ### ---------- EXPORT LIST ----------
 __all__ = []
@@ -155,7 +157,7 @@ def stouffer_clusters_df(dat_df, cluster_vector):
 
 def add_layer_as_log_normalized_nes(adata,layer="mLog10"):
     """\
-    Compute -log10(p-value) as tranformation of the viper-computed NES. 
+    Compute -log10(p-value) as tranformation of the viper-computed NES.
     This is added to a new layer named mLog10, where m stands for minus
 
     Parameters
@@ -528,4 +530,217 @@ def path_enr(gex_data,
         output_as_anndata,
         transfer_obs,
         store_input_data
+    )
+
+def representative_subsample(adata,
+                             pca_slot = "X_pca",
+                             size = 1000,
+                             seed = 0,
+                             verbose = True,
+                             njobs = 1):
+    """\
+    A tool for create a subsample of the input data such it is well
+    representative of all the populations within the input data rather than
+    being a random sample. This is accomplished by pairing samples together in
+    an iterative fashion until the desired sample size is reached.
+
+    Parameters
+    ----------
+    adata
+        An anndata object containing a distance object in adata.obsp.
+    pca_slot (default: "X_pca")
+        The slot in adata.obsm where the PCA object is stored. One way of
+        generating this object is with sc.pp.pca.
+    size (default: 1000)
+        The size of the representative subsample
+    seed (default: 0)
+        The random seed used when taking samples of the data.
+    verbose (default: True)
+        Whether to provide runtime information.
+    njobs (default: 1)
+        The number of cores to use for the analysis. Using more than 1 core
+        (multicore) speeds up the analysis.
+
+    Returns
+    -------
+    An AnnData containing the representative sample with the obs and vars
+    information from the input adata. The returned subsample AnnData has a column
+    in obs in the slot "index_in_source_adata" that contain the chosen indices
+    and a pandas DataFrame in .uns in the slot "knn_groups_indices_df" that
+    contain the KNN groups that were used to generate the subsample.
+    """
+    return _representative_subsample_anndata(
+        adata,
+        pca_slot,
+        size,
+        exact_size = True,
+        seed = seed,
+        verbose = verbose,
+        njobs = njobs
+    )
+
+# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
+# ------------------------------------------------------------------------------
+# ----------------------------- ** METACELL FUNC ** ----------------------------
+# ------------------------------------------------------------------------------
+# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
+def representative_metacells(
+    adata,
+    counts = None,
+    pca_slot = "X_pca",
+    dist_slot = "corr_dist",
+    clusters_slot = None,
+    score_slot = None,
+    score_min_thresh = None,
+    size = 500,
+    n_cells_per_metacell = None,
+    min_median_depth = 10000,
+    perc_data_to_use = None,
+    perc_incl_data_reused = None,
+    seed = 0,
+    key_added = "metacells",
+    verbose = True,
+    njobs = 1
+):
+    """\
+    A tool for create a representative selection of metacells from the data that
+    aims to maximize reusing samples from the data, while simultaneously
+    ensuring that all neighbors are close to the metacell they construct.
+    When using this function, exactly two of the following parameters must be
+    set: size, min_median_depth or n_cells_per_metacell, perc_data_to_use or
+    perc_incl_data_reused.
+    Note that min_median_depth and n_cells_per_metacell cannot both be set
+    at the same time, since they directly relate (e.g. higher n_cells_per_metacell
+    means more neighbors are used to construct a single metacell, meaning each
+    metacell will have more counts, resulting in a higher median depth).
+    Note that perc_data_to_use and perc_incl_data_reused cannot both be set
+    at the same time, since they directly relate (e.g. higher perc_data_to_use
+    means you include more data, which means it's more likely to reuse more
+    data, resulting in a higher perc_incl_data_reused).
+
+    Parameters
+    ----------
+    adata
+        An anndata object containing a distance object in adata.obsp.
+    counts (default: None)
+        A pandas DataFrame or AnnData object of unnormalized gene expression
+        counts that has the same samples in the same order as that of adata.
+        If counts are left as None, adata must have counts stored in adata.raw.
+    pca_slot (default: "X_pca")
+        The slot in adata.obsm where the PCA object is stored. One way of
+        generating this object is with sc.pp.pca.
+    dist_slot (default: "corr_dist")
+        The slot in adata.obsp where the distance object is stored. One way of
+        generating this object is with adata.pp.corr_distance.
+    clusters_slot (default: None)
+        The slot in adata.obs where cluster labels are stored. Cluster-specific
+        metacells will be generated using the same parameters with the results
+        for each cluster being stored separately in adata.uns.
+    score_slot (default: None)
+        The slot in adata.obs where a score used to determine and filter cell
+        quality are stored (e.g. silhouette score).
+    score_min_thresh (default: None)
+        The score from adata.obs[score_slot] that a cell must have at minimum to
+        be used for metacell construction (e.g. 0.25 is the rule of thumb for
+        silhouette score).
+    size (default: None)
+        A specific number of metacells to generate. If left as None,
+        perc_data_to_use or perc_incl_data_reused can be used to specify the size
+        when n_cells_per_metacell or min_median_depth is given.
+    n_cells_per_metacell (default: None)
+        The number of cells that should be used to generate single metacell.
+        Note that this parameter and n_cells_per_metacell cannot both be set as
+        they directly relate: e.g. higher n_cells_per_metacell leads to higher
+        min_median_depth. If left as None, perc_data_to_use or
+        perc_incl_data_reused can be used to specify n_cells_per_metacell when
+        size is given.
+    min_median_depth (default: 10000)
+        The desired minimum median depth for the metacells (indirectly specifies
+        n_cells_per_metacell). The default is set to 10000 as this is recommend
+        by PISCES[1]. Note that this parameter and n_cells_per_metacell cannot
+        both be set as they directly relate: e.g. higher min_median_depth leads
+        to higher n_cells_per_metacell.
+    perc_data_to_use (default: None)
+        The percent of the total amount of provided samples that will be used in
+        the creation of metacells. Note that this parameter and
+        perc_incl_data_reused cannot both be set as they directly relate: e.g.
+        higher perc_data_to_use leads to higher perc_incl_data_reused.
+    perc_incl_data_reused (default: None)
+        The percent of samples that are included in the creation of metacells
+        that will be reused (i.e. used in more than one metacell). Note that this
+        parameter and perc_data_to_use cannot both be set as they directly relate:
+        e.g. higher perc_incl_data_reused leads to higher perc_data_to_use.
+    seed (default: 0)
+        The random seed used when taking samples of the data.
+    key_added (default: "metacells")
+        The name of the slot in the adata.uns to store the output.
+    verbose (default: True)
+        Whether to provide runtime information and quality statistics.
+    njobs (default: 1)
+        The number of cores to use for the analysis. Using more than 1 core
+        (multicore) speeds up the analysis.
+
+
+    Returns
+    -------
+    Saves the metacells as a pandas dataframe in adata.uns[key_added]. Attributes
+    that contain parameters for and statistics about the construction of the
+    metacells are stored in adata.uns[key_added].attrs.
+
+    Citations
+    -------
+    Obradovic, A., Vlahos, L., Laise, P., Worley, J., Tan, X., Wang, A., &
+    Califano, A. (2021). PISCES: A pipeline for the systematic, protein activity
+    -based analysis of single cell RNA sequencing data. bioRxiv, 6, 22.
+    """
+
+    # Here is a summary of parameter choices and their affects:
+	# size + min_median_depth
+	# 	--> calculate n_cells_per_metacell
+	# size + n_cells_per_metacell
+	# 	--> N/A
+	# perc_data_used + size
+	# 	--> optimize n_cells_per_metacell
+	# perc_data_used + n_cells_per_metacell
+	# 	--> optimize size
+	# perc_data_used + min_median_depth
+	# 	--> calculate n_cells_per_metacell
+	# 	--> optimize size
+	# max_perc_included_reused + size
+	# 	--> optimize n_cells_per_metacell
+	# max_perc_included_reused + n_cells_per_metacell
+	# 	--> optimize size
+	# max_perc_included_reused + min_median_depth
+	# 	--> calculate n_cells_per_metacell
+	# 	--> optimize size
+
+    # Removed single parameter choices:
+    # size
+	# 	--> assume n_cells_per_metacell = total_samples/size
+	# n_cells_per_metacell
+	# 	--> assume size = total_samples/n_cells_per_metacell
+	# min_median_depth
+	# 	--> calculate n_cells_per_metacell
+	# 	--> assume size = total_samples/n_cells_per_metacell
+
+    if score_slot in adata.obs.columns is not None:
+        adata = adata[adata.obs[score_slot].values >= score_min_thresh,:].copy()
+
+    _representative_metacells_multiclusters(
+        adata,
+        counts,
+        pca_slot,
+        dist_slot,
+        clusters_slot,
+        size,
+        n_cells_per_metacell,
+        min_median_depth,
+        perc_data_to_use,
+        perc_incl_data_reused,
+        exact_size = True,
+        seed = seed,
+        key_added = key_added,
+        verbose = verbose,
+        njobs = njobs,
+        smart_sample = True
     )
