@@ -118,8 +118,13 @@ def viper_similarity(adata,
                      ws = [4, 2],
                      alternative=['two-sided','greater','less'],
                      layer=None,
-                     filter_by_feature_groups=None):
+                     filter_by_feature_groups=None,
+                     key_added = 'viper_similarity'):
     """\
+    Compute the similarity between the columns of a VIPER-predicted activity or
+    gene expression matrix. While following the same concept as the two-tail
+    Gene Set Enrichment Analysis (GSEA)[1], it is based on the aREA algorithm[2].
+
     If ws is a single number, weighting is performed using an exponential function.
     If ws is a 2 numbers vector, weighting is performed with a symmetric sigmoid
     function using the first element as inflection point and the second as trend.
@@ -147,15 +152,18 @@ def viper_similarity(adata,
         The selected regulators, such that all other regulators are filtered out
         from the input data. If None, all regulators will be included. Regulator
         sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
+    key_added (default: "viper_similarity")
+        The name of the slot in the adata.obsp to store the output.
 
     Returns
     -------
-    The original anndata.AnnData object where adata.obsp['viper_similarity']
-    contains a signature-based distance numpy.ndarray.
+    Saves a signature-based distance numpy.ndarray in adata.obsp[key_added].
 
     References
     ----------
-    Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H.,
+    [1] Julio, M. K. -d. et al. Regulation of extra-embryonic endoderm stem cell
+    differentiation by Nodal and Cripto signaling. Development 138, 3885-3895 (2011).
+    [2] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H.,
     & Califano, A. (2016). Functional characterization of somatic mutations in
     cancer using network-based inference of protein activity. Nature genetics,
     48(8), 838-847.
@@ -212,14 +220,13 @@ def viper_similarity(adata,
     vp.values[np.triu_indices(vp.shape[0], 1)] = tmp
     vp.columns = vp.index
 
-    adata.obsp['viper_similarity'] = vp
-
-    return adata
+    adata.obsp[key_added] = vp
 
 def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=50, normalize_MI_per_regulon=True):
     """\
-    Process an output from ARACNe3 to return a pd.DataFrame describing a gene regulatory network
-    with suitable columns for conversion to an object of Interactome class.
+    Process an output from ARACNe3 to return a pd.DataFrame describing a gene
+    regulatory network with suitable columns for conversion to an object of the
+    Interactome class.
 
     Parameters
     ----------
@@ -280,7 +287,7 @@ def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=
     )
 
     return op
-# 
+#
 # def select_cells(n_cells_per_metacell,probability_weights, use_decay, decay_factor, num_cells_gq, adata_gq_cells):
 #     '''
 #     Select a set of cells for a metacell based on specified probability weights. A good quality cell is defined as a cell with

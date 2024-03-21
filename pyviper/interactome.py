@@ -14,6 +14,14 @@ class Interactome:
     def __init__(self, name, net_table=None, input_type=None):
         """\
         Create an Interactome object to contain the results of ARACNe.
+        This object describes the relationship between regulator proteins (e.g.
+        TFs and CoTFs) and their downstream target genes with mor (e.g. spearman
+        correlation) indicating sign of association and likelihood
+        (e.g. mutual information) indicating strength of association.
+        An Interactome object can be given to pyviper.viper along with a gene
+        expression signature to generate a protein activity matrix with the
+        VIPER (Virtual Inference of Protein-activity by Enriched Regulon
+        analysis) algorithm[1].
 
         Parameters
         ----------
@@ -30,6 +38,13 @@ class Interactome:
             Only relevant when net_table is a filepath. If None, the input_type
             will be inferred from the net_table. Otherwise, specify "csv", "tsv"
             or "pkl".
+
+        Citations
+        -------
+        [1] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye,
+        B. H., & Califano, A. (2016). Functional characterization of somatic
+        mutations in cancer using network-based inference of protein activity.
+        Nature genetics, 48(8), 838-847.
         """
         self.name = name
         if net_table is None:

@@ -121,6 +121,10 @@ def translate_adata_index(adata, desired_format, eliminate = True):
     eliminate (default: True)
         Whether to eliminate var rows that don't have a translation. Otherwise,
         None will be left in place in the index.
+
+    Returns
+    -------
+    The translated anndata object.
     """
     # So all translation happen on a new adata that is returned. Otherwise, we
     # edit the original, but eliminate doesn't work if the output isn't taken.

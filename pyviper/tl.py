@@ -285,11 +285,13 @@ def OncoMatch(pax_data_to_test,
               both_ways = False,
               om_max_NES_threshold = 30,
               om_min_logp_threshold = 0,
-              enrichment = 'area',
+              enrichment = 'aREA',
               key_added = 'om'):
     """\
-    The OncoMatch function that computes -log10 p-values for each sample in pax_data_to_test
-    of the MRs of each sample in pax_data_for_cMRs.
+    The OncoMatch algorithm[1] assesses the overlap in differentially active MR
+    proteins between two sets of samples (e.g. to validate GEMMs as effective
+    models of human tumor samples). It does so by computing -log10 p-values for
+    each sample in pax_data_to_test of the MRs of each sample in pax_data_for_cMRs.
 
     Parameters
     ----------
@@ -311,8 +313,8 @@ def OncoMatch(pax_data_to_test,
     om_min_logp_threshold (default: 0)
         The minimum logp value threshold, such that all logp values smaller than
         this value are set to 0.
-    enrichment (default: 'area')
-        The method of compute enrichment. 'area' or 'narnea'
+    enrichment (default: 'aREA')
+        The method of compute enrichment. 'aREA' or 'NaRnEA'
     key_added (default: 'om')
         The slot in pax_data_to_test.obsm to store the oncomatch results.
     Returns
@@ -329,6 +331,11 @@ def OncoMatch(pax_data_to_test,
     Alvarez, M. J. et al. Reply to ’H-STS, L-STS and KRJ-I are not authentic GEPNET
     cell lines’. Nat Genet 51, 1427–1428, doi:10.1038/s41588-019-0509-5 (2019).
     """
+
+    if enrichment is None:
+        enrichment = 'narnea'
+    else:
+        enrichment = enrichment.lower()
 
     if isinstance(pax_data_to_test, anndata.AnnData):
         vpmat_to_test = pax_data_to_test.to_df()
@@ -438,7 +445,7 @@ def path_enr(gex_data,
              layer=None,
              eset_filter=True,
              method=None,  # [None, "scale", "rank", "mad", "ttest"],
-             enrichment='area',  # [None, 'area','narnea'],
+             enrichment='aREA',  # [None, 'area','narnea'],
              mvws=1,
              njobs=1,
              batch_size=10000,
@@ -468,15 +475,15 @@ def path_enr(gex_data,
         default of None is used when gex_data.X is already a gene expression
         signature. Alternative inputs include "scale", "rank", "doublerank",
         "mad", and "ttest".
-    enrichment (default: 'area')
+    enrichment (default: 'aREA')
         The algorithm to use to calculate the enrichment. Choose betweeen
         Analytical Ranked Enrichment Analysis (aREA) and Nonparametric
-        Analytical Rank-based Enrichment Analysis (NaRnEA) function. Default ='area',
-        alternative = 'narnea'.
+        Analytical Rank-based Enrichment Analysis (NaRnEA) function. Default ='aREA',
+        alternative = 'NaRnEA'.
     mvws (default: 1)
         (A) Number indicating either the exponent score for the metaViper weights.
-        These are only applicable when enrichment = 'area' and are not used when
-        enrichment = 'narnea'. Roughly, a lower number (e.g. 1) results in
+        These are only applicable when enrichment = 'aREA' and are not used when
+        enrichment = 'NaRnEA'. Roughly, a lower number (e.g. 1) results in
         networks being treated as a consensus network (useful for multiple
         networks of the same celltype with the same epigenetics), while a higher
         number (e.g. 10) results in networks being treated as separate (useful
@@ -532,12 +539,12 @@ def path_enr(gex_data,
         store_input_data
     )
 
-def representative_subsample(adata,
-                             pca_slot = "X_pca",
-                             size = 1000,
-                             seed = 0,
-                             verbose = True,
-                             njobs = 1):
+def repr_subsample(adata,
+                   pca_slot="X_pca",
+                   size=1000,
+                   seed=0,
+                   verbose=True,
+                   njobs=1):
     """\
     A tool for create a subsample of the input data such it is well
     representative of all the populations within the input data rather than
@@ -584,7 +591,7 @@ def representative_subsample(adata,
 # ----------------------------- ** METACELL FUNC ** ----------------------------
 # ------------------------------------------------------------------------------
 # @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
-def representative_metacells(
+def repr_metacells(
     adata,
     counts = None,
     pca_slot = "X_pca",

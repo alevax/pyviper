@@ -66,7 +66,7 @@ def viper(gex_data,
           layer=None,
           eset_filter=True,
           method=None,  # [None, "scale", "rank", "mad", "ttest"],
-          enrichment='area',  # [None, 'area','narnea'],
+          enrichment='aREA',  # [None, 'area','narnea'],
           mvws=1,
           min_targets=30,
           njobs=1,
@@ -77,10 +77,14 @@ def viper(gex_data,
           store_input_data=True
           ):
     """\
-    Allows the individual to infer normalized enrichment scores using Analytical
-    Ranked Enrichment Analysis (aREA)[1] or Nonparametric Analytical Rank-based
+    The VIPER (Virtual Inference of Protein-activity by Enriched Regulon
+    analysis) algorithm[1] allows individuals to compute protein activity
+    using a gene expression signature and an Interactome object that describes
+    the relationship between regulators and their downstream targets.
+    Users can infer normalized enrichment scores (NES) using Analytical Ranked
+    Enrichment Analysis (aREA)[1] or Nonparametric Analytical Rank-based
     Enrichment Analysis (NaRnEA)[2]. NaRnEA also compute proportional enrichment
-    scores.
+    scores (PES).
 
     The Interactome object must not contain any targets that are not in the
     features of gex_data. This can be accomplished by running:
@@ -105,15 +109,15 @@ def viper(gex_data,
         default of None is used when gex_data.X is already a gene expression
         signature. Alternative inputs include "scale", "rank", "doublerank",
         "mad", and "ttest".
-    enrichment (default: 'area')
+    enrichment (default: 'aREA')
         The algorithm to use to calculate the enrichment. Choose betweeen
         Analytical Ranked Enrichment Analysis (aREA) and Nonparametric
-        Analytical Rank-based Enrichment Analysis (NaRnEA) function. Default ='area',
-        alternative = 'narnea'.
+        Analytical Rank-based Enrichment Analysis (NaRnEA) function. Default ='aREA',
+        alternative = 'NaRnEA'.
     mvws (default: 1)
         (A) Number indicating either the exponent score for the metaViper weights.
-        These are only applicable when enrichment = 'area' and are not used when
-        enrichment = 'narnea'. Roughly, a lower number (e.g. 1) results in
+        These are only applicable when enrichment = 'aREA' and are not used when
+        enrichment = 'NaRnEA'. Roughly, a lower number (e.g. 1) results in
         networks being treated as a consensus network (useful for multiple
         networks of the same celltype with the same epigenetics), while a higher
         number (e.g. 10) results in networks being treated as separate (useful
@@ -152,11 +156,11 @@ def viper(gex_data,
     -------
     A dictionary containing :class:`~numpy.ndarray` containing NES values
     (key: 'nes') and PES values (key: 'pes') when output_as_anndata==False and
-    enrichment = "narnea".
+    enrichment = "NaRnEA".
     A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values
-    when output_as_anndata==False and enrichment = "area".
+    when output_as_anndata==False and enrichment = "aREA".
     An anndata object containin NES values in .X. Will contain PES values in the
-    layer 'pes' when enrichment = 'narnea'. Will contain .gex_data and/or
+    layer 'pes' when enrichment = 'NaRnEA'. Will contain .gex_data and/or
     .pax_data in the unstructured data slot (.uns) when store_input_data = True.
     Will contain identical .obs to the input anndata when transfer_obs = True.
 
