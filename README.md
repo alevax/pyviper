@@ -53,7 +53,7 @@ activity = pyviper.viper(gex_data=ges, interactome=network, enrichment="area")
 print(activity.to_df())
 
 ## narnea
-activity = pyviper.viper(gex_data=ges, interactome=network, enrichment="narnea")
+activity = pyviper.viper(gex_data=ges, interactome=network, enrichment="narnea", eset_filter=False)
 print(activity.to_df())
 ```
 
