@@ -68,20 +68,20 @@ The main functions available from `pyviper` are:
 - `pyviper.viper`: "pyviper" function for Virtual Inference of Protein Activity by Enriched Regulon Analysis (VIPER). The function allows using 2 enrichment algorithms, aREA and (matrix)-NaRnEA (see below).
 - `pyviper.aREA`: computes [aREA](https://www.nature.com/articles/ng.3593) (analytic rank-based enrichment analysis) and meta-aREA
 - `pyviper.NaRnEA`: computes [matrix-NaRnEA](https://www.biorxiv.org/content/10.1101/2021.05.20.445002v5), a vectorized, implementation of [NaRnEA](https://www.mdpi.com/1099-4300/25/3/542)
-- `pyviper.translate_adata_index`: for translating between species (i.e. mouse vs human) and between ensembl, entrez and gene symbols.
+- `pyviper.pp.translate_adata_index`: for translating between species (i.e. mouse vs human) and between ensembl, entrez and gene symbols.
 - `pyviper.tl.path_enr`: computes pathway enrichment
 
 Other notable functions include:
-- `pyviper.tl.stouffer`: computes signatures on a cluster-by-cluster basis using Cluster integration method for pathway enrichment
 - `pyviper.tl.OncoMatch`: computes [OncoMatch](https://www.nature.com/articles/s41588-018-0138-4), an algorithm to assess the overlap in differentially active MR proteins between two sets of samples (e.g. validate GEMMs as effective models of human samples)
+- `pyviper.pp.stouffer`: computes signatures on a cluster-by-cluster basis using Cluster integration method for pathway enrichment
 - `pyviper.pp.viper_similarity`: computes the [similarity](https://s3.jcloud.sjtu.edu.cn/899a892efef34b1b944a19981040f55b-oss01/bioconductor/3.14/bioc/vignettes/viper/inst/doc/viper.pdf) between VIPER signatures
-- `pyviper.tl.repr_metacells`: compute representative metacells (e.g. for ARACNe) using our method to maximize unique sample usage and minimize resampling (users can specify depth, percent data usage, etc).
-- `pyviper.tl.repr_subsample`: select a representative subsample of data using our method to ensure a widely distributed sampling.
+- `pyviper.pp.repr_metacells`: compute representative metacells (e.g. for ARACNe) using our method to maximize unique sample usage and minimize resampling (users can specify depth, percent data usage, etc).
+- `pyviper.pp.repr_subsample`: select a representative subsample of data using our method to ensure a widely distributed sampling.
 
 Additionally, the following submodules are available:
 - `pyviper.load`: submodule containing several utility functions useful for different analyses, including `load_msigdb_regulon`, `load_TFs` etc
 - `pyviper.pl`: submodule containing pyviper-wrappers for `scanpy` plotting
-- `pyviper.tl`: submodule containing pyviper-wrapper for `scanpy` data transformation
+- `pyviper.tl`: submodule containing pyviper-wrappers for `scanpy` data transformation
 - `pyviper.config`: submodule allowing users to specify current species and filepaths for regulators
 
 ## Contact

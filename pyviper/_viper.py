@@ -1,8 +1,6 @@
 ### ---------- IMPORT DEPENDENCIES ----------
 import pandas as pd
 import numpy as np
-
-from ._helpers import *
 from .aREA.aREA_meta import aREA
 from .NaRnEA.NaRnEA_meta import NaRnEA
 from .pp import rank_norm
@@ -19,6 +17,24 @@ __all__ = ['viper']
 # ------------------------------ HELPER FUNCTIONS -----------------------------
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+def mat_to_anndata(mat):
+    # Helper function for *pyviper* and *path_enr*
+    # Create obs dataframe
+    mat_sampleNames = pd.DataFrame(index=range(len(mat.index.values)),columns=range(0))
+    mat_sampleNames.index = mat.index.values
+    mat_sampleNames
+
+    # Create var dataframe
+    mat_features = pd.DataFrame(index=range(len(mat.columns.values)),columns=range(0))
+    mat_features.index = mat.columns.values
+    mat_features
+
+    # Convert the pandas dataframe from Pyviper into a new Anndata object
+    pax_data = anndata.AnnData(X=mat,
+                               obs=mat_sampleNames,
+                               var=mat_features,
+                               dtype=np.float64)
+    return(pax_data)
 
 def sample_ttest(i,array):
     return ttest_1samp((array[i] - np.delete(array, i, 0)), 0).statistic

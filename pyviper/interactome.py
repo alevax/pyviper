@@ -15,9 +15,9 @@ class Interactome:
         """\
         Create an Interactome object to contain the results of ARACNe.
         This object describes the relationship between regulator proteins (e.g.
-        TFs and CoTFs) and their downstream target genes with mor (e.g. spearman
-        correlation) indicating sign of association and likelihood
-        (e.g. mutual information) indicating strength of association.
+        TFs and CoTFs) and their downstream target genes with mor (Mode Of
+        Regulation, e.g. spearman correlation) indicating directionality and
+        likelihood (e.g. mutual information) indicating weight of association.
         An Interactome object can be given to pyviper.viper along with a gene
         expression signature to generate a protein activity matrix with the
         VIPER (Virtual Inference of Protein-activity by Enriched Regulon

@@ -2,7 +2,6 @@ from .aREA.aREA_meta import aREA
 from .NaRnEA.NaRnEA_meta import NaRnEA
 from ._viper import *
 from .interactome import *
-from ._translate import *
 
 # Want to appear as module - no direct functions
 # made __all__ = [] in each of these .py files

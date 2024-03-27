@@ -1,117 +1,85 @@
 ### ---------- IMPORT DEPENDENCIES ----------
-import pandas as pd
-import numpy as np
-import anndata
-import string
-from scipy.stats import rankdata
-import string
-import random
-import scanpy as sc
-from tqdm.auto import tqdm
-import os
+from ._pp import _rank_norm, _stouffer, _viper_similarity, _aracne3_to_regulon, _nes_to_neg_log, _nes_to_pval, _mad_from_R, _median
+from ._corr_distance import corr_distance
+from ._rep_subsample_funcs import _representative_subsample_anndata
+from ._metacell_funcs import _representative_metacells_multiclusters
+from ._translate import translate_adata_index
 
 ### ---------- EXPORT LIST ----------
 __all__ = []
 
-
-def _mad_from_R(x, center=None, constant=1.4826, low=False, high=False):
-    if center is None:
-        center=np.median(x)
-    x = x[~np.isnan(x)] if np.isnan(x).any() else x
-    n = len(x)
-    if (low or high) and n % 2 == 0:
-        if low and high:
-            raise ValueError("'low' and 'high' cannot be both True")
-        n2 = n // 2 + int(high)
-        return constant * np.sort(np.abs(x - center))[n2]
-    return constant * np.median(np.abs(x - center))
-
-# Function assumes features as rows and observations as columns
-# Numerator Functions:
-    # Median - numpy.median
-    # Mean - numpy.mean
-# Denominator Functions:
-    # Median absolute deviation - mad_from_R
-    # Standard deviation - statistics.stdev
-def _rank_norm(x, NUM_FUN=np.median, DEM_FUN = _mad_from_R, verbose = False):
-    rank = rankdata(x, axis=0)
-    median = NUM_FUN(rank, axis=1, keepdims=True)#np.median(rank, axis=1, keepdims=True)
-    mad = np.apply_along_axis(DEM_FUN, 1, rank)
-
-    x = ((rank - median)/mad[:, np.newaxis])
-
-    if verbose: print("- Number of NA features:", np.sum(np.sum(np.isnan(x), axis=1)))
-    if verbose: print("- Number of Inf features:", np.sum(np.isinf(np.sum(x, axis=1))))
-    if verbose: print("- Number of 0 features:", np.sum(np.sum(x, axis=1) == 0))
-    if verbose: print("- Features to Remove:")
-
-    # Take care of infinite values
-    max_finite = np.nanmax(x[np.isfinite(x)])
-    min_finite = np.nanmin(x[np.isfinite(x)])
-    x[np.isposinf(x)] = max_finite
-    x[np.isneginf(x)] = min_finite
-
-    x = np.where(np.isnan(x), np.nanmin(x), x)
-    x = np.clip(x, a_min=np.nanmin(x), a_max=np.nanmax(x))
-    if verbose: print("- Removing NULL/NA features ...")
-    x = x[~np.isnan(x).any(axis=1)]
-
-    if verbose: print("- Number of NA features:", np.sum(np.sum(np.isnan(x), axis=1)))
-    if verbose: print("- Number of Inf features:", np.sum(np.isinf(np.sum(x, axis=1))))
-    if verbose: print("- Number of 0 features:", np.sum(np.sum(x, axis=1) == 0))
-
-    return x
-
-def rank_norm(x, NUM_FUN=np.median, DEM_FUN = _mad_from_R, layer_input = None, layer_output = None, verbose = False):
+def rank_norm(
+    adata,
+    NUM_FUN=_median,
+    DEM_FUN = _mad_from_R,
+    layer = None,
+    key_added = None
+):
     """\
     Compute a double rank normalization on an anndata, np.array, or pd.DataFrame.
 
     Parameters
     ----------
-    x
+    adata
         Data stored in an anndata object, np.array or pd.DataFrame.
     NUM_FUN (default: np.median)
         The first function to be applied across each column.
     DEM_FUN (default: _mad_from_R)
         The second function to be applied across each column.
-    layer_input (default: None)
-        For an anndata input, the layer to use. When None, the input layer is anndata.X.
-    layer_output (default: None)
-        For an anndata input, the name of the layer where to store.
-        When None, this is anndata.X.
-    verbose (default: False)
-        Whether to give additional output about the progress of the function.
+    layer (default: None)
+        For an anndata input, the layer to use. When None, the input layer is
+        anndata.X.
+    key_added (default: None)
+        For an anndata input, the name of the layer where to store. When None,
+        this is anndata.X.
 
     Returns
     -------
-    A double rank transformed version of the input data
+    Saves the input data as a double rank transformed version
     """
-    if(isinstance(x, anndata.AnnData) or isinstance(x, anndata._core.anndata.AnnData)):
-        if(layer_input is None):
-            gesMat = x.X.copy()
-        else:
-            if(verbose): print('- Using the layer "' + layer_input + '" as input...')
-            gesMat = x.layers[layer_input].copy()
-    elif(isinstance(x, np.ndarray)):
-        gesMat = x.copy()
-    elif(isinstance(x, pd.DataFrame)):
-        gesMat = x.copy().to_numpy
-    else:
-        raise Exception("In RankNorm(x), x must be anndata.AnnData, numpy.ndarray or pandas.DataFrame.")
-    gesMat = _rank_norm(gesMat, NUM_FUN, DEM_FUN, verbose)
-    if(isinstance(x, anndata.AnnData)):
-        if(layer_output is None):
-            x.X = gesMat
-        else:
-            if(verbose): print('- Saving result in the layer "' + layer_output + '"...')
-            x.layers[layer_output] = gesMat
-    else:
-        x = gesMat
-    return(x)
+    return _rank_norm(
+        adata,
+        NUM_FUN,
+        DEM_FUN,
+        layer,
+        key_added
+    )
 
 
-def __sigT(x, slope = 20, inflection = 0.5):
-    return (1 - 1/(1 + np.exp(slope * (x - inflection))))
+def stouffer(adata,
+             obs_column_name = None,
+             layer = None,
+             filter_by_feature_groups = None,
+             key_added = 'stouffer'):
+    """\
+    Compute a stouffer signature on each of your clusters in an anndata object.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata
+        object, or a pandas dataframe containing input data.
+    obs_column_name
+        The name of the column of observations in adata to use as clusters, or a
+        cluster vector corresponding to observations.
+    layer (default: None)
+        The layer to use as input data to compute the signatures.
+    filter_by_feature_groups (default: None)
+        The selected regulators, such that all other regulators are filtered out
+        from input data. If None, all regulators will be included. Regulator
+        sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
+    key_added (default: 'stouffer')
+        The slot in adata.uns to store the stouffer signatures.
+
+    Returns
+    -------
+    Adds the cluster stouffer signatures to adata.uns[key_added]
+    """
+    _stouffer(adata,
+              obs_column_name,
+              layer,
+              filter_by_feature_groups,
+              key_added)
 
 def viper_similarity(adata,
                      nn = None,
@@ -168,61 +136,24 @@ def viper_similarity(adata,
     cancer using network-based inference of protein activity. Nature genetics,
     48(8), 838-847.
     """
+    _viper_similarity(
+        adata,
+        nn,
+        ws,
+        alternative,
+        layer,
+        filter_by_feature_groups,
+        key_added
+    )
 
-    mat = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups).to_df()
-
-    if np.min(mat)>=0 :
-        mat = rankdata(mat,axis=1)
-        mat = norm.ppf(mat/(np.sum(mat.isna()==False,axis = 1)+1))
-
-    mat[mat.isna()] =0 # will this work?
-
-    xw = mat
-
-    if nn == None:
-        if alternative == 'greater':
-            xw[xw < 0] = 0
-        elif alternative == 'less' :
-            xw[xw > 0] = 0
-
-        if len(ws) == 1:
-            xw = np.transpose(xw)/np.max(np.abs(mat), axis = 1)
-            xw = np.sign(xw) * np.abs(xw) ** ws
-
-        else:
-            ws[1] = 1/(ws[1] - ws[0]) * np.log(1/0.9 -1)
-            xw = np.sign(xw) *__sigT(np.abs(mat),ws[1],ws[0]) #why it's 1, 0 instead of 0,1
-
-    else:
-        if alternative == 'greater':
-            xw = rankdata(-mat,axis=1)
-            mat[xw > nn] = None
-        elif alternative == 'less' :
-            xw = rankdata(mat,axis=1)
-            mat[xw > nn] = None
-        else:
-            xw = rankdata(mat,axis=1)
-            mat[xw > nn/2 & xw <(len(xw) - nn/2 +1)] = None
-
-    nes = np.sqrt(np.sum(xw**2, axis = 1))
-    xw = xw.transpose()/np.sum(np.abs(xw),axis = 1)
-
-    t2 = norm.ppf(rankdata(xw.transpose(), axis = 1)/(mat.shape[1]+1))
-    vp = np.matmul(t2, xw)
-
-    vp = vp * nes
-
-    tmp = np.array([vp.values[np.triu_indices(vp.shape[0], 1)],vp.T.values[np.triu_indices(vp.shape[0], 1)]])
-    tmp = np.sum(tmp * tmp ** 2, axis=0) / np.sum(tmp ** 2, axis=0)
-
-    vp.values[np.triu_indices(vp.shape[0], 1)] = tmp
-    vp = vp.T
-    vp.values[np.triu_indices(vp.shape[0], 1)] = tmp
-    vp.columns = vp.index
-
-    adata.obsp[key_added] = vp
-
-def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=50, normalize_MI_per_regulon=True):
+def aracne3_to_regulon(
+    net_file,
+    net_df=None,
+    anno=None,
+    MI_thres=0,
+    regul_size=50,
+    normalize_MI_per_regulon=True
+):
     """\
     Process an output from ARACNe3 to return a pd.DataFrame describing a gene
     regulatory network with suitable columns for conversion to an object of the
@@ -248,315 +179,270 @@ def aracne3_to_regulon(net_file, net_df=None, anno=None, MI_thres=0, regul_size=
     A pd.DataFrame containing an ARACNe3-inferred gene regulatory network with the
     following 4 columns: "regulator", "target", "mor" (mode of regulation) and "likelihood".
     """
-
-
-    pd.options.mode.chained_assignment = None
-    if net_df is None:
-        net = pd.read_csv(net_file, sep='\t')
-    else:
-        net = net_df.copy()
-
-    if anno is not None:
-        if anno.shape[1] != 2 or not isinstance(anno, (pd.DataFrame, pd.Series, pd.Matrix)):
-            raise ValueError("anno should contain two columns: 1-original symbol, 2-new symbol")
-
-        anno.columns = ["old", "new"]
-
-        ## Convert gene symbols:
-        net['regulator.values'] = anno.set_index('old').loc[net['regulator.values'], 'new'].values
-        net['target.values'] = anno.set_index('old').loc[net['target.values'], 'new'].values
-
-    ## Network filtering
-    net = net[net['mi.values'] > MI_thres]
-
-    net.sort_values(by=['regulator.values','count.values','mi.values'],ascending=[True,False,False], inplace=True)
-    net = net.groupby('regulator.values').head(regul_size)
-
-    if normalize_MI_per_regulon:
-        reg_max = net.groupby(['regulator.values'])['mi.values'].transform('max')
-    else:
-        reg_max = net['mi.values'].max()
-
-    # print(reg_max)
-    op = pd.DataFrame({
-        'regulator': net['regulator.values'],
-        'target' : net['target.values'],
-        'mor': net['scc.values'],
-        'likelihood': net['mi.values']/reg_max
-        }
+    return _aracne3_to_regulon(
+        net_file,
+        net_df,
+        anno,
+        MI_thres,
+        regul_size,
+        normalize_MI_per_regulon
     )
 
-    return op
-#
-# def select_cells(n_cells_per_metacell,probability_weights, use_decay, decay_factor, num_cells_gq, adata_gq_cells):
-#     '''
-#     Select a set of cells for a metacell based on specified probability weights. A good quality cell is defined as a cell with
-#     silouhette score greater than 0.1.
-#
-#     Parameters:
-#         n_cells_per_metacell (int): Number of cells to select for the metacell.
-#         probability_weights (numpy.ndarray): Array of probability weights for each cell.
-#         use_decay (bool): If True, use penalized probability sampling with decay.
-#         decay_factor (float): Decay factor for penalized probability.
-#         num_cells_gq (int): Total number of good-quality cells.
-#         adata_gq_cells (anndata.AnnData): Anndata object containing good-quality cells data.
-#
-#     Returns:
-#         numpy.ndarray: Array of selected cell indices for the metacell.
-#
-#     If `use_decay` is True, the function performs penalized probability sampling
-#     using the specified probability weights and decay factor. It selects `n_cells_per_metacell`
-#     cells based on a combined score of probabilities and distances. If `use_decay` is False,
-#     the function performs uniform probability sampling.
-#
-#     The selected cell indices are returned as a numpy array.
-#
-#
-#     '''
-#     if use_decay:
-#         #Using Penalized Probability upon Resampling
-#
-#         #select a starting cell
-#         a_selected_cell = np.random.choice(num_cells_gq,p= probability_weights)
-#         #obtain its neighbors and the distances
-#         dist_array = np.ravel(adata_gq_cells.obsp['distances'].todense()[a_selected_cell, :])
-#         indices = np.nonzero(dist_array)[0]
-#         nonzero_distances = dist_array[indices]
-#
-#         #extract the probabilities of those neighbors
-#         probabilities_cells = probability_weights[indices]
-#
-#
-#         #produce a combined score using the probabilities and the distances.
-#         #Higher probability and smaller distances are prioritized.
-#         combined_score = probabilities_cells / nonzero_distances
-#         combined_score = [score / sum(combined_score) for score in combined_score]
-#
-#         #select cells to create the metacell
-#         selected_cells_int = np.random.choice(indices, n_cells_per_metacell,p= combined_score, replace=False)
-#         selected_cells_int = np.append(selected_cells_int, a_selected_cell)
-#     else:
-#         #Using Uniform Probability
-#
-#         #select a starting cell
-#         a_selected_cell = random.sample(range(0, adata_gq_cells.shape[0]), 1)
-#
-#         #obtain its neighbors and the distances
-#         dist_array = np.ravel(adata_gq_cells.obsp['distances'].todense()[a_selected_cell, :])
-#
-#         #select the cells with the smallest distances to create the metacell
-#         selected_cells_int = sparse_argsort(dist_array)[0:n_cells_per_metacell] # Ascend Ordering
-#         selected_cells_int = np.append(selected_cells_int, a_selected_cell)
-#     return selected_cells_int
-#
-#
-#
-# def sparse_argsort(array):
-#     indices = np.nonzero(array)[0]
-#     return indices[np.argsort(array[indices])]
-#
-# def generateRandomCellID(prefix='',chars=string.ascii_uppercase + string.digits, N=10):
-#     return "CellID_" + prefix + '_' + ''.join(random.choice(chars) for _ in range(N))
-#
-# def generateMetacellAnnData(arg0, n_metacells_per_cluster=500, n_metacells=1000, n_cells_per_metacell=10,
-#                             n_neighbors = 15,
-#                             cluster_label="clusters" , method="proportional", experiment_dir_path="",
-#                             use_decay = False, decay_factor = 0.1, seed = 42):
-#     """\
-#     Generate an AnnData object representing metacells from an input AnnData object.
-#
-#     Parameters
-#     ----------
-#     arg0 (anndata.AnnData)
-#     	Input AnnData object containing single-cell data.
-#     n_metacells_per_cluster (int)
-#     	Number of metacells to generate for each cluster.
-#     n_metacells (int)
-#         Total number of metacells to generate.
-#     n_cells_per_metacell (int)
-#     	Number of cells to include in each metacell.
-#     n_neighbors (int)
-#     	Number of neighbors for computing cell-cell distances.
-#     cluster_label (str)
-#     	Name of the column in the obs attribute specifying cell clusters.
-#     method (str)
-#     	Method for generating metacells ("proportional", "absolute", "relative").
-#     experiment_dir_path (str)
-#     	Path to the directory to save the generated data.
-#     use_decay (bool)
-#     	If True, use probability decay during metacell generation.
-#     decay_factor (float)
-#     	Decay factor for probability during metacell generation (1 means no penalty)
-#     seed (int)
-#     	Seed for random number generation.
-#
-#     Returns
-#     ----------
-#         anndata.AnnData: AnnData object representing the generated metacells.
-#
-#     Method Differences
-#     ----------
-#         - "proportional": This method generates metacells based on the proportion of cells in each cluster.
-#           Metacells are created proportionally to the cluster sizes, and cell probabilities may decay.
-#         - "absolute": Metacells are generated with an absolute number of cells per metacell.
-#           The method creates a fixed number of cells in each metacell, and cell probabilities may decay.
-#         - "relative": Metacells are generated with a relative number of cells per metacell.
-#           The method creates a variable number of cells based on cluster sizes, and cell probabilities may decay.
-#
-#     This function generates metacells from the input single-cell data in the form of an AnnData object.
-#     The method of metacell generation can be selected based on the `method` parameter. The resulting
-#     AnnData object contains metacell data, and the generated metacells are saved in the specified
-#     `experiment_dir_path`.
-#
-#     """
-#
-#     _adata = arg0.copy()
-#     n_var = _adata.shape[1]
-#
-#     #check for missing columns
-#     if "silhouette_score" not in _adata.obs.columns:
-#         raise Exception("Please provide silhouette score as a column in adata observations.")
-#     gq_cell_counts = {}
-#     # sc.pp.neighbors(_adata, n_neighbors=51, n_pcs=30)
-#
-#     var_names = _adata.var_names.tolist()
-#
-#     #for the proportional approach, it is necessary to have the distribution of the clusters
-#     _adata.obs[cluster_label] = _adata.obs[cluster_label].astype('category')
-#     cluster_perc_dict = {i: [] for i in _adata.obs[cluster_label].cat.categories.to_list()}
-#     tot_cells = len(_adata.obs)
-#     for a_cluster in _adata.obs[cluster_label].cat.categories:
-#         index = _adata.obs[cluster_label].isin([a_cluster])
-#         tot_cells_per_cluster = index.sum()
-#         perc = round(tot_cells_per_cluster / tot_cells * 100, 1)
-#         cluster_perc_dict[a_cluster] = round(perc / 100 * n_metacells)
-#
-#
-#
-#     random.seed(seed)
-#     list_of_matrices = list()
-#
-#     for a_cluster, cluster_iterations in cluster_perc_dict.items():
-#
-#
-#         index = _adata.obs[cluster_label].isin([a_cluster]) & _adata.obs["silhouette_score"] > 0.1
-#         adata_gq_cells = _adata[index, :]
-#
-#         sc.pp.neighbors(adata_gq_cells, n_neighbors=n_neighbors, n_pcs=30)
-#
-#
-#         num_cells_gq = adata_gq_cells.shape[0]
-#         for cell_id in adata_gq_cells.obs_names:
-#             gq_cell_counts[cell_id] = [0, a_cluster]
-#         print("Good quality cells ", num_cells_gq)
-#         #initial probabilities are discrete uniform
-#         probability_weights = np.full(num_cells_gq, 1/num_cells_gq)
-#
-#         if method == "proportional":
-#             m = np.zeros([cluster_iterations, n_var])
-#             m = np.matrix(m)
-#             for a_metacell in tqdm(range(0, cluster_iterations), desc="Metacells for Cluster: " + str(a_cluster)):
-#
-#                 selected_cells_int = select_cells(n_cells_per_metacell,probability_weights,use_decay,decay_factor,num_cells_gq,adata_gq_cells)
-#                 #once a cell is selected, decay its probability using a decay factor
-#                 probability_weights[selected_cells_int]*=decay_factor
-#                 #then, re-normalize the probabilities to ensure that they sum up to 1
-#                 probability_weights = probability_weights / np.sum(probability_weights)
-#                 selected_cell_ids = [adata_gq_cells.obs_names[i] for i in selected_cells_int]
-#                 for selected_cell_id in selected_cell_ids:
-#                     gq_cell_counts[selected_cell_id][0] += 1
-#
-#                 tmp = adata_gq_cells.raw[adata_gq_cells.obs.index[selected_cells_int], :].X.sum(axis=0)
-#                 m[a_metacell,] = tmp
-#                 if (tmp.sum() == 0):
-#                     print("No counts found in metacells")
-#             list_of_matrices.append(m)
-#
-#         elif method == "absolute":
-#             m = np.zeros([n_metacells_per_cluster, n_var])
-#             m = np.matrix(m)
-#             for a_metacell in tqdm(range(0, n_metacells_per_cluster), desc="Metacells for Cluster: " + str(a_cluster)):
-#                 selected_cells_int = select_cells(n_cells_per_metacell,probability_weights,use_decay,decay_factor,num_cells_gq,adata_gq_cells)
-#                 #once a cell is selected, decay its probability using a decay factor
-#                 probability_weights[selected_cells_int]*=decay_factor
-#                 #then, re-normalize the probabilities to ensure that they sum up to 1
-#                 probability_weights = probability_weights / np.sum(probability_weights)
-#                 selected_cell_ids = [adata_gq_cells.obs_names[i] for i in selected_cells_int]
-#                 for selected_cell_id in selected_cell_ids:
-#                     gq_cell_counts[selected_cell_id][0] += 1
-#
-#                 tmp = adata_gq_cells.raw[adata_gq_cells.obs.index[selected_cells_int], :].X.sum(axis=0)
-#                 m[a_metacell,] = tmp
-#                 if (tmp.sum() == 0):
-#                     print("No counts found in metacells")
-#             list_of_matrices.append(m)
-#         elif method == "relative":
-#             #only create n_metacells_per_cluster if there are sufficient good quality cells
-#             #to produce metacells without re-using too many cells
-#             max_limit = int(num_cells_gq/n_cells_per_metacell)
-#             max_limit = min(max_limit,n_metacells_per_cluster)
-#             m = np.zeros([max_limit, n_var])
-#             m = np.matrix(m)
-#             for a_metacell in tqdm(range(0, max_limit), desc="Metacells for Cluster: " + str(a_cluster)):
-#                 selected_cells_int = select_cells(n_cells_per_metacell,probability_weights,use_decay,decay_factor,num_cells_gq,adata_gq_cells)
-#                 #once a cell is selected, decay its probability using a decay factor
-#                 probability_weights[selected_cells_int]*=decay_factor
-#                 #then, re-normalize the probabilities to ensure that they sum up to 1
-#                 probability_weights = probability_weights / np.sum(probability_weights)
-#                 selected_cell_ids = [adata_gq_cells.obs_names[i] for i in selected_cells_int]
-#                 for selected_cell_id in selected_cell_ids:
-#                     gq_cell_counts[selected_cell_id][0] += 1
-#
-#                 tmp = adata_gq_cells.raw[adata_gq_cells.obs.index[selected_cells_int], :].X.sum(axis=0)
-#                 m[a_metacell,] = tmp
-#                 if (tmp.sum() == 0):
-#                     print("No counts found in metacells")
-#             list_of_matrices.append(m)
-#         else:
-#             print("ERROR")
-#         [print(mat.shape) for mat in list_of_matrices]
-#
-#
-#     i = 0
-#     cluster_labels = _adata.obs[cluster_label].cat.categories.to_list()
-#     obs_names_full = []
-#     folder = "with_penalty" if use_decay else "without_penalty"
-#     output_path = os.path.join(experiment_dir_path, folder, str(n_cells_per_metacell))
-#     if not os.path.exists(output_path):
-#         os.makedirs(output_path)
-#
-#     for mat in list_of_matrices:
-#         sample_name = "C_" + str(i)
-#         cluster_name = "C_" + str(cluster_labels[i])
-#         cluster_name = cluster_name.replace(' ', '_')
-#
-#         i = i+1
-#         obs_names = [generateRandomCellID(prefix=sample_name,N=10) for i in range(0, mat.shape[0])]
-#         obs_names = obs_names[0:mat.shape[0]]
-#         obs_names_full.append(obs_names)
-#         x = anndata.AnnData(X=mat.A, obs=pd.DataFrame(index=obs_names), var=pd.DataFrame(index=var_names))
-#         sc.pp.normalize_total(x, inplace=True, target_sum=1e6)
-#         #x.write(filename)
-#         df = pd.DataFrame(data=x.X.T, index=var_names, columns=obs_names)
-#         filename = os.path.join(output_path ,"whole-dataset-metacells-expression_"+ cluster_name + "-expression.txt")
-#         df.insert(0, "Gene", var_names)
-#         df.to_csv(filename, sep = "\t", index = False)
-#
-#     m = np.vstack(list_of_matrices)
-#     repeated_cluster_labels = [label for label, mat in zip(cluster_labels, list_of_matrices) for _ in range(mat.shape[0])]
-#
-#     print(m.shape)
-#
-#
-#     obs_names_full_flat = [item for sublist in obs_names_full for item in sublist]
-#     adata_metacell = anndata.AnnData(X=m.A, obs=pd.DataFrame(index=obs_names_full_flat), var=pd.DataFrame(index=var_names))
-#     adata_metacell.obs[cluster_label] = repeated_cluster_labels
-#     adata_metacell.raw = adata_metacell
-#     sc.pp.normalize_total(adata_metacell, inplace=True, target_sum=1e6)
-#
-#     # filename = os.path.join(experiment_dir_path, sample_name + "-whole-dataset-metacells-expression.h5ad")
-#
-#     filename = os.path.join(output_path ,"whole-dataset-metacells-expression_" + str(n_cells_per_metacell) + ".h5ad")
-#     pd.DataFrame.from_dict(gq_cell_counts, orient='index', columns=['Count', 'Cluster']).to_csv(os.path.join(output_path,"metacell_counts" + "_" + str(n_cells_per_metacell) + ".csv"))
-#     adata_metacell.write(filename)
-#     return (adata_metacell)
+def nes_to_neg_log(adata, layer = None, key_added = None):
+    """\
+    Transform VIPER-computed NES into -log10(p-value).
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata
+        object, or a pandas dataframe containing input data, where rows are
+        observations/samples (e.g. cells or groups) and columns are features
+        (e.g. proteins or pathways).
+    layer : (default: None)
+        Entry of layers to tranform.
+    key_added : (default: None)
+        Name of layer to save result in a new layer instead of adata.X.
+
+    Returns
+    -------
+    Saves the input data as a transformed version. If key_added is specified,
+    saves the results in adata.layers[key_added].
+    """
+    _nes_to_neg_log(adata, layer, key_added)
+
+def nes_to_pval(adata, layer = None, key_added = None, adjust=True, axs=1):
+    """\
+    Transform VIPER-computed NES into p-values.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata
+        object, or a pandas dataframe containing input data, where rows are
+        observations/samples (e.g. cells or groups) and columns are features
+        (e.g. proteins or pathways).
+    layer : (default: None)
+        Entry of layers to tranform.
+    key_added : (default: None)
+        Name of layer to save result in a new layer instead of adata.X.
+
+    Returns
+    -------
+    Saves the input data as a transformed version. If key_added is specified,
+    saves the results in adata.layers[key_added].
+    """
+    _nes_to_pval(adata, layer, key_added, adjust, axs)
+
+def repr_subsample(adata,
+                   pca_slot="X_pca",
+                   size=1000,
+                   seed=0,
+                   verbose=True,
+                   njobs=1):
+    """\
+    A tool for create a subsample of the input data such it is well
+    representative of all the populations within the input data rather than
+    being a random sample. This is accomplished by pairing samples together in
+    an iterative fashion until the desired sample size is reached.
+
+    Parameters
+    ----------
+    adata
+        An anndata object containing a distance object in adata.obsp.
+    pca_slot (default: "X_pca")
+        The slot in adata.obsm where the PCA object is stored. One way of
+        generating this object is with sc.pp.pca.
+    size (default: 1000)
+        The size of the representative subsample
+    seed (default: 0)
+        The random seed used when taking samples of the data.
+    verbose (default: True)
+        Whether to provide runtime information.
+    njobs (default: 1)
+        The number of cores to use for the analysis. Using more than 1 core
+        (multicore) speeds up the analysis.
+
+    Returns
+    -------
+    An AnnData containing the representative sample with the obs and vars
+    information from the input adata. The returned subsample AnnData has a column
+    in obs in the slot "index_in_source_adata" that contain the chosen indices
+    and a pandas DataFrame in .uns in the slot "knn_groups_indices_df" that
+    contain the KNN groups that were used to generate the subsample.
+    """
+    return _representative_subsample_anndata(
+        adata,
+        pca_slot,
+        size,
+        exact_size = True,
+        seed = seed,
+        verbose = verbose,
+        njobs = njobs
+    )
+
+# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
+# ------------------------------------------------------------------------------
+# ----------------------------- ** METACELL FUNC ** ----------------------------
+# ------------------------------------------------------------------------------
+# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
+def repr_metacells(
+    adata,
+    counts = None,
+    pca_slot = "X_pca",
+    dist_slot = "corr_dist",
+    clusters_slot = None,
+    score_slot = None,
+    score_min_thresh = None,
+    size = 500,
+    n_cells_per_metacell = None,
+    min_median_depth = 10000,
+    perc_data_to_use = None,
+    perc_incl_data_reused = None,
+    seed = 0,
+    key_added = "metacells",
+    verbose = True,
+    njobs = 1
+):
+    """\
+    A tool for create a representative selection of metacells from the data that
+    aims to maximize reusing samples from the data, while simultaneously
+    ensuring that all neighbors are close to the metacell they construct.
+    When using this function, exactly two of the following parameters must be
+    set: size, min_median_depth or n_cells_per_metacell, perc_data_to_use or
+    perc_incl_data_reused.
+    Note that min_median_depth and n_cells_per_metacell cannot both be set
+    at the same time, since they directly relate (e.g. higher n_cells_per_metacell
+    means more neighbors are used to construct a single metacell, meaning each
+    metacell will have more counts, resulting in a higher median depth).
+    Note that perc_data_to_use and perc_incl_data_reused cannot both be set
+    at the same time, since they directly relate (e.g. higher perc_data_to_use
+    means you include more data, which means it's more likely to reuse more
+    data, resulting in a higher perc_incl_data_reused).
+
+    Parameters
+    ----------
+    adata
+        An anndata object containing a distance object in adata.obsp.
+    counts (default: None)
+        A pandas DataFrame or AnnData object of unnormalized gene expression
+        counts that has the same samples in the same order as that of adata.
+        If counts are left as None, adata must have counts stored in adata.raw.
+    pca_slot (default: "X_pca")
+        The slot in adata.obsm where the PCA object is stored. One way of
+        generating this object is with sc.pp.pca.
+    dist_slot (default: "corr_dist")
+        The slot in adata.obsp where the distance object is stored. One way of
+        generating this object is with pyviper.pp.corr_distance.
+    clusters_slot (default: None)
+        The slot in adata.obs where cluster labels are stored. Cluster-specific
+        metacells will be generated using the same parameters with the results
+        for each cluster being stored separately in adata.uns.
+    score_slot (default: None)
+        The slot in adata.obs where a score used to determine and filter cell
+        quality are stored (e.g. silhouette score).
+    score_min_thresh (default: None)
+        The score from adata.obs[score_slot] that a cell must have at minimum to
+        be used for metacell construction (e.g. 0.25 is the rule of thumb for
+        silhouette score).
+    size (default: None)
+        A specific number of metacells to generate. If left as None,
+        perc_data_to_use or perc_incl_data_reused can be used to specify the size
+        when n_cells_per_metacell or min_median_depth is given.
+    n_cells_per_metacell (default: None)
+        The number of cells that should be used to generate single metacell.
+        Note that this parameter and n_cells_per_metacell cannot both be set as
+        they directly relate: e.g. higher n_cells_per_metacell leads to higher
+        min_median_depth. If left as None, perc_data_to_use or
+        perc_incl_data_reused can be used to specify n_cells_per_metacell when
+        size is given.
+    min_median_depth (default: 10000)
+        The desired minimum median depth for the metacells (indirectly specifies
+        n_cells_per_metacell). The default is set to 10000 as this is recommend
+        by PISCES[1]. Note that this parameter and n_cells_per_metacell cannot
+        both be set as they directly relate: e.g. higher min_median_depth leads
+        to higher n_cells_per_metacell.
+    perc_data_to_use (default: None)
+        The percent of the total amount of provided samples that will be used in
+        the creation of metacells. Note that this parameter and
+        perc_incl_data_reused cannot both be set as they directly relate: e.g.
+        higher perc_data_to_use leads to higher perc_incl_data_reused.
+    perc_incl_data_reused (default: None)
+        The percent of samples that are included in the creation of metacells
+        that will be reused (i.e. used in more than one metacell). Note that this
+        parameter and perc_data_to_use cannot both be set as they directly relate:
+        e.g. higher perc_incl_data_reused leads to higher perc_data_to_use.
+    seed (default: 0)
+        The random seed used when taking samples of the data.
+    key_added (default: "metacells")
+        The name of the slot in the adata.uns to store the output.
+    verbose (default: True)
+        Whether to provide runtime information and quality statistics.
+    njobs (default: 1)
+        The number of cores to use for the analysis. Using more than 1 core
+        (multicore) speeds up the analysis.
+
+
+    Returns
+    -------
+    Saves the metacells as a pandas dataframe in adata.uns[key_added]. Attributes
+    that contain parameters for and statistics about the construction of the
+    metacells are stored in adata.uns[key_added].attrs.
+
+    Citations
+    -------
+    Obradovic, A., Vlahos, L., Laise, P., Worley, J., Tan, X., Wang, A., &
+    Califano, A. (2021). PISCES: A pipeline for the systematic, protein activity
+    -based analysis of single cell RNA sequencing data. bioRxiv, 6, 22.
+    """
+
+    # Here is a summary of parameter choices and their affects:
+	# size + min_median_depth
+	# 	--> calculate n_cells_per_metacell
+	# size + n_cells_per_metacell
+	# 	--> N/A
+	# perc_data_used + size
+	# 	--> optimize n_cells_per_metacell
+	# perc_data_used + n_cells_per_metacell
+	# 	--> optimize size
+	# perc_data_used + min_median_depth
+	# 	--> calculate n_cells_per_metacell
+	# 	--> optimize size
+	# max_perc_included_reused + size
+	# 	--> optimize n_cells_per_metacell
+	# max_perc_included_reused + n_cells_per_metacell
+	# 	--> optimize size
+	# max_perc_included_reused + min_median_depth
+	# 	--> calculate n_cells_per_metacell
+	# 	--> optimize size
+
+    # Removed single parameter choices:
+    # size
+	# 	--> assume n_cells_per_metacell = total_samples/size
+	# n_cells_per_metacell
+	# 	--> assume size = total_samples/n_cells_per_metacell
+	# min_median_depth
+	# 	--> calculate n_cells_per_metacell
+	# 	--> assume size = total_samples/n_cells_per_metacell
+
+    if score_slot in adata.obs.columns is not None:
+        adata = adata[adata.obs[score_slot].values >= score_min_thresh,:].copy()
+
+    _representative_metacells_multiclusters(
+        adata,
+        counts,
+        pca_slot,
+        dist_slot,
+        clusters_slot,
+        size,
+        n_cells_per_metacell,
+        min_median_depth,
+        perc_data_to_use,
+        perc_incl_data_reused,
+        exact_size = True,
+        seed = seed,
+        key_added = key_added,
+        verbose = verbose,
+        njobs = njobs,
+        smart_sample = True
+    )

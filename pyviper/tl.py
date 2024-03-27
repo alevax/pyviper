@@ -1,18 +1,5 @@
 ### ---------- IMPORT DEPENDENCIES ----------
-import pandas as pd
-import numpy as np
-import scanpy as sc
-from scipy.stats import rankdata
-from scipy.stats import norm
-from statsmodels.stats import multitest
-from ._filtering_funcs import *
-from ._filtering_funcs import _get_anndata_filtered_by_feature_group
-from ._helpers import _adjust_p_values
-from ._viper import viper
-from ._load._load import msigdb_regulon
-from .interactome import Interactome
-from ._rep_subsample_funcs import _representative_subsample_anndata
-from ._metacell_funcs import _representative_metacells_multiclusters
+from ._tl import _pca, _dendrogram, _onco_match, _find_top_mrs, _path_enr
 
 ### ---------- EXPORT LIST ----------
 __all__ = []
@@ -39,11 +26,10 @@ def pca(adata,
     **kwargs
         Arguments to provide to the sc.tl.pca function.
     """
-    adata_filt = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
-    print(adata_filt.shape)
-
-    sc.tl.pca(adata_filt, **kwargs)
-    adata.obsm["X_pca"] = adata_filt.obsm["X_pca"]
+    _pca(adata,
+         layer,
+         filter_by_feature_groups,
+         **kwargs)
 
 def dendrogram(adata,
                *,
@@ -70,216 +56,14 @@ def dendrogram(adata,
     **kwargs
         Arguments to provide to the sc.tl.dendrogram function.
     """
-    adata_filt = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
-    if key_added is None:
-        key_added = f'dendrogram_{groupby}'
-    sc.tl.dendrogram(adata_filt, groupby, **kwargs, key_added = key_added)
-    adata.uns[key_added] = adata_filt.uns[key_added]
+    _dendrogram(adata,
+                groupby,
+                key_added,
+                layer,
+                filter_by_feature_groups,
+                **kwargs)
 
-def stouffer(adata, obs_column_name, layer = None, filter_by_feature_groups=None):
-    """\
-    Compute a stouffer signature on each of your clusters in an anndata object.
-
-    Parameters
-    ----------
-    adata
-        Gene expression, protein activity or pathways stored in an anndata object.
-    obs_column_name
-        The name of the column of observations to use as clusters.
-    layer (default: None)
-        The layer to use as input data to compute the signatures.
-    filter_by_feature_groups (default: None)
-        The selected regulators, such that all other regulators are filtered out
-        from the input data. If None, all regulators will be included. Regulator
-        sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
-
-    Returns
-    -------
-    A new anndata object containing cluster stouffer signatures.
-    """
-    adata = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
-    if layer is None:
-        dat_df = pd.DataFrame(adata.X,
-                              index=adata.obs_names,
-                              columns=adata.var_names)
-    else:
-        dat_df = pd.DataFrame(adata.layers[layer],
-                              index=adata.obs_names,
-                              columns=adata.var_names)
-    cluster_vector = adata.obs[obs_column_name]
-    result_df = stouffer_clusters_df(dat_df, cluster_vector)
-    adata.uns['stouffer'] = result_df
-    return adata
-    # return mat_to_anndata(result_df)
-
-def stouffer_clusters_df(dat_df, cluster_vector):
-    """\
-    Compute a stouffer signature on each of your clusters from a DataFrame.
-
-    Parameters
-    ----------
-    dat_df
-        A pandas dataframe containing input data.
-    cluster_vector
-        A cluster vector corresponding to observations in the pd.DataFrame.
-
-    Returns
-    -------
-    A new pd.DataFrame containing cluster stouffer signatures.
-    """
-    # Ensure cluster_vector has the same number of samples as rows in dat_df
-    if len(cluster_vector) != dat_df.shape[0]:
-        raise ValueError("Cluster vector length does not match the number of rows in the DataFrame.")
-
-    # Convert the DataFrame to a NumPy array
-    dat_array = dat_df.to_numpy()
-
-    # Find unique clusters and initialize arrays to store Stouffer scores
-    unique_clusters, cluster_indices = np.unique(cluster_vector, return_inverse=True)
-    n_clusters = len(unique_clusters)
-    n_genes = dat_df.shape[1]
-    stouffer_scores = np.zeros((n_clusters, n_genes))
-
-    # Calculate the denominator for Stouffer scores for each cluster
-    cluster_sizes = np.bincount(cluster_indices)
-    sqrt_cluster_sizes = np.sqrt(cluster_sizes)
-
-    # Calculate Stouffer scores for each cluster and gene
-    for i in range(n_clusters):
-        cluster_mask = (cluster_indices == i)
-        cluster_data = dat_array[cluster_mask]
-        stouffer_scores[i, :] = np.sum(cluster_data, axis=0) / sqrt_cluster_sizes[i]
-
-    # Create a DataFrame from the computed Stouffer scores
-    result_df = pd.DataFrame(stouffer_scores, index=unique_clusters, columns=dat_df.columns)
-
-    return result_df
-
-def add_layer_as_log_normalized_nes(adata,layer="mLog10"):
-    """\
-    Compute -log10(p-value) as tranformation of the viper-computed NES.
-    This is added to a new layer named mLog10, where m stands for minus
-
-    Parameters
-    ----------
-    adata
-        AnnData containing protein activity (NES), pathways (NES) data or
-        Stouffer-integrated NES data, where rows are observations/samples (e.g. cells or groups) and
-        columns are features (e.g. proteins or pathways).
-
-    Returns
-    -------
-    AnnData object with one more layer added.
-    The layer is named mlog10
-
-    """
-    adata.layers[layer] = -1*np.log10(scipy.stats.norm.sf(adata.X))
-    print("Added one more layer as {} to AnnData (returned)".format(layer))
-    return adata
-
-
-def nes_to_pval_df(dat_df,adjust=True,axs=1):
-    """\
-    Compute (adjusted) p-value associated to the viper-computed NES in a pd.DataFrame.
-
-    Parameters
-    ----------
-    dat_df
-        A pd.Series or pd.DataFrame containing protein activity (NES), pathways (NES) data or
-        Stouffer-integrated NES data, where rows are observations/samples (e.g. cells or groups) and
-        columns are features (e.g. proteins or pathways).
-    adjust (default: True)
-        If `True`, returns adjusted p values using FDR Benjamini-Hochberg procedure.
-        If `False`, does not adjust p values
-    axs (default: 1)
-        axis along which to perform the p-value correction (Used only if the input is a pd.DataFrame).
-        Possible values are 0 or 1.
-
-    Returns
-    -------
-    A pd.Series or pd.DataFrame objects of (adjusted) p-values.
-
-    References
-    ----------
-    Benjamini, Y., & Hochberg, Y. (1995). Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing.
-        Journal of the Royal Statistical Society. Series B (Methodological), 57(1), 289–300.
-        http://www.jstor.org/stable/2346101
-    """
-
-    p_values_array = 2 * norm.sf(np.abs(dat_df))
-
-    if dat_df.ndim == 1:
-    # Calculate P values and corrected P values
-        if adjust==True:
-            _, p_values_array, _, _ = multitest.multipletests(p_values_array, method='fdr_bh')
-            # Generate pd.DataFrames for (adjusted) p values
-        p_values_df = pd.Series(p_values_array, index=dat_df.index)
-
-    elif dat_df.ndim == 2:
-    # Calculate P values and corrected P values
-        if adjust==True:
-            # correct p value
-            p_values_array = np.apply_along_axis(_adjust_p_values, axis=axs, arr=p_values_array)
-
-        # Generate pd.DataFrames for (adjusted) p values
-        p_values_df = pd.DataFrame(p_values_array, index=dat_df.index, columns=dat_df.columns)
-    else:
-        raise ValueError("dat_df must have 1 or 2 dimensions.")
-
-    return p_values_df
-
-def _generate_interactome_from_pax_data(pax_data,
-                                        interactome_name="vpmat",
-                                        n_top=50,
-                                        is_symmetric=True):
-
-    if isinstance(pax_data, anndata.AnnData):
-        vpmat = pax_data.to_df()
-    elif isinstance(pax_data, pd.DataFrame):
-        vpmat = pax_data
-    else:
-        raise ValueError("pax_data must be anndata.AnnData or pd.DataFrame.")
-
-
-    n_cells = vpmat.shape[0]
-    n_mrs = vpmat.shape[1]
-    cell_names = vpmat.index
-
-    # For each sample, we calculate index arragement that would sort the vector
-    sorted_order_array = np.argsort(-vpmat.values)
-    # We then get the MRs ranked for each sample by indexing with this sorted order
-    mrs_ranked_array = np.array(vpmat.columns)[sorted_order_array]
-
-    if is_symmetric:
-        # Slice the top n_top/2 rows and bottom n_top/2 rows
-        # Get the top 25 and bottom 25 rows
-        n_top_half = int(n_top/2)
-        selected_column_indices = list(range(0,n_top_half)) + list(range(n_mrs-n_top_half,n_mrs))
-        cell_i_mor = np.concatenate((np.ones(n_top_half), np.full(n_top_half, -1)))
-    else:
-        # Slice the top n_top rows
-        selected_column_indices = list(range(0,n_top))
-        cell_i_mor = np.ones(n_top)
-
-    top_mrs_ranked_array = mrs_ranked_array[:, selected_column_indices]
-    top_mrs_ranked_array_1D = top_mrs_ranked_array.flatten()
-
-    regulator = np.repeat(cell_names, n_top)
-    target = top_mrs_ranked_array_1D
-    mor = np.tile(cell_i_mor, n_cells)
-
-    net_table = pd.DataFrame({
-            'regulator': regulator,
-            'target': top_mrs_ranked_array_1D,
-            'mor': mor,
-            'likelihood': 1
-        })
-
-    return Interactome(interactome_name, net_table)
-
-
-
-def OncoMatch(pax_data_to_test,
+def onco_match(pax_data_to_test,
               pax_data_for_cMRs,
               tcm_size = 50,
               both_ways = False,
@@ -317,10 +101,12 @@ def OncoMatch(pax_data_to_test,
         The method of compute enrichment. 'aREA' or 'NaRnEA'
     key_added (default: 'om')
         The slot in pax_data_to_test.obsm to store the oncomatch results.
+
     Returns
     -------
-    A pd.DataFrame objects of -log10 p-values with shape n_samples in
-    pax_data_to_test by n_samples pax_data_for_cMRs.
+    Stores a pd.DataFrame objects of -log10 p-values with shape (n_samples in
+    pax_data_to_test, n_samples in pax_data_for_cMRs) in
+    pax_data_to_test.obsm[key_added].
 
     References
     ----------
@@ -331,114 +117,41 @@ def OncoMatch(pax_data_to_test,
     Alvarez, M. J. et al. Reply to ’H-STS, L-STS and KRJ-I are not authentic GEPNET
     cell lines’. Nat Genet 51, 1427–1428, doi:10.1038/s41588-019-0509-5 (2019).
     """
+    _onco_match(pax_data_to_test,
+                pax_data_for_cMRs,
+                tcm_size,
+                both_ways,
+                om_max_NES_threshold,
+                om_min_logp_threshold,
+                enrichment,
+                key_added)
 
-    if enrichment is None:
-        enrichment = 'narnea'
+def find_top_mrs(adata, N = 50, both = True, key_added = "top_mrs", return_filtered = False):
+    """\
+    Identify the top N master regulator proteins in a VIPER AnnData object
+
+    Parameters
+    ----------
+    adata
+        An anndata object containing a distance object in adata.obsp.
+    N (default: 50)
+        The number of MRs to return
+    both (default: True)
+        Whether to return both the top N and bottom N MRs (True) or just the
+        top N (False).
+    key_added (default: "top_mrs")
+        The name of the slot in the adata.var to store the output.
+    return_filtered (default: False)
+        Whether to return the results as an AnnData object filtering var to only
+        the top MRs (True) or to add an annotation to adata.var[key_added]
+        labeling the top MRs (False)
+    """
+    # Feature where you add a cluster vector. Each MR column has key_added_cluster#
+    # Feature where you can choose a method, e.g. MWU Test instead of Stouffer signature
+    if return_filtered:
+        return _find_top_mrs(adata, N, both, key_added, return_filtered)
     else:
-        enrichment = enrichment.lower()
-
-    if isinstance(pax_data_to_test, anndata.AnnData):
-        vpmat_to_test = pax_data_to_test.to_df()
-    elif isinstance(pax_data_to_test, pd.DataFrame):
-        vpmat_to_test = pax_data_to_test
-    else:
-        raise ValueError("pax_data_to_test must be anndata.AnnData or pd.DataFrame.")
-
-    if isinstance(pax_data_for_cMRs, anndata.AnnData):
-        vpmat_for_cMRs = pax_data_for_cMRs.to_df()
-    elif isinstance(pax_data_for_cMRs, pd.DataFrame):
-        vpmat_for_cMRs = pax_data_for_cMRs
-    else:
-        raise ValueError("pax_data_for_cMRs must be anndata.AnnData or pd.DataFrame.")
-
-    # Compute intersection of regulons
-    regs_in_common = np.intersect1d(vpmat_to_test.columns.values, vpmat_for_cMRs.columns.values)
-    vpmat_to_test = vpmat_to_test[regs_in_common]
-    vpmat_for_cMRs = vpmat_for_cMRs[regs_in_common]
-
-
-    if both_ways is True:
-        interactome_test = _generate_interactome_from_pax_data(
-            vpmat_to_test,
-            interactome_name = "vpmat_to_test",
-            n_top = tcm_size
-        )
-        interactome_cMRs = _generate_interactome_from_pax_data(
-            vpmat_for_cMRs,
-            interactome_name = "vpmat_to_test",
-            n_top = tcm_size
-        )
-
-        om_t = viper(gex_data=anndata.AnnData(vpmat_to_test, dtype='float64'),
-                     interactome=interactome_cMRs,
-                     enrichment=enrichment,
-                     min_targets=0,
-                     output_as_anndata=False,
-                     verbose=False)
-        if enrichment == 'narnea': om_t = om_t['nes']
-
-        om_q = viper(gex_data=anndata.AnnData(vpmat_for_cMRs, dtype='float64'),
-                     interactome=interactome_test,
-                     enrichment=enrichment,
-                     min_targets=0,
-                     output_as_anndata=False,
-                     verbose=False)
-        if enrichment == 'narnea': om_q = om_q['nes']
-
-        # Replace NaN (missing) values with 0 in om_t
-        om_t[np.isnan(om_t)] = 0
-
-        # Replace NaN (missing) values with 0 in om_q
-        om_q[np.isnan(om_q)] = 0
-
-        # Clip values greater than om_max_NES_threshold in om_t
-        om_t = np.where(om_t > om_max_NES_threshold, om_max_NES_threshold, om_t)
-
-        # Clip values greater than om_max_NES_threshold in om_q
-        om_q = np.where(om_q > om_max_NES_threshold, om_max_NES_threshold, om_q)
-
-        # Tranpose om_q so it has the same shape as om_t
-        om_q = np.transpose(om_q)
-
-        # Average them
-        om = (om_t+om_q)/2
-    else:
-        interactome_cMRs = _generate_interactome_from_pax_data(
-            vpmat_for_cMRs,
-            interactome_name = "vpmat_to_test",
-            n_top = tcm_size
-        )
-        om = viper(gex_data=anndata.AnnData(vpmat_to_test, dtype='float64'),
-                   interactome=interactome_cMRs,
-                   enrichment=enrichment,
-                   min_targets=0,
-                   output_as_anndata=False,
-                   verbose=False)
-        if enrichment == 'narnea': om = om['nes']
-
-        # Replace NaN (missing) values with 0 in om
-        om[np.isnan(om)] = 0
-
-        # Clip values greater than om_max_NES_threshold in om
-        om = np.where(om > om_max_NES_threshold, om_max_NES_threshold, om)
-
-    # Compute p_values
-    # cond = om < 7
-    # om[cond] = 1 - norm.cdf(om[cond]) # accurate (i.e. same as R) when NES scores are small (returns 0.0 when given big NES, e.g. 10)
-    # om[~cond] = norm.logcdf(om[~cond])*-1 # accurate (i.e. same as R) when NES scores are big (e.g. 10)
-
-    om = pd.DataFrame(om, index = vpmat_to_test.index, columns = vpmat_for_cMRs.index)
-    om = nes_to_pval_df(om)
-
-    # Log transform
-    om = -np.log10(om)
-
-    # Clip values smaller than om_min_logp_threshold in om
-    om = np.where(om < om_min_logp_threshold, 0, om)
-
-    om = pd.DataFrame(om, index = vpmat_to_test.index, columns = vpmat_for_cMRs.index)
-
-    pax_data_to_test.obsm[key_added] = om
+        _find_top_mrs(adata, N, both, key_added, return_filtered)
 
 def path_enr(gex_data,
              pathway_interactome,
@@ -512,242 +225,16 @@ def path_enr(gex_data,
         assumed to be protein activity and will be stored in .uns as 'pax_data'.
         Otherwise, the data will be stored as 'gex_data' in .uns.
     """
-    if isinstance(pathway_interactome, str):
-        collection = pathway_interactome.lower()
-        if collection in ["c2", "c5", "c6", "c7", "h"]:
-            pathway_interactome = msigdb_regulon(collection)
-        else:
-            raise ValueError(
-                'pathway_interactome "' + str(pathway_interactome) + '" is not in "c2", "c5", "c6", "c7", "h".'
-            )
-
-    pathway_interactome.filter_targets(gex_data.var_names)
-    return viper(
-        gex_data,
-        pathway_interactome,
-        layer,
-        eset_filter,
-        method,
-        enrichment,
-        mvws,
-        0, #min_targets
-        njobs,
-        batch_size,
-        verbose,
-        output_as_anndata,
-        transfer_obs,
-        store_input_data
-    )
-
-def repr_subsample(adata,
-                   pca_slot="X_pca",
-                   size=1000,
-                   seed=0,
-                   verbose=True,
-                   njobs=1):
-    """\
-    A tool for create a subsample of the input data such it is well
-    representative of all the populations within the input data rather than
-    being a random sample. This is accomplished by pairing samples together in
-    an iterative fashion until the desired sample size is reached.
-
-    Parameters
-    ----------
-    adata
-        An anndata object containing a distance object in adata.obsp.
-    pca_slot (default: "X_pca")
-        The slot in adata.obsm where the PCA object is stored. One way of
-        generating this object is with sc.pp.pca.
-    size (default: 1000)
-        The size of the representative subsample
-    seed (default: 0)
-        The random seed used when taking samples of the data.
-    verbose (default: True)
-        Whether to provide runtime information.
-    njobs (default: 1)
-        The number of cores to use for the analysis. Using more than 1 core
-        (multicore) speeds up the analysis.
-
-    Returns
-    -------
-    An AnnData containing the representative sample with the obs and vars
-    information from the input adata. The returned subsample AnnData has a column
-    in obs in the slot "index_in_source_adata" that contain the chosen indices
-    and a pandas DataFrame in .uns in the slot "knn_groups_indices_df" that
-    contain the KNN groups that were used to generate the subsample.
-    """
-    return _representative_subsample_anndata(
-        adata,
-        pca_slot,
-        size,
-        exact_size = True,
-        seed = seed,
-        verbose = verbose,
-        njobs = njobs
-    )
-
-# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
-# ------------------------------------------------------------------------------
-# ----------------------------- ** METACELL FUNC ** ----------------------------
-# ------------------------------------------------------------------------------
-# @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
-def repr_metacells(
-    adata,
-    counts = None,
-    pca_slot = "X_pca",
-    dist_slot = "corr_dist",
-    clusters_slot = None,
-    score_slot = None,
-    score_min_thresh = None,
-    size = 500,
-    n_cells_per_metacell = None,
-    min_median_depth = 10000,
-    perc_data_to_use = None,
-    perc_incl_data_reused = None,
-    seed = 0,
-    key_added = "metacells",
-    verbose = True,
-    njobs = 1
-):
-    """\
-    A tool for create a representative selection of metacells from the data that
-    aims to maximize reusing samples from the data, while simultaneously
-    ensuring that all neighbors are close to the metacell they construct.
-    When using this function, exactly two of the following parameters must be
-    set: size, min_median_depth or n_cells_per_metacell, perc_data_to_use or
-    perc_incl_data_reused.
-    Note that min_median_depth and n_cells_per_metacell cannot both be set
-    at the same time, since they directly relate (e.g. higher n_cells_per_metacell
-    means more neighbors are used to construct a single metacell, meaning each
-    metacell will have more counts, resulting in a higher median depth).
-    Note that perc_data_to_use and perc_incl_data_reused cannot both be set
-    at the same time, since they directly relate (e.g. higher perc_data_to_use
-    means you include more data, which means it's more likely to reuse more
-    data, resulting in a higher perc_incl_data_reused).
-
-    Parameters
-    ----------
-    adata
-        An anndata object containing a distance object in adata.obsp.
-    counts (default: None)
-        A pandas DataFrame or AnnData object of unnormalized gene expression
-        counts that has the same samples in the same order as that of adata.
-        If counts are left as None, adata must have counts stored in adata.raw.
-    pca_slot (default: "X_pca")
-        The slot in adata.obsm where the PCA object is stored. One way of
-        generating this object is with sc.pp.pca.
-    dist_slot (default: "corr_dist")
-        The slot in adata.obsp where the distance object is stored. One way of
-        generating this object is with adata.pp.corr_distance.
-    clusters_slot (default: None)
-        The slot in adata.obs where cluster labels are stored. Cluster-specific
-        metacells will be generated using the same parameters with the results
-        for each cluster being stored separately in adata.uns.
-    score_slot (default: None)
-        The slot in adata.obs where a score used to determine and filter cell
-        quality are stored (e.g. silhouette score).
-    score_min_thresh (default: None)
-        The score from adata.obs[score_slot] that a cell must have at minimum to
-        be used for metacell construction (e.g. 0.25 is the rule of thumb for
-        silhouette score).
-    size (default: None)
-        A specific number of metacells to generate. If left as None,
-        perc_data_to_use or perc_incl_data_reused can be used to specify the size
-        when n_cells_per_metacell or min_median_depth is given.
-    n_cells_per_metacell (default: None)
-        The number of cells that should be used to generate single metacell.
-        Note that this parameter and n_cells_per_metacell cannot both be set as
-        they directly relate: e.g. higher n_cells_per_metacell leads to higher
-        min_median_depth. If left as None, perc_data_to_use or
-        perc_incl_data_reused can be used to specify n_cells_per_metacell when
-        size is given.
-    min_median_depth (default: 10000)
-        The desired minimum median depth for the metacells (indirectly specifies
-        n_cells_per_metacell). The default is set to 10000 as this is recommend
-        by PISCES[1]. Note that this parameter and n_cells_per_metacell cannot
-        both be set as they directly relate: e.g. higher min_median_depth leads
-        to higher n_cells_per_metacell.
-    perc_data_to_use (default: None)
-        The percent of the total amount of provided samples that will be used in
-        the creation of metacells. Note that this parameter and
-        perc_incl_data_reused cannot both be set as they directly relate: e.g.
-        higher perc_data_to_use leads to higher perc_incl_data_reused.
-    perc_incl_data_reused (default: None)
-        The percent of samples that are included in the creation of metacells
-        that will be reused (i.e. used in more than one metacell). Note that this
-        parameter and perc_data_to_use cannot both be set as they directly relate:
-        e.g. higher perc_incl_data_reused leads to higher perc_data_to_use.
-    seed (default: 0)
-        The random seed used when taking samples of the data.
-    key_added (default: "metacells")
-        The name of the slot in the adata.uns to store the output.
-    verbose (default: True)
-        Whether to provide runtime information and quality statistics.
-    njobs (default: 1)
-        The number of cores to use for the analysis. Using more than 1 core
-        (multicore) speeds up the analysis.
-
-
-    Returns
-    -------
-    Saves the metacells as a pandas dataframe in adata.uns[key_added]. Attributes
-    that contain parameters for and statistics about the construction of the
-    metacells are stored in adata.uns[key_added].attrs.
-
-    Citations
-    -------
-    Obradovic, A., Vlahos, L., Laise, P., Worley, J., Tan, X., Wang, A., &
-    Califano, A. (2021). PISCES: A pipeline for the systematic, protein activity
-    -based analysis of single cell RNA sequencing data. bioRxiv, 6, 22.
-    """
-
-    # Here is a summary of parameter choices and their affects:
-	# size + min_median_depth
-	# 	--> calculate n_cells_per_metacell
-	# size + n_cells_per_metacell
-	# 	--> N/A
-	# perc_data_used + size
-	# 	--> optimize n_cells_per_metacell
-	# perc_data_used + n_cells_per_metacell
-	# 	--> optimize size
-	# perc_data_used + min_median_depth
-	# 	--> calculate n_cells_per_metacell
-	# 	--> optimize size
-	# max_perc_included_reused + size
-	# 	--> optimize n_cells_per_metacell
-	# max_perc_included_reused + n_cells_per_metacell
-	# 	--> optimize size
-	# max_perc_included_reused + min_median_depth
-	# 	--> calculate n_cells_per_metacell
-	# 	--> optimize size
-
-    # Removed single parameter choices:
-    # size
-	# 	--> assume n_cells_per_metacell = total_samples/size
-	# n_cells_per_metacell
-	# 	--> assume size = total_samples/n_cells_per_metacell
-	# min_median_depth
-	# 	--> calculate n_cells_per_metacell
-	# 	--> assume size = total_samples/n_cells_per_metacell
-
-    if score_slot in adata.obs.columns is not None:
-        adata = adata[adata.obs[score_slot].values >= score_min_thresh,:].copy()
-
-    _representative_metacells_multiclusters(
-        adata,
-        counts,
-        pca_slot,
-        dist_slot,
-        clusters_slot,
-        size,
-        n_cells_per_metacell,
-        min_median_depth,
-        perc_data_to_use,
-        perc_incl_data_reused,
-        exact_size = True,
-        seed = seed,
-        key_added = key_added,
-        verbose = verbose,
-        njobs = njobs,
-        smart_sample = True
-    )
+    return _path_enr(gex_data,
+                     pathway_interactome,
+                     layer,
+                     eset_filter,
+                     method,
+                     enrichment,
+                     mvws,
+                     njobs,
+                     batch_size,
+                     verbose,
+                     output_as_anndata,
+                     transfer_obs,
+                     store_input_data)

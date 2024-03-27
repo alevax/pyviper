@@ -149,17 +149,17 @@ def get_sample_indices_with_preset_params(
         raise ValueError("get_sample_indices_with_preset_params," + \
                          " but size and n_cells_per_metacell are not both set.")
 
-    if smart_sample:
-        pca_array = adata.obsm[pca_slot].copy()
+    pca_array = adata.obsm[pca_slot].copy()
+    # Get the KNN to identify the neighbors of each selected index
+    if dist_slot not in list(adata.obsp.keys()):
+        warnings.warn(dist_slot + " not in adata.obsp. Computing correlation distance...")
+        corr_distance(adata,
+                      use_reduction=True,
+                      reduction_slot=pca_slot,
+                      key_added='corr_dist')
+        dist_slot = 'corr_dist'
 
-        # Get the KNN to identify the neighbors of each selected index
-        if dist_slot not in list(adata.obsp.keys()):
-            warnings.warn(dist_slot + " not in adata.obsp. Computing correlation distance...")
-            corr_distance(adata,
-                          use_reduction=True,
-                          reduction_slot=pca_slot,
-                          key_added='corr_dist')
-            dist_slot = 'corr_dist'
+    if smart_sample:
         if verbose: print("Identifying a representative sample from the data...")
         knn_groups_indices_df = get_mc_indices_by_condensing(pca_array, size, exact_size, seed, verbose, njobs)
         if n_cells_per_metacell is None:
