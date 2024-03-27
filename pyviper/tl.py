@@ -126,7 +126,15 @@ def onco_match(pax_data_to_test,
                 enrichment,
                 key_added)
 
-def find_top_mrs(adata, N = 50, both = True, key_added = "top_mrs", return_filtered = False):
+def find_top_mrs(adata,
+                 obs_column_name = None,
+                 layer = None,
+                 N = 50,
+                 both = True,
+                 key_added = "mr",
+                 filter_by_feature_groups=None,
+                 rank=False,
+                 return_filtered = False):
     """\
     Identify the top N master regulator proteins in a VIPER AnnData object
 
@@ -134,24 +142,56 @@ def find_top_mrs(adata, N = 50, both = True, key_added = "top_mrs", return_filte
     ----------
     adata
         An anndata object containing a distance object in adata.obsp.
+    obs_column_name
+        The name of the column of observations in adata to use as clusters, or a
+        cluster vector corresponding to observations.
     N (default: 50)
         The number of MRs to return
     both (default: True)
         Whether to return both the top N and bottom N MRs (True) or just the
         top N (False).
-    key_added (default: "top_mrs")
+    key_added (default: "mr")
         The name of the slot in the adata.var to store the output.
+    filter_by_feature_groups (default: None)
+        The selected regulators, such that all other regulators are filtered out
+        from the input data. If None, all regulators will be included. Regulator
+        sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
+    rank (default: False)
+        When False, a column is added to var with identified MRs labeled as
+        "True", while all other proteins are labeled as "False". When True, top
+        MRs are labeled N,N-1,N-2,...,1, bottom MRs are labeled -N,-N-1,-N-2,
+        ...,-1, and all other proteins are labeled 0. Higher rank means greater
+        activity, while lower rank means less.
     return_filtered (default: False)
         Whether to return the results as an AnnData object filtering var to only
-        the top MRs (True) or to add an annotation to adata.var[key_added]
+        the top MRs (True) or to only add an annotation to adata.var[key_added]
         labeling the top MRs (False)
     """
-    # Feature where you add a cluster vector. Each MR column has key_added_cluster#
     # Feature where you can choose a method, e.g. MWU Test instead of Stouffer signature
     if return_filtered:
-        return _find_top_mrs(adata, N, both, key_added, return_filtered)
+        return _find_top_mrs(
+            adata,
+            obs_column_name,
+            layer,
+            N,
+            both,
+            key_added,
+            filter_by_feature_groups,
+            rank,
+            return_filtered
+        )
     else:
-        _find_top_mrs(adata, N, both, key_added, return_filtered)
+         _find_top_mrs(
+            adata,
+            obs_column_name,
+            layer,
+            N,
+            both,
+            key_added,
+            filter_by_feature_groups,
+            rank,
+            return_filtered
+        )
 
 def path_enr(gex_data,
              pathway_interactome,

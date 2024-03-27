@@ -6,7 +6,7 @@ from ._filtering_funcs import _get_anndata_filtered_by_feature_group
 from ._viper import viper
 from ._load._load import msigdb_regulon
 from .interactome import Interactome
-from ._pp import _nes_to_pval_df
+from ._pp import _nes_to_pval_df, _stouffer_clusters_adata
 
 def _pca(adata,
          *,
@@ -197,16 +197,52 @@ def _onco_match(pax_data_to_test,
 
     pax_data_to_test.obsm[key_added] = om
 
-def _find_top_mrs(adata, N = 50, both = True, key_added = "top_mrs", return_filtered = False):
-    adata.obs["all"] = 0
-    pyviper.tl.stouffer(adata, "all")
-    stouffer_sig = adata.uns['stouffer'].copy()
-    sorted_mrs = stouffer_sig.columns.values[np.flip(np.argsort(stouffer_sig.values))].flatten()
-    top_mrs = stouffer_sig[sorted_mrs[0:N]].columns.values
-    if both is True:
-        bottom_mrs = stouffer_sig[sorted_mrs[-N:]].columns.values
-        top_mrs = np.concatenate((top_mrs, bottom_mrs))
-    adata.var[key_added] = np.isin(adata.var.index, top_mrs)
+def _find_top_mrs_from_stouffer_sig(stouffer_sig, N, both, rank):
+    if rank is False:
+        top_mrs_clusts_df = pd.DataFrame(False,index=stouffer_sig.columns, columns=stouffer_sig.index)
+    else:
+        top_mrs_clusts_df = pd.DataFrame(0,index=stouffer_sig.columns, columns=stouffer_sig.index)
+
+    for i in range(stouffer_sig.shape[0]):
+        stouffer_sig_clust_i = stouffer_sig.iloc[i,:]
+        sorted_mrs_clust_i = stouffer_sig_clust_i.index.values[np.flip(np.argsort(stouffer_sig_clust_i.values))].flatten()
+        top_mrs_clust_i = stouffer_sig_clust_i[sorted_mrs_clust_i[0:N]].index.values
+        if both is True:
+            bottom_mrs_clust_i = stouffer_sig_clust_i[sorted_mrs_clust_i[-N:]].index.values
+            top_mrs_clust_i = np.concatenate((top_mrs_clust_i, bottom_mrs_clust_i))
+        if rank is False:
+            top_mrs_clusts_df.iloc[:, i] = np.isin(stouffer_sig_clust_i.index, top_mrs_clust_i)
+        else:
+            N_to_1 = np.flip(np.arange(N)+1)
+            neg_1_to_neg_N = -1*(np.arange(N)+1)
+            N_to_neg_N = np.concatenate((N_to_1, neg_1_to_neg_N))
+            if both is True:
+                top_mrs_clusts_df.iloc[:, i].loc[top_mrs_clust_i] = N_to_neg_N
+            else:
+                top_mrs_clusts_df.iloc[:, i].loc[top_mrs_clust_i] = N_to_1
+    return top_mrs_clusts_df
+
+def _find_top_mrs(adata,
+                  obs_column_name = None,
+                  layer = None,
+                  N = 50,
+                  both = True,
+                  key_added = "mr",
+                  filter_by_feature_groups=None,
+                  rank=False,
+                  return_filtered = False):
+    stouffer_sig = _stouffer_clusters_adata(adata,
+                                            obs_column_name,
+                                            layer,
+                                            filter_by_feature_groups)
+
+    result_df = _find_top_mrs_from_stouffer_sig(stouffer_sig, N, both, rank)
+
+    if obs_column_name is None:
+        result_df.columns = [key_added]
+    else:
+        result_df.columns = key_added + "_" + result_df.columns
+    adata.var = pd.concat([adata.var, result_df], axis=1, join='inner')
 
     if return_filtered:
         adata_filt = adata[:,adata.var[key_added].values.flatten()==True].copy()

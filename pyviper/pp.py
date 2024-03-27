@@ -1,5 +1,5 @@
 ### ---------- IMPORT DEPENDENCIES ----------
-from ._pp import _rank_norm, _stouffer, _viper_similarity, _aracne3_to_regulon, _nes_to_neg_log, _nes_to_pval, _mad_from_R, _median
+from ._pp import _rank_norm, _stouffer, _viper_similarity, _aracne3_to_regulon, _nes_to_pval, _mad_from_R, _median
 from ._corr_distance import corr_distance
 from ._rep_subsample_funcs import _representative_subsample_anndata
 from ._metacell_funcs import _representative_metacells_multiclusters
@@ -188,30 +188,30 @@ def aracne3_to_regulon(
         normalize_MI_per_regulon
     )
 
-def nes_to_neg_log(adata, layer = None, key_added = None):
-    """\
-    Transform VIPER-computed NES into -log10(p-value).
+# def nes_to_neg_log(adata, layer = None, key_added = None):
+#     """\
+#     Transform VIPER-computed NES into -log10(p-value).
+#
+#     Parameters
+#     ----------
+#     adata
+#         Gene expression, protein activity or pathways stored in an anndata
+#         object, or a pandas dataframe containing input data, where rows are
+#         observations/samples (e.g. cells or groups) and columns are features
+#         (e.g. proteins or pathways).
+#     layer : (default: None)
+#         Entry of layers to tranform.
+#     key_added : (default: None)
+#         Name of layer to save result in a new layer instead of adata.X.
+#
+#     Returns
+#     -------
+#     Saves the input data as a transformed version. If key_added is specified,
+#     saves the results in adata.layers[key_added].
+#     """
+#     _nes_to_neg_log(adata, layer, key_added)
 
-    Parameters
-    ----------
-    adata
-        Gene expression, protein activity or pathways stored in an anndata
-        object, or a pandas dataframe containing input data, where rows are
-        observations/samples (e.g. cells or groups) and columns are features
-        (e.g. proteins or pathways).
-    layer : (default: None)
-        Entry of layers to tranform.
-    key_added : (default: None)
-        Name of layer to save result in a new layer instead of adata.X.
-
-    Returns
-    -------
-    Saves the input data as a transformed version. If key_added is specified,
-    saves the results in adata.layers[key_added].
-    """
-    _nes_to_neg_log(adata, layer, key_added)
-
-def nes_to_pval(adata, layer = None, key_added = None, adjust=True, axs=1):
+def nes_to_pval(adata, layer = None, key_added = None, adjust=True, axs=1, neg_log = False):
     """\
     Transform VIPER-computed NES into p-values.
 
@@ -226,13 +226,21 @@ def nes_to_pval(adata, layer = None, key_added = None, adjust=True, axs=1):
         Entry of layers to tranform.
     key_added : (default: None)
         Name of layer to save result in a new layer instead of adata.X.
+    adjust (default: True)
+        If `True`, returns adjusted p values using FDR Benjamini-Hochberg procedure.
+        If `False`, does not adjust p values
+    axs (default: 1)
+        axis along which to perform the p-value correction (Used only if the input is a pd.DataFrame).
+        Possible values are 0 or 1.
+    neg_log : (default: False)
+        Whether to transform VIPER-computed NES into -log10(p-value).
 
     Returns
     -------
     Saves the input data as a transformed version. If key_added is specified,
     saves the results in adata.layers[key_added].
     """
-    _nes_to_pval(adata, layer, key_added, adjust, axs)
+    _nes_to_pval(adata, layer, key_added, adjust, axs, neg_log)
 
 def repr_subsample(adata,
                    pca_slot="X_pca",

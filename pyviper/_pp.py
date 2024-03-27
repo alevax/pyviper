@@ -1,11 +1,10 @@
 import pandas as pd
 import numpy as np
+import scanpy as sc
 import anndata
-import string
 from scipy.stats import rankdata, norm
 from statsmodels.stats import multitest
-import string
-import scanpy as sc
+from ._filtering_funcs import _get_anndata_filtered_by_feature_group
 from tqdm.auto import tqdm
 import os
 
@@ -133,11 +132,10 @@ def _stouffer_clusters_df(dat_df, cluster_vector):
 
     return result_df
 
-def _stouffer(adata,
-             obs_column_name = None,
-             layer = None,
-             filter_by_feature_groups = None,
-             key_added = 'stouffer'):
+def _stouffer_clusters_adata(adata,
+                             obs_column_name = None,
+                             layer = None,
+                             filter_by_feature_groups = None):
     if isinstance(adata, pd.DataFrame): adata = anndata.AnnData(adata)
 
     adata_filt = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups)
@@ -148,14 +146,29 @@ def _stouffer(adata,
                               index=adata_filt.obs_names,
                               columns=adata_filt.var_names)
     if obs_column_name is None:
-        cluster_vector = np.zeros(adata_filt.shape[0])
+        cluster_vector = np.zeros(adata_filt.shape[0]).astype(int).astype(str)
     elif isinstance(obs_column_name, str):
         cluster_vector = adata.obs[obs_column_name]
     else:
         cluster_vector = obs_column_name
 
     result_df = _stouffer_clusters_df(dat_df, cluster_vector)
-    adata.uns[key_added] = result_df
+    return result_df
+
+def _stouffer(adata,
+              obs_column_name = None,
+              layer = None,
+              filter_by_feature_groups = None,
+              key_added = 'stouffer'):
+    result_df = _stouffer_clusters_adata(adata,
+                                         obs_column_name,
+                                         layer,
+                                         filter_by_feature_groups).T
+    if obs_column_name is None:
+        result_df.columns = [key_added]
+    else:
+        result_df.columns = key_added + "_" + result_df.columns
+    adata.var = pd.concat([adata.var, result_df], axis=1, join='inner')
 
 def _viper_similarity(adata,
                          nn = None,
@@ -263,26 +276,26 @@ def _aracne3_to_regulon(
 
     return op
 
-def _nes_to_neg_log(adata, layer = None, key_added = None):
-    if isinstance(adata, pd.DataFrame) or isinstance(adata, np.ndarray):
-        adata[:] = -1 * np.log10(norm.sf(adata))
-    elif(isinstance(adata, anndata.AnnData) or isinstance(adata, anndata._core.anndata.AnnData)):
-        if layer is None:
-            input_array = adata.X
-        else:
-            input_array = adata.layers[layer]
-
-        transformed_array = -1*np.log10(norm.sf(input_array))
-
-        if key_added is not None:
-            adata.layers[key_added] = transformed_array
-        elif layer is not None:
-            adata.layers[layer] = transformed_array
-        else:
-            adata.X = transformed_array
-    else:
-        raise Exception("adata must be anndata.AnnData, numpy.ndarray or pandas.DataFrame.")
-
+# def _nes_to_neg_log(adata, layer = None, key_added = None):
+#     if isinstance(adata, pd.DataFrame) or isinstance(adata, np.ndarray):
+#         adata[:] = -1 * np.log10(norm.sf(adata))
+#     elif(isinstance(adata, anndata.AnnData) or isinstance(adata, anndata._core.anndata.AnnData)):
+#         if layer is None:
+#             input_array = adata.X
+#         else:
+#             input_array = adata.layers[layer]
+#
+#         transformed_array = -1*np.log10(norm.sf(input_array))
+#
+#         if key_added is not None:
+#             adata.layers[key_added] = transformed_array
+#         elif layer is not None:
+#             adata.layers[layer] = transformed_array
+#         else:
+#             adata.X = transformed_array
+#     else:
+#         raise Exception("adata must be anndata.AnnData, numpy.ndarray or pandas.DataFrame.")
+#
 
 
 
@@ -295,7 +308,7 @@ def _adjust_p_values(p_values):
     _, corrected_p_values, _, _ = multitest.multipletests(p_values, method='fdr_bh')
     return corrected_p_values
 
-def _nes_to_pval_df(dat_df, adjust = True, axs = 1):
+def _nes_to_pval_df(dat_df, adjust = True, axs = 1, neg_log = False):
     """\
     Compute (adjusted) p-value associated to the viper-computed NES in a pd.DataFrame.
 
@@ -346,18 +359,20 @@ def _nes_to_pval_df(dat_df, adjust = True, axs = 1):
     else:
         raise ValueError("dat_df must have 1 or 2 dimensions.")
 
+    if neg_log: p_values_df = -1 * np.log10(norm.sf(p_values_df))
+
     return p_values_df
 
-def _nes_to_pval(adata, layer, key_added, adjust = True, axs = 1):
+def _nes_to_pval(adata, layer, key_added, adjust = True, axs = 1, neg_log = False):
     if isinstance(adata, pd.DataFrame) or isinstance(adata, np.ndarray):
-        adata[:] = _nes_to_pval_df(adata, adjust, axs)
+        adata[:] = _nes_to_pval_df(adata, adjust, axs, neg_log)
     elif(isinstance(adata, anndata.AnnData) or isinstance(adata, anndata._core.anndata.AnnData)):
         if layer is None:
             input_array = adata.X
         else:
             input_array = adata.layers[layer]
 
-        transformed_array = _nes_to_pval_df(input_array, adjust, axs)
+        transformed_array = _nes_to_pval_df(input_array, adjust, axs, neg_log)
 
         if key_added is not None:
             adata.layers[key_added] = transformed_array
