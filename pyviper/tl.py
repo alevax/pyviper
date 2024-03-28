@@ -166,6 +166,11 @@ def find_top_mrs(adata,
         Whether to return the results as an AnnData object filtering var to only
         the top MRs (True) or to only add an annotation to adata.var[key_added]
         labeling the top MRs (False)
+
+    Returns
+    -------
+    Add a column to adata.var[key_added] or, when clusters given, adds multiple
+    columns (e.g. key_added_clust1name, key_added_clust2name, etc) to adata.var.
     """
     # Feature where you can choose a method, e.g. MWU Test instead of Stouffer signature
     # scipy.stats.mannwhitneyu

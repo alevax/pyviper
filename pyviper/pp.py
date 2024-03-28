@@ -73,7 +73,7 @@ def stouffer(adata,
 
     Returns
     -------
-    Adds the cluster stouffer signatures to adata.uns[key_added]
+    Adds the cluster stouffer signatures to adata.var[key_added]
     """
     _stouffer(adata,
               obs_column_name,

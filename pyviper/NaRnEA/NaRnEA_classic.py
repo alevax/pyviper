@@ -165,7 +165,7 @@ def NaRnEA_classic(gex_data,
 
     if (eset_filter):
         # This will affect the rankings of genes by eliminating those not present in the interactome
-        tmp = np.unique(np.concatenate((interactome.get_targetSet(), interactome.get_regulonNames())))
+        tmp = np.unique(np.concatenate((interactome.get_target_names(), interactome.get_reg_names())))
         gex_data = gex_data[:,gex_data.var_names.isin(pd.Series(tmp))]
 
     pd.options.mode.chained_assignment = None
@@ -174,7 +174,7 @@ def NaRnEA_classic(gex_data,
 
     # modify regulon list, take the intersect of targets and genes, making there is no 0 nor +_1 in am
     # filtered_table = int_table[int_table['target'].isin(exp_genes)]
-    n_targets_not_in_exp_genes = np.count_nonzero(~np.isin(interactome.get_targetSet(), exp_genes))
+    n_targets_not_in_exp_genes = np.count_nonzero(~np.isin(interactome.get_target_names(), exp_genes))
     if n_targets_not_in_exp_genes > 0:
         # raise ValueError(
         warnings.warn('interactome "' + str(interactome.name) + '" contains ' +

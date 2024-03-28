@@ -139,9 +139,9 @@ class Interactome:
         -------
         An int
         """
-        return len(self.get_regulonNames())
+        return len(self.get_reg_names())
 
-    def get_regulonNames(self):
+    def get_reg_names(self):
         """\
         Get an array of all unique regulators in this Interactome.
 
@@ -307,7 +307,7 @@ class Interactome:
         return self.net_table[self.net_table['regulator'] == regName]
 
     # generates the unified set of targets from all regulons
-    def get_targetSet(self):
+    def get_target_names(self):
         """\
         Get a set of the unique targets in this Interactome
 
@@ -318,7 +318,7 @@ class Interactome:
         return self.net_table["target"].unique()
 
     # generates IC matrix for VIPER
-    def icMat(self):
+    def ic_mat(self):
         """\
         Get the DataFrame of all the likelihood values. Targets are in the rows,
         while Regulators are in the columns.
@@ -333,13 +333,13 @@ class Interactome:
                                                     sort=False,
                                                     fill_value = 0)
         normalization_function = lambda col: col / col.max() / (col / col.max()).sum()
-        icMat = pivot_df.apply(normalization_function, axis=0)
+        ic_mat = pivot_df.apply(normalization_function, axis=0)
         # Reorder columns so they are not alphabetical: keep them consistent with regulonNames: sort=False not working
-        icMat = icMat[self.get_regulonNames()]
-        return(icMat)
+        ic_mat = ic_mat[self.get_reg_names()]
+        return(ic_mat)
 
     # generates MoR matrix for VIPER
-    def morMat(self):
+    def mor_mat(self):
         """\
         Get the DataFrame of all the correlation values. Targets are in the rows,
         while Regulators are in the columns.
@@ -348,17 +348,17 @@ class Interactome:
         -------
         A dataframe of :class:`~pandas.core.frame.DataFrame`.
         """
-        morMat = self.net_table.copy().pivot_table(index='target',
+        mor_mat = self.net_table.copy().pivot_table(index='target',
                                                   columns='regulator',
                                                   values='mor',
                                                   sort=False,
                                                   fill_value = 0)
         # Reorder columns so they are not alphabetical: keep them consistent with regulonNames: sort=False not working
-        morMat = morMat[self.get_regulonNames()]
-        return(morMat)
+        mor_mat = mor_mat[self.get_reg_names()]
+        return(mor_mat)
 
     # generates the vector of icP values for VIPER
-    def icpVec(self):
+    def icp_vec(self):
         """\
         Get the vector containing the proportion of the "Interaction Confidence"
         (IC) score for each interaction in a network, relative to the maximum IC
@@ -372,10 +372,10 @@ class Interactome:
         """
         icP_function = lambda x: np.sqrt(np.sum((x / x.max())**2))
         icP_df = self.net_table.copy().groupby('regulator')['likelihood'].apply(icP_function).reset_index(name='icP')
-        unique_regulators = self.get_regulonNames()
+        unique_regulators = self.get_reg_names()
         icP_df = icP_df.set_index('regulator').loc[unique_regulators].reset_index()
-        icpVec = icP_df["icP"].values
-        return icpVec
+        icp_vec = icP_df["icP"].values
+        return icp_vec
 
     def __check_if_reg_names_are_groups(self, regulator_names):
         if len(regulator_names) > 4:
