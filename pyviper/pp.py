@@ -3,7 +3,7 @@ from ._pp import _rank_norm, _stouffer, _viper_similarity, _aracne3_to_regulon, 
 from ._corr_distance import corr_distance
 from ._rep_subsample_funcs import _representative_subsample_anndata
 from ._metacell_funcs import _representative_metacells_multiclusters
-from ._translate import translate_adata_index
+from ._translate import translate
 
 ### ---------- EXPORT LIST ----------
 __all__ = []
@@ -227,7 +227,7 @@ def nes_to_pval(adata, layer = None, key_added = None, lower_tail=True, adjust=T
     key_added : (default: None)
         Name of layer to save result in a new layer instead of adata.X.
     lower_tail: default (True)
-    	If `True` (default), probabilities are P(X <= x) 
+    	If `True` (default), probabilities are P(X <= x)
     	If `False`, probabilities are P(X > x)
     adjust (default: True)
         If `True`, returns adjusted p values using FDR Benjamini-Hochberg procedure.

@@ -90,7 +90,7 @@ def neighbors_knn(adata,
         The slot in adata.obsp where the distance object is stored. One way of
         generating this object is with adata.pp.corr_distance.
     key_added (default: "knn")
-        Slot in uns to store the resulting knn array.
+        Slot in adata.uns to store the resulting knn array.
     njobs (default: 1)
         Paralleization option that allows users to speed up runtime.
 

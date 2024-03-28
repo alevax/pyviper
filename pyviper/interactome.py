@@ -79,12 +79,16 @@ class Interactome:
 
     # string representation
     def __str__(self):
+        net_table_absMOR = self.net_table.copy()
+        net_table_absMOR['mor'] = net_table_absMOR['mor'].abs()
+        median_abs_mor_per_reg = str(np.median(net_table_absMOR.groupby('regulator')['mor'].mean()))
+
         retStr = "Object of class Interactome:"
         retStr += "\n\tName: " + self.name
         retStr += "\n\tNumber of regulons: " + str(self.size())
-        retStr += "\n\tMedian of average targets per regulon: " + str(np.median(self.net_table.groupby('regulator')['target'].nunique()))
-        retStr += "\n\tMedian of average mor per regulon: " + str(np.median(self.net_table.groupby('regulator')['mor'].mean()))
-        retStr += "\n\tMedian of average likelihood per regulon: " + str(np.median(self.net_table.groupby('regulator')['likelihood'].mean()))
+        retStr += "\n\tMedian average targets per regulon: " + str(np.median(self.net_table.groupby('regulator')['target'].nunique()))
+        retStr += "\n\tMedian average abs(mor) per regulon: " + median_abs_mor_per_reg
+        retStr += "\n\tMedian average likelihood per regulon: " + str(np.median(self.net_table.groupby('regulator')['likelihood'].mean()))
 
         return retStr
 

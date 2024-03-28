@@ -3,6 +3,7 @@ from tqdm import tqdm
 from ._load._load_translate import load_human2mouse
 import numpy as np
 import pandas as pd
+from anndata import AnnData
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['translate_adata_index', '_detect_name_type']
@@ -143,3 +144,57 @@ def translate_adata_index(adata, desired_format, eliminate = True):
         adata = adata.copy()
     adata.var.set_index(desired_format, inplace=True)
     return adata
+
+def translate(adata, desired_format, eliminate = True):
+    """\
+    Performs translation of an AnnData, np.ndarray, or list object. For AnnData,
+    takes adata.var.index.names, replaces them with a translation of desired_format,
+    and moves the original names to a new column in var. The current name format
+    and desired_format of the gene names in adata.var.index should be one of the
+    following:
+        mouse_symbol, mouse_ensembl, mouse_entrez, human_symbol, human_ensembl, or human_entrez
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata
+        object. Alternate inputs: np.ndarray or list.
+    desired_format
+        Desired format can be one of six strings: "mouse_symbol", "mouse_ensembl",
+        "mouse_entrez", "human_symbol", "human_ensembl", or "human_entrez".
+    eliminate (default: True)
+        Whether to eliminate var rows that don't have a translation. Otherwise,
+        None will be left in place in the index.
+
+    Returns
+    -------
+    The translated object.
+    """
+    if isinstance(adata, AnnData):
+        return translate_adata_index(adata, desired_format, eliminate)
+    elif isinstance(adata, np.ndarray):
+        original_shape = adata.shape
+        adata = adata.flatten()
+        current_format = _detect_name_type(adata)
+        adata = _translate_genes_array(adata, desired_format)
+        # Switch to "-1" so shape isn't affected
+        adata[adata == None] = '-1'
+        adata[adata == np.nan] = '-1'
+        adata = keep_first_duplicate_strings(adata)
+        adata = adata.reshape(original_shape)
+        if eliminate:
+            adata = adata[~pd.isna(adata)]
+            adata = adata[adata != "nan"]
+            adata = adata[adata != "NaN"]
+        return adata
+    elif isinstance(adata, list):
+        adata = np.array(adata)
+        current_format = _detect_name_type(adata)
+        adata = _translate_genes_array(adata, desired_format)
+        adata = keep_first_duplicate_strings(adata)
+        if eliminate:
+            adata = adata[~pd.isna(adata)]
+            adata = adata[adata != "nan"]
+            adata = adata[adata != "NaN"]
+        adata = list(adata)
+        return adata
