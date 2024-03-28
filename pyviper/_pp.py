@@ -308,7 +308,7 @@ def _adjust_p_values(p_values):
     _, corrected_p_values, _, _ = multitest.multipletests(p_values, method='fdr_bh')
     return corrected_p_values
 
-def _nes_to_pval_df(dat_df, adjust = True, axs = 1, neg_log = False):
+def _nes_to_pval_df(dat_df, lower_tail=True, adjust = True, axs = 1, neg_log = False):
     """\
     Compute (adjusted) p-value associated to the viper-computed NES in a pd.DataFrame.
 
@@ -318,6 +318,9 @@ def _nes_to_pval_df(dat_df, adjust = True, axs = 1, neg_log = False):
         A pd.Series or pd.DataFrame containing protein activity (NES), pathways (NES) data or
         Stouffer-integrated NES data, where rows are observations/samples (e.g. cells or groups) and
         columns are features (e.g. proteins or pathways).
+    lower_tail (default: True)
+        If `True` (default), probabilities are P(X <= x) 
+        If `False`, probabilities are P(X > x)
     adjust (default: True)
         If `True`, returns adjusted p values using FDR Benjamini-Hochberg procedure.
         If `False`, does not adjust p values
@@ -335,9 +338,17 @@ def _nes_to_pval_df(dat_df, adjust = True, axs = 1, neg_log = False):
         Journal of the Royal Statistical Society. Series B (Methodological), 57(1), 289–300.
         http://www.jstor.org/stable/2346101
     """
+	
+    if lower_tail == False:	
+        p_values_array = norm.sf(dat_df)
 
-    p_values_array = 2 * norm.sf(np.abs(dat_df))
+    elif lower_tail == True:
+        p_values_array = 2 * norm.sf(np.abs(dat_df))
 
+    else:
+    	raise ValueError("'lower_tail' must be either True or False.")
+
+    	
     if dat_df.ndim == 1:
     # Calculate P values and corrected P values
         if adjust==True:
@@ -363,16 +374,16 @@ def _nes_to_pval_df(dat_df, adjust = True, axs = 1, neg_log = False):
 
     return p_values_df
 
-def _nes_to_pval(adata, layer, key_added, adjust = True, axs = 1, neg_log = False):
+def _nes_to_pval(adata, layer, key_added, lower_tail=True, adjust = True, axs = 1, neg_log = False):
     if isinstance(adata, pd.DataFrame) or isinstance(adata, np.ndarray):
-        adata[:] = _nes_to_pval_df(adata, adjust, axs, neg_log)
+        adata[:] = _nes_to_pval_df(adata, lower_tail, adjust, axs, neg_log)
     elif(isinstance(adata, anndata.AnnData) or isinstance(adata, anndata._core.anndata.AnnData)):
         if layer is None:
             input_array = adata.X
         else:
             input_array = adata.layers[layer]
 
-        transformed_array = _nes_to_pval_df(input_array, adjust, axs, neg_log)
+        transformed_array = _nes_to_pval_df(input_array, lower_tail, adjust, axs, neg_log)
 
         if key_added is not None:
             adata.layers[key_added] = transformed_array

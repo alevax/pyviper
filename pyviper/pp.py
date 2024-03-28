@@ -211,7 +211,7 @@ def aracne3_to_regulon(
 #     """
 #     _nes_to_neg_log(adata, layer, key_added)
 
-def nes_to_pval(adata, layer = None, key_added = None, adjust=True, axs=1, neg_log = False):
+def nes_to_pval(adata, layer = None, key_added = None, lower_tail=True, adjust=True, axs=1, neg_log = False):
     """\
     Transform VIPER-computed NES into p-values.
 
@@ -226,6 +226,9 @@ def nes_to_pval(adata, layer = None, key_added = None, adjust=True, axs=1, neg_l
         Entry of layers to tranform.
     key_added : (default: None)
         Name of layer to save result in a new layer instead of adata.X.
+    lower_tail: default (True)
+    	If `True` (default), probabilities are P(X <= x) 
+    	If `False`, probabilities are P(X > x)
     adjust (default: True)
         If `True`, returns adjusted p values using FDR Benjamini-Hochberg procedure.
         If `False`, does not adjust p values
@@ -240,7 +243,7 @@ def nes_to_pval(adata, layer = None, key_added = None, adjust=True, axs=1, neg_l
     Saves the input data as a transformed version. If key_added is specified,
     saves the results in adata.layers[key_added].
     """
-    _nes_to_pval(adata, layer, key_added, adjust, axs, neg_log)
+    _nes_to_pval(adata, layer, key_added, lower_tail, adjust, axs, neg_log)
 
 def repr_subsample(adata,
                    pca_slot="X_pca",
