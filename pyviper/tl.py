@@ -64,13 +64,14 @@ def dendrogram(adata,
                 **kwargs)
 
 def onco_match(pax_data_to_test,
-              pax_data_for_cMRs,
-              tcm_size = 50,
-              both_ways = False,
-              om_max_NES_threshold = 30,
-              om_min_logp_threshold = 0,
-              enrichment = 'aREA',
-              key_added = 'om'):
+               pax_data_for_cMRs,
+               tcm_size = 50,
+               both_ways = False,
+               lower_tail = True,
+               om_max_NES_threshold = 30,
+               om_min_logp_threshold = 0,
+               enrichment = 'aREA',
+               key_added = 'om'):
     """\
     The OncoMatch algorithm[1] assesses the overlap in differentially active MR
     proteins between two sets of samples (e.g. to validate GEMMs as effective
@@ -92,6 +93,9 @@ def onco_match(pax_data_to_test,
     both_ways (default: False)
         Whether to also use the candidate MRs of pax_data_to_test to compute
         NES for the samples in pax_data_for_cMRs, and then average.
+    lower_tail: default (True)
+    	If `True` (default), probabilities are P(X <= x)
+    	If `False`, probabilities are P(X > x)
     om_max_NES_threshold (default: 30)
         The maximum NES scores before using a cutoff.
     om_min_logp_threshold (default: 0)
@@ -121,6 +125,7 @@ def onco_match(pax_data_to_test,
                 pax_data_for_cMRs,
                 tcm_size,
                 both_ways,
+                lower_tail,
                 om_max_NES_threshold,
                 om_min_logp_threshold,
                 enrichment,

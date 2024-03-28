@@ -82,13 +82,14 @@ def _generate_interactome_from_pax_data(pax_data,
     return Interactome(interactome_name, net_table)
 
 def _onco_match(pax_data_to_test,
-              pax_data_for_cMRs,
-              tcm_size = 50,
-              both_ways = False,
-              om_max_NES_threshold = 30,
-              om_min_logp_threshold = 0,
-              enrichment = 'aREA',
-              key_added = 'om'):
+                pax_data_for_cMRs,
+                tcm_size = 50,
+                both_ways = False,
+                om_max_NES_threshold = 30,
+                om_min_logp_threshold = 0,
+                lower_tail = True,
+                enrichment = 'aREA',
+                key_added = 'om'):
     if enrichment is None:
         enrichment = 'narnea'
     else:
@@ -185,7 +186,7 @@ def _onco_match(pax_data_to_test,
     # om[~cond] = norm.logcdf(om[~cond])*-1 # accurate (i.e. same as R) when NES scores are big (e.g. 10)
 
     om = pd.DataFrame(om, index = vpmat_to_test.index, columns = vpmat_for_cMRs.index)
-    om = _nes_to_pval_df(om)
+    om = _nes_to_pval_df(om, lower_tail=lower_tail)
 
     # Log transform
     om = -np.log10(om)
