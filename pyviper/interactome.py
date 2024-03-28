@@ -81,10 +81,10 @@ class Interactome:
     def __str__(self):
         retStr = "Object of class Interactome:"
         retStr += "\n\tName: " + self.name
-        retStr += "\n\tNumber of Regulons: " + str(self.size())
-        retStr += "\n\tMedian Targets per Regulon: " + str(np.median(self.net_table.groupby('regulator')['target'].nunique()))
-        retStr += "\n\tMedian mor per regulator: " + str(np.median(self.net_table.groupby('regulator')['mor'].mean()))
-        retStr += "\n\tMedian likelihood per regulator: " + str(np.median(self.net_table.groupby('regulator')['likelihood'].mean()))
+        retStr += "\n\tNumber of regulons: " + str(self.size())
+        retStr += "\n\tMedian of average targets per regulon: " + str(np.median(self.net_table.groupby('regulator')['target'].nunique()))
+        retStr += "\n\tMedian of average mor per regulon: " + str(np.median(self.net_table.groupby('regulator')['mor'].mean()))
+        retStr += "\n\tMedian of average likelihood per regulon: " + str(np.median(self.net_table.groupby('regulator')['likelihood'].mean()))
 
         return retStr
 
