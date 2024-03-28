@@ -8,6 +8,7 @@ from joblib import Parallel, delayed
 from multiprocessing import cpu_count
 from scipy.stats import rankdata
 from scipy.stats import ttest_1samp
+from anndata import AnnData
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['viper']
@@ -30,10 +31,10 @@ def mat_to_anndata(mat):
     mat_features
 
     # Convert the pandas dataframe from Pyviper into a new Anndata object
-    pax_data = anndata.AnnData(X=mat,
-                               obs=mat_sampleNames,
-                               var=mat_features,
-                               dtype=np.float64)
+    pax_data = AnnData(X=mat,
+                       obs=mat_sampleNames,
+                       var=mat_features,
+                       dtype=np.float64)
     return(pax_data)
 
 def sample_ttest(i,array):

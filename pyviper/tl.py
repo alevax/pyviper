@@ -168,6 +168,7 @@ def find_top_mrs(adata,
         labeling the top MRs (False)
     """
     # Feature where you can choose a method, e.g. MWU Test instead of Stouffer signature
+    # scipy.stats.mannwhitneyu
     if return_filtered:
         return _find_top_mrs(
             adata,
