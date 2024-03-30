@@ -1,7 +1,5 @@
 ### ---------- IMPORT DEPENDENCIES ----------
-import pandas as pd
 import scanpy as sc
-
 
 ### ---------- EXPORT LIST ----------
 __all__ = []

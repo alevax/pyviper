@@ -4,6 +4,7 @@ from ._load._load_translate import load_human2mouse
 import numpy as np
 import pandas as pd
 from anndata import AnnData
+from warnings import warn
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['translate_adata_index', '_detect_name_type']
@@ -104,7 +105,7 @@ def keep_first_duplicate_strings(arr):
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 
-def translate_adata_index(adata, desired_format, eliminate = True):
+def translate_adata_index(adata, desired_format, eliminate = True, copy = False):
     """\
     Take adata.var.index.names, replace them with a translation of desired_format,
     and move the original names to a new column in var. The current name format
@@ -122,6 +123,9 @@ def translate_adata_index(adata, desired_format, eliminate = True):
     eliminate (default: True)
         Whether to eliminate var rows that don't have a translation. Otherwise,
         None will be left in place in the index.
+    copy (default: False)
+        Whether to return a translated copy (True) or to instead translate the
+        original input (False).
 
     Returns
     -------
@@ -129,23 +133,23 @@ def translate_adata_index(adata, desired_format, eliminate = True):
     """
     # So all translation happen on a new adata that is returned. Otherwise, we
     # edit the original, but eliminate doesn't work if the output isn't taken.
-    adata = adata.copy()
+    if copy: adata = adata.copy()
     current_format = _detect_name_type(adata.var.index.values)
     adata.var[current_format] = adata.var.index.values.astype(str)
     adata.var[desired_format] = _translate_genes_array(adata.var[current_format], desired_format)
     # return adata
     adata.var[desired_format] = keep_first_duplicate_strings(adata.var[desired_format].values)
     if eliminate:
-        # adata = adata[:, adata.var[desired_format] != np.nan]
-        adata = adata[:, ~pd.isna(adata.var[desired_format])]
-        adata = adata[:, adata.var[desired_format] != "nan"]
-        adata = adata[:, adata.var[desired_format] != "NaN"]
-        # Turn view of anndata into just anndata
-        adata = adata.copy()
-    adata.var.set_index(desired_format, inplace=True)
-    return adata
+        adata._inplace_subset_var(~pd.isna(adata.var[desired_format]))
+        adata._inplace_subset_var(adata.var[desired_format] != "nan")
+        adata._inplace_subset_var(adata.var[desired_format] != "NaN")
 
-def translate(adata, desired_format, eliminate = True):
+    adata.var.set_index(desired_format, inplace=True)
+
+    if copy: return adata
+
+
+def translate(adata, desired_format, eliminate = True, copy = False):
     """\
     Performs translation of an AnnData, np.ndarray, or list object. For AnnData,
     takes adata.var.index.names, replaces them with a translation of desired_format,
@@ -165,14 +169,24 @@ def translate(adata, desired_format, eliminate = True):
     eliminate (default: True)
         Whether to eliminate var rows that don't have a translation. Otherwise,
         None will be left in place in the index.
+    copy (default: False)
+        Whether to return a translated copy (True) or to instead translate the
+        original AnnData (False). True when given np.ndarray or list.
 
     Returns
     -------
-    The translated object.
+    Returns a translated object when copy = True or input is np.ndarray or list.
+    Modifies the original when copy = False and input is AnnData.
     """
     if isinstance(adata, AnnData):
-        return translate_adata_index(adata, desired_format, eliminate)
+        if copy is True:
+            return translate_adata_index(adata, desired_format, eliminate, copy)
+        else:
+            translate_adata_index(adata, desired_format, eliminate, copy)
     elif isinstance(adata, np.ndarray):
+        if copy is False:
+            warn("np.ndarray supplied:" +
+                 " overriding copy=False and returning a translated copy.")
         original_shape = adata.shape
         adata = adata.flatten()
         current_format = _detect_name_type(adata)
@@ -188,6 +202,9 @@ def translate(adata, desired_format, eliminate = True):
             adata = adata[adata != "NaN"]
         return adata
     elif isinstance(adata, list):
+        if copy is False:
+            warn("list supplied to translate:" +
+                 " overriding copy=False and returning a translated copy.")
         adata = np.array(adata)
         current_format = _detect_name_type(adata)
         adata = _translate_genes_array(adata, desired_format)

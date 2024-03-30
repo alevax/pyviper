@@ -1,5 +1,5 @@
 ### ---------- IMPORT DEPENDENCIES ----------
-from ._tl import _pca, _dendrogram, _onco_match, _find_top_mrs, _path_enr
+from ._tl import _pca, _dendrogram, _oncomatch, _find_top_mrs, _path_enr
 
 ### ---------- EXPORT LIST ----------
 __all__ = []
@@ -63,7 +63,7 @@ def dendrogram(adata,
                 filter_by_feature_groups,
                 **kwargs)
 
-def onco_match(pax_data_to_test,
+def oncomatch(pax_data_to_test,
                pax_data_for_cMRs,
                tcm_size = 50,
                both_ways = False,
@@ -71,7 +71,9 @@ def onco_match(pax_data_to_test,
                om_max_NES_threshold = 30,
                om_min_logp_threshold = 0,
                enrichment = 'aREA',
-               key_added = 'om'):
+               key_added = 'om',
+               return_as_df = False,
+               copy = False):
     """\
     The OncoMatch algorithm[1] assesses the overlap in differentially active MR
     proteins between two sets of samples (e.g. to validate GEMMs as effective
@@ -105,12 +107,19 @@ def onco_match(pax_data_to_test,
         The method of compute enrichment. 'aREA' or 'NaRnEA'
     key_added (default: 'om')
         The slot in pax_data_to_test.obsm to store the oncomatch results.
+    return_as_df (default: False)
+        Instead of adding the OncoMatch DataFrame to pax_data_to_test.obsm,
+        return it directly.
+    copy (default: False)
+        Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
-    Stores a pd.DataFrame objects of -log10 p-values with shape (n_samples in
-    pax_data_to_test, n_samples in pax_data_for_cMRs) in
-    pax_data_to_test.obsm[key_added].
+    When copy is False, stores a pd.DataFrame objects of -log10 p-values with
+    shape (n_samples in pax_data_to_test, n_samples in pax_data_for_cMRs) in
+    pax_data_to_test.obsm[key_added]. When copy is True, a copy of the AnnData
+    is returned with these pd.DataFrames stored. When return_as_df is True,
+    the OncoMatch DataFrame alone is directly returned by the function.
 
     References
     ----------
@@ -121,15 +130,17 @@ def onco_match(pax_data_to_test,
     Alvarez, M. J. et al. Reply to ’H-STS, L-STS and KRJ-I are not authentic GEPNET
     cell lines’. Nat Genet 51, 1427–1428, doi:10.1038/s41588-019-0509-5 (2019).
     """
-    _onco_match(pax_data_to_test,
-                pax_data_for_cMRs,
-                tcm_size,
-                both_ways,
-                lower_tail,
-                om_max_NES_threshold,
-                om_min_logp_threshold,
-                enrichment,
-                key_added)
+    return _oncomatch(pax_data_to_test,
+                      pax_data_for_cMRs,
+                      tcm_size,
+                      both_ways,
+                      lower_tail,
+                      om_max_NES_threshold,
+                      om_min_logp_threshold,
+                      enrichment,
+                      key_added,
+                      return_as_df,
+                      copy)
 
 def find_top_mrs(adata,
                  obs_column_name = None,
@@ -139,7 +150,9 @@ def find_top_mrs(adata,
                  key_added = "mr",
                  filter_by_feature_groups=None,
                  rank=False,
-                 return_filtered = False):
+                 filter_by_top_mrs = False,
+                 return_as_df = False,
+                 copy = False):
     """\
     Identify the top N master regulator proteins in a VIPER AnnData object
 
@@ -167,42 +180,35 @@ def find_top_mrs(adata,
         MRs are labeled N,N-1,N-2,...,1, bottom MRs are labeled -N,-N-1,-N-2,
         ...,-1, and all other proteins are labeled 0. Higher rank means greater
         activity, while lower rank means less.
-    return_filtered (default: False)
-        Whether to return the results as an AnnData object filtering var to only
-        the top MRs (True) or to only add an annotation to adata.var[key_added]
-        labeling the top MRs (False)
+    filter_by_top_mrs (default: False)
+        Whether to filter var to only the top MRs in adata
+    return_as_df (default: False)
+        Returns a pd.DataFrame of the top MRs per cluster
+    copy (default: False)
+        Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
     Add a column to adata.var[key_added] or, when clusters given, adds multiple
     columns (e.g. key_added_clust1name, key_added_clust2name, etc) to adata.var.
+    If copy, returns a new adata transformed by this function. If return_as_df,
+    returns a DataFrame.
     """
     # Feature where you can choose a method, e.g. MWU Test instead of Stouffer signature
     # scipy.stats.mannwhitneyu
-    if return_filtered:
-        return _find_top_mrs(
-            adata,
-            obs_column_name,
-            layer,
-            N,
-            both,
-            key_added,
-            filter_by_feature_groups,
-            rank,
-            return_filtered
-        )
-    else:
-         _find_top_mrs(
-            adata,
-            obs_column_name,
-            layer,
-            N,
-            both,
-            key_added,
-            filter_by_feature_groups,
-            rank,
-            return_filtered
-        )
+    return _find_top_mrs(
+        adata,
+        obs_column_name,
+        layer,
+        N,
+        both,
+        key_added,
+        filter_by_feature_groups,
+        rank,
+        filter_by_top_mrs,
+        return_as_df,
+        copy
+    )
 
 def path_enr(gex_data,
              pathway_interactome,
@@ -275,6 +281,11 @@ def path_enr(gex_data,
         If input anndata already contains 'gex_data' in .uns, the input will
         assumed to be protein activity and will be stored in .uns as 'pax_data'.
         Otherwise, the data will be stored as 'gex_data' in .uns.
+
+    Returns
+    -------
+    Returns an AnnData object containing the pathways. When store_input_data,
+    the input gex_data AnnData is stored within the dataframe.
     """
     return _path_enr(gex_data,
                      pathway_interactome,

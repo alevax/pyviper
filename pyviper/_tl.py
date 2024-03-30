@@ -81,7 +81,7 @@ def _generate_interactome_from_pax_data(pax_data,
 
     return Interactome(interactome_name, net_table)
 
-def _onco_match(pax_data_to_test,
+def _oncomatch(pax_data_to_test,
                 pax_data_for_cMRs,
                 tcm_size = 50,
                 both_ways = False,
@@ -89,7 +89,11 @@ def _onco_match(pax_data_to_test,
                 om_min_logp_threshold = 0,
                 lower_tail = True,
                 enrichment = 'aREA',
-                key_added = 'om'):
+                key_added = 'om',
+                return_as_df = False,
+                copy = False):
+    if copy: pax_data_to_test = pax_data_to_test.copy()
+
     if enrichment is None:
         enrichment = 'narnea'
     else:
@@ -196,7 +200,11 @@ def _onco_match(pax_data_to_test,
 
     om = pd.DataFrame(om, index = vpmat_to_test.index, columns = vpmat_for_cMRs.index)
 
+    if return_as_df: return om
+
     pax_data_to_test.obsm[key_added] = om
+
+    if copy: return pax_data_to_test
 
 def _find_top_mrs_from_stouffer_sig(stouffer_sig, N, both, rank):
     if rank is False:
@@ -231,7 +239,13 @@ def _find_top_mrs(adata,
                   key_added = "mr",
                   filter_by_feature_groups=None,
                   rank=False,
-                  return_filtered = False):
+                  filter_by_top_mrs = False,
+                  return_as_df = False,
+                  copy = False):
+    if copy and return_as_df:
+        raise ValueError("copy and return_as_df cannot both be True.")
+    if copy: adata = adata.copy()
+
     stouffer_sig = _stouffer_clusters_adata(adata,
                                             obs_column_name,
                                             layer,
@@ -245,9 +259,14 @@ def _find_top_mrs(adata,
         result_df.columns = key_added + "_" + result_df.columns
     adata.var = pd.concat([adata.var, result_df], axis=1, join='inner')
 
-    if return_filtered:
-        adata_filt = adata[:,adata.var[key_added].values.flatten()==True].copy()
-        return adata_filt
+    if filter_by_top_mrs:
+        adata._inplace_subset_var(adata.var[key_added].values.flatten()==True)
+
+    if return_as_df:
+        mrs_df = result_df.apply(lambda col: result_df.index[col].tolist())
+        return mrs_df
+    elif copy:
+        return adata
 
 def _path_enr(gex_data,
              pathway_interactome,

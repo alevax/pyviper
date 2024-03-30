@@ -13,7 +13,8 @@ def rank_norm(
     NUM_FUN=_median,
     DEM_FUN = _mad_from_R,
     layer = None,
-    key_added = None
+    key_added = None,
+    copy = False
 ):
     """\
     Compute a double rank normalization on an anndata, np.array, or pd.DataFrame.
@@ -32,25 +33,31 @@ def rank_norm(
     key_added (default: None)
         For an anndata input, the name of the layer where to store. When None,
         this is anndata.X.
+    copy (default: False)
+        Whether to return a rank-transformed copy (True) or to instead transform
+        the original input (False).
 
     Returns
     -------
-    Saves the input data as a double rank transformed version
+    When copy = False, saves the input data as a double rank transformed version.
+    When copy = True, return a double rank transformed version of the input data.
     """
     return _rank_norm(
         adata,
         NUM_FUN,
         DEM_FUN,
         layer,
-        key_added
+        key_added,
+        copy
     )
-
 
 def stouffer(adata,
              obs_column_name = None,
              layer = None,
              filter_by_feature_groups = None,
-             key_added = 'stouffer'):
+             key_added = 'stouffer',
+             return_as_df = False,
+             copy = False):
     """\
     Compute a stouffer signature on each of your clusters in an anndata object.
 
@@ -70,16 +77,24 @@ def stouffer(adata,
         sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
     key_added (default: 'stouffer')
         The slot in adata.uns to store the stouffer signatures.
+    return_as_df (default: False)
+        If True, returns the stouffer signature in a pd.DataFrame. If False,
+        stores it in adata.var[key_added].
+    copy (default: False)
+        Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
-    Adds the cluster stouffer signatures to adata.var[key_added]
+    When return_as_df is False, adds the cluster stouffer signatures to
+    adata.var[key_added]. When return_as_df is True, returns as pd.DataFrame.
     """
-    _stouffer(adata,
-              obs_column_name,
-              layer,
-              filter_by_feature_groups,
-              key_added)
+    return _stouffer(adata,
+                     obs_column_name,
+                     layer,
+                     filter_by_feature_groups,
+                     key_added,
+                     return_as_df,
+                     copy)
 
 def viper_similarity(adata,
                      nn = None,
@@ -87,7 +102,8 @@ def viper_similarity(adata,
                      alternative=['two-sided','greater','less'],
                      layer=None,
                      filter_by_feature_groups=None,
-                     key_added = 'viper_similarity'):
+                     key_added = 'viper_similarity',
+                     copy = False):
     """\
     Compute the similarity between the columns of a VIPER-predicted activity or
     gene expression matrix. While following the same concept as the two-tail
@@ -122,6 +138,8 @@ def viper_similarity(adata,
         sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
     key_added (default: "viper_similarity")
         The name of the slot in the adata.obsp to store the output.
+    copy (default: False)
+        Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
@@ -136,14 +154,15 @@ def viper_similarity(adata,
     cancer using network-based inference of protein activity. Nature genetics,
     48(8), 838-847.
     """
-    _viper_similarity(
+    return _viper_similarity(
         adata,
         nn,
         ws,
         alternative,
         layer,
         filter_by_feature_groups,
-        key_added
+        key_added,
+        copy
     )
 
 def aracne3_to_regulon(
@@ -211,7 +230,16 @@ def aracne3_to_regulon(
 #     """
 #     _nes_to_neg_log(adata, layer, key_added)
 
-def nes_to_pval(adata, layer = None, key_added = None, lower_tail=True, adjust=True, axs=1, neg_log = False):
+def nes_to_pval(
+    adata,
+    layer = None,
+    key_added = None,
+    lower_tail=True,
+    adjust=True,
+    axs=1,
+    neg_log = False,
+    copy = False
+):
     """\
     Transform VIPER-computed NES into p-values.
 
@@ -237,20 +265,23 @@ def nes_to_pval(adata, layer = None, key_added = None, lower_tail=True, adjust=T
         Possible values are 0 or 1.
     neg_log : (default: False)
         Whether to transform VIPER-computed NES into -log10(p-value).
+    copy (default: False)
+        Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
     Saves the input data as a transformed version. If key_added is specified,
     saves the results in adata.layers[key_added].
     """
-    _nes_to_pval(adata, layer, key_added, lower_tail, adjust, axs, neg_log)
+    return _nes_to_pval(adata, layer, key_added, lower_tail, adjust, axs, neg_log, copy)
 
 def repr_subsample(adata,
                    pca_slot="X_pca",
                    size=1000,
                    seed=0,
                    verbose=True,
-                   njobs=1):
+                   njobs=1,
+                   copy = True):
     """\
     A tool for create a subsample of the input data such it is well
     representative of all the populations within the input data rather than
@@ -273,14 +304,17 @@ def repr_subsample(adata,
     njobs (default: 1)
         The number of cores to use for the analysis. Using more than 1 core
         (multicore) speeds up the analysis.
+    copy (default: True)
+        Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
-    An AnnData containing the representative sample with the obs and vars
-    information from the input adata. The returned subsample AnnData has a column
-    in obs in the slot "index_in_source_adata" that contain the chosen indices
-    and a pandas DataFrame in .uns in the slot "knn_groups_indices_df" that
-    contain the KNN groups that were used to generate the subsample.
+    When copy is True, returns an AnnData containing the representative sample
+    with the obs and vars information from the input adata. The returned subsample
+    AnnData has a column in obs in the slot "index_in_source_adata" that contain
+    the chosen indices and a pandas DataFrame in .uns in the slot
+    "knn_groups_indices_df" that contain the KNN groups that were used to
+    generate the subsample. When copy is False, we modify the original AnnData.
     """
     return _representative_subsample_anndata(
         adata,
@@ -289,8 +323,10 @@ def repr_subsample(adata,
         exact_size = True,
         seed = seed,
         verbose = verbose,
-        njobs = njobs
+        njobs = njobs,
+        copy = copy
     )
+
 
 # @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
 # ------------------------------------------------------------------------------
@@ -313,7 +349,8 @@ def repr_metacells(
     seed = 0,
     key_added = "metacells",
     verbose = True,
-    njobs = 1
+    njobs = 1,
+    copy = False
 ):
     """\
     A tool for create a representative selection of metacells from the data that
@@ -392,13 +429,15 @@ def repr_metacells(
     njobs (default: 1)
         The number of cores to use for the analysis. Using more than 1 core
         (multicore) speeds up the analysis.
-
+    copy (default: False)
+        Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
     Saves the metacells as a pandas dataframe in adata.uns[key_added]. Attributes
     that contain parameters for and statistics about the construction of the
-    metacells are stored in adata.uns[key_added].attrs.
+    metacells are stored in adata.uns[key_added].attrs. Set copy = True to
+    return a new AnnData object.
 
     Citations
     -------
@@ -439,7 +478,7 @@ def repr_metacells(
     if score_slot in adata.obs.columns is not None:
         adata = adata[adata.obs[score_slot].values >= score_min_thresh,:].copy()
 
-    _representative_metacells_multiclusters(
+    return _representative_metacells_multiclusters(
         adata,
         counts,
         pca_slot,
@@ -455,5 +494,6 @@ def repr_metacells(
         key_added = key_added,
         verbose = verbose,
         njobs = njobs,
-        smart_sample = True
+        smart_sample = True,
+        copy = copy
     )

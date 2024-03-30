@@ -1,3 +1,6 @@
+import numpy as np
+import pandas as pd
+
 # SA_GS_subfunctions.R
 def _corr_distance_matrix(data):
     # Equivalent to the following in R: d = sqrt(1 - stats::corr(X))
@@ -21,7 +24,10 @@ def __add_row_column_names_to_dist_mat(dist_mat, adata):
 def _corr_distance(adata,
                    use_reduction=True,
                    reduction_slot="X_pca",
-                   key_added="corr_dist"):
+                   key_added="corr_dist",
+                   copy = False):
+    if copy: adata = adata.copy()
+
     if isinstance(adata, np.ndarray) or isinstance(adata, pd.DataFrame):
         return _corr_distance_matrix(adata)
 
@@ -37,6 +43,8 @@ def _corr_distance(adata,
     d = __add_row_column_names_to_dist_mat(d, adata)
     adata.obsp[key_added] = d
 
+    if copy: return adata
+
 # @-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-
 # ------------------------------------------------------------------------------
 # ---------------------------- ** DISTANCE FUNCS ** ----------------------------
@@ -45,7 +53,8 @@ def _corr_distance(adata,
 def corr_distance(adata,
                   use_reduction=True,
                   reduction_slot="X_pca",
-                  key_added="corr_dist"):
+                  key_added="corr_dist",
+                  copy = False):
     """\
     A tool for computing a distance matrix based on pearson correlation.
 
@@ -66,7 +75,4 @@ def corr_distance(adata,
     Adds fields to the input adata, such that it contains a distance matrix
     stored in adata.obsp[key_added].
     """
-    if isinstance(adata, np.ndarray) or isinstance(adata, pd.DataFrame):
-        return _corr_distance(adata, use_reduction, reduction_slot, key_added)
-    else:
-        _corr_distance(adata, use_reduction, reduction_slot, key_added)
+    return _corr_distance(adata, use_reduction, reduction_slot, key_added, copy)

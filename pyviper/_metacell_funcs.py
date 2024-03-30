@@ -619,8 +619,11 @@ def _representative_metacells_multiclusters(
     key_added = "metacells",
     verbose = True,
     njobs = 1,
-    smart_sample = True
+    smart_sample = True,
+    copy = False
 ):
+    if copy: adata = adata.copy()
+
     if clusters_slot is not None:
         unique_clusters = np.unique(adata.obs[clusters_slot].values)
         n_unique_clusters = len(unique_clusters)
@@ -666,6 +669,8 @@ def _representative_metacells_multiclusters(
             njobs,
             smart_sample
         )
+
+    if copy: return adata
 
 def _representative_metacells(
     adata,

@@ -64,8 +64,11 @@ def _rank_norm(
     NUM_FUN = np.median,
     DEM_FUN = _mad_from_R,
     layer = None,
-    key_added = None
+    key_added = None,
+    copy = False
 ):
+    if copy is True: adata = adata.copy()
+
     if isinstance(adata, pd.DataFrame) or isinstance(adata, np.ndarray):
         adata[:] = _rank_norm_df(adata, NUM_FUN, DEM_FUN)
     elif(isinstance(adata, anndata.AnnData) or isinstance(adata, anndata._core.anndata.AnnData)):
@@ -85,6 +88,10 @@ def _rank_norm(
     else:
         raise Exception("In RankNorm(x), x must be anndata.AnnData, numpy.ndarray or pandas.DataFrame.")
 
+    if copy is True:
+        return adata
+    else:
+        return None
 
 def __sigT(x, slope = 20, inflection = 0.5):
     return (1 - 1/(1 + np.exp(slope * (x - inflection))))
@@ -159,29 +166,45 @@ def _stouffer(adata,
               obs_column_name = None,
               layer = None,
               filter_by_feature_groups = None,
-              key_added = 'stouffer'):
+              key_added = 'stouffer',
+              return_as_df = False,
+              copy = False):
+    if copy is True and return_as_df is True:
+        raise ValueError("copy and return_as_df cannot both be True.")
+
+    if copy is True: adata = adata.copy()
+
     result_df = _stouffer_clusters_adata(adata,
                                          obs_column_name,
                                          layer,
-                                         filter_by_feature_groups).T
-    if obs_column_name is None:
-        result_df.columns = [key_added]
+                                         filter_by_feature_groups)
+    if return_as_df is True:
+        return result_df
     else:
-        result_df.columns = key_added + "_" + result_df.columns
-    adata.var = pd.concat([adata.var, result_df], axis=1, join='inner')
+        result_df = result_df.T
+        if obs_column_name is None:
+            result_df.columns = [key_added]
+        else:
+            result_df.columns = key_added + "_" + result_df.columns
+        adata.var = pd.concat([adata.var, result_df], axis=1, join='inner')
+    if copy is True:
+        return adata
 
 def _viper_similarity(adata,
-                         nn = None,
-                         ws = [4, 2],
-                         alternative=['two-sided','greater','less'],
-                         layer=None,
-                         filter_by_feature_groups=None,
-                         key_added = 'viper_similarity'):
+                      nn=None,
+                      ws=[4, 2],
+                      alternative=['two-sided', 'greater', 'less'],
+                      layer=None,
+                      filter_by_feature_groups=None,
+                      key_added='viper_similarity',
+                      copy=False):
+    if copy: adata = adata.copy()
     mat = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups).to_df()
 
-    if np.min(mat)>=0 :
-        mat = rankdata(mat,axis=1)
-        mat = norm.ppf(mat/(np.sum(mat.isna()==False,axis = 1)+1))
+    if np.min(mat.values.flatten())>=0:
+        mat = pd.DataFrame(rankdata(mat,axis=1), index = mat.index, columns = mat.columns)
+        row_sums = np.sum(~np.isnan(mat.values), axis=1).reshape(-1, 1)
+        mat = pd.DataFrame(norm.ppf(mat/(row_sums+1)), index = mat.index, columns = mat.columns)
 
     mat[mat.isna()] =0 # will this work?
 
@@ -230,6 +253,8 @@ def _viper_similarity(adata,
 
     adata.obsp[key_added] = vp
 
+    if copy: return adata
+
 def _aracne3_to_regulon(
     net_file,
     net_df,
@@ -275,29 +300,6 @@ def _aracne3_to_regulon(
     )
 
     return op
-
-# def _nes_to_neg_log(adata, layer = None, key_added = None):
-#     if isinstance(adata, pd.DataFrame) or isinstance(adata, np.ndarray):
-#         adata[:] = -1 * np.log10(norm.sf(adata))
-#     elif(isinstance(adata, anndata.AnnData) or isinstance(adata, anndata._core.anndata.AnnData)):
-#         if layer is None:
-#             input_array = adata.X
-#         else:
-#             input_array = adata.layers[layer]
-#
-#         transformed_array = -1*np.log10(norm.sf(input_array))
-#
-#         if key_added is not None:
-#             adata.layers[key_added] = transformed_array
-#         elif layer is not None:
-#             adata.layers[layer] = transformed_array
-#         else:
-#             adata.X = transformed_array
-#     else:
-#         raise Exception("adata must be anndata.AnnData, numpy.ndarray or pandas.DataFrame.")
-#
-
-
 
 
 
@@ -374,7 +376,18 @@ def _nes_to_pval_df(dat_df, lower_tail=True, adjust = True, axs = 1, neg_log = F
 
     return p_values_df
 
-def _nes_to_pval(adata, layer, key_added, lower_tail=True, adjust = True, axs = 1, neg_log = False):
+def _nes_to_pval(
+    adata,
+    layer,
+    key_added,
+    lower_tail=True,
+    adjust = True,
+    axs = 1,
+    neg_log = False,
+    copy = False
+):
+    if copy: adata = adata.copy()
+
     if isinstance(adata, pd.DataFrame) or isinstance(adata, np.ndarray):
         adata[:] = _nes_to_pval_df(adata, lower_tail, adjust, axs, neg_log)
     elif(isinstance(adata, anndata.AnnData) or isinstance(adata, anndata._core.anndata.AnnData)):
@@ -393,3 +406,5 @@ def _nes_to_pval(adata, layer, key_added, lower_tail=True, adjust = True, axs = 
             adata.X = transformed_array
     else:
         raise Exception("adata must be anndata.AnnData, numpy.ndarray or pandas.DataFrame.")
+
+    if copy: return adata
