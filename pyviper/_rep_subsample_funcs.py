@@ -242,6 +242,8 @@ def _representative_subsample_anndata(
     size = 1000,
     exact_size = True,
     seed = 0,
+    key_added = "repr_subsample",
+    eliminate = False,
     verbose = True,
     njobs = 1,
     copy = False
@@ -251,8 +253,8 @@ def _representative_subsample_anndata(
     pca_array = adata.obsm["X_pca"].copy()
     metacell_indices_df = get_mc_indices_by_condensing(pca_array, size, exact_size, seed, verbose, njobs)
     sample_indices = np.array(metacell_indices_df.loc[:,0])
-    adata._inplace_subset_obs(sample_indices)
-    adata.obs["index_in_source_adata"] = sample_indices
-    adata.uns["knn_groups_indices_df"] = metacell_indices_df
+    adata.obs[key_added] = np.isin(np.arange(adata.shape[0]), sample_indices)
+    if eliminate: adata._inplace_subset_obs(sample_indices)
+    # adata.uns["knn_groups_indices_df"] = metacell_indices_df
 
     if copy: return adata

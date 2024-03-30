@@ -279,9 +279,11 @@ def repr_subsample(adata,
                    pca_slot="X_pca",
                    size=1000,
                    seed=0,
+                   key_added = "repr_subsample",
+                   eliminate = False,
                    verbose=True,
                    njobs=1,
-                   copy = True):
+                   copy = False):
     """\
     A tool for create a subsample of the input data such it is well
     representative of all the populations within the input data rather than
@@ -297,6 +299,9 @@ def repr_subsample(adata,
         generating this object is with sc.pp.pca.
     size (default: 1000)
         The size of the representative subsample
+    eliminate (default: False)
+        Whether to trim down adata to the subsample (True) or leave the
+        subsample as an annotation in adata.obs[key_added].
     seed (default: 0)
         The random seed used when taking samples of the data.
     verbose (default: True)
@@ -304,17 +309,14 @@ def repr_subsample(adata,
     njobs (default: 1)
         The number of cores to use for the analysis. Using more than 1 core
         (multicore) speeds up the analysis.
-    copy (default: True)
+    copy (default: False)
         Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
-    When copy is True, returns an AnnData containing the representative sample
-    with the obs and vars information from the input adata. The returned subsample
-    AnnData has a column in obs in the slot "index_in_source_adata" that contain
-    the chosen indices and a pandas DataFrame in .uns in the slot
-    "knn_groups_indices_df" that contain the KNN groups that were used to
-    generate the subsample. When copy is False, we modify the original AnnData.
+    When copy is False, saves the subsample annotation in adata.var[key_added].
+    When copy is True, return an anndata with this annotation. When eliminate is
+    True, modify the adata by subsetting it down to the subsample.
     """
     return _representative_subsample_anndata(
         adata,
@@ -322,6 +324,8 @@ def repr_subsample(adata,
         size,
         exact_size = True,
         seed = seed,
+        key_added = key_added,
+        eliminate = eliminate,
         verbose = verbose,
         njobs = njobs,
         copy = copy
