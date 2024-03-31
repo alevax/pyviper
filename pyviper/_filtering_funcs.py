@@ -84,6 +84,7 @@ def __mat_to_anndata(mat):
 
 # ------------------------- GET ANNDATA OBJECT FILTERED -----------------------
 def _get_anndata_filtered_by_feature_group(adata, layer = None, feature_groups=None): #["TFs", "CoTFs", "sig", "surf"],
+    if feature_groups is None and layer is None: return adata
     features_list = __get_features_list(adata, feature_groups)
     adata_filt = __get_anndata_filtered_by_feature_list(adata, layer, features_list)
     return(adata_filt)

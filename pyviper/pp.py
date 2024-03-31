@@ -1,5 +1,5 @@
 ### ---------- IMPORT DEPENDENCIES ----------
-from ._pp import _rank_norm, _stouffer, _viper_similarity, _aracne3_to_regulon, _nes_to_pval, _mad_from_R, _median
+from ._pp import _rank_norm, _stouffer, _mwu, _spearman, _viper_similarity, _aracne3_to_regulon, _nes_to_pval, _mad_from_R, _median
 from ._corr_distance import corr_distance
 from ._rep_subsample_funcs import _representative_subsample_anndata
 from ._metacell_funcs import _representative_metacells_multiclusters
@@ -56,6 +56,9 @@ def stouffer(adata,
              layer = None,
              filter_by_feature_groups = None,
              key_added = 'stouffer',
+             compute_pvals = True,
+             null_iters = 1000,
+             verbose = True,
              return_as_df = False,
              copy = False):
     """\
@@ -77,6 +80,13 @@ def stouffer(adata,
         sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
     key_added (default: 'stouffer')
         The slot in adata.uns to store the stouffer signatures.
+    compute_pvals (default: True)
+        Whether to compute a p-value for each score to return in the results.
+    null_iters (default: 1000)
+        The number of iterations to use to compute a null model to assess the
+        p-values of each of the stouffer scores.
+    verbose (default: True)
+        Whether to provide additional output during the execution of the function.
     return_as_df (default: False)
         If True, returns the stouffer signature in a pd.DataFrame. If False,
         stores it in adata.var[key_added].
@@ -93,8 +103,130 @@ def stouffer(adata,
                      layer,
                      filter_by_feature_groups,
                      key_added,
+                     compute_pvals,
+                     null_iters,
+                     verbose,
                      return_as_df,
                      copy)
+
+def mwu(adata,
+        obs_column_name = None,
+        layer = None,
+        filter_by_feature_groups = None,
+        key_added = 'mwu',
+        compute_pvals = True,
+        verbose = True,
+        return_as_df = False,
+        copy = False):
+    """\
+    Compute a Mann-Whitney U-Test signature on each of your clusters in an
+    anndata object.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata
+        object, or a pandas dataframe containing input data.
+    obs_column_name
+        The name of the column of observations in adata to use as clusters, or a
+        cluster vector corresponding to observations.
+    layer (default: None)
+        The layer to use as input data to compute the signatures.
+    filter_by_feature_groups (default: None)
+        The selected regulators, such that all other regulators are filtered out
+        from input data. If None, all regulators will be included. Regulator
+        sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
+    key_added (default: 'mwu')
+        The slot in adata.uns to store the MWU signatures.
+    compute_pvals (default: True)
+        Whether to compute a p-value for each score to return in the results.
+    verbose (default: True)
+        Whether to provide additional output during the execution of the function.
+    return_as_df (default: False)
+        If True, returns the MWU signature in a pd.DataFrame. If False,
+        stores it in adata.var[key_added].
+    copy (default: False)
+        Determines whether a copy of the input AnnData is returned.
+
+    Returns
+    -------
+    When return_as_df is False, adds the cluster MWU signatures to
+    adata.var[key_added]. When return_as_df is True, returns as pd.DataFrame.
+    """
+    return _mwu(adata,
+                obs_column_name,
+                layer,
+                filter_by_feature_groups,
+                key_added,
+                compute_pvals,
+                verbose,
+                return_as_df,
+                copy)
+
+def spearman(adata,
+             pca_slot = "X_pca",
+             obs_column_name = None,
+             layer = None,
+             filter_by_feature_groups = None,
+             key_added = 'stouffer',
+             compute_pvals = True,
+             null_iters = 1000,
+             verbose = True,
+             return_as_df = False,
+             copy = False):
+    """\
+    Compute spearman correlation between each gene product and the cluster
+    centroids along with the statistical significance for each of your clusters
+    in an anndata object.
+
+    Parameters
+    ----------
+    adata
+        Gene expression, protein activity or pathways stored in an anndata
+        object, or a pandas dataframe containing input data.
+    pca_slot
+        The slot in adata.obsm where a PCA is stored.
+    obs_column_name
+        The name of the column of observations in adata to use as clusters, or a
+        cluster vector corresponding to observations.
+    layer (default: None)
+        The layer to use as input data to compute the correlation.
+    filter_by_feature_groups (default: None)
+        The selected regulators, such that all other regulators are filtered out
+        from input data. If None, all regulators will be included. Regulator
+        sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
+    key_added (default: 'spearman')
+        The slot in adata.uns to store the spearman correlation.
+    compute_pvals (default: True)
+        Whether to compute a p-value for each score to return in the results.
+    null_iters (default: 1000)
+        The number of iterations to use to compute a null model to assess the
+        p-values of each of the spearman scores.
+    verbose (default: True)
+        Whether to provide additional output during the execution of the function.
+    return_as_df (default: False)
+        If True, returns the spearman signature in a pd.DataFrame. If False,
+        stores it in adata.var[key_added].
+    copy (default: False)
+        Determines whether a copy of the input AnnData is returned.
+
+    Returns
+    -------
+    When return_as_df is False, adds the cluster spearman correlation to
+    adata.var[key_added]. When return_as_df is True, returns as pd.DataFrame.
+    """
+    return _spearman(adata,
+                     pca_slot,
+                     obs_column_name,
+                     layer,
+                     filter_by_feature_groups,
+                     key_added,
+                     compute_pvals,
+                     null_iters,
+                     verbose,
+                     return_as_df,
+                     copy)
+
 
 def viper_similarity(adata,
                      nn = None,

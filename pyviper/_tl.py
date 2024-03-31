@@ -6,7 +6,7 @@ from ._filtering_funcs import _get_anndata_filtered_by_feature_group
 from ._viper import viper
 from ._load._load import msigdb_regulon
 from .interactome import Interactome
-from ._pp import _nes_to_pval_df, _stouffer_clusters_adata
+from ._pp import _nes_to_pval_df, _sig_clusters_adata
 
 def _pca(adata,
          *,
@@ -206,7 +206,7 @@ def _oncomatch(pax_data_to_test,
 
     if copy: return pax_data_to_test
 
-def _find_top_mrs_from_stouffer_sig(stouffer_sig, N, both, rank):
+def _find_top_mrs_from_sig(stouffer_sig, N, both, rank):
     if rank is False:
         top_mrs_clusts_df = pd.DataFrame(False,index=stouffer_sig.columns, columns=stouffer_sig.index)
     else:
@@ -232,10 +232,12 @@ def _find_top_mrs_from_stouffer_sig(stouffer_sig, N, both, rank):
     return top_mrs_clusts_df
 
 def _find_top_mrs(adata,
+                  pca_slot = "X_pca",
                   obs_column_name = None,
                   layer = None,
                   N = 50,
                   both = True,
+                  method = "stouffer",
                   key_added = "mr",
                   filter_by_feature_groups=None,
                   rank=False,
@@ -246,12 +248,15 @@ def _find_top_mrs(adata,
         raise ValueError("copy and return_as_df cannot both be True.")
     if copy: adata = adata.copy()
 
-    stouffer_sig = _stouffer_clusters_adata(adata,
-                                            obs_column_name,
-                                            layer,
-                                            filter_by_feature_groups)
-
-    result_df = _find_top_mrs_from_stouffer_sig(stouffer_sig, N, both, rank)
+    sig = _sig_clusters_adata(adata,
+                              obs_column_name,
+                              layer,
+                              filter_by_feature_groups,
+                              sig_method = method,
+                              compute_pvals = False,
+                              pca_slot = "X_pca")
+    result_df = _find_top_mrs_from_sig(sig, N, both, rank)
+    result_df.columns.str.replace('_scores', '')
 
     if obs_column_name is None:
         result_df.columns = [key_added]

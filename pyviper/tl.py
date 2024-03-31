@@ -143,10 +143,12 @@ def oncomatch(pax_data_to_test,
                       copy)
 
 def find_top_mrs(adata,
+                 pca_slot = "X_pca",
                  obs_column_name = None,
                  layer = None,
                  N = 50,
                  both = True,
+                 method = "stouffer",
                  key_added = "mr",
                  filter_by_feature_groups=None,
                  rank=False,
@@ -160,14 +162,22 @@ def find_top_mrs(adata,
     ----------
     adata
         An anndata object containing a distance object in adata.obsp.
+    pca_slot
+        The slot in adata.obsm where a PCA is stored. Only required when method
+        is "spearman".
     obs_column_name
         The name of the column of observations in adata to use as clusters, or a
-        cluster vector corresponding to observations.
+        cluster vector corresponding to observations. Required when method is
+        "mwu" or "spearman".
     N (default: 50)
         The number of MRs to return
     both (default: True)
         Whether to return both the top N and bottom N MRs (True) or just the
         top N (False).
+    method (default: "stouffer")
+        The method used to compute a signature to identify the top candidate
+        master regulators (MRs). The options come from functions in pyviper.pp.
+        Choose between "stouffer", "mwu", or "spearman".
     key_added (default: "mr")
         The name of the slot in the adata.var to store the output.
     filter_by_feature_groups (default: None)
@@ -198,10 +208,12 @@ def find_top_mrs(adata,
     # scipy.stats.mannwhitneyu
     return _find_top_mrs(
         adata,
+        pca_slot,
         obs_column_name,
         layer,
         N,
         both,
+        method,
         key_added,
         filter_by_feature_groups,
         rank,
