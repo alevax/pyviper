@@ -7,6 +7,25 @@ import warnings
 from tqdm import tqdm
 import anndata
 
+def get_counts_as_df(counts, adata):
+    if counts is None:
+        if adata.raw is None:
+            raise ValueError("counts must be given as a parameter or adata.raw must contain counts.")
+        else:
+            counts = pd.DataFrame(adata.raw.X)
+            counts.index = adata.raw.obs_names
+            counts.columns = adata.raw.var_names
+            counts = counts.loc[adata.obs_names]
+    elif isinstance(counts, anndata.AnnData):
+        counts = counts.to_df()
+    elif isinstance(counts, pd.DataFrame):
+        counts = counts
+    elif isinstance(counts, np.ndarray):
+        counts = pd.DataFrame(counts)
+    else:
+        raise ValueError("counts must be either anndata.AnnData or pd.DataFrame, or np.ndarray.")
+    return counts
+
 def select_optimal_column_of_knn_groups_indices_df(knn_groups_indices_df, knn_array, progress_bar = True):
     # Each column of the knn groups has a different set of members in the groups
     # E.g. the 0th columns has the 0th member of each group, the 1st column has
@@ -603,75 +622,6 @@ def get_sample_indices_by_optimizing_params(
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def _representative_metacells_multiclusters(
-    adata,
-    counts = None,
-    pca_slot = "X_pca",
-    dist_slot = "corr_dist",
-    clusters_slot=None,
-    size = 250,
-    n_cells_per_metacell = None,
-    min_median_depth = 10000,
-    perc_data_to_use = None,
-    perc_incl_data_reused = None,
-    exact_size = True,
-    seed = 0,
-    key_added = "metacells",
-    verbose = True,
-    njobs = 1,
-    smart_sample = True,
-    copy = False
-):
-    if copy: adata = adata.copy()
-
-    if clusters_slot is not None:
-        unique_clusters = np.unique(adata.obs[clusters_slot].values)
-        n_unique_clusters = len(unique_clusters)
-        for i in tqdm(range(n_unique_clusters), desc="cluster metacells") if verbose else range(n_unique_clusters):
-            clust = unique_clusters[i]
-            adata_clust = adata[adata.obs[clusters_slot]==clust,].copy()
-            counts_clust = counts[adata.obs[clusters_slot]==clust].copy()
-            _representative_metacells(
-                adata_clust,
-                counts_clust,
-                pca_slot,
-                dist_slot,
-                size,
-                n_cells_per_metacell,
-                min_median_depth,
-                perc_data_to_use,
-                perc_incl_data_reused,
-                exact_size,
-                seed,
-                key_added,
-                verbose = False,
-                njobs = njobs,
-                smart_sample = smart_sample
-            )
-            clust_metacells = adata_clust.uns[key_added]
-
-            adata.uns[str(key_added + "_" + str(clust))] = clust_metacells
-    else:
-        _representative_metacells(
-            adata,
-            counts,
-            pca_slot,
-            dist_slot,
-            size,
-            n_cells_per_metacell,
-            min_median_depth,
-            perc_data_to_use,
-            perc_incl_data_reused,
-            exact_size,
-            seed,
-            key_added,
-            verbose,
-            njobs,
-            smart_sample
-        )
-
-    if copy: return adata
-
 def _representative_metacells(
     adata,
     counts = None,
@@ -695,23 +645,7 @@ def _representative_metacells(
     # samples or do they prefer using as many samples as possible despite sample reuse? Or
     # do they just want to set a minimum median depth and the point will fall wherever?
     # It would be great if they could have that option.
-
-    if counts is None:
-        if adata.raw is None:
-            raise ValueError("counts must be given as a parameter or adata.raw must contain counts.")
-        else:
-            counts = pd.DataFrame(adata.raw.X)
-            counts.index = adata.raw.obs_names
-            counts.columns = adata.raw.var_names
-            counts = counts.loc[adata.obs_names]
-    elif isinstance(counts, anndata.AnnData):
-        counts = counts.to_df()
-    elif isinstance(counts, pd.DataFrame):
-        counts = counts
-    elif isinstance(counts, np.ndarray):
-        counts = pd.DataFrame(counts)
-    else:
-        raise ValueError("counts must be either anndata.AnnData or pd.DataFrame, or np.ndarray.")
+    counts = get_counts_as_df(counts, adata)
 
     if np.sum([size != None,
                min_median_depth != None,
@@ -847,3 +781,73 @@ def _representative_metacells(
             jitter=0.4,
             multi_panel=True,
         )
+
+def _representative_metacells_multiclusters(
+    adata,
+    counts = None,
+    pca_slot = "X_pca",
+    dist_slot = "corr_dist",
+    clusters_slot=None,
+    size = 250,
+    n_cells_per_metacell = None,
+    min_median_depth = 10000,
+    perc_data_to_use = None,
+    perc_incl_data_reused = None,
+    exact_size = True,
+    seed = 0,
+    key_added = "metacells",
+    verbose = True,
+    njobs = 1,
+    smart_sample = True,
+    copy = False
+):
+    if copy: adata = adata.copy()
+    counts = get_counts_as_df(counts, adata)
+
+    if clusters_slot is not None:
+        unique_clusters = np.unique(adata.obs[clusters_slot].values)
+        n_unique_clusters = len(unique_clusters)
+        for i in tqdm(range(n_unique_clusters), desc="cluster metacells") if verbose else range(n_unique_clusters):
+            clust = unique_clusters[i]
+            adata_clust = adata[adata.obs[clusters_slot]==clust,].copy()
+            counts_clust = counts[adata.obs[clusters_slot]==clust].copy()
+            _representative_metacells(
+                adata_clust,
+                counts_clust,
+                pca_slot,
+                dist_slot,
+                size,
+                n_cells_per_metacell,
+                min_median_depth,
+                perc_data_to_use,
+                perc_incl_data_reused,
+                exact_size,
+                seed,
+                key_added,
+                verbose = False,
+                njobs = njobs,
+                smart_sample = smart_sample
+            )
+            clust_metacells = adata_clust.uns[key_added]
+
+            adata.uns[str(key_added + "_" + str(clust))] = clust_metacells
+    else:
+        _representative_metacells(
+            adata,
+            counts,
+            pca_slot,
+            dist_slot,
+            size,
+            n_cells_per_metacell,
+            min_median_depth,
+            perc_data_to_use,
+            perc_incl_data_reused,
+            exact_size,
+            seed,
+            key_added,
+            verbose,
+            njobs,
+            smart_sample
+        )
+
+    if copy: return adata

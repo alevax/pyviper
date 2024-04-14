@@ -535,7 +535,7 @@ def repr_metacells(
         when n_cells_per_metacell or min_median_depth is given.
     n_cells_per_metacell (default: None)
         The number of cells that should be used to generate single metacell.
-        Note that this parameter and n_cells_per_metacell cannot both be set as
+        Note that this parameter and min_median_depth cannot both be set as
         they directly relate: e.g. higher n_cells_per_metacell leads to higher
         min_median_depth. If left as None, perc_data_to_use or
         perc_incl_data_reused can be used to specify n_cells_per_metacell when
