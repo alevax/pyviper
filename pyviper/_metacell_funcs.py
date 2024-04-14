@@ -6,13 +6,19 @@ from ._rep_subsample_funcs import get_mc_indices_by_condensing, condense_in_half
 import warnings
 from tqdm import tqdm
 import anndata
+from scipy.sparse._csr import csr_matrix
 
 def get_counts_as_df(counts, adata):
     if counts is None:
         if adata.raw is None:
             raise ValueError("counts must be given as a parameter or adata.raw must contain counts.")
         else:
-            counts = pd.DataFrame(adata.raw.X)
+            if isinstance(adata.raw.X, np.ndarray):
+                counts = pd.DataFrame(adata.raw.X)
+            elif isinstance(adata.raw.X, csr_matrix):
+                counts = pd.DataFrame(adata.raw.X.toarray())
+            else:
+                raise ValueError("type(adata.raw.X) is " + str(type(adata.raw.X)) + ". Must be np.ndarray or scipy.sparse._csr.csr_matrix.")
             counts.index = adata.raw.obs_names
             counts.columns = adata.raw.var_names
             counts = counts.loc[adata.obs_names]
