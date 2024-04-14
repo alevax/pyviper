@@ -30,6 +30,12 @@ def get_counts_as_df(counts, adata):
         counts = pd.DataFrame(counts)
     else:
         raise ValueError("counts must be either anndata.AnnData or pd.DataFrame, or np.ndarray.")
+
+
+    if adata.shape[0] != counts.shape[0]:
+        raise ValueError("Different number of samples between counts (" +  \
+                         str(counts.shape[0]) + ") and adata (" + str(adata.shape[0]) + ").")
+
     return counts
 
 def select_optimal_column_of_knn_groups_indices_df(knn_groups_indices_df, knn_array, progress_bar = True):
@@ -40,7 +46,7 @@ def select_optimal_column_of_knn_groups_indices_df(knn_groups_indices_df, knn_ar
     # optimizing further.
     best_col = 0
     metric_opt = knn_groups_indices_df.size
-    for i in tqdm(range(knn_groups_indices_df.shape[1])) if progress_bar else range(knn_groups_indices_df.shape[1]):
+    for i in tqdm(range(knn_groups_indices_df.shape[1]), desc = "opt selection") if progress_bar else range(knn_groups_indices_df.shape[1]):
         sample_indices = np.array(knn_groups_indices_df.loc[:,i])
         metacell_knn = knn_array[sample_indices,:].copy()
         n_times_sample_used = np.unique(metacell_knn.flatten(), return_counts = True)[1]
@@ -128,17 +134,19 @@ def optimize_selected_sample_from_each_knn_group(sample_indices, knn_groups_indi
             n_unique_samples_old = n_unique_samples
     return sample_indices
 
-def get_sample_indices_with_max_unique_samples(knn_groups_indices_df, knn_array):
+def get_sample_indices_with_max_unique_samples(knn_groups_indices_df, knn_array, verbose):
     # Get a good starting point for the optimization
     sample_indices = select_optimal_column_of_knn_groups_indices_df(
         knn_groups_indices_df,
-        knn_array
+        knn_array,
+        progress_bar = verbose
     )
     # Optimize by switching to samples whose shared neighbors don't overlap much
     sample_indices = optimize_selected_sample_from_each_knn_group(
         sample_indices,
         knn_groups_indices_df,
-        knn_array
+        knn_array,
+        progress_bar = verbose
     )
     return sample_indices
 
@@ -210,7 +218,8 @@ def get_sample_indices_with_preset_params(
     if smart_sample:
         sample_indices = get_sample_indices_with_max_unique_samples(
             knn_groups_indices_df,
-            knn_array
+            knn_array,
+            verbose
         )
     adata.obs["selected_for_mc"] = pd.Categorical(np.isin(np.arange(adata.shape[0]), sample_indices))
     return adata, size, n_cells_per_metacell
@@ -253,10 +262,10 @@ def get_optimally_sized_knn_groups_by_dividing(
         knn_groups_indices_df = condense_results["metacell_indices_df"]
         previous_sample_indices = sample_indices
         sample_indices = select_optimal_column_of_knn_groups_indices_df(
-                    knn_groups_indices_df,
-                    knn_array,
-                    progress_bar = False
-                )
+            knn_groups_indices_df,
+            knn_array,
+            progress_bar = False
+        )
         sample_indices = optimize_selected_sample_from_each_knn_group(
             sample_indices,
             knn_groups_indices_df,
@@ -653,6 +662,11 @@ def _representative_metacells(
     # It would be great if they could have that option.
     counts = get_counts_as_df(counts, adata)
 
+    if adata.shape[0] < size:
+        raise ValueError("Number of metacells requested (" + str(size) + \
+                         ") is greater than the number of samples in adata (" +  \
+                         str(adata.shape[0]) + ").")
+
     if np.sum([size != None,
                min_median_depth != None,
                n_cells_per_metacell != None,
@@ -815,8 +829,16 @@ def _representative_metacells_multiclusters(
         n_unique_clusters = len(unique_clusters)
         for i in tqdm(range(n_unique_clusters), desc="cluster metacells") if verbose else range(n_unique_clusters):
             clust = unique_clusters[i]
+            clust_size = np.sum(adata.obs[clusters_slot]==clust)
+            if clust_size < size:
+                warnings.warn("Number of samples (" + str(clust_size) + ") in cluster " + \
+                              str(clust) + " is less than number of metacells requested (" + \
+                              str(size) + "). Skipping cluster.")
+                continue
+
             adata_clust = adata[adata.obs[clusters_slot]==clust,].copy()
             counts_clust = counts[adata.obs[clusters_slot]==clust].copy()
+
             _representative_metacells(
                 adata_clust,
                 counts_clust,
