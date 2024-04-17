@@ -9,7 +9,6 @@ from .interactome import Interactome
 from ._pp import _nes_to_pval_df, _sig_clusters_adata
 
 def _pca(adata,
-         *,
          layer=None,
          filter_by_feature_groups=None, # ["tfs", "cotfs", "sig", "surf"],
          **kwargs):
@@ -19,7 +18,6 @@ def _pca(adata,
     adata.obsm["X_pca"] = adata_filt.obsm["X_pca"]
 
 def _dendrogram(adata,
-               *,
                groupby,
                key_added=None,
                layer=None,
