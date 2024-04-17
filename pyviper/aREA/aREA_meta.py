@@ -130,7 +130,8 @@ def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets =
     Parameters
     ----------
     gex_data
-        Gene expression stored in an anndata object (e.g. from Scanpy).
+        Gene expression stored in an anndata object (e.g. from Scanpy) or in a
+        pd.DataFrame.
     interactome
         An object of class Interactome.
     layer (default: None)
