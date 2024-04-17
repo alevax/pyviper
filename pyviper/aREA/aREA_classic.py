@@ -2,8 +2,9 @@
 import pandas as pd
 import numpy as np
 from scipy.stats import rankdata
-from scipy.stats import norm
+from scipy.special import ndtri # from scipy.stats import norm
 import warnings
+from anndata import AnnData
 
 
 ### ---------- EXPORT LIST ----------
@@ -36,7 +37,8 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     Parameters
     ----------
     gex_data
-        Gene expression stored in an anndata object (e.g. from Scanpy).
+        Gene expression stored in an anndata object (e.g. from Scanpy) or in a
+        pd.DataFrame.
     interactome
         The interactome object.
     layer
@@ -48,17 +50,25 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     """
     # Filter out those with target less than min.targets
     interactome = interactome.copy()
+
+    if isinstance(gex_data, AnnData):
+        gex_df = gex_data.to_df(layer)
+        gex_data = None #deassign refrence
+    elif isinstance(gex_data, pd.DataFrame):
+        gex_df = gex_data
+    else:
+        raise ValueError("gex_data is type: " + str(type(gex_data)) + ". Must be anndata.AnnData or pd.DataFrame.")
 #    interactome.prune(min_targets = min_targets, max_targets = None, eliminate = False, verbose = False)
 
     if (eset_filter):
         # This will affect the rankings of genes by eliminating those not present in the interactome
         tmp = np.unique(np.concatenate((interactome.get_target_names(), interactome.get_reg_names())))
-        gex_data = gex_data[:,gex_data.var_names.isin(pd.Series(tmp))]
+        gex_df = gex_df.iloc[:,gex_df.columns.isin(pd.Series(tmp))]
 
-    if layer is None:
-        gesMat = gex_data.X
-    else:
-        gesMat = gex_data.layers[layer]
+    # Collect important data from gex_df before creating ges_arr
+    varNames = gex_df.columns.to_list()
+    samplesIndex = gex_df.index
+    ges_arr = gex_df.values
 
     interactome.prune(min_targets = min_targets, max_targets = None, eliminate = False, verbose = False)
 
@@ -67,7 +77,7 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     # Use get_target_names as part of the interactome class to get a list of all targets in the interactome
     targetSet = interactome.get_target_names()
     # Get a list of the gene names of the gExpr signature matrix
-    varNames = gex_data.var_names.to_list()
+
     # Get the intersction of gene names in the gExpr signature and those in the target set
     # intersectGenes = np.intersect1d(targetSet, varNames)
     intersectGenes = np.array([x for x in targetSet if x in varNames])
@@ -82,31 +92,22 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
                          "resolve this. It is highly recommend to do this on the unPruned network and\n\t"+
                          "then prune to the pruned network contains a consistent number of targets per\n\t"
                          "regulator, allow of which exist within gex_data.")
-        interactome.filter_targets(gex_data.var_names)
+        interactome.filter_targets(varNames)
 
     # rank transform the GES using the rankdata function from scipy.stats
     if(verbose): print("Rank transforming the data")
-    rankMat = rankdata(gesMat, axis = 1)
-
-    # ------------ reduce regulon matrices ------------
-    # The ic_mat is the matrix with regulators in the columns, targets in the rows and likelihood (weights) as values
-        # (we filter to intersectGenes as targets by using .loc[intersectGenes])
-    if(verbose): print("Computing the likelihood matrix")
-    ic_mat = interactome.ic_mat()#.loc[intersectGenes]
-    # The morDict is the matrix with regulators in the columns, targets in the rows and tfmode (modes) as values
-    if(verbose): print("Computing the modes matrix")
-    mor_mat = interactome.mor_mat()#.loc[intersectGenes]
+    rankMat = rankdata(ges_arr, axis = 1)
 
     # ------------ prepare the 1-tailed / 2-tailed matrices ------------
     if(verbose): print("Preparing the 1-tailed / 2-tailed matrices")
     # gesInds is a series of indices - the index of every target in the gExpr signature matrix
         # for each of the intersecting genes
     gesInds = [varNames.index(i) for i in intersectGenes]
-
     # To get the one tailed matrix, we normalize our rank values between 0 and 1 across each sample,
         # thereby scaling our data across each sample
     # To do this, we divide each row of the rankMat by the number of samples (rows) plus 1 to get the 2-tailed matrix
     ges2T = rankMat / (rankMat.shape[1] + 1)
+    del rankMat
     # For a one tailed test,
         # (1) since each sample has a range of 0 to 1, we recenter our values at 0 for each sample by subtracting 0.5
         # (2) take the absolute value so values are classified by their extremeness and not their sign
@@ -119,31 +120,52 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     # which is the inverse of the cumulative distribution function. In this code, norm.ppf(ges2T[:, gesInds])
     # and norm.ppf(ges1T[:, gesInds]) calculate the z-scores for each column in gesInds, using the corresponding
     # values from ges2T and ges1T. The resulting matrices are called ges2TQ and ges1TQ, respectively.
-    ges2TQ = norm.ppf(ges2T[:, gesInds])
-    ges1TQ = norm.ppf(ges1T[:, gesInds])
+    # ges2TQ = norm.ppf(ges2T[:, gesInds])
+    # ges1TQ = norm.ppf(ges1T[:, gesInds])
 
-    if(verbose): print("Computing enrichment")
+    ges2TQ = ndtri(ges2T[:, gesInds]) #equivalent of norm.ppf but faster
+    ges1TQ = ndtri(ges1T[:, gesInds]) #equivalent of norm.ppf but faster
+    del ges2T
+    del ges1T
+
+    # ------------ reduce regulon matrices ------------
+    # The ic_mat is the matrix with regulators in the columns, targets in the rows and likelihood (weights) as values
+        # (we filter to intersectGenes as targets by using .loc[intersectGenes])
+    if(verbose): print("Computing the likelihood matrix")
+    ic_mat = interactome.ic_mat()#.loc[intersectGenes]
+    # The morDict is the matrix with regulators in the columns, targets in the rows and tfmode (modes) as values
+    if(verbose): print("Computing the modes matrix")
+    mor_mat = interactome.mor_mat()#.loc[intersectGenes]
+
     # ------------ 2-tail enrichment ------------
+    if(verbose): print("Computing 2-tail enrichment")
     # We multiply the likelihood matrix (ic_mat) and the tfmode matrix (mor_mat)
     # to get directional weights of the targets in each regulon
     dES = pd.DataFrame.transpose(pd.DataFrame.mul(ic_mat, mor_mat))
     # We then perform a dot product of these weights and the genes in our 2 tailed Z-scores matrix ges2TQ
     # to get our directed enrichment scores (samples in columns, regulators in the rows)
     dES = dES.dot(np.transpose(ges2TQ))
+    del ges2TQ
 
     # ------------ 1-tail enrichment ------------
+    if(verbose): print("Computing 1-tail enrichment")
     # We multiply the likelihood matrix (ic_mat) and the tfmode matrix (mor_mat)
     # to get undirected weights of the targets in each regulon
         # The farther the tfmode is from 0 and closer it is to 1, the smaller the weights
     uES = pd.DataFrame.transpose(pd.DataFrame.mul(1 - abs(mor_mat), ic_mat))
+    del mor_mat
+    del ic_mat
     # We then perform a dot product of these weights and the genes in our 1 tailed Z-scores matrix ges1TQ
     # to get our undirected enrichment scores (samples in columns, regulators in the rows)
     uES = uES.dot(np.transpose(ges1TQ))
+    del ges1TQ
 
     # ------------ Integrate enrichment ------------
     if(verbose): print("Integrating enrichment")
     # We integrate our directed and undirected enrichment scores matrices to get our integrated enrichment scores
     iES = (abs(dES) + uES * (uES > 0)) * np.sign(dES)
+    del dES
+    del uES
 
     # ------------ make NES (Normalized Enrichment Scores) matrix ------------
     # interactome.icp_vec() returns a vector
@@ -155,10 +177,11 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     # We multiply the Interaction Confidence of each regulator across the scores of each regulator
         # by making these multplications along the index (axis = 0)
     nES = iES.mul(interactome.icp_vec(), 0)
+    del iES
     # We transpose our NES matrix to have samples in the rows and regulators in the columns
     nES = np.transpose(nES)
     # We make the rownames for the samples the same as that in the gExpr matrix
-    nES.index = gex_data.obs.index
+    nES.index = samplesIndex
     # We return our result
     return(nES)
 

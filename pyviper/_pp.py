@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 import scanpy as sc
 import anndata
-from scipy.stats import rankdata, norm, mannwhitneyu
+from scipy.stats import rankdata, mannwhitneyu
+from scipy.special import ndtri  #equivalent of norm.ppf but faster
 import random
 from tqdm import tqdm
 from statsmodels.stats import multitest
@@ -534,7 +535,7 @@ def _viper_similarity(adata,
     if np.min(mat.values.flatten())>=0:
         mat = pd.DataFrame(rankdata(mat,axis=1), index = mat.index, columns = mat.columns)
         row_sums = np.sum(~np.isnan(mat.values), axis=1).reshape(-1, 1)
-        mat = pd.DataFrame(norm.ppf(mat/(row_sums+1)), index = mat.index, columns = mat.columns)
+        mat = pd.DataFrame(ndtri(mat/(row_sums+1)), index = mat.index, columns = mat.columns)
 
     mat[mat.isna()] =0 # will this work?
 
@@ -568,7 +569,7 @@ def _viper_similarity(adata,
     nes = np.sqrt(np.sum(xw**2, axis = 1))
     xw = xw.transpose()/np.sum(np.abs(xw),axis = 1)
 
-    t2 = norm.ppf(rankdata(xw.transpose(), axis = 1)/(mat.shape[1]+1))
+    t2 = ndtri(rankdata(xw.transpose(), axis = 1)/(mat.shape[1]+1))
     vp = np.matmul(t2, xw)
 
     vp = vp * nes
@@ -738,3 +739,81 @@ def _nes_to_pval(
         raise Exception("adata must be anndata.AnnData, numpy.ndarray or pandas.DataFrame.")
 
     if copy: return adata
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# from scipy.stats import rankdata
+# from scipy.stats import spearmanr
+# import time
+#
+# def Pearson_corr_single_X_col(x_diff, Y_diff, Sum_Y_diff_squared):
+#     x_diff = x_diff[:, np.newaxis]
+#     xY_diff = Y_diff * x_diff
+#     Sum_xY_diff = np.sum(xY_diff, axis=0)
+#     Sum_x_diff_squared = np.repeat(sum(x_diff**2), Y_diff.shape[1])
+#     corr = Sum_xY_diff / np.sqrt(Sum_x_diff_squared * Sum_Y_diff_squared)
+#     return corr
+#
+# def Pearson_corr_by_cols(X, Y):
+#     X_mean = X.mean(axis=0, keepdims=True)
+#     Y_mean = Y.mean(axis=0, keepdims=True)
+#
+#     X_diff = X - X_mean
+#     Y_diff = Y - Y_mean
+#
+#     # For each Y_diff column we square and take the sum.
+#     Sum_Y_diff_squared = np.sum(Y_diff**2, axis = 0)
+#
+#     # Make a correlation array for us to fill in
+#     corr = np.apply_along_axis(Pearson_corr_single_X_col, 0, X_diff, Y_diff, Sum_Y_diff_squared)
+#
+#     return corr
+#
+# def Spearman_corr_by_cols(X, Y):
+#     return Pearson_corr_by_cols(rankdata(X, axis=0), rankdata(Y, axis=0))
+#
+# def setdiff(X, Y):
+#     return np.array([x for x in X if x not in Y])
+#
+# def get_spearman_network(norm_gex_data):
+#     gex_data = norm_gex_data
+#     s = time.time()
+#     if isinstance(gex_data, anndata.AnnData):
+#         gex_norm_df = gex_data.to_df()
+#     else:
+#         gex_norm_df = gex_data
+#
+#     TFs_CoTFs_array = np.array(pyviper.load.TFs() + pyviper.load.coTFs())
+#     selected_columns = np.intersect1d(TFs_CoTFs_array, gex_norm_df.columns.values)
+#
+#     spearman_corr_array = Spearman_corr_by_cols(
+#         gex_norm_df[selected_columns].values,
+#         gex_norm_df.drop(columns=selected_columns).values
+#     )
+#
+#     spearman_net_table = pd.DataFrame(spearman_corr_array)
+#     spearman_net_table.columns = selected_columns
+#     spearman_net_table.index = setdiff(gex_norm_df.columns.values, selected_columns)
+#     spearman_net_table = spearman_net_table.reset_index()
+#     spearman_net_table.rename(columns={'index': 'target'}, inplace=True)
+#     spearman_net_table = pd.melt(spearman_net_table, id_vars='target', var_name="regulator", value_name='mor')
+#     spearman_net_table.dropna(subset=['mor'], inplace=True)
+#     spearman_net_table['likelihood'] = np.abs(spearman_net_table['mor'].values)
+#     spearman_net_table = spearman_net_table[['regulator', 'target', 'mor', 'likelihood']]
+#     spearman_net = pyviper.Interactome("spearman_net", spearman_net_table)
+#     e = time.time()
+#     print (e-s)
+#
+#     return spearman_net

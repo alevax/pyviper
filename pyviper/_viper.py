@@ -40,14 +40,10 @@ def mat_to_anndata(mat):
 def sample_ttest(i,array):
     return ttest_1samp((array[i] - np.delete(array, i, 0)), 0).statistic
 
-def apply_method_on_gex_data(gex_data, method = None, layer = None):
+def apply_method_on_gex_df(gex_df, method = None, layer = None):
     if method is None:
-        return gex_data
-
-    if layer is None:
-        gesMat = gex_data.X
-    else:
-        gesMat = gex_data.layers[layer]
+        return gex_df
+    gesMat = gex_data.values
 
     if method == 'scale':
         gesMat = (gesMat - np.mean(gesMat,axis=0))/np.std(gesMat,axis=0)
@@ -63,12 +59,7 @@ def apply_method_on_gex_data(gex_data, method = None, layer = None):
         gesMat = rank_norm(gesMat)
     else:
         raise ValueError("Unsupported method:" + str(method))
-
-    if layer is None:
-        gex_data.X = gesMat
-    else:
-        gex_data.layers[layer] = gesMat
-
+    gex_df[:] = gesMat
     return gex_data
 
 
@@ -200,10 +191,17 @@ def viper(gex_data,
         raise ValueError('njobs (' + str(njobs) + ') is larger than the ' +
                          'number of CPU cores (' + str(n_max_cores) + ').')
 
-    gex_data_original = gex_data
-    gex_data = gex_data_original.copy()
+    if isinstance(gex_data, AnnData):
+        gex_df = gex_data.to_df(layer)
+    elif isinstance(gex_data, pd.DataFrame):
+        gex_df = gex_data
+    else:
+        raise ValueError("gex_data is type: " + str(type(gex_data)) + ". Must be anndata.AnnData or pd.DataFrame.")
 
-    n_samples = gex_data.shape[0]
+    if isinstance(mvws, str) and mvws != "auto":
+        mvws = gex_data.obs[mvws].values
+
+    n_samples = gex_df.shape[0]
     if batch_size is None or batch_size >= n_samples:
         batch_size = int(np.ceil(n_samples/njobs))
         n_batches = njobs
@@ -229,7 +227,7 @@ def viper(gex_data,
             # I dont quite understand this part maybe ask later:
             gex_data.X = gex_data.X
     '''
-    gex_data = apply_method_on_gex_data(gex_data, method, layer)
+    gex_df = apply_method_on_gex_df(gex_df, method, layer)
 
     if enrichment is None:
         enrichment = 'narnea'
@@ -240,14 +238,14 @@ def viper(gex_data,
 
         if njobs==1:
             preOp = aREA(
-                gex_data,
+                gex_df,
                 interactome, layer, eset_filter,
                 min_targets, mvws, verbose
             )
         else:
             preOp = Parallel(njobs)(
                 delayed(aREA)(
-                    gex_data[batch_i*batch_size:batch_i*batch_size+batch_size],
+                    gex_df.iloc[batch_i*batch_size:batch_i*batch_size+batch_size],
                     interactome, layer, eset_filter,
                     min_targets, mvws, verbose
                 ) for batch_i in range(n_batches)
@@ -259,14 +257,14 @@ def viper(gex_data,
 
         if njobs==1:
             preOp = NaRnEA(
-                gex_data,
+                gex_df,
                 interactome, layer, eset_filter,
                 min_targets, verbose
             )
         else:
             results = Parallel(njobs)(
                 delayed(NaRnEA)(
-                    gex_data[batch_i*batch_size:batch_i*batch_size+batch_size],
+                    gex_df.iloc[batch_i*batch_size:batch_i*batch_size+batch_size],
                     interactome, layer, eset_filter,
                     min_targets, verbose
                 ) for batch_i in range(n_batches)
@@ -293,9 +291,9 @@ def viper(gex_data,
             op.obs = pd.concat([op.obs.copy(), gex_data.obs.copy()],axis=1)
         if store_input_data is True:
             # If input data was pax_data for pathway enrichment
-            if 'gex_data' in gex_data_original.uns:
-                op.uns['gex_data'] = gex_data_original.uns['gex_data']
-                op.uns['pax_data'] = gex_data_original
+            if 'gex_data' in gex_data.uns:
+                op.uns['gex_data'] = gex_data.uns['gex_data']
+                op.uns['pax_data'] = gex_data
             else:
-                op.uns['gex_data'] = gex_data_original
+                op.uns['gex_data'] = gex_data
     return op #final result

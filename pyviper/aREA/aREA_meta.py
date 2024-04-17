@@ -5,6 +5,7 @@ from .._helpers_meta import get_resized_mats
 from .aREA_classic import aREA_classic
 from ..interactome import Interactome
 from scipy.stats import rankdata
+from anndata import AnnData
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['aREA']
@@ -170,16 +171,21 @@ def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets =
     mutations in cancer using network-based inference of protein activity.
     Nature genetics, 48(8), 838-847.
     """
+    if not isinstance(gex_data, AnnData) and not isinstance(gex_data, pd.DataFrame):
+        raise ValueError("gex_data is type: " + str(type(gex_data)) + ". Must be anndata.AnnData or pd.DataFrame.")
 
     # We want all if/else conditions in case
     # users or testers run this function directly
-    if isinstance(mvws, str) and mvws != "auto":
+    if (isinstance(mvws, (pd.Series, pd.Index, np.ndarray, list)) and len(mvws) > 1) or (isinstance(mvws, str) and mvws != "auto"):
         # network manual assignment
         if(verbose): print("Running VIPER using manual network matching annotation...")
         netMats = []
         tot_nets = len(interactome)
         n_completed_nets = 0
-        net_assignments = gex_data.obs[mvws].values
+        if len(mvws) > 1:
+            net_assignments = mvws
+        else:
+            net_assignments = gex_data.obs[mvws].values
         if isinstance(net_assignments[0], str):
             # Create net_index_assignments by replacing each on with the appropriate network names
             int_names_in_index_order = [iObj.name for iObj in interactome]
@@ -194,7 +200,11 @@ def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets =
                              "(str) or be indices to the input list interactome (int)")
         for i in range(tot_nets):
             iObj = interactome[i]
-            gex_data_subset = gex_data[net_index_assignments==i,]
+            if isinstance(gex_data, AnnData):
+                gex_data_subset = gex_data[net_index_assignments==i,]
+            elif isinstance(gex_data, pd.DataFrame):
+                gex_data_subset = gex_data.iloc[net_index_assignments==i,]
+
             if gex_data_subset.shape[0] == 0: continue # for multi-core
             netMats.append(aREA_classic(gex_data_subset, iObj, layer, eset_filter, min_targets, verbose))
             n_completed_nets = n_completed_nets + 1

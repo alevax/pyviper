@@ -4,6 +4,7 @@ from scipy.stats import rankdata
 from scipy.stats import norm
 import numpy as np
 import warnings
+from anndata import AnnData
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['NaRnEA_classic']
@@ -159,6 +160,14 @@ def NaRnEA_classic(gex_data,
                    verbose=False,
                    return_as_df=False):
 
+    if isinstance(gex_data, AnnData):
+        gex_df = gex_data.to_df(layer)
+        gex_data = None #deassign refrence
+    elif isinstance(gex_data, pd.DataFrame):
+        gex_df = gex_data
+    else:
+        raise ValueError("gex_data is type: " + str(type(gex_data)) + ". Must be anndata.AnnData or pd.DataFrame.")
+
     # filter out those with target less than min.targets
     interactome = interactome.copy()
     interactome.prune(min_targets = min_targets, max_targets = None, eliminate = False, verbose = False)
@@ -166,10 +175,10 @@ def NaRnEA_classic(gex_data,
     if (eset_filter):
         # This will affect the rankings of genes by eliminating those not present in the interactome
         tmp = np.unique(np.concatenate((interactome.get_target_names(), interactome.get_reg_names())))
-        gex_data = gex_data[:,gex_data.var_names.isin(pd.Series(tmp))]
+        gex_df = gex_df.iloc[:,gex_df.columns.isin(pd.Series(tmp))]
 
     pd.options.mode.chained_assignment = None
-    exp_genes = list(gex_data.var.sort_index().index)
+    exp_genes = list(gex_df.columns.sort_values())
 
 
     # modify regulon list, take the intersect of targets and genes, making there is no 0 nor +_1 in am
@@ -183,7 +192,7 @@ def NaRnEA_classic(gex_data,
                          "resolve this. It is highly recommend to do this on the unPruned network and\n\t"+
                          "then prune to the pruned network contains a consistent number of targets per\n\t"
                          "regulator, allow of which exist within gex_data.")
-        interactome.filter_targets(gex_data.var_names)
+        interactome.filter_targets(gex_df.columns)
     int_table = interactome.net_table
     filtered_table = int_table
 
@@ -198,14 +207,7 @@ def NaRnEA_classic(gex_data,
     # modify the expression matrix:
         # fill with number less than the min in this sample, sign is randomly assigned according to the +_ proportion
     if verbose: print('reordering genes')
-
-    if layer is None:
-        expr = np.copy(gex_data[:,exp_genes].X)
-    else:
-        expr = np.copy(gex_data[:,exp_genes].layers[layer])
-
-
-
+    expr = np.copy(gex_df.loc[:,exp_genes].values)
     zeros = len(expr[expr == 0])
 
     pos = np.sum(np.sign(expr) + np.abs(np.sign(expr)))/2
@@ -229,7 +231,7 @@ def NaRnEA_classic(gex_data,
 
 
     # initializing matrixs with
-    genes = list(gex_data.var.index)
+    genes = list(gex_df.columns)
     regulons = list(filtered_table['regulator'].drop_duplicates())
 
     # wait, not necesscarily do that, can we do sth like merge and pivot longer?
@@ -266,7 +268,7 @@ def NaRnEA_classic(gex_data,
     U_list = undirected_nes(ranks, signs, AW_AM_abs_prob, E_r, E_r2, expr.shape[0])
 
     if verbose: print('Calculating NES...')
-    COV_nes = nes_covariance(ranks, signs, AW_AM_prob, AW_AM_abs_prob, E_r, E_rs,D_list[2], U_list[2], len(genes))
+    COV_nes = nes_covariance(ranks, signs, AW_AM_prob, AW_AM_abs_prob, E_r, E_rs, D_list[2], U_list[2], len(genes))
     NES_mat = combine_nes(D_list[3], U_list[3], COV_nes)
 
     if verbose: print('Calculating PES...')
@@ -306,8 +308,8 @@ def NaRnEA_classic(gex_data,
 
 
     if (return_as_df) == False :
-        NES_mat = pd.DataFrame(NES_mat.T, index = gex_data.obs.index, columns = list(AW_AM_prob.columns))
-        PES_mat = pd.DataFrame(PES_mat.T, index = gex_data.obs.index, columns = list(AW_AM_prob.columns))
+        NES_mat = pd.DataFrame(NES_mat.T, index = gex_df.index, columns = list(AW_AM_prob.columns))
+        PES_mat = pd.DataFrame(PES_mat.T, index = gex_df.index, columns = list(AW_AM_prob.columns))
 
 
     result = {"nes": NES_mat, "pes": PES_mat}
