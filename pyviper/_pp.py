@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import scanpy as sc
 import anndata
-from scipy.stats import rankdata, mannwhitneyu
+from scipy.stats import rankdata, norm, mannwhitneyu
 from scipy.special import ndtri  #equivalent of norm.ppf but faster
 import random
 from tqdm import tqdm
