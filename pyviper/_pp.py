@@ -2,14 +2,23 @@ import pandas as pd
 import numpy as np
 import scanpy as sc
 import anndata
-from scipy.stats import rankdata, norm, mannwhitneyu
-from scipy.special import ndtri  #equivalent of norm.ppf but faster
+from scipy.stats import rankdata, mannwhitneyu
+from scipy.special import ndtri, ndtr  #equivalent of norm.ppf and norm_cdf respectively but faster
 import random
 from tqdm import tqdm
 from statsmodels.stats import multitest
 from ._filtering_funcs import _get_anndata_filtered_by_feature_group
 from tqdm.auto import tqdm
 import os
+
+def norm_ppf(x):
+    return ndtri(x)
+
+def norm_cdf(x):
+    return ndtr(x)
+
+def norm_sf(x):
+    return ndtr(-x)
 
 def _median(a, axis=None, out=None, overwrite_input=False, keepdims=False):
     return np.median(a, axis, out, overwrite_input, keepdims)
@@ -214,7 +223,7 @@ def _spearman_clusters_df(dat_df, pca_array, cluster_vector, compute_pvals = Tru
 
             mean_ests = np.mean(spearman_scores_null_dist, axis=0)
             sd_ests = np.std(spearman_scores_null_dist, axis=0)
-            pvals = 2 * norm.cdf(-abs(spearman_scores), loc=mean_ests, scale=sd_ests)
+            pvals = 2 * norm_cdf(-abs(spearman_scores), loc=mean_ests, scale=sd_ests)
             pvals[pvals > 1] = 1
             spearman_pvals_arr[i, :] = pvals
 
@@ -280,7 +289,7 @@ def _gen_sig_clusters_df(dat_df, cluster_vector, compute_pvals = True, null_iter
 
             mean_ests = np.mean(scores_null_dist, axis=0)
             sd_ests = np.std(scores_null_dist, axis=0)
-            pvals = 2 * norm.cdf(-abs(scores), loc=mean_ests, scale=sd_ests)
+            pvals = 2 * norm_cdf(-abs(scores), loc=mean_ests, scale=sd_ests)
             pvals[pvals > 1] = 1
             pvals_arr[i, :] = pvals
 
@@ -535,7 +544,7 @@ def _viper_similarity(adata,
     if np.min(mat.values.flatten())>=0:
         mat = pd.DataFrame(rankdata(mat,axis=1), index = mat.index, columns = mat.columns)
         row_sums = np.sum(~np.isnan(mat.values), axis=1).reshape(-1, 1)
-        mat = pd.DataFrame(ndtri(mat/(row_sums+1)), index = mat.index, columns = mat.columns)
+        mat = pd.DataFrame(norm_ppf(mat/(row_sums+1)), index = mat.index, columns = mat.columns)
 
     mat[mat.isna()] =0 # will this work?
 
@@ -569,7 +578,7 @@ def _viper_similarity(adata,
     nes = np.sqrt(np.sum(xw**2, axis = 1))
     xw = xw.transpose()/np.sum(np.abs(xw),axis = 1)
 
-    t2 = ndtri(rankdata(xw.transpose(), axis = 1)/(mat.shape[1]+1))
+    t2 = norm_ppf(rankdata(xw.transpose(), axis = 1)/(mat.shape[1]+1))
     vp = np.matmul(t2, xw)
 
     vp = vp * nes
@@ -673,10 +682,10 @@ def _nes_to_pval_df(dat_df, lower_tail=True, adjust = True, axs = 1, neg_log = F
     """
 
     if lower_tail == False:
-        p_values_array = norm.sf(dat_df)
+        p_values_array = norm_sf(dat_df)
 
     elif lower_tail == True:
-        p_values_array = 2 * norm.sf(np.abs(dat_df))
+        p_values_array = 2 * norm_sf(np.abs(dat_df))
 
     else:
     	raise ValueError("'lower_tail' must be either True or False.")
@@ -703,7 +712,7 @@ def _nes_to_pval_df(dat_df, lower_tail=True, adjust = True, axs = 1, neg_log = F
     else:
         raise ValueError("dat_df must have 1 or 2 dimensions.")
 
-    if neg_log: p_values_df = -1 * np.log10(norm.sf(p_values_df))
+    if neg_log: p_values_df = -1 * np.log10(norm_sf(p_values_df))
 
     return p_values_df
 

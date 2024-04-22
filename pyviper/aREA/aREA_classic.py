@@ -16,6 +16,9 @@ __all__ = ['aREA_classic']
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
+def norm_ppf(x):
+    return ndtri(x)
+
 def sigT(x, slope = 20, inflection = 0.5):
     return (1 - 1/(1 + np.exp(slope * (x - inflection))))
 
@@ -123,8 +126,8 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     # ges2TQ = norm.ppf(ges2T[:, gesInds])
     # ges1TQ = norm.ppf(ges1T[:, gesInds])
 
-    ges2TQ = ndtri(ges2T[:, gesInds]) #equivalent of norm.ppf but faster
-    ges1TQ = ndtri(ges1T[:, gesInds]) #equivalent of norm.ppf but faster
+    ges2TQ = norm_ppf(ges2T[:, gesInds])
+    ges1TQ = norm_ppf(ges1T[:, gesInds])
     del ges2T
     del ges1T
 
