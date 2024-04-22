@@ -12,5 +12,5 @@ __all__ = ['__get_pyviper_dir']
 
 
 def __get_pyviper_dir():
-    pyviper_dir = str(pathlib.Path(__file__).parent.parent.parent.resolve())
+    pyviper_dir = str(pathlib.Path(__file__).parent.parent.resolve())
     return(pyviper_dir)
