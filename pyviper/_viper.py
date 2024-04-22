@@ -260,7 +260,6 @@ def viper(gex_data,
 
     if output_as_anndata == False:
         op = preOp
-        op.columns.name = None
     else: #output_as_anndata == True:
         if enrichment == 'area':
             op = AnnData(preOp)
