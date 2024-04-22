@@ -18,25 +18,6 @@ __all__ = ['viper']
 # ------------------------------ HELPER FUNCTIONS -----------------------------
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-def mat_to_anndata(mat):
-    # Helper function for *pyviper* and *path_enr*
-    # Create obs dataframe
-    mat_sampleNames = pd.DataFrame(index=range(len(mat.index.values)),columns=range(0))
-    mat_sampleNames.index = mat.index.values
-    mat_sampleNames
-
-    # Create var dataframe
-    mat_features = pd.DataFrame(index=range(len(mat.columns.values)),columns=range(0))
-    mat_features.index = mat.columns.values
-    mat_features
-
-    # Convert the pandas dataframe from Pyviper into a new Anndata object
-    pax_data = AnnData(X=mat,
-                       obs=mat_sampleNames,
-                       var=mat_features,
-                       dtype=np.float64)
-    return(pax_data)
-
 def sample_ttest(i,array):
     return ttest_1samp((array[i] - np.delete(array, i, 0)), 0).statistic
 
@@ -279,11 +260,12 @@ def viper(gex_data,
 
     if output_as_anndata == False:
         op = preOp
+        op.columns.name = None
     else: #output_as_anndata == True:
         if enrichment == 'area':
-            op = mat_to_anndata(preOp)
+            op = AnnData(preOp)
         else: #enrichment == 'narnea':
-            op = mat_to_anndata(preOp["nes"])
+            op = AnnData(preOp["nes"])
             op.layers['pes'] = preOp["pes"]
 
         if transfer_obs is True:
@@ -296,4 +278,5 @@ def viper(gex_data,
                 op.uns['pax_data'] = gex_data
             else:
                 op.uns['gex_data'] = gex_data
+        op.var.index.name = None
     return op #final result
