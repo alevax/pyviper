@@ -185,6 +185,8 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     nES = np.transpose(nES)
     # We make the rownames for the samples the same as that in the gExpr matrix
     nES.index = samplesIndex
+    # Remove 'regulator' from the columns' name
+    nES.columns.name = None
     # We return our result
     return(nES)
 

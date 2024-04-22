@@ -277,5 +277,4 @@ def viper(gex_data,
                 op.uns['pax_data'] = gex_data
             else:
                 op.uns['gex_data'] = gex_data
-        op.var.index.name = None
     return op #final result
