@@ -9,4 +9,4 @@ from .load import *
 from .pl import *
 from .tl import *
 
-__version__ = "1.1.3"
+__version__ = "1.0.6"

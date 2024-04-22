@@ -1,11 +1,11 @@
 import setuptools
 
-with open("README.md", "r") as fh:
+with open("README.md", "r", encoding = "utf-8") as fh:
     description = fh.read()
 
 setuptools.setup(
     name="viper-in-python",
-    version="1.1.7",
+    version="1.0.6",
     author="Alexander L.E. Wang & Zizhao Lin & Luca Zanella",
     author_email="aw3436@cumc.columbia.edu",
     packages=setuptools.find_packages(),
