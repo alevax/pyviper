@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import scanpy as sc
 import anndata
-from scipy.stats import rankdata, mannwhitneyu
+from scipy.stats import rankdata, mannwhitneyu, norm
 from scipy.special import ndtri, ndtr  #equivalent of norm.ppf and norm_cdf respectively but faster
 import random
 from tqdm import tqdm
@@ -14,8 +14,8 @@ import os
 def norm_ppf(x):
     return ndtri(x)
 
-def norm_cdf(x):
-    return ndtr(x)
+# def norm_cdf(x):
+#     return ndtr(x)
 
 def norm_sf(x):
     return ndtr(-x)
@@ -223,7 +223,7 @@ def _spearman_clusters_df(dat_df, pca_array, cluster_vector, compute_pvals = Tru
 
             mean_ests = np.mean(spearman_scores_null_dist, axis=0)
             sd_ests = np.std(spearman_scores_null_dist, axis=0)
-            pvals = 2 * norm_cdf(-abs(spearman_scores), loc=mean_ests, scale=sd_ests)
+            pvals = 2 * norm.cdf(-abs(spearman_scores), loc=mean_ests, scale=sd_ests)
             pvals[pvals > 1] = 1
             spearman_pvals_arr[i, :] = pvals
 
@@ -289,7 +289,7 @@ def _gen_sig_clusters_df(dat_df, cluster_vector, compute_pvals = True, null_iter
 
             mean_ests = np.mean(scores_null_dist, axis=0)
             sd_ests = np.std(scores_null_dist, axis=0)
-            pvals = 2 * norm_cdf(-abs(scores), loc=mean_ests, scale=sd_ests)
+            pvals = 2 * norm.cdf(-abs(scores), loc=mean_ests, scale=sd_ests)
             pvals[pvals > 1] = 1
             pvals_arr[i, :] = pvals
 
@@ -400,8 +400,13 @@ def _sig_clusters(adata,
                   null_iters = 1000,
                   verbose = True,
                   pca_slot = "X_pca"):
-    if copy is True and return_as_df is True:
-        raise ValueError("copy and return_as_df cannot both be True.")
+    if not isinstance(adata, anndata.AnnData):
+        if isinstance(adata, pd.DataFrame):
+            return_as_df = True
+        else:
+            raise ValueError("adata must be anndata.AnnData or pd.DataFrame.")
+    elif copy is True and return_as_df is True:
+        raise ValueError("copy and return_as_df cannot both be True when adata is anndata.AnnData.")
 
     if copy is True: adata = adata.copy()
 
@@ -419,7 +424,7 @@ def _sig_clusters(adata,
     else:
         result_df = result_df.T
         result_df.columns = key_added + "_" + result_df.columns
-        adata.var = pd.concat([adata.var, result_df], axis=1, join='inner')
+        adata.var = pd.concat([adata.var, result_df], axis=1, join='outer')
     if copy is True:
         return adata
 
