@@ -11,7 +11,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setuptools.setup(
     name="viper-in-python",
-    version="1.0.6",
+    version="1.1.9",
     author="Alexander L.E. Wang & Zizhao Lin & Luca Zanella",
     author_email="aw3436@cumc.columbia.edu",
     packages=setuptools.find_packages(),
@@ -24,6 +24,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/alevax/pyviper",
     project_urls = {
+    	'Documentation': 'https://alevax.github.io/pyviper/',
     	'Source': 'https://github.com/alevax/pyviper',
     },
     license='MIT',
