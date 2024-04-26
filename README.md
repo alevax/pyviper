@@ -1,7 +1,9 @@
 # pyVIPER (VIPER Analysis in Python for single-cell RNASeq)
-[![PyPI](https://img.shields.io/pypi/v/viper-in-python?logo=PyPI)](https://pypi.org/project/viper-in-python)
+<!-- [![PyPI](https://img.shields.io/pypi/v/viper-in-python?logo=PyPI)](https://pypi.org/project/viper-in-python) -->
+[![PyPI](https://img.shields.io/badge/pypi-stable-darkgreeen?logo=PyPI)](https://pypi.org/project/viper-in-python)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Downloads](https://static.pepy.tech/badge/viper-in-python)](https://pepy.tech/project/viper-in-python)
+
 
 
 This package enables network-based protein activity estimation on Python.
