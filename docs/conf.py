@@ -10,9 +10,9 @@ sys.path.insert(0, pathlib.Path(__file__).parents[1].resolve().as_posix())
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'pyviper'
-copyright = '2023, .'
-author = '.'
-release = '1.0.0'
+copyright = '2023'
+author = 'Califano Lab'
+release = '1.0.6'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
