@@ -661,11 +661,12 @@ def _representative_metacells(
     # do they just want to set a minimum median depth and the point will fall wherever?
     # It would be great if they could have that option.
     counts = get_counts_as_df(counts, adata)
-
-    if adata.shape[0] < size:
-        raise ValueError("Number of metacells requested (" + str(size) + \
-                         ") is greater than the number of samples in adata (" +  \
-                         str(adata.shape[0]) + ").")
+	
+    if size is not None:
+        if adata.shape[0] < size:
+            raise ValueError("Number of metacells requested (" + str(size) + \
+            	             ") is greater than the number of samples in adata (" +  \
+                	         str(adata.shape[0]) + ").")
 
     if np.sum([size != None,
                min_median_depth != None,
@@ -830,11 +831,12 @@ def _representative_metacells_multiclusters(
         for i in tqdm(range(n_unique_clusters), desc="cluster metacells") if verbose else range(n_unique_clusters):
             clust = unique_clusters[i]
             clust_size = np.sum(adata.obs[clusters_slot]==clust)
-            if clust_size < size:
-                warnings.warn("Number of samples (" + str(clust_size) + ") in cluster " + \
-                              str(clust) + " is less than number of metacells requested (" + \
-                              str(size) + "). Skipping cluster.")
-                continue
+            if size is not None:
+                if clust_size < size:
+                    warnings.warn("Number of samples (" + str(clust_size) + ") in cluster " + \
+                                  str(clust) + " is less than number of metacells requested (" + \
+                                  str(size) + "). Skipping cluster.")
+                    continue
 
             adata_clust = adata[adata.obs[clusters_slot]==clust,].copy()
             counts_clust = counts[adata.obs[clusters_slot]==clust].copy()

@@ -529,8 +529,8 @@ def repr_metacells(
         The score from adata.obs[score_slot] that a cell must have at minimum to
         be used for metacell construction (e.g. 0.25 is the rule of thumb for
         silhouette score).
-    size (default: None)
-        A specific number of metacells to generate. If left as None,
+    size (default: 500)
+        A specific number of metacells to generate. If set to None,
         perc_data_to_use or perc_incl_data_reused can be used to specify the size
         when n_cells_per_metacell or min_median_depth is given.
     n_cells_per_metacell (default: None)
