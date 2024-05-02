@@ -30,7 +30,7 @@ setuptools.setup(
     license='MIT',
     python_requires='>=3.8',
     install_requires=[
-        "scipy",
+        "scipy>=1.10.0",
         "tqdm",
         "scanpy",
         "anndata",
