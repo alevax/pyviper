@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pyVIPER (VIPER Analysis in Python for single-cell RNASeq) &mdash; pyviper 1.0.0 documentation</title>
+  <title>pyVIPER (VIPER Analysis in Python for single-cell RNASeq) &mdash; pyviper 1.0.6 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -15,7 +15,6 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -79,12 +78,13 @@
              
   <div class="section" id="pyviper-viper-analysis-in-python-for-single-cell-rnaseq">
 <h1>pyVIPER (VIPER Analysis in Python for single-cell RNASeq)<a class="headerlink" href="#pyviper-viper-analysis-in-python-for-single-cell-rnaseq" title="Permalink to this heading"></a></h1>
-<p><a class="reference external" href="https://pypi.python.org/pypi/pyviper"><img alt="pipy" src="https://img.shields.io/pypi/v/pyviper?color=informational" /></a>
-<a class="reference external" href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" /></a></p>
+<!-- [![PyPI](https://img.shields.io/pypi/v/viper-in-python?logo=PyPI)](https://pypi.org/project/viper-in-python) -->
+<p><a class="reference external" href="https://pypi.org/project/viper-in-python"><img alt="PyPI" src="https://img.shields.io/badge/pypi-stable-darkgreeen?logo=PyPI" /></a>
+<a class="reference external" href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" /></a>
+<a class="reference external" href="https://pepy.tech/project/viper-in-python"><img alt="Downloads" src="https://static.pepy.tech/badge/viper-in-python" /></a></p>
 <p>This package enables network-based protein activity estimation on Python.
 It provides also interfaces for scanpy (single-cell RNASeq analysis in Python).
-Functions are partly transplanted from R package <a class="reference external" href="https://www.bioconductor.org/packages/release/bioc/html/viper.html">viper</a>.</p>
-<p>Find the package user-friendly documentation here: https://alevax.github.io/pyviper/</p>
+Functions are partly transplanted from R package <a class="reference external" href="https://www.bioconductor.org/packages/release/bioc/html/viper.html">viper</a> and the R package <a class="reference external" href="https://github.com/califano-lab/NaRnEA">NaRnEA</a>.</p>
 <hr class="docutils" />
 <div class="section" id="dependencies">
 <h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading"></a></h2>
@@ -106,7 +106,7 @@ Functions are partly transplanted from R package <a class="reference external" h
 </div>
 <div class="section" id="local">
 <h3>local<a class="headerlink" href="#local" title="Permalink to this heading"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/alevax/pyviper/tree/main
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/alevax/pyviper/
 <span class="nb">cd</span><span class="w"> </span>pyviper
 pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </pre></div>
@@ -119,56 +119,61 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <span class="kn">import</span> <span class="nn">anndata</span>
 <span class="kn">import</span> <span class="nn">pyviper</span>
 
-<span class="c1"># load sample data</span>
+<span class="c1"># Load sample data</span>
 <span class="n">ges</span> <span class="o">=</span> <span class="n">anndata</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="s2">&quot;test/unit_tests/test_1/test_1_inputs/LNCaPWT_gExpr_GES.tsv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
-<span class="c1"># load network</span>
-<span class="n">network</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;data/regulons/msigdb-h-as-regulon.tsv&quot;</span><span class="p">)</span>
-<span class="n">gene_annot</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/translate/human_genes.csv&quot;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="c1"># Load network</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">load</span><span class="o">.</span><span class="n">msigdb_regulon</span><span class="p">(</span><span class="s2">&quot;h&quot;</span><span class="p">)</span>
 
-<span class="c1"># prepare interactome</span>
-<span class="c1">## translate network names from symbol to ensembl</span>
-<span class="n">gene_annot</span> <span class="o">=</span> <span class="n">gene_annot</span><span class="p">[[</span><span class="s2">&quot;human_symbol&quot;</span><span class="p">,</span><span class="s2">&quot;human_ensembl&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;human_symbol&quot;</span><span class="p">)[</span><span class="s2">&quot;human_ensembl&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-<span class="n">network</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">gene_annot</span><span class="p">)</span>
-<span class="c1">## interactome</span>
-<span class="n">network_interactome</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">Interactome</span><span class="p">(</span><span class="s1">&#39;net&#39;</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span>
-<span class="n">network_interactome</span><span class="o">.</span><span class="n">filter_targets</span><span class="p">(</span><span class="n">ges</span><span class="o">.</span><span class="n">var_names</span><span class="p">)</span>
+<span class="c1"># Translate sample data from ensembl to gene names</span>
+<span class="n">ges</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">translate_adata_index</span><span class="p">(</span><span class="n">ges</span><span class="p">,</span> <span class="n">desired_format</span> <span class="o">=</span> <span class="s2">&quot;human_symbol&quot;</span><span class="p">)</span>
 
-<span class="c1"># compute regulon activities</span>
+<span class="c1">## Filter targets in the interactome</span>
+<span class="n">network</span><span class="o">.</span><span class="n">filter_targets</span><span class="p">(</span><span class="n">ges</span><span class="o">.</span><span class="n">var_names</span><span class="p">)</span>
+
+<span class="c1"># Compute regulon activities</span>
 <span class="c1">## area</span>
-<span class="n">activity</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">viper</span><span class="p">(</span><span class="n">gex_data</span><span class="o">=</span><span class="n">ges</span><span class="p">,</span> <span class="n">interactome</span><span class="o">=</span><span class="n">network_interactome</span><span class="p">,</span> <span class="n">enrichment</span><span class="o">=</span><span class="s2">&quot;area&quot;</span><span class="p">)</span>
+<span class="n">activity</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">viper</span><span class="p">(</span><span class="n">gex_data</span><span class="o">=</span><span class="n">ges</span><span class="p">,</span> <span class="n">interactome</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">enrichment</span><span class="o">=</span><span class="s2">&quot;area&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">activity</span><span class="o">.</span><span class="n">to_df</span><span class="p">())</span>
 
 <span class="c1">## narnea</span>
-<span class="n">activity</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">viper</span><span class="p">(</span><span class="n">gex_data</span><span class="o">=</span><span class="n">ges</span><span class="p">,</span> <span class="n">interactome</span><span class="o">=</span><span class="n">network_interactome</span><span class="p">,</span> <span class="n">enrichment</span><span class="o">=</span><span class="s2">&quot;narnea&quot;</span><span class="p">)</span>
+<span class="n">activity</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">viper</span><span class="p">(</span><span class="n">gex_data</span><span class="o">=</span><span class="n">ges</span><span class="p">,</span> <span class="n">interactome</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">enrichment</span><span class="o">=</span><span class="s2">&quot;narnea&quot;</span><span class="p">,</span> <span class="n">eset_filter</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">activity</span><span class="o">.</span><span class="n">to_df</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="tutorials">
 <h2>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this heading"></a></h2>
-<ol class="simple">
-<li><p><a class="reference external" href="https://alevax.github.io/pyviper/Tutorial-1.html">Analyzing scRNA-seq data at the Protein Activity Level</a></p></li>
-<li><p><a class="reference external" href="https://alevax.github.io/pyviper/Tutorial-2.html">Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach</a></p></li>
-<li><p><a class="reference external" href="https://alevax.github.io/pyviper/Tutorial-3.html">Generating Metacells for ARACNe3 network generation and VIPER protein activity analysis</a></p></li>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://github.com/alevax/pyviper/blob/main/Tutorials/Tutorial-1.ipynb">Analyzing scRNA-seq data at the Protein Activity Level</a></p></li>
+<li><p><a class="reference external" href="https://github.com/alevax/pyviper/blob/main/Tutorials/Tutorial-2.ipynb">Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach</a></p></li>
+<li><p><a class="reference external" href="https://github.com/alevax/pyviper/blob/main/Tutorials/Tutorial-3.ipynb">Generating Metacells for ARACNe3 network generation and VIPER protein activity analysis</a> (note: to be updated soon)</p></li>
 </ol>
 </div>
 <div class="section" id="structure-and-rationale">
 <h2>Structure and rationale<a class="headerlink" href="#structure-and-rationale" title="Permalink to this heading"></a></h2>
 <p>The main functions available from <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> are:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">pyviper</span></code>: “pyviper” function for Virtual Inference of Protein Activity by Enriched Regulon Analysis (VIPER). The function allows using 2 enrichment algorithms, aREA and (matrix)-NaRnEA (see below)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">aREA</span></code>: computes <a class="reference external" href="https://www.nature.com/articles/ng.3593">aREA</a> (analytic rank-based enrichment analysis) and meta-aREA</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">NaRnEA</span></code>: computes <a class="reference external" href="https://www.biorxiv.org/content/10.1101/2021.05.20.445002v5">matrix-NaRnEA</a>, a vectorized, implementation of <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">NaRnEA</a></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">path_enr</span></code>: computes pathway enrichment</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">compute_cluster_stouffer_anndata</span></code>: computes signatures on a cluster-by-cluster basis using Cluster integration method for pathway enrichment</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">translate-adata_index</span></code>: for mouse-to-human and human-to-mouse</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.viper</span></code>: “pyviper” function for Virtual Inference of Protein Activity by Enriched Regulon Analysis (VIPER). The function allows using 2 enrichment algorithms, aREA and (matrix)-NaRnEA (see below).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.aREA</span></code>: computes <a class="reference external" href="https://www.nature.com/articles/ng.3593">aREA</a> (analytic rank-based enrichment analysis) and meta-aREA</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.NaRnEA</span></code>: computes <a class="reference external" href="https://www.biorxiv.org/content/10.1101/2021.05.20.445002v5">matrix-NaRnEA</a>, a vectorized, implementation of <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">NaRnEA</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.pp.translate_adata_index</span></code>: for translating between species (i.e. mouse vs human) and between ensembl, entrez and gene symbols.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.tl.path_enr</span></code>: computes pathway enrichment</p></li>
+</ul>
+<p>Other notable functions include:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.tl.OncoMatch</span></code>: computes <a class="reference external" href="https://www.nature.com/articles/s41588-018-0138-4">OncoMatch</a>, an algorithm to assess the overlap in differentially active MR proteins between two sets of samples (e.g. validate GEMMs as effective models of human samples)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.pp.stouffer</span></code>: computes signatures on a cluster-by-cluster basis using Cluster integration method for pathway enrichment</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.pp.viper_similarity</span></code>: computes the <a class="reference external" href="https://s3.jcloud.sjtu.edu.cn/899a892efef34b1b944a19981040f55b-oss01/bioconductor/3.14/bioc/vignettes/viper/inst/doc/viper.pdf">similarity</a> between VIPER signatures</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.pp.repr_metacells</span></code>: compute representative metacells (e.g. for ARACNe) using our method to maximize unique sample usage and minimize resampling (users can specify depth, percent data usage, etc).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.pp.repr_subsample</span></code>: select a representative subsample of data using our method to ensure a widely distributed sampling.</p></li>
 </ul>
 <p>Additionally, the following submodules are available:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">pyviper.load</span></code>: submodule containing several utility functions useful for different analyses, including <code class="docutils literal notranslate"><span class="pre">load_msigdb_regulon</span></code>, <code class="docutils literal notranslate"><span class="pre">load_TFs</span></code> etc</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pyviper.pl</span></code>: submodule containing pyviper-wrappers for <code class="docutils literal notranslate"><span class="pre">scanpy</span></code> plotting</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.tl</span></code>: submodule containing pyviper-wrapper for <code class="docutils literal notranslate"><span class="pre">scanpy</span></code> data transformation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.tl</span></code>: submodule containing pyviper-wrappers for <code class="docutils literal notranslate"><span class="pre">scanpy</span></code> data transformation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyviper.config</span></code>: submodule allowing users to specify current species and filepaths for regulators</p></li>
 </ul>
 </div>
 <div class="section" id="contact">
@@ -187,11 +192,11 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="pyviper.html">pyviper package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.config">pyviper.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-config">pyviper.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.interactome">pyviper.interactome</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.pl">pyviper.pl</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.pp">pyviper.pp</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.tl">pyviper.tl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-pl">pyviper.pl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-pp">pyviper.pp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-tl">pyviper.tl</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.aREA.aREA_classic">pyviper.aREA.aREA_classic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.aREA.aREA_meta">pyviper.aREA.aREA_meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.NaRnEA.NaRnEA_classic">pyviper.NaRnEA.NaRnEA_classic</a></li>
@@ -206,6 +211,11 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-1.html">Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="Tutorial-1.html#Install-PyVIPER">Install PyVIPER</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tutorial-1.html#Import-modules">Import modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-1.html#Step-1.-Load-a-gene-expression-signature-for-single-cells">Step 1. Load a gene expression signature for single-cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-1.html#Step-2.-Load-an-inspect-a-lineage-specific-gene-regulatory-network">Step 2. Load an inspect a lineage-specific gene regulatory network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-1.html#Step-3.-Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-VIPER">Step 3. Convert the gene expression signature into a protein activity matrix using VIPER</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-1.html#Step-4.-Analyze-single-cells-at-the-Protein-Activity-level">Step 4. Analyze single-cells at the Protein Activity level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-1.html#Key-takeaways">Key takeaways</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-2.html">Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach</a><ul>
@@ -242,7 +252,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, ..</p>
+    <p>&#169; Copyright 2023.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level &mdash; pyviper 1.0.0 documentation</title>
+  <title>Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level &mdash; pyviper 1.0.6 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/nbsphinx-code-cells.css" type="text/css" />
@@ -16,9 +16,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
@@ -55,11 +53,16 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#Install-PyVIPER">Install PyVIPER</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Import-modules">Import modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Import-modules">Import modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Step-1.-Load-a-gene-expression-signature-for-single-cells">Step 1. Load a gene expression signature for single-cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Step-2.-Load-an-inspect-a-lineage-specific-gene-regulatory-network">Step 2. Load an inspect a lineage-specific gene regulatory network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Step-3.-Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-VIPER">Step 3. Convert the gene expression signature into a protein activity matrix using VIPER</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#Method-1---protein-activity-inference-using-aREA">Method 1 - protein activity inference using aREA</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Method-2---protein-activity-inference-using-(matrix)-NaRnEA">Method 2 - protein activity inference using (matrix)-NaRnEA</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#Step-4.-Analyze-single-cells-at-the-Protein-Activity-level">Step 4. Analyze single-cells at the Protein Activity level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Key-takeaways">Key takeaways</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-2.html">Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach</a></li>
@@ -117,7 +120,7 @@
 <h2>Import modules<a class="headerlink" href="#Import-modules" title="Permalink to this heading"></a></h2>
 <p>Load <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> and additional modules required used in this tutorial.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyviper</span>
@@ -134,7 +137,7 @@
 </div>
 <p>Setup the path to the data.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_location</span> <span class="o">=</span> <span class="s2">&quot;https://zenodo.org/records/10059791/files/&quot;</span>
@@ -154,9 +157,12 @@
 </pre></div>
 </div>
 </div>
-<p>### Step 1. Load a gene expression signature for single-cells Load a gene expression signature to be used as input for the <code class="docutils literal notranslate"><span class="pre">viper</span></code> function for Protein Activity inference and store it as an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> object to enable interoperability with <a class="reference external" href="https://scanpy-tutorials.readthedocs.io/en/latest/#">scanpy</a>. The time required for this process is approximately 5 s and 30 s if loading from the local directory or remote url, respectively.</p>
+</div>
+<div class="section" id="Step-1.-Load-a-gene-expression-signature-for-single-cells">
+<h2>Step 1. Load a gene expression signature for single-cells<a class="headerlink" href="#Step-1.-Load-a-gene-expression-signature-for-single-cells" title="Permalink to this heading"></a></h2>
+<p>Load a gene expression signature to be used as input for the <code class="docutils literal notranslate"><span class="pre">viper</span></code> function for Protein Activity inference and store it as an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> object to enable interoperability with <a class="reference external" href="https://scanpy-tutorials.readthedocs.io/en/latest/#">scanpy</a>. The time required for this process is approximately 5 s and 30 s if loading from the local directory or remote url, respectively.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gene_expr_path</span> <span class="o">=</span> <span class="n">data_location</span> <span class="o">+</span> <span class="s2">&quot;Tutorial_1_gExpr_fibroblast_5802.tsv.gz&quot;</span>
@@ -169,7 +175,7 @@
 <p>This signature was generated from a population of cancer-asssociated fibroblasts (CAFs) from publicly avaiable data from <a class="reference external" href="https://www.nature.com/articles/s41422-019-0195-y">Peng et al., 2019</a> following a similar procedure to the one described in Tutorial 2.</p>
 <p>Display matrix dimensions with cells on rows and features (genes) on columns.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gene_expr_signature</span>
@@ -177,7 +183,7 @@
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -185,9 +191,12 @@
 AnnData object with n_obs × n_vars = 5802 × 5000
 </pre></div></div>
 </div>
-<p>### Step 2. Load an inspect a lineage-specific gene regulatory network Load and inspect a lineage-specific gene regulatory network generated with the <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">ARACNe3</a>. The time required to load a network is approximately 1 s (from local directory) and 40 s (from remote url).</p>
+</div>
+<div class="section" id="Step-2.-Load-an-inspect-a-lineage-specific-gene-regulatory-network">
+<h2>Step 2. Load an inspect a lineage-specific gene regulatory network<a class="headerlink" href="#Step-2.-Load-an-inspect-a-lineage-specific-gene-regulatory-network" title="Permalink to this heading"></a></h2>
+<p>Load and inspect a lineage-specific gene regulatory network generated with the <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">ARACNe3</a>. The time required to load a network is approximately 1 s (from local directory) and 40 s (from remote url).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">network_path</span> <span class="o">=</span> <span class="n">data_location</span> <span class="o">+</span> <span class="s2">&quot;fibroblast-net.tsv&quot;</span> <span class="c1"># path to ARACNe network</span>
@@ -198,7 +207,7 @@ AnnData object with n_obs × n_vars = 5802 × 5000
 </div>
 <p>Convert the pd.DataFrame to an object of class <code class="docutils literal notranslate"><span class="pre">Interactome</span></code> to enable easier manipulation. Show the number of regulons using the <code class="docutils literal notranslate"><span class="pre">size()</span></code> method. You can see all available methods by typing <code class="docutils literal notranslate"><span class="pre">help(pyviper.Interactome)</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">network_interactome</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">Interactome</span><span class="p">(</span><span class="s1">&#39;fibroblasts&#39;</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span> <span class="c1"># convert to class Interactome</span>
@@ -207,7 +216,7 @@ AnnData object with n_obs × n_vars = 5802 × 5000
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -217,7 +226,7 @@ AnnData object with n_obs × n_vars = 5802 × 5000
 </div>
 <p>Display the first 5 interactions in the regulatory network. <code class="docutils literal notranslate"><span class="pre">mor</span></code> and <code class="docutils literal notranslate"><span class="pre">likelihood</span></code> are the mode of regulation of the given regulator-target pair and the likelihood of the interaction, respectively. Algorithms other than ARACNe can be used to generate gene regulatory networks, but we recommend postprocessing the output to suitable data formats to use <code class="docutils literal notranslate"><span class="pre">viper</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">network_interactome</span><span class="o">.</span><span class="n">net_table</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -225,7 +234,7 @@ AnnData object with n_obs × n_vars = 5802 × 5000
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -295,7 +304,7 @@ AnnData object with n_obs × n_vars = 5802 × 5000
 </div>
 <p>Filter out targets in the <code class="docutils literal notranslate"><span class="pre">Interactome</span></code> that are not present in the gene expression matrix. This step is recommended before running <code class="docutils literal notranslate"><span class="pre">viper</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">network_interactome</span><span class="o">.</span><span class="n">filter_targets</span><span class="p">(</span><span class="n">gene_expr_signature</span><span class="o">.</span><span class="n">var_names</span><span class="p">)</span>
@@ -312,7 +321,7 @@ Removed 3047484 targets.
 </div>
 <p>As an example, display the number of targets of two regulators, MYC and EGFR2.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_MYC</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">network_interactome</span><span class="o">.</span><span class="n">get_reg</span><span class="p">(</span><span class="s1">&#39;MYC&#39;</span><span class="p">))</span> <span class="c1"># number of MYC targets in the network</span>
@@ -330,12 +339,15 @@ Removed 3047484 targets.
 The number of targets of MYC and SERPINA12 are 284 and 183, respectively.
 </pre></div></div>
 </div>
-<p>### Step 3. Convert the gene expression signature into a protein activity matrix using VIPER <code class="docutils literal notranslate"><span class="pre">viper</span></code> transforms a gene expression signature into a protein activity matrix by performing enrichment analysis on regulons. Two methods for enrichment analysis are available, <a class="reference external" href="https://www.nature.com/articles/ng.3593">aREA</a> (default) and <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">NaRnEA</a> (by setting <code class="docutils literal notranslate"><span class="pre">enrichment=&quot;narnea&quot;</span></code>).</p>
+</div>
+<div class="section" id="Step-3.-Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-VIPER">
+<h2>Step 3. Convert the gene expression signature into a protein activity matrix using VIPER<a class="headerlink" href="#Step-3.-Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-VIPER" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">viper</span></code> transforms a gene expression signature into a protein activity matrix by performing enrichment analysis on regulons. Two methods for enrichment analysis are available, <a class="reference external" href="https://www.nature.com/articles/ng.3593">aREA</a> (default) and <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">NaRnEA</a> (by setting <code class="docutils literal notranslate"><span class="pre">enrichment=&quot;narnea&quot;</span></code>).</p>
 <div class="section" id="Method-1---protein-activity-inference-using-aREA">
 <h3>Method 1 - protein activity inference using aREA<a class="headerlink" href="#Method-1---protein-activity-inference-using-aREA" title="Permalink to this heading"></a></h3>
 <p>As shown above, different regulators can have a different number of targets. Prune each regulon to have the same number of targets (50 in this case). This preprocessing step is advisable to avoid regulators with exceedingly number of targets dominating those having fewer in the computation of Normalized Enrichment Scores (NES), to make NES comparable.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">network_pruned</span> <span class="o">=</span> <span class="n">network_interactome</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># generate a copy of the unpruned network before pruning it</span>
@@ -376,7 +388,7 @@ Number of EGFR targets: 50
 <div class="alert alert-block alert-success"><p>Run <code class="docutils literal notranslate"><span class="pre">viper</span></code> to compute the protein activity matrix with aREA.</p>
 </div><p>Mandatory inputs to <code class="docutils literal notranslate"><span class="pre">viper</span></code> are 1. a gene expression signature and 2. a gene regulatory network. Set the <code class="docutils literal notranslate"><span class="pre">viper</span></code> output to be an ndarray (The default output would be an AnnData object). The expected runtime is approximately 10-15 s.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ProtAct_aREA</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">viper</span><span class="p">(</span><span class="n">gex_data</span><span class="o">=</span><span class="n">gene_expr_signature</span><span class="p">,</span> <span class="c1"># gene expression signature</span>
@@ -390,7 +402,7 @@ Number of EGFR targets: 50
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">ProtAct_aREA</span></code> contains the activity of every regulatory protein described by its NES for each single cell.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ProtAct_aREA</span> <span class="c1"># display the protein activity matrix</span>
@@ -398,7 +410,7 @@ Number of EGFR targets: 50
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -419,7 +431,7 @@ Number of EGFR targets: 50
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
-      <th>regulator</th>
+      <th></th>
       <th>AAMP</th>
       <th>AATF</th>
       <th>ABCA1</th>
@@ -446,123 +458,123 @@ Number of EGFR targets: 50
   <tbody>
     <tr>
       <th>T1_AAACCTGAGATGTCGG</th>
-      <td>-0.014206</td>
-      <td>0.027712</td>
-      <td>0.057313</td>
-      <td>0.095473</td>
-      <td>-0.021236</td>
-      <td>0.038511</td>
-      <td>-0.598815</td>
-      <td>-1.505867</td>
-      <td>0.044179</td>
-      <td>-0.032513</td>
+      <td>-4.958661</td>
+      <td>-6.340532</td>
+      <td>5.591431</td>
+      <td>0.026641</td>
+      <td>-0.952873</td>
+      <td>0.024560</td>
+      <td>6.763799</td>
+      <td>-0.220392</td>
+      <td>-0.051190</td>
+      <td>0.051432</td>
       <td>...</td>
-      <td>0.157645</td>
-      <td>0.190605</td>
-      <td>-1.006026</td>
-      <td>-0.016635</td>
-      <td>0.053824</td>
-      <td>-0.483114</td>
-      <td>-0.164187</td>
-      <td>0.598380</td>
-      <td>-0.219886</td>
-      <td>0.042218</td>
+      <td>-0.079490</td>
+      <td>-0.701844</td>
+      <td>-6.250761</td>
+      <td>-0.011008</td>
+      <td>-1.692154</td>
+      <td>0.018511</td>
+      <td>-0.282504</td>
+      <td>-5.392813</td>
+      <td>0.063155</td>
+      <td>-0.051505</td>
     </tr>
     <tr>
       <th>T1_AACTGGTTCTAACGGT</th>
-      <td>-0.251498</td>
-      <td>0.049527</td>
-      <td>0.058710</td>
-      <td>0.086291</td>
-      <td>-0.130560</td>
-      <td>0.008993</td>
-      <td>-0.170331</td>
-      <td>-0.038688</td>
-      <td>-0.033160</td>
-      <td>-0.023936</td>
+      <td>-7.377609</td>
+      <td>-6.798952</td>
+      <td>-6.550723</td>
+      <td>1.626537</td>
+      <td>0.039575</td>
+      <td>0.132152</td>
+      <td>-9.076912</td>
+      <td>0.024765</td>
+      <td>-0.054462</td>
+      <td>0.046818</td>
       <td>...</td>
-      <td>0.050540</td>
-      <td>-0.001874</td>
-      <td>0.852565</td>
-      <td>-0.003012</td>
-      <td>0.046448</td>
-      <td>-0.073733</td>
-      <td>0.650326</td>
-      <td>1.442805</td>
-      <td>0.026046</td>
-      <td>-0.014535</td>
+      <td>-0.039977</td>
+      <td>-1.666785</td>
+      <td>-5.924595</td>
+      <td>-0.070319</td>
+      <td>1.271308</td>
+      <td>-0.008729</td>
+      <td>0.347169</td>
+      <td>8.320215</td>
+      <td>-0.504002</td>
+      <td>0.030807</td>
     </tr>
     <tr>
       <th>T1_AAGGTTCGTGTCAATC</th>
-      <td>-0.436400</td>
-      <td>0.058650</td>
-      <td>0.071995</td>
-      <td>0.085530</td>
-      <td>0.007212</td>
-      <td>-0.037141</td>
-      <td>-0.350010</td>
-      <td>-0.271247</td>
-      <td>0.026917</td>
-      <td>-0.005419</td>
+      <td>-6.881051</td>
+      <td>-6.227523</td>
+      <td>-5.938090</td>
+      <td>0.248098</td>
+      <td>-0.075314</td>
+      <td>0.431982</td>
+      <td>8.251861</td>
+      <td>0.353197</td>
+      <td>-0.024522</td>
+      <td>0.019459</td>
       <td>...</td>
-      <td>0.588326</td>
-      <td>-0.040662</td>
-      <td>0.265022</td>
-      <td>-0.185548</td>
-      <td>-0.007104</td>
-      <td>-0.078222</td>
-      <td>0.020503</td>
-      <td>-0.784129</td>
-      <td>-0.116486</td>
-      <td>0.008290</td>
+      <td>-0.217323</td>
+      <td>1.762852</td>
+      <td>-5.514518</td>
+      <td>-0.042265</td>
+      <td>0.096729</td>
+      <td>-0.072773</td>
+      <td>-0.204381</td>
+      <td>-8.505392</td>
+      <td>0.020706</td>
+      <td>-0.005608</td>
     </tr>
     <tr>
       <th>T1_ACAGCCGTCAAGCCTA</th>
-      <td>-1.034668</td>
-      <td>0.052937</td>
-      <td>0.096666</td>
-      <td>0.110275</td>
-      <td>-0.019219</td>
-      <td>-0.021259</td>
-      <td>-0.021779</td>
-      <td>-0.703762</td>
-      <td>0.007190</td>
-      <td>-0.045264</td>
+      <td>-7.370794</td>
+      <td>-5.838071</td>
+      <td>-5.957978</td>
+      <td>-0.356005</td>
+      <td>-0.611744</td>
+      <td>0.173595</td>
+      <td>9.672680</td>
+      <td>1.063066</td>
+      <td>0.021172</td>
+      <td>0.004548</td>
       <td>...</td>
-      <td>0.167126</td>
-      <td>0.056834</td>
-      <td>0.557881</td>
-      <td>-0.548752</td>
-      <td>-0.010246</td>
-      <td>-0.044021</td>
-      <td>-0.007267</td>
-      <td>0.501714</td>
-      <td>-0.001597</td>
-      <td>-0.007290</td>
+      <td>-0.023732</td>
+      <td>-1.628548</td>
+      <td>-5.588137</td>
+      <td>0.008851</td>
+      <td>-0.634454</td>
+      <td>-0.010447</td>
+      <td>-0.095425</td>
+      <td>-7.882212</td>
+      <td>0.052736</td>
+      <td>-0.012834</td>
     </tr>
     <tr>
       <th>T1_AGACGTTAGGCGACAT</th>
-      <td>-0.811760</td>
-      <td>0.043792</td>
-      <td>0.066080</td>
-      <td>0.069523</td>
-      <td>-0.035705</td>
-      <td>-0.035428</td>
-      <td>-0.317873</td>
-      <td>0.037946</td>
-      <td>-0.005969</td>
-      <td>-0.024018</td>
+      <td>-7.160952</td>
+      <td>-6.351434</td>
+      <td>-6.644756</td>
+      <td>-0.020971</td>
+      <td>0.197701</td>
+      <td>0.093815</td>
+      <td>-7.264978</td>
+      <td>0.045201</td>
+      <td>-0.019334</td>
+      <td>-0.005189</td>
       <td>...</td>
-      <td>0.104896</td>
-      <td>-0.012483</td>
-      <td>-0.457026</td>
-      <td>0.211869</td>
-      <td>-0.144309</td>
-      <td>-0.019348</td>
-      <td>-0.035585</td>
-      <td>0.085054</td>
-      <td>-0.352943</td>
-      <td>-0.011871</td>
+      <td>0.016033</td>
+      <td>-1.136795</td>
+      <td>-6.277997</td>
+      <td>0.015763</td>
+      <td>1.310698</td>
+      <td>0.022143</td>
+      <td>-1.424293</td>
+      <td>-7.538373</td>
+      <td>-0.124011</td>
+      <td>-0.004775</td>
     </tr>
     <tr>
       <th>...</th>
@@ -590,123 +602,123 @@ Number of EGFR targets: 50
     </tr>
     <tr>
       <th>T24_TTGCGTCCAGACAAAT</th>
-      <td>0.002299</td>
-      <td>0.013470</td>
-      <td>0.060106</td>
-      <td>1.236346</td>
-      <td>0.018945</td>
-      <td>0.028562</td>
-      <td>-0.093820</td>
-      <td>-1.275721</td>
-      <td>-1.226240</td>
-      <td>0.386276</td>
+      <td>-3.853770</td>
+      <td>-3.744690</td>
+      <td>-5.746431</td>
+      <td>-0.770776</td>
+      <td>-0.006618</td>
+      <td>0.075021</td>
+      <td>4.486073</td>
+      <td>0.032965</td>
+      <td>-0.072500</td>
+      <td>0.025214</td>
       <td>...</td>
-      <td>-0.031268</td>
-      <td>-0.062835</td>
-      <td>-0.006546</td>
-      <td>0.019039</td>
-      <td>0.068665</td>
-      <td>-0.544908</td>
-      <td>0.573362</td>
-      <td>-0.551146</td>
-      <td>-0.000499</td>
-      <td>-0.129102</td>
+      <td>-0.040233</td>
+      <td>2.667354</td>
+      <td>5.823175</td>
+      <td>0.706549</td>
+      <td>-0.558190</td>
+      <td>-0.006004</td>
+      <td>0.520060</td>
+      <td>4.892258</td>
+      <td>0.977937</td>
+      <td>0.303938</td>
     </tr>
     <tr>
       <th>T24_TTGCGTCCATTAACCG</th>
-      <td>-0.129001</td>
-      <td>0.034863</td>
-      <td>0.089672</td>
-      <td>0.044609</td>
-      <td>0.040947</td>
-      <td>-0.078091</td>
-      <td>-0.200762</td>
-      <td>-0.007241</td>
-      <td>0.042752</td>
-      <td>-0.070949</td>
+      <td>-7.183422</td>
+      <td>6.414101</td>
+      <td>-6.321449</td>
+      <td>-1.070418</td>
+      <td>-0.604463</td>
+      <td>0.162847</td>
+      <td>-9.382614</td>
+      <td>0.062170</td>
+      <td>-0.088907</td>
+      <td>-0.006882</td>
       <td>...</td>
-      <td>0.024643</td>
-      <td>-0.484168</td>
-      <td>-0.022466</td>
-      <td>-0.023258</td>
-      <td>-0.045327</td>
-      <td>-0.041769</td>
-      <td>-0.025815</td>
-      <td>-0.003803</td>
-      <td>-0.054201</td>
-      <td>-0.011256</td>
+      <td>-0.078167</td>
+      <td>-1.471368</td>
+      <td>-6.268302</td>
+      <td>-0.468904</td>
+      <td>-1.011935</td>
+      <td>0.028369</td>
+      <td>0.770259</td>
+      <td>7.526919</td>
+      <td>0.083573</td>
+      <td>0.024982</td>
     </tr>
     <tr>
       <th>T24_TTTATGCTCCTTTACA</th>
-      <td>-0.354839</td>
-      <td>0.036691</td>
-      <td>0.062033</td>
-      <td>0.054651</td>
-      <td>-0.018591</td>
-      <td>0.102881</td>
-      <td>-0.535426</td>
-      <td>-0.809012</td>
-      <td>0.000806</td>
-      <td>0.072612</td>
+      <td>-7.402969</td>
+      <td>-6.773775</td>
+      <td>-6.956773</td>
+      <td>0.873204</td>
+      <td>0.104889</td>
+      <td>-0.613706</td>
+      <td>8.306039</td>
+      <td>-0.014412</td>
+      <td>-0.003422</td>
+      <td>-0.008079</td>
       <td>...</td>
-      <td>0.074007</td>
-      <td>0.091054</td>
-      <td>0.080505</td>
-      <td>0.003998</td>
-      <td>0.030402</td>
-      <td>-0.000688</td>
-      <td>-0.049335</td>
-      <td>-1.073907</td>
-      <td>-0.215079</td>
-      <td>0.007779</td>
+      <td>-0.045534</td>
+      <td>-2.281823</td>
+      <td>6.220555</td>
+      <td>-0.622250</td>
+      <td>0.353278</td>
+      <td>-0.006841</td>
+      <td>-0.106645</td>
+      <td>-7.967557</td>
+      <td>0.531523</td>
+      <td>-0.018268</td>
     </tr>
     <tr>
       <th>T24_TTTCCTCCACCGGAAA</th>
-      <td>-0.742043</td>
-      <td>0.049942</td>
-      <td>0.065039</td>
-      <td>0.105232</td>
-      <td>0.236517</td>
-      <td>-0.762427</td>
-      <td>-0.290367</td>
-      <td>1.586747</td>
-      <td>0.020128</td>
-      <td>-0.075647</td>
+      <td>-5.338859</td>
+      <td>-5.148087</td>
+      <td>-4.857930</td>
+      <td>-0.589181</td>
+      <td>1.378187</td>
+      <td>0.016195</td>
+      <td>-6.906513</td>
+      <td>-0.113458</td>
+      <td>-0.017487</td>
+      <td>-0.001037</td>
       <td>...</td>
-      <td>0.032234</td>
-      <td>0.398886</td>
-      <td>-0.547757</td>
-      <td>-0.016941</td>
-      <td>0.260247</td>
-      <td>-0.038721</td>
-      <td>0.012140</td>
-      <td>0.437124</td>
-      <td>-0.040129</td>
-      <td>-0.040400</td>
+      <td>-0.038365</td>
+      <td>-1.267985</td>
+      <td>5.216135</td>
+      <td>-0.087870</td>
+      <td>-0.819144</td>
+      <td>-0.005551</td>
+      <td>-0.701608</td>
+      <td>-4.798419</td>
+      <td>0.062763</td>
+      <td>-0.084813</td>
     </tr>
     <tr>
       <th>T24_TTTGCGCTCCTTTCGG</th>
-      <td>-1.030933</td>
-      <td>0.030371</td>
-      <td>0.090810</td>
-      <td>0.093285</td>
-      <td>0.010458</td>
-      <td>-0.062967</td>
-      <td>0.552246</td>
-      <td>-1.137227</td>
-      <td>-0.015079</td>
-      <td>-0.065197</td>
+      <td>6.571542</td>
+      <td>-5.770066</td>
+      <td>-6.173451</td>
+      <td>1.207757</td>
+      <td>-0.328110</td>
+      <td>0.027743</td>
+      <td>7.764931</td>
+      <td>0.028870</td>
+      <td>-0.032131</td>
+      <td>0.034307</td>
       <td>...</td>
-      <td>-0.782121</td>
-      <td>-0.306618</td>
-      <td>-0.194269</td>
-      <td>0.008829</td>
-      <td>-0.011833</td>
-      <td>-0.075083</td>
-      <td>-0.043519</td>
-      <td>0.334202</td>
-      <td>-0.869105</td>
-      <td>-0.009373</td>
+      <td>-0.153165</td>
+      <td>-2.324143</td>
+      <td>-4.856275</td>
+      <td>0.808057</td>
+      <td>-0.381149</td>
+      <td>0.053897</td>
+      <td>-0.455522</td>
+      <td>-6.480079</td>
+      <td>0.033859</td>
+      <td>-0.373861</td>
     </tr>
   </tbody>
 </table>
@@ -719,12 +731,13 @@ Number of EGFR targets: 50
 <div class="alert alert-block alert-success"><p>Run <code class="docutils literal notranslate"><span class="pre">viper</span></code> to compute the protein activity matrix using (matrix-based) NaRnEA .</p>
 </div><p>Compute the protein activity using <code class="docutils literal notranslate"><span class="pre">viper</span></code> with NaRnEA as the enrichment method. Unlike aREA, the NaRnEA framework is suitable also for regulons of different size. Store the output in an <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> object (default).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ProtAct_NaRnEA</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">viper</span><span class="p">(</span><span class="n">gex_data</span><span class="o">=</span><span class="n">gene_expr_signature</span><span class="p">,</span> <span class="c1"># gene expression signature</span>
                                  <span class="n">interactome</span><span class="o">=</span><span class="n">network_interactome</span><span class="p">,</span> <span class="c1"># gene regulatory network</span>
                                  <span class="n">enrichment</span> <span class="o">=</span> <span class="s2">&quot;narnea&quot;</span><span class="p">,</span>
+                                 <span class="n">eset_filter</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                  <span class="n">njobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                  <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
@@ -732,7 +745,7 @@ Number of EGFR targets: 50
 </div>
 <p>Show the output type and length of <code class="docutils literal notranslate"><span class="pre">ProtAct_NaRnEA</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ProtAct_NaRnEA</span> <span class="c1"># display the protein activity matrix as AnnData object</span>
@@ -740,7 +753,7 @@ Number of EGFR targets: 50
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -753,7 +766,7 @@ AnnData object with n_obs × n_vars = 5802 × 6413
 <p>When run with the NaRnEA method, <code class="docutils literal notranslate"><span class="pre">viper</span></code> returns an additional layer, <code class="docutils literal notranslate"><span class="pre">pes</span></code> that stores the Proportional Enrichment Score (PES) of each regulator, a measure of protein activity in the <span class="math notranslate nohighlight">\(-1 \le PES \le 1\)</span> interval that can be used as an enhanced measure of effect size of each regulon’s activity. For further details, see <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/36981431/">Griffin et al., 2022</a>.</p>
 <p>Display NES protein activity matrix.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ProtAct_NaRnEA</span><span class="o">.</span><span class="n">to_df</span><span class="p">()</span> <span class="c1"># NES matrix</span>
@@ -761,7 +774,7 @@ AnnData object with n_obs × n_vars = 5802 × 6413
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -809,123 +822,123 @@ AnnData object with n_obs × n_vars = 5802 × 6413
   <tbody>
     <tr>
       <th>T1_AAACCTGAGATGTCGG</th>
-      <td>4.715789</td>
-      <td>-6.613786</td>
-      <td>7.001248</td>
-      <td>1.851045</td>
-      <td>1.843629</td>
-      <td>-0.857881</td>
-      <td>14.543342</td>
-      <td>-0.613878</td>
-      <td>-0.824745</td>
-      <td>0.406057</td>
+      <td>4.721734</td>
+      <td>-6.619827</td>
+      <td>7.008813</td>
+      <td>1.861781</td>
+      <td>1.856598</td>
+      <td>-0.870238</td>
+      <td>14.555466</td>
+      <td>-0.624870</td>
+      <td>-0.835634</td>
+      <td>0.415443</td>
       <td>...</td>
-      <td>-1.862346</td>
-      <td>3.146378</td>
-      <td>-7.006648</td>
-      <td>-0.756162</td>
-      <td>-2.003027</td>
-      <td>1.459852</td>
-      <td>2.712799</td>
-      <td>5.787629</td>
-      <td>2.397046</td>
-      <td>-2.582086</td>
+      <td>-1.877274</td>
+      <td>3.158300</td>
+      <td>-7.010895</td>
+      <td>-0.767114</td>
+      <td>-2.016624</td>
+      <td>1.473462</td>
+      <td>2.726915</td>
+      <td>5.796276</td>
+      <td>2.409854</td>
+      <td>-2.594848</td>
     </tr>
     <tr>
       <th>T1_AACTGGTTCTAACGGT</th>
-      <td>-7.191714</td>
-      <td>7.533881</td>
-      <td>9.429433</td>
-      <td>4.088336</td>
-      <td>-0.461214</td>
-      <td>1.055557</td>
-      <td>-18.886093</td>
-      <td>1.401654</td>
-      <td>-0.798170</td>
-      <td>1.079553</td>
+      <td>-7.194335</td>
+      <td>7.539468</td>
+      <td>9.435460</td>
+      <td>4.098622</td>
+      <td>-0.469555</td>
+      <td>1.067867</td>
+      <td>-18.895628</td>
+      <td>1.415011</td>
+      <td>-0.808934</td>
+      <td>1.093563</td>
       <td>...</td>
-      <td>2.199012</td>
-      <td>-3.213969</td>
-      <td>-7.219745</td>
-      <td>0.821136</td>
-      <td>1.227563</td>
-      <td>-1.558459</td>
-      <td>-1.394093</td>
-      <td>12.747848</td>
-      <td>1.822417</td>
-      <td>2.953031</td>
+      <td>2.213714</td>
+      <td>-3.225383</td>
+      <td>-7.223655</td>
+      <td>0.832463</td>
+      <td>1.240214</td>
+      <td>-1.571365</td>
+      <td>-1.406364</td>
+      <td>12.754583</td>
+      <td>1.835522</td>
+      <td>2.965396</td>
     </tr>
     <tr>
       <th>T1_AAGGTTCGTGTCAATC</th>
-      <td>8.887137</td>
-      <td>-9.449057</td>
-      <td>-10.272199</td>
-      <td>3.190093</td>
-      <td>-1.265178</td>
-      <td>0.657827</td>
-      <td>20.582304</td>
-      <td>0.466253</td>
-      <td>-0.916708</td>
-      <td>0.486921</td>
+      <td>8.892053</td>
+      <td>-9.453808</td>
+      <td>-10.276663</td>
+      <td>3.200662</td>
+      <td>-1.276665</td>
+      <td>0.668082</td>
+      <td>20.592220</td>
+      <td>0.475050</td>
+      <td>-0.928214</td>
+      <td>0.497169</td>
       <td>...</td>
-      <td>1.655850</td>
-      <td>3.406829</td>
-      <td>-8.988820</td>
-      <td>-1.780032</td>
-      <td>-0.947679</td>
-      <td>-2.583600</td>
-      <td>1.037094</td>
-      <td>-11.109167</td>
-      <td>-1.955563</td>
-      <td>-2.474079</td>
+      <td>1.669964</td>
+      <td>3.418652</td>
+      <td>-8.993046</td>
+      <td>-1.793087</td>
+      <td>-0.958978</td>
+      <td>-2.596414</td>
+      <td>1.049315</td>
+      <td>-11.111879</td>
+      <td>-1.967781</td>
+      <td>-2.485891</td>
     </tr>
     <tr>
       <th>T1_ACAGCCGTCAAGCCTA</th>
-      <td>7.847414</td>
-      <td>6.900573</td>
-      <td>9.575873</td>
-      <td>-2.852121</td>
-      <td>-0.872999</td>
-      <td>-1.455654</td>
-      <td>23.062950</td>
-      <td>-0.603498</td>
-      <td>1.127638</td>
-      <td>0.936162</td>
+      <td>7.851400</td>
+      <td>6.905695</td>
+      <td>9.582031</td>
+      <td>-2.862549</td>
+      <td>-0.883946</td>
+      <td>-1.470669</td>
+      <td>23.073534</td>
+      <td>-0.614457</td>
+      <td>1.140870</td>
+      <td>0.949438</td>
       <td>...</td>
-      <td>-1.165667</td>
-      <td>-2.528141</td>
-      <td>-6.812299</td>
-      <td>-1.115750</td>
-      <td>-1.571316</td>
-      <td>1.245981</td>
-      <td>2.074361</td>
-      <td>-11.699137</td>
-      <td>2.160041</td>
-      <td>2.499193</td>
+      <td>-1.179793</td>
+      <td>-2.539163</td>
+      <td>-6.815755</td>
+      <td>-1.127239</td>
+      <td>-1.584070</td>
+      <td>1.258887</td>
+      <td>2.088022</td>
+      <td>-11.702254</td>
+      <td>2.173031</td>
+      <td>2.511354</td>
     </tr>
     <tr>
       <th>T1_AGACGTTAGGCGACAT</th>
-      <td>7.643162</td>
-      <td>6.953849</td>
-      <td>-8.838992</td>
-      <td>2.588946</td>
-      <td>0.552425</td>
-      <td>-0.694912</td>
-      <td>-15.233547</td>
-      <td>0.163285</td>
-      <td>2.939726</td>
-      <td>-0.930142</td>
+      <td>7.647149</td>
+      <td>6.960122</td>
+      <td>-8.842428</td>
+      <td>2.599533</td>
+      <td>0.562035</td>
+      <td>-0.706634</td>
+      <td>-15.241218</td>
+      <td>0.168039</td>
+      <td>2.954947</td>
+      <td>-0.942813</td>
       <td>...</td>
-      <td>1.883423</td>
-      <td>-2.452158</td>
-      <td>-9.295234</td>
-      <td>0.852636</td>
-      <td>1.995564</td>
-      <td>-1.274296</td>
-      <td>-2.888875</td>
-      <td>8.253686</td>
-      <td>-2.171622</td>
-      <td>3.023637</td>
+      <td>1.897963</td>
+      <td>-2.463266</td>
+      <td>-9.299325</td>
+      <td>0.864452</td>
+      <td>2.009431</td>
+      <td>-1.286205</td>
+      <td>-2.902146</td>
+      <td>8.258941</td>
+      <td>-2.184118</td>
+      <td>3.036592</td>
     </tr>
     <tr>
       <th>...</th>
@@ -953,123 +966,123 @@ AnnData object with n_obs × n_vars = 5802 × 6413
     </tr>
     <tr>
       <th>T24_TTGCGTCCAGACAAAT</th>
-      <td>3.929488</td>
-      <td>3.904004</td>
-      <td>-7.629382</td>
-      <td>-2.257839</td>
-      <td>0.547175</td>
-      <td>-1.310761</td>
-      <td>10.857200</td>
-      <td>0.809013</td>
-      <td>-1.093720</td>
-      <td>1.711279</td>
+      <td>3.936121</td>
+      <td>3.912197</td>
+      <td>-7.635411</td>
+      <td>-2.268020</td>
+      <td>0.557243</td>
+      <td>-1.325284</td>
+      <td>10.868199</td>
+      <td>0.819879</td>
+      <td>-1.106013</td>
+      <td>1.725982</td>
       <td>...</td>
-      <td>-2.431247</td>
-      <td>2.670952</td>
-      <td>5.755338</td>
-      <td>0.977276</td>
-      <td>-2.342592</td>
-      <td>-0.952300</td>
-      <td>1.586434</td>
-      <td>6.731536</td>
-      <td>2.967126</td>
-      <td>1.218217</td>
+      <td>-2.446716</td>
+      <td>2.681818</td>
+      <td>5.761685</td>
+      <td>0.989011</td>
+      <td>-2.355896</td>
+      <td>-0.963434</td>
+      <td>1.598874</td>
+      <td>6.739289</td>
+      <td>2.979156</td>
+      <td>1.230419</td>
     </tr>
     <tr>
       <th>T24_TTGCGTCCATTAACCG</th>
-      <td>-7.197257</td>
-      <td>7.793606</td>
-      <td>8.194140</td>
-      <td>-2.333065</td>
-      <td>-1.661859</td>
-      <td>1.403345</td>
-      <td>-19.088629</td>
-      <td>0.623605</td>
-      <td>-0.571697</td>
-      <td>-1.285721</td>
+      <td>-7.200858</td>
+      <td>7.800428</td>
+      <td>8.200803</td>
+      <td>-2.343332</td>
+      <td>-1.674645</td>
+      <td>1.416084</td>
+      <td>-19.099210</td>
+      <td>0.633930</td>
+      <td>-0.581409</td>
+      <td>-1.299787</td>
       <td>...</td>
-      <td>1.153792</td>
-      <td>-2.933194</td>
-      <td>7.263271</td>
-      <td>-0.940619</td>
-      <td>-1.737071</td>
-      <td>1.691363</td>
-      <td>-1.825287</td>
-      <td>10.659641</td>
-      <td>1.579409</td>
-      <td>2.971451</td>
+      <td>1.167182</td>
+      <td>-2.944020</td>
+      <td>7.269258</td>
+      <td>-0.951725</td>
+      <td>-1.750199</td>
+      <td>1.705520</td>
+      <td>-1.838097</td>
+      <td>10.667582</td>
+      <td>1.591999</td>
+      <td>2.984735</td>
     </tr>
     <tr>
       <th>T24_TTTATGCTCCTTTACA</th>
-      <td>-7.103387</td>
-      <td>8.042507</td>
-      <td>-8.372260</td>
-      <td>2.609825</td>
-      <td>0.896921</td>
-      <td>-2.094449</td>
-      <td>20.645484</td>
-      <td>-0.346492</td>
-      <td>0.872927</td>
-      <td>-0.579501</td>
+      <td>-7.106027</td>
+      <td>8.048133</td>
+      <td>-8.375441</td>
+      <td>2.619907</td>
+      <td>0.908485</td>
+      <td>-2.109688</td>
+      <td>20.656478</td>
+      <td>-0.355086</td>
+      <td>0.885489</td>
+      <td>-0.590344</td>
       <td>...</td>
-      <td>1.109876</td>
-      <td>2.796211</td>
-      <td>6.435829</td>
-      <td>1.046557</td>
-      <td>1.433361</td>
-      <td>-1.580545</td>
-      <td>1.450763</td>
-      <td>-10.226545</td>
-      <td>1.772312</td>
-      <td>2.924802</td>
+      <td>1.123289</td>
+      <td>2.807651</td>
+      <td>6.441253</td>
+      <td>1.058726</td>
+      <td>1.446795</td>
+      <td>-1.593226</td>
+      <td>1.463587</td>
+      <td>-10.230168</td>
+      <td>1.784666</td>
+      <td>2.937815</td>
     </tr>
     <tr>
       <th>T24_TTTCCTCCACCGGAAA</th>
-      <td>-6.267298</td>
-      <td>-5.975001</td>
-      <td>-6.912350</td>
-      <td>-3.515971</td>
-      <td>0.877991</td>
-      <td>-1.020563</td>
-      <td>-11.196501</td>
-      <td>0.534728</td>
-      <td>-1.318767</td>
-      <td>0.807623</td>
+      <td>-6.272371</td>
+      <td>-5.982345</td>
+      <td>-6.917609</td>
+      <td>-3.526581</td>
+      <td>0.889230</td>
+      <td>-1.033967</td>
+      <td>-11.206110</td>
+      <td>0.544282</td>
+      <td>-1.331863</td>
+      <td>0.820132</td>
       <td>...</td>
-      <td>1.258743</td>
-      <td>-3.328178</td>
-      <td>5.359631</td>
-      <td>-2.210881</td>
-      <td>-1.586171</td>
-      <td>-1.064334</td>
-      <td>0.944330</td>
-      <td>-6.458201</td>
-      <td>-1.191704</td>
-      <td>2.884055</td>
+      <td>1.272478</td>
+      <td>-3.339912</td>
+      <td>5.365629</td>
+      <td>-2.224107</td>
+      <td>-1.598793</td>
+      <td>-1.075789</td>
+      <td>0.956203</td>
+      <td>-6.464254</td>
+      <td>-1.202947</td>
+      <td>2.896665</td>
     </tr>
     <tr>
       <th>T24_TTTGCGCTCCTTTCGG</th>
-      <td>7.656701</td>
-      <td>5.664298</td>
-      <td>-7.455275</td>
-      <td>3.304026</td>
-      <td>1.240349</td>
-      <td>-2.871128</td>
-      <td>15.743551</td>
-      <td>0.305051</td>
-      <td>-1.252826</td>
-      <td>1.436090</td>
+      <td>7.662765</td>
+      <td>5.670811</td>
+      <td>-7.459790</td>
+      <td>3.314262</td>
+      <td>1.253227</td>
+      <td>-2.886863</td>
+      <td>15.754894</td>
+      <td>0.312123</td>
+      <td>-1.264925</td>
+      <td>1.451191</td>
       <td>...</td>
-      <td>-1.513860</td>
-      <td>-2.786318</td>
-      <td>5.453333</td>
-      <td>1.610768</td>
-      <td>1.393192</td>
-      <td>1.825675</td>
-      <td>1.602548</td>
-      <td>-6.023640</td>
-      <td>1.601451</td>
-      <td>2.207284</td>
+      <td>-1.528563</td>
+      <td>-2.797515</td>
+      <td>5.459777</td>
+      <td>1.624329</td>
+      <td>1.406323</td>
+      <td>1.839792</td>
+      <td>1.615043</td>
+      <td>-6.028920</td>
+      <td>1.614101</td>
+      <td>2.219795</td>
     </tr>
   </tbody>
 </table>
@@ -1078,7 +1091,7 @@ AnnData object with n_obs × n_vars = 5802 × 6413
 </div>
 <p>Display the PES protein activity matrix.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ProtAct_NaRnEA</span><span class="o">.</span><span class="n">to_df</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="s2">&quot;pes&quot;</span><span class="p">)</span> <span class="c1"># PES matrix</span>
@@ -1086,7 +1099,7 @@ AnnData object with n_obs × n_vars = 5802 × 6413
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1134,123 +1147,123 @@ AnnData object with n_obs × n_vars = 5802 × 6413
   <tbody>
     <tr>
       <th>T1_AAACCTGAGATGTCGG</th>
-      <td>0.240772</td>
-      <td>-0.304270</td>
-      <td>0.281038</td>
-      <td>0.074875</td>
-      <td>0.065383</td>
-      <td>-0.030209</td>
-      <td>0.378750</td>
-      <td>-0.021176</td>
-      <td>-0.028191</td>
-      <td>0.012894</td>
+      <td>0.241036</td>
+      <td>-0.304539</td>
+      <td>0.281272</td>
+      <td>0.075302</td>
+      <td>0.065838</td>
+      <td>-0.030641</td>
+      <td>0.378996</td>
+      <td>-0.021552</td>
+      <td>-0.028560</td>
+      <td>0.013191</td>
       <td>...</td>
-      <td>-0.057990</td>
-      <td>0.109255</td>
-      <td>-0.352088</td>
-      <td>-0.026435</td>
-      <td>-0.069684</td>
-      <td>0.050031</td>
-      <td>0.092210</td>
-      <td>0.262122</td>
-      <td>0.085055</td>
-      <td>-0.092093</td>
+      <td>-0.058449</td>
+      <td>0.109650</td>
+      <td>-0.352310</td>
+      <td>-0.026813</td>
+      <td>-0.070147</td>
+      <td>0.050491</td>
+      <td>0.092683</td>
+      <td>0.262461</td>
+      <td>0.085498</td>
+      <td>-0.092541</td>
     </tr>
     <tr>
       <th>T1_AACTGGTTCTAACGGT</th>
-      <td>-0.377572</td>
-      <td>0.314127</td>
-      <td>0.353572</td>
-      <td>0.160783</td>
-      <td>-0.015217</td>
-      <td>0.035737</td>
-      <td>-0.497909</td>
-      <td>0.047375</td>
-      <td>-0.026517</td>
-      <td>0.033253</td>
+      <td>-0.377690</td>
+      <td>0.314298</td>
+      <td>0.353704</td>
+      <td>0.161168</td>
+      <td>-0.015489</td>
+      <td>0.036149</td>
+      <td>-0.498108</td>
+      <td>0.047821</td>
+      <td>-0.026871</td>
+      <td>0.033680</td>
       <td>...</td>
-      <td>0.065166</td>
-      <td>-0.115518</td>
-      <td>-0.365130</td>
-      <td>0.029192</td>
-      <td>0.042427</td>
-      <td>-0.052575</td>
-      <td>-0.044594</td>
-      <td>0.546236</td>
-      <td>0.062533</td>
-      <td>0.098134</td>
+      <td>0.065591</td>
+      <td>-0.115920</td>
+      <td>-0.365330</td>
+      <td>0.029592</td>
+      <td>0.042860</td>
+      <td>-0.053004</td>
+      <td>-0.044979</td>
+      <td>0.546406</td>
+      <td>0.062974</td>
+      <td>0.098528</td>
     </tr>
     <tr>
       <th>T1_AAGGTTCGTGTCAATC</th>
-      <td>0.411746</td>
-      <td>-0.426309</td>
-      <td>-0.463015</td>
-      <td>0.121526</td>
-      <td>-0.039884</td>
-      <td>0.021507</td>
-      <td>0.489378</td>
-      <td>0.015299</td>
-      <td>-0.029489</td>
-      <td>0.014491</td>
+      <td>0.411896</td>
+      <td>-0.426499</td>
+      <td>-0.463221</td>
+      <td>0.121913</td>
+      <td>-0.040238</td>
+      <td>0.021839</td>
+      <td>0.489513</td>
+      <td>0.015586</td>
+      <td>-0.029855</td>
+      <td>0.014794</td>
       <td>...</td>
-      <td>0.047115</td>
-      <td>0.107279</td>
-      <td>-0.455701</td>
-      <td>-0.057125</td>
-      <td>-0.030605</td>
-      <td>-0.084660</td>
-      <td>0.033765</td>
-      <td>-0.547947</td>
-      <td>-0.066875</td>
-      <td>-0.085122</td>
+      <td>0.047508</td>
+      <td>0.107629</td>
+      <td>-0.455912</td>
+      <td>-0.057534</td>
+      <td>-0.030965</td>
+      <td>-0.085069</td>
+      <td>0.034159</td>
+      <td>-0.548071</td>
+      <td>-0.067285</td>
+      <td>-0.085520</td>
     </tr>
     <tr>
       <th>T1_ACAGCCGTCAAGCCTA</th>
-      <td>0.373952</td>
-      <td>0.280809</td>
-      <td>0.347536</td>
-      <td>-0.110712</td>
-      <td>-0.028223</td>
-      <td>-0.049295</td>
-      <td>0.563023</td>
-      <td>-0.019842</td>
-      <td>0.036926</td>
-      <td>0.028396</td>
+      <td>0.374073</td>
+      <td>0.280960</td>
+      <td>0.347664</td>
+      <td>-0.111102</td>
+      <td>-0.028572</td>
+      <td>-0.049797</td>
+      <td>0.563166</td>
+      <td>-0.020199</td>
+      <td>0.037355</td>
+      <td>0.028794</td>
       <td>...</td>
-      <td>-0.035112</td>
-      <td>-0.090271</td>
-      <td>-0.344878</td>
-      <td>-0.036706</td>
-      <td>-0.051855</td>
-      <td>0.040700</td>
-      <td>0.068411</td>
-      <td>-0.576989</td>
-      <td>0.072889</td>
-      <td>0.081400</td>
+      <td>-0.035533</td>
+      <td>-0.090658</td>
+      <td>-0.345054</td>
+      <td>-0.037077</td>
+      <td>-0.052268</td>
+      <td>0.041115</td>
+      <td>0.068854</td>
+      <td>-0.577137</td>
+      <td>0.073317</td>
+      <td>0.081781</td>
     </tr>
     <tr>
       <th>T1_AGACGTTAGGCGACAT</th>
-      <td>0.367726</td>
-      <td>0.285936</td>
-      <td>-0.395159</td>
-      <td>0.100920</td>
-      <td>0.019161</td>
-      <td>-0.023652</td>
-      <td>-0.399057</td>
-      <td>0.005474</td>
-      <td>0.096805</td>
-      <td>-0.028409</td>
+      <td>0.367849</td>
+      <td>0.286135</td>
+      <td>-0.395323</td>
+      <td>0.101320</td>
+      <td>0.019492</td>
+      <td>-0.024048</td>
+      <td>-0.399215</td>
+      <td>0.005632</td>
+      <td>0.097293</td>
+      <td>-0.028792</td>
       <td>...</td>
-      <td>0.055218</td>
-      <td>-0.087718</td>
-      <td>-0.469730</td>
-      <td>0.030140</td>
-      <td>0.068457</td>
-      <td>-0.042643</td>
-      <td>-0.091376</td>
-      <td>0.348384</td>
-      <td>-0.075733</td>
-      <td>0.099308</td>
+      <td>0.055635</td>
+      <td>-0.088110</td>
+      <td>-0.469940</td>
+      <td>0.030555</td>
+      <td>0.068925</td>
+      <td>-0.043036</td>
+      <td>-0.091780</td>
+      <td>0.348528</td>
+      <td>-0.076160</td>
+      <td>0.099715</td>
     </tr>
     <tr>
       <th>...</th>
@@ -1278,123 +1291,123 @@ AnnData object with n_obs × n_vars = 5802 × 6413
     </tr>
     <tr>
       <th>T24_TTGCGTCCAGACAAAT</th>
-      <td>0.204446</td>
-      <td>0.174607</td>
-      <td>-0.337181</td>
-      <td>-0.093020</td>
-      <td>0.019611</td>
-      <td>-0.046764</td>
-      <td>0.288005</td>
-      <td>0.028439</td>
-      <td>-0.037907</td>
-      <td>0.055128</td>
+      <td>0.204764</td>
+      <td>0.174948</td>
+      <td>-0.337461</td>
+      <td>-0.093431</td>
+      <td>0.019970</td>
+      <td>-0.047278</td>
+      <td>0.288253</td>
+      <td>0.028819</td>
+      <td>-0.038329</td>
+      <td>0.055596</td>
       <td>...</td>
-      <td>-0.076656</td>
-      <td>0.094553</td>
-      <td>0.273277</td>
-      <td>0.035624</td>
-      <td>-0.082810</td>
-      <td>-0.033380</td>
-      <td>0.054557</td>
-      <td>0.311536</td>
-      <td>0.106925</td>
-      <td>0.042919</td>
+      <td>-0.077137</td>
+      <td>0.094923</td>
+      <td>0.273529</td>
+      <td>0.036050</td>
+      <td>-0.083271</td>
+      <td>-0.033768</td>
+      <td>0.054981</td>
+      <td>0.311843</td>
+      <td>0.107347</td>
+      <td>0.043343</td>
     </tr>
     <tr>
       <th>T24_TTGCGTCCATTAACCG</th>
-      <td>-0.379965</td>
-      <td>0.335563</td>
-      <td>0.321241</td>
-      <td>-0.093680</td>
-      <td>-0.056283</td>
-      <td>0.048430</td>
-      <td>-0.508088</td>
-      <td>0.021407</td>
-      <td>-0.019326</td>
-      <td>-0.040297</td>
+      <td>-0.380139</td>
+      <td>0.335792</td>
+      <td>0.321417</td>
+      <td>-0.094081</td>
+      <td>-0.056706</td>
+      <td>0.048863</td>
+      <td>-0.508320</td>
+      <td>0.021759</td>
+      <td>-0.019652</td>
+      <td>-0.040733</td>
       <td>...</td>
-      <td>0.034984</td>
-      <td>-0.105993</td>
-      <td>0.329845</td>
-      <td>-0.032393</td>
-      <td>-0.059631</td>
-      <td>0.057258</td>
-      <td>-0.059820</td>
-      <td>0.473351</td>
-      <td>0.055332</td>
-      <td>0.101333</td>
+      <td>0.035385</td>
+      <td>-0.106378</td>
+      <td>0.330039</td>
+      <td>-0.032770</td>
+      <td>-0.060073</td>
+      <td>0.057730</td>
+      <td>-0.060230</td>
+      <td>0.473601</td>
+      <td>0.055765</td>
+      <td>0.101769</td>
     </tr>
     <tr>
       <th>T24_TTTATGCTCCTTTACA</th>
-      <td>-0.374228</td>
-      <td>0.343792</td>
-      <td>-0.370403</td>
-      <td>0.103941</td>
-      <td>0.031494</td>
-      <td>-0.072713</td>
-      <td>0.525797</td>
-      <td>-0.011750</td>
-      <td>0.029375</td>
-      <td>-0.018084</td>
+      <td>-0.374351</td>
+      <td>0.343964</td>
+      <td>-0.370559</td>
+      <td>0.104330</td>
+      <td>0.031898</td>
+      <td>-0.073233</td>
+      <td>0.525972</td>
+      <td>-0.012040</td>
+      <td>0.029794</td>
+      <td>-0.018420</td>
       <td>...</td>
-      <td>0.033471</td>
-      <td>0.094812</td>
-      <td>0.289742</td>
-      <td>0.037420</td>
-      <td>0.050027</td>
-      <td>-0.053926</td>
-      <td>0.048746</td>
-      <td>-0.502225</td>
-      <td>0.061779</td>
-      <td>0.099145</td>
+      <td>0.033870</td>
+      <td>0.095181</td>
+      <td>0.289916</td>
+      <td>0.037852</td>
+      <td>0.050491</td>
+      <td>-0.054353</td>
+      <td>0.049172</td>
+      <td>-0.502406</td>
+      <td>0.062200</td>
+      <td>0.099569</td>
     </tr>
     <tr>
       <th>T24_TTTCCTCCACCGGAAA</th>
-      <td>-0.332941</td>
-      <td>-0.275806</td>
-      <td>-0.310930</td>
-      <td>-0.140664</td>
-      <td>0.031023</td>
-      <td>-0.035522</td>
-      <td>-0.299154</td>
-      <td>0.018338</td>
-      <td>-0.044461</td>
-      <td>0.025257</td>
+      <td>-0.333195</td>
+      <td>-0.276134</td>
+      <td>-0.311172</td>
+      <td>-0.141074</td>
+      <td>0.031418</td>
+      <td>-0.035984</td>
+      <td>-0.299382</td>
+      <td>0.018663</td>
+      <td>-0.044897</td>
+      <td>0.025645</td>
       <td>...</td>
-      <td>0.037913</td>
-      <td>-0.120995</td>
-      <td>0.238777</td>
-      <td>-0.075475</td>
-      <td>-0.054143</td>
-      <td>-0.036417</td>
-      <td>0.031897</td>
-      <td>-0.320772</td>
-      <td>-0.042458</td>
-      <td>0.097503</td>
+      <td>0.038321</td>
+      <td>-0.121415</td>
+      <td>0.238997</td>
+      <td>-0.075915</td>
+      <td>-0.054567</td>
+      <td>-0.036805</td>
+      <td>0.032295</td>
+      <td>-0.321070</td>
+      <td>-0.042854</td>
+      <td>0.097915</td>
     </tr>
     <tr>
       <th>T24_TTTGCGCTCCTTTCGG</th>
-      <td>0.387339</td>
-      <td>0.245869</td>
-      <td>-0.329289</td>
-      <td>0.132855</td>
-      <td>0.043827</td>
-      <td>-0.100557</td>
-      <td>0.406450</td>
-      <td>0.010523</td>
-      <td>-0.042570</td>
-      <td>0.045317</td>
+      <td>0.387580</td>
+      <td>0.246106</td>
+      <td>-0.329504</td>
+      <td>0.133253</td>
+      <td>0.044279</td>
+      <td>-0.101097</td>
+      <td>0.406666</td>
+      <td>0.010766</td>
+      <td>-0.042976</td>
+      <td>0.045788</td>
       <td>...</td>
-      <td>-0.046915</td>
-      <td>-0.100964</td>
-      <td>0.250039</td>
-      <td>0.057934</td>
-      <td>0.049015</td>
-      <td>0.062157</td>
-      <td>0.054237</td>
-      <td>-0.295971</td>
-      <td>0.056435</td>
-      <td>0.075792</td>
+      <td>-0.047366</td>
+      <td>-0.101365</td>
+      <td>0.250277</td>
+      <td>0.058417</td>
+      <td>0.049472</td>
+      <td>0.062629</td>
+      <td>0.054655</td>
+      <td>-0.296234</td>
+      <td>0.056873</td>
+      <td>0.076209</td>
     </tr>
   </tbody>
 </table>
@@ -1403,7 +1416,7 @@ AnnData object with n_obs × n_vars = 5802 × 6413
 </div>
 <p>Notice that when setting the <code class="docutils literal notranslate"><span class="pre">viper</span></code> output to be an object of class <code class="docutils literal notranslate"><span class="pre">AnnData</span></code>, the input gene expression matrix is saved under the attribute <code class="docutils literal notranslate"><span class="pre">gex_data</span></code> of the output <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> object:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ProtAct_NaRnEA</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;gex_data&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">to_df</span><span class="p">()</span>
@@ -1411,7 +1424,7 @@ AnnData object with n_obs × n_vars = 5802 × 6413
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1485,10 +1498,14 @@ AnnData object with n_obs × n_vars = 5802 × 6413
 </table>
 </div></div>
 </div>
-<p>### Step 4. Analyze single-cells at the Protein Activity level This section presents some useful postprocessing functions that can be used on the protein activity matrix.</p>
+</div>
+</div>
+<div class="section" id="Step-4.-Analyze-single-cells-at-the-Protein-Activity-level">
+<h2>Step 4. Analyze single-cells at the Protein Activity level<a class="headerlink" href="#Step-4.-Analyze-single-cells-at-the-Protein-Activity-level" title="Permalink to this heading"></a></h2>
+<p>This section presents some useful postprocessing functions that can be used on the protein activity matrix.</p>
 <p>First, set the set of regulatory proteins to be those for the human species. This is step is redundant, since <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> sets <code class="docutils literal notranslate"><span class="pre">&quot;human&quot;</span></code> as default, but it demonstrates how to have complete control over the analysis, if fine-tuning is desired.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pyviper</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">set_regulators_species_to_use</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">)</span>
@@ -1496,55 +1513,55 @@ AnnData object with n_obs × n_vars = 5802 × 6413
 </div>
 </div>
 <p>Run PCA to reduce the dimensionality of the dataset, by projecting the PES of transcriptional regulators (TFs) and co-transcriptional regulators (coTFs) by setting <code class="docutils literal notranslate"><span class="pre">filter_by_feature_groups=[&quot;tfs&quot;,</span> <span class="pre">&quot;cotfs&quot;]</span></code>. In this example, we focus on TFs and coTFs, major mechanistic determinants of cell state as shown in <a class="reference external" href="https://www.sciencedirect.com/science/article/pii/S0092867420316172?via%3Dihub">Paull et al., 2021</a> and <a class="reference external" href="https://www.nature.com/articles/nrc.2016.124">Califano &amp; Alvarez, 2016</a>.
-Possible options for this parameter are <code class="docutils literal notranslate"><span class="pre">[&quot;tfs&quot;,</span> <span class="pre">&quot;cotfs&quot;,</span> <span class="pre">&quot;sig&quot;,</span> <span class="pre">&quot;surf&quot;]</span></code>, where the latter refer to signaling proteins and surface markers, respectively. Set <code class="docutils literal notranslate"><span class="pre">None</span></code> to use all the features in the protein activity matrix.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
+Possible options for this parameter are <code class="docutils literal notranslate"><span class="pre">[&quot;tfs&quot;,</span> <span class="pre">&quot;cotfs&quot;,</span> <span class="pre">&quot;sig&quot;,</span> <span class="pre">&quot;surf&quot;]</span></code>, where the latter refer to signaling proteins and surface markers, respectively. The default (<code class="docutils literal notranslate"><span class="pre">None</span></code>) uses all the features in the protein activity matrix.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">pyviper</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;pes&quot;</span><span class="p">,</span> <span class="n">filter_by_feature_groups</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;tfs&quot;</span><span class="p">,</span><span class="s2">&quot;cotfs&quot;</span><span class="p">],</span> <span class="n">zero_center</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="n">svd_solver</span><span class="o">=</span><span class="s1">&#39;arpack&#39;</span><span class="p">)</span>
+<span class="n">pyviper</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;pes&quot;</span><span class="p">,</span> <span class="n">filter_by_feature_groups</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;tfs&quot;</span><span class="p">,</span><span class="s2">&quot;cotfs&quot;</span><span class="p">],</span> <span class="n">zero_center</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="n">svd_solver</span><span class="o">=</span><span class="s1">&#39;arpack&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">tl</span></code> module provides wrappers to several <code class="docutils literal notranslate"><span class="pre">scanpy.tl</span></code> functions, and it can be used to simplify the postprocessing of protein activity data, for instance by subsetting the class of regulatory proteins to analyze, as shown in the cell above.</p>
+<p>Compute the neighbors graph of cells using the PCA representation of the protein activity matrix. For sake of simplicity, set <code class="docutils literal notranslate"><span class="pre">n_neighbors</span> <span class="pre">=</span> <span class="pre">20</span></code>and <code class="docutils literal notranslate"><span class="pre">n_pcs</span> <span class="pre">=</span> <span class="pre">50</span></code> (please, notice that typically, these parameters need tuning).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;correlation&quot;</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-(5802, 2164)
+OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active_levels instead.
 </pre></div></div>
-</div>
-<p>The <code class="docutils literal notranslate"><span class="pre">tl</span></code> module provides wrappers to several <code class="docutils literal notranslate"><span class="pre">scanpy.tl</span></code> functions, and it can be used to simplify the postprocessing of protein activity data, for instance by subsetting the class of regulatory proteins to analyze, as shown in the cell above.</p>
-<p>Compute the neighbors graph of cells using the PCA representation of the protein activity matrix. For sake of simplicity, set <code class="docutils literal notranslate"><span class="pre">n_neighbors</span> <span class="pre">=</span> <span class="pre">20</span></code>and <code class="docutils literal notranslate"><span class="pre">n_pcs</span> <span class="pre">=</span> <span class="pre">50</span></code> (please, notice that typically, these parameters need tuning).</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[58]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;correlation&quot;</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
-</pre></div>
-</div>
 </div>
 <p>Cluster cells based on their protein activity profiles using the Leiden algorithm with <code class="docutils literal notranslate"><span class="pre">resolution=0.1</span></code> (in real-world applications this parameter should also be optimized).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[59]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Generate a <a class="reference external" href="https://arxiv.org/abs/1802.03426">UMAP</a> embedding for the graph.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[60]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Display the 2-dimensional UMAP embedding using the <code class="docutils literal notranslate"><span class="pre">pyviper.pl</span></code> module for easier post-processing of key protein activity features. Color by cluster.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[61]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">set_figure_params</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
@@ -1554,37 +1571,47 @@ Possible options for this parameter are <code class="docutils literal notranslat
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:369: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:379: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  cax = scatter(
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Tutorial-1_54_0.png" class="no-scaled-link" src="_images/Tutorial-1_54_0.png" style="width: 364px; height: 333px;" />
+<img alt="_images/Tutorial-1_54_1.png" class="no-scaled-link" src="_images/Tutorial-1_54_1.png" style="width: 364px; height: 333px;" />
 </div>
 </div>
 <p>Identify the most active regulators in each cluster by cluster-based integration of their NES using the Stouffer’s method:</p>
 <div class="math notranslate nohighlight">
 \[NES^C_j = \frac{\sum_{k \in C}NES_{k,j}}{\sqrt{n^C}}\]</div>
 <p>where <span class="math notranslate nohighlight">\(NES^C_j\)</span> denotes the integrated NES for regulator <span class="math notranslate nohighlight">\(j\)</span> in cluster <span class="math notranslate nohighlight">\(C\)</span>, <span class="math notranslate nohighlight">\(NES_{k,j}\)</span> is the NES of regulator <span class="math notranslate nohighlight">\(j\)</span> in cluster <span class="math notranslate nohighlight">\(C\)</span> and <span class="math notranslate nohighlight">\(n^C\)</span> is the number of cells in cluster <span class="math notranslate nohighlight">\(C\)</span>.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[63]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ProtAct_NaRnEA</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">stouffer</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="s2">&quot;leiden&quot;</span><span class="p">,</span> <span class="n">filter_by_feature_groups</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;tfs&quot;</span><span class="p">,</span><span class="s2">&quot;cotfs&quot;</span><span class="p">])</span> <span class="c1"># Stouffer integration</span>
-</pre></div>
-</div>
-</div>
-<p>Display the integrated NES scores in each cluster, are stored in <code class="docutils literal notranslate"><span class="pre">.uns</span></code> under<code class="docutils literal notranslate"><span class="pre">stouffer</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">NES_integrated</span> <span class="o">=</span> <span class="n">ProtAct_NaRnEA</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;stouffer&quot;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">NES_integrated</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">stouffer</span><span class="p">(</span><span class="n">ProtAct_NaRnEA</span><span class="p">,</span> <span class="s2">&quot;leiden&quot;</span><span class="p">,</span> <span class="n">filter_by_feature_groups</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;tfs&quot;</span><span class="p">,</span><span class="s2">&quot;cotfs&quot;</span><span class="p">],</span> <span class="n">compute_pvals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_as_df</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># Stouffer integration</span>
 <span class="n">NES_integrated</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "9f9f309ba4aa4be5add5c37fa1bb2e8f", "version_major": 2, "version_minor": 0}</script></div>
+</div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1631,109 +1658,109 @@ Possible options for this parameter are <code class="docutils literal notranslat
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>66.091798</td>
-      <td>115.405773</td>
-      <td>26.758490</td>
-      <td>-28.100281</td>
-      <td>-132.191396</td>
-      <td>-33.599384</td>
-      <td>-13.772651</td>
-      <td>-47.460612</td>
-      <td>4.015370</td>
-      <td>-30.219543</td>
+      <th>0_scores</th>
+      <td>67.525573</td>
+      <td>115.613861</td>
+      <td>27.080476</td>
+      <td>-28.436313</td>
+      <td>-132.404139</td>
+      <td>-33.429712</td>
+      <td>-13.909552</td>
+      <td>-47.931126</td>
+      <td>4.051971</td>
+      <td>-29.487164</td>
       <td>...</td>
-      <td>-11.137375</td>
-      <td>-22.225285</td>
-      <td>61.797696</td>
-      <td>20.534119</td>
-      <td>-66.629786</td>
-      <td>-29.674837</td>
-      <td>-11.166953</td>
-      <td>1.518258</td>
-      <td>-26.212789</td>
-      <td>-22.827012</td>
+      <td>-11.106391</td>
+      <td>-22.387029</td>
+      <td>62.365929</td>
+      <td>20.721141</td>
+      <td>-66.658539</td>
+      <td>-30.107811</td>
+      <td>-11.112864</td>
+      <td>1.628075</td>
+      <td>-26.403334</td>
+      <td>-22.699427</td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>-95.484010</td>
-      <td>-144.304612</td>
-      <td>-16.952406</td>
-      <td>-17.652945</td>
-      <td>19.505636</td>
-      <td>36.045797</td>
-      <td>-0.281349</td>
-      <td>-34.882520</td>
-      <td>11.360462</td>
-      <td>-158.717215</td>
+      <th>1_scores</th>
+      <td>-91.800207</td>
+      <td>-142.827803</td>
+      <td>-17.348848</td>
+      <td>-18.037332</td>
+      <td>25.121737</td>
+      <td>36.583034</td>
+      <td>-0.532866</td>
+      <td>-34.507518</td>
+      <td>11.575850</td>
+      <td>-161.079785</td>
       <td>...</td>
-      <td>29.614091</td>
-      <td>26.530288</td>
-      <td>-36.345481</td>
-      <td>10.419244</td>
-      <td>-52.724309</td>
-      <td>70.003267</td>
-      <td>22.476657</td>
-      <td>-9.414996</td>
-      <td>21.718254</td>
-      <td>26.721121</td>
+      <td>30.393149</td>
+      <td>26.228487</td>
+      <td>-35.711558</td>
+      <td>10.563270</td>
+      <td>-54.133110</td>
+      <td>71.437503</td>
+      <td>22.445477</td>
+      <td>-9.705253</td>
+      <td>22.332898</td>
+      <td>26.533621</td>
     </tr>
     <tr>
-      <th>2</th>
-      <td>160.694616</td>
-      <td>112.503595</td>
-      <td>-28.526969</td>
-      <td>-12.598789</td>
-      <td>273.728607</td>
-      <td>35.077632</td>
-      <td>-18.162602</td>
-      <td>0.486704</td>
-      <td>11.013269</td>
-      <td>-159.268514</td>
+      <th>2_scores</th>
+      <td>155.866707</td>
+      <td>112.772956</td>
+      <td>-28.882646</td>
+      <td>-12.207053</td>
+      <td>269.112806</td>
+      <td>34.378121</td>
+      <td>-17.958921</td>
+      <td>-0.020872</td>
+      <td>11.181962</td>
+      <td>-156.887473</td>
       <td>...</td>
-      <td>20.997878</td>
-      <td>-30.428877</td>
-      <td>-3.913593</td>
-      <td>-4.204891</td>
-      <td>-78.140381</td>
-      <td>52.720958</td>
-      <td>3.642006</td>
-      <td>-28.206880</td>
-      <td>23.372432</td>
-      <td>-44.491621</td>
+      <td>20.037990</td>
+      <td>-30.555842</td>
+      <td>-4.616144</td>
+      <td>-4.629360</td>
+      <td>-77.501573</td>
+      <td>52.334168</td>
+      <td>3.893929</td>
+      <td>-28.350717</td>
+      <td>23.055552</td>
+      <td>-45.316784</td>
     </tr>
     <tr>
-      <th>3</th>
-      <td>59.755942</td>
-      <td>-6.759463</td>
-      <td>-18.311627</td>
-      <td>-13.108654</td>
-      <td>45.268690</td>
-      <td>13.422040</td>
-      <td>-6.960340</td>
-      <td>-5.065040</td>
-      <td>4.802130</td>
-      <td>-35.830086</td>
+      <th>3_scores</th>
+      <td>60.353173</td>
+      <td>-7.015611</td>
+      <td>-18.430420</td>
+      <td>-13.188699</td>
+      <td>45.879802</td>
+      <td>13.423553</td>
+      <td>-6.909312</td>
+      <td>-5.033798</td>
+      <td>4.884707</td>
+      <td>-35.414756</td>
       <td>...</td>
-      <td>14.509917</td>
-      <td>-0.621032</td>
-      <td>6.271539</td>
-      <td>5.765715</td>
-      <td>-7.064015</td>
-      <td>41.651426</td>
-      <td>15.331487</td>
-      <td>-15.428624</td>
-      <td>22.443587</td>
-      <td>-13.317803</td>
+      <td>14.532806</td>
+      <td>-0.763232</td>
+      <td>6.192970</td>
+      <td>5.708014</td>
+      <td>-6.913988</td>
+      <td>41.258296</td>
+      <td>15.351770</td>
+      <td>-15.435729</td>
+      <td>22.549805</td>
+      <td>-13.521504</td>
     </tr>
   </tbody>
 </table>
 <p>4 rows × 2164 columns</p>
 </div></div>
 </div>
-<p>Analogously, the function <code class="docutils literal notranslate"><span class="pre">stouffer_clusters_df</span></code> can be used to performed the same operations on pd.DataFrames. Remove ribosomal proteins from the Stouffer-integrated matrix (ribosomal protein genes are among the most highly expressed genes in most cell types).</p>
+<p>Analogously, the <code class="docutils literal notranslate"><span class="pre">stouffer</span></code> function can be employed to produce an output directly on the AnnData object. Remove ribosomal proteins from the Stouffer-integrated matrix (ribosomal protein genes are among the most highly expressed genes in most cell types).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[66]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filtered_proteins</span> <span class="o">=</span> <span class="n">NES_integrated</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="o">~</span><span class="n">NES_integrated</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;RP&#39;</span><span class="p">)]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span> <span class="c1"># Exclude columns starting with &#39;RP&#39; from integrated matrix</span>
@@ -1743,7 +1770,7 @@ Possible options for this parameter are <code class="docutils literal notranslat
 </div>
 <p>Select the 10 most activated regulatory protein in each cluster.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[67]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">active_proteins</span> <span class="o">=</span> <span class="n">NES_integrated</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">nlargest</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># the top 10 most activated proteins in each cell type</span>
@@ -1752,21 +1779,21 @@ Possible options for this parameter are <code class="docutils literal notranslat
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[67]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0    [INHBA, MMP14, ID3, LOXL2, HOPX, RUNX2, LEF1, ...
-1    [TSHZ2, NFIA, NFIB, ZBTB16, TCF21, NR2F1, ZFP3...
-2    [ENO1, PFDN5, NACA, LOXL2, BTF3, HMGA1, CCDC85...
-3    [FOSB, NR4A1, ELL2, ID4, REL, JUND, NR4A2, NR4...
+0_scores    [INHBA, MMP14, ID3, LOXL2, HOPX, RUNX2, LEF1, ...
+1_scores    [TSHZ2, NFIA, NFIB, ZBTB16, TCF21, NR2F1, ZFP3...
+2_scores    [ENO1, NACA, PFDN5, LOXL2, BTF3, HMGA1, CCDC85...
+3_scores    [FOSB, NR4A1, ELL2, ID4, REL, JUND, NR4A2, NR4...
 dtype: object
 </pre></div></div>
 </div>
 <p>Finally, display the top activated proteins from <code class="docutils literal notranslate"><span class="pre">ProtAct_NaRnEA</span></code> on a heatmap</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[68]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">protein_set</span> <span class="o">=</span> <span class="n">active_proteins</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="c1"># protein set to display on the heatmap</span>
@@ -1778,12 +1805,14 @@ dtype: object
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Tutorial-1_64_0.png" class="no-scaled-link" src="_images/Tutorial-1_64_0.png" style="width: 832px; height: 556px;" />
+<img alt="_images/Tutorial-1_62_0.png" class="no-scaled-link" src="_images/Tutorial-1_62_0.png" style="width: 832px; height: 556px;" />
 </div>
 </div>
-<p>### Key takeaways This Tutorial describes how to inspect and process gene regulatory networks, by manipulating objects of class <code class="docutils literal notranslate"><span class="pre">Interactome</span></code>, and shows how to generate protein activity profiles from single-cell data using the <code class="docutils literal notranslate"><span class="pre">viper</span></code> function. Last, we presented key functions for the post-processing and visualization of protein activity data. In Tutorial 2 we will introduce the user to the generation of suitable gene expression signatures for <code class="docutils literal notranslate"><span class="pre">viper</span></code> and extend the VIPER analysis to
-simultaneously account for multiple cell pupulations through the exploitation of the <a class="reference external" href="https://www.nature.com/articles/s41467-018-03843-3">metaVIPER</a> paradigm.</p>
 </div>
+<div class="section" id="Key-takeaways">
+<h2>Key takeaways<a class="headerlink" href="#Key-takeaways" title="Permalink to this heading"></a></h2>
+<p>This Tutorial describes how to inspect and process gene regulatory networks, by manipulating objects of class <code class="docutils literal notranslate"><span class="pre">Interactome</span></code>, and shows how to generate protein activity profiles from single-cell data using the <code class="docutils literal notranslate"><span class="pre">viper</span></code> function. Last, we presented key functions for the post-processing and visualization of protein activity data. In Tutorial 2 we will introduce the user to the generation of suitable gene expression signatures for <code class="docutils literal notranslate"><span class="pre">viper</span></code> and extend the VIPER analysis to simultaneously account
+for multiple cell pupulations through the exploitation of the <a class="reference external" href="https://www.nature.com/articles/s41467-018-03843-3">metaVIPER</a> paradigm.</p>
 </div>
 </div>
 
@@ -1798,7 +1827,7 @@ simultaneously account for multiple cell pupulations through the exploitation of
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, ..</p>
+    <p>&#169; Copyright 2023.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

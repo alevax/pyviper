@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach &mdash; pyviper 1.0.0 documentation</title>
+  <title>Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach &mdash; pyviper 1.0.6 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/nbsphinx-code-cells.css" type="text/css" />
@@ -16,9 +16,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
@@ -192,10 +190,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-AnnData object with n_obs × n_vars = 4632 × 20197
-    obs: &#39;Cell_Type&#39;, &#39;n_genes&#39;, &#39;n_genes_by_counts&#39;, &#39;total_counts&#39;
-    var: &#39;n_cells&#39;, &#39;n_cells_by_counts&#39;, &#39;mean_counts&#39;, &#39;pct_dropout_by_counts&#39;, &#39;total_counts&#39;, &#39;mean&#39;, &#39;std&#39;
-    uns: &#39;log1p&#39;
+AnnData object with n_obs × n_vars = 4632 × 24005
 </pre></div></div>
 </div>
 <p>Load cell-associated metadata.</p>
@@ -219,7 +214,7 @@ AnnData object with n_obs × n_vars = 4632 × 20197
 </div>
 <p>Display the observation annotation from the AnnData object.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -227,7 +222,7 @@ AnnData object with n_obs × n_vars = 4632 × 20197
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -250,46 +245,28 @@ AnnData object with n_obs × n_vars = 4632 × 20197
     <tr style="text-align: right;">
       <th></th>
       <th>Cell_Type</th>
-      <th>n_genes</th>
-      <th>n_genes_by_counts</th>
-      <th>total_counts</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>T1_AACCATGCACAACTGT</th>
       <td>Ductal cell type 2</td>
-      <td>1218</td>
-      <td>1218</td>
-      <td>2395.170410</td>
     </tr>
     <tr>
       <th>T1_AAGACCTAGTCATGCT</th>
       <td>Ductal cell type 2</td>
-      <td>3149</td>
-      <td>3146</td>
-      <td>3325.380615</td>
     </tr>
     <tr>
       <th>T1_ACATACGAGACTCGGA</th>
       <td>Ductal cell type 2</td>
-      <td>1044</td>
-      <td>1044</td>
-      <td>2051.984863</td>
     </tr>
     <tr>
       <th>T1_ACCAGTATCTTGCAAG</th>
       <td>Ductal cell type 2</td>
-      <td>4039</td>
-      <td>4037</td>
-      <td>3812.823730</td>
     </tr>
     <tr>
       <th>T1_ACGATGTTCACGAAGG</th>
       <td>Ductal cell type 2</td>
-      <td>3377</td>
-      <td>3375</td>
-      <td>3621.977051</td>
     </tr>
   </tbody>
 </table>
@@ -297,7 +274,7 @@ AnnData object with n_obs × n_vars = 4632 × 20197
 </div>
 <p>The observation annotations include the annotated cell type for each single-cell. List the cell types.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;Cell_Type&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;n&#39;</span><span class="p">)</span> <span class="c1"># show cell types and number of cells for each type in AnnData</span>
@@ -305,7 +282,7 @@ AnnData object with n_obs × n_vars = 4632 × 20197
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -477,39 +454,39 @@ AnnData object with n_obs × n_vars = 4632 × 20197
   <tbody>
     <tr>
       <th>T1_AAGACCTAGTCATGCT</th>
-      <td>-0.445240</td>
-      <td>-0.125835</td>
-      <td>-0.059886</td>
-      <td>-0.114998</td>
-      <td>-0.220759</td>
-      <td>-0.107077</td>
+      <td>-0.373427</td>
+      <td>-0.106789</td>
+      <td>-0.06304</td>
+      <td>-0.082578</td>
+      <td>-0.187788</td>
+      <td>-0.126722</td>
     </tr>
     <tr>
       <th>T1_ACATACGAGACTCGGA</th>
-      <td>-0.282344</td>
-      <td>-0.082131</td>
-      <td>-0.067132</td>
-      <td>-0.040628</td>
-      <td>-0.145249</td>
-      <td>-0.152253</td>
+      <td>-0.373427</td>
+      <td>-0.106789</td>
+      <td>-0.06304</td>
+      <td>-0.082578</td>
+      <td>-0.187788</td>
+      <td>-0.126722</td>
     </tr>
     <tr>
       <th>T1_ACCAGTATCTTGCAAG</th>
-      <td>-0.507595</td>
-      <td>-0.142565</td>
-      <td>-0.057112</td>
-      <td>-0.143467</td>
-      <td>-0.249664</td>
-      <td>-0.089785</td>
+      <td>-0.373427</td>
+      <td>-0.106789</td>
+      <td>-0.06304</td>
+      <td>-0.082578</td>
+      <td>-0.187788</td>
+      <td>-0.126722</td>
     </tr>
     <tr>
       <th>T1_ACGATGTTCACGAAGG</th>
-      <td>-0.483181</td>
-      <td>-0.136015</td>
-      <td>-0.058198</td>
-      <td>-0.132320</td>
-      <td>-0.238347</td>
-      <td>-0.096555</td>
+      <td>-0.373427</td>
+      <td>-0.106789</td>
+      <td>-0.06304</td>
+      <td>-0.082578</td>
+      <td>-0.187788</td>
+      <td>-0.126722</td>
     </tr>
   </tbody>
 </table>
@@ -539,16 +516,16 @@ loading from the remote url).</p>
 <p>Each regulatory network loaded as an instance of class <code class="docutils literal notranslate"><span class="pre">Interactome</span></code>:</p>
 <p>Due to the similarity between regulatory networks of fibroblasts and stellate cells, we integrate their corresponding interactomes, thus generating a consensus network.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fibroblast_net</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">stellate_net</span><span class="p">,</span> <span class="n">normalize_likelihoods</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fibroblast_net</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">stellate_net</span><span class="p">,</span> <span class="n">normalize_likelihoods</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Optionally, save the integrated interactome as a .tsv file if needed for later use, by uncommenting the following line. Possible output formats are: “csv”, “tsv” and “pkl”.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#fibroblast_net.save(&quot;fibroblast_integrated.tsv&quot;, output_type=&quot;tsv&quot;)</span>
@@ -557,7 +534,7 @@ loading from the remote url).</p>
 </div>
 <p>Filter out targets in the <code class="docutils literal notranslate"><span class="pre">Interactomes</span></code> that are not present in the gene expression matrix</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bcell_net</span><span class="o">.</span><span class="n">filter_targets</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">var_names</span><span class="p">)</span>
@@ -578,7 +555,7 @@ Removed 84211 targets.
 </div>
 <p>Prune each regulon to have exactly 100 targets (this step can be omitted when setting <code class="docutils literal notranslate"><span class="pre">enrichment=narnea</span></code> in <code class="docutils literal notranslate"><span class="pre">pyviper</span></code>)</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bcell_net</span><span class="o">.</span><span class="n">prune</span><span class="p">(</span><span class="n">max_targets</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span><span class="n">eliminate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -604,13 +581,14 @@ Removed 64 regulators.
 <h3>Convert the gene expression signature into a protein activity matrix using pyviper (metaVIPER approach)<a class="headerlink" href="#Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-pyviper-(metaVIPER-approach)" title="Permalink to this heading"></a></h3>
 <p>Convert previously computed gene expression signature into protein activity by using multiple interactomes simultaneousely via the metaVIPER approach. Use <code class="docutils literal notranslate"><span class="pre">enrichment=&quot;narnea&quot;</span></code> with 1 core and store the result in an <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> object (default). See Tutorial 1 for details on the available modalities to compute enrichment.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_PA</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">viper</span><span class="p">(</span><span class="n">gex_data</span><span class="o">=</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="c1"># gene expression signature</span>
                             <span class="n">interactome</span><span class="o">=</span><span class="p">[</span><span class="n">bcell_net</span><span class="p">,</span> <span class="n">ductal_2_net</span><span class="p">,</span> <span class="n">fibroblast_net</span><span class="p">],</span> <span class="c1"># list of interactomes</span>
                             <span class="n">enrichment</span> <span class="o">=</span> <span class="s2">&quot;narnea&quot;</span><span class="p">,</span>
-                            <span class="n">njobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># 3 cores</span>
+                            <span class="n">eset_filter</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">njobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                             <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -646,7 +624,7 @@ Integrating results
 </div>
 <p>The output <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> object stores a matrix collecting the Normalized Enrichment Scores (NES) and a matrix of Proportional Enrichment Scores (PES) with cells on rows and regulatory proteins on columns. See Tutorial 1 and <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/36981431/">Griffin et al., 2022</a> for more details .</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_PA</span>
@@ -654,14 +632,14 @@ Integrating results
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-AnnData object with n_obs × n_vars = 4632 × 50
+AnnData object with n_obs × n_vars = 4632 × 6659
     obs: &#39;Cell_Type&#39;, &#39;n_genes&#39;, &#39;n_genes_by_counts&#39;, &#39;total_counts&#39;
-    uns: &#39;gex_data&#39;, &#39;pax_data&#39;
+    uns: &#39;gex_data&#39;
     layers: &#39;pes&#39;
 </pre></div></div>
 </div>
@@ -671,43 +649,43 @@ AnnData object with n_obs × n_vars = 4632 × 50
 <h2>Step 4. Analyze single-cells at the Protein Activity level<a class="headerlink" href="#Step-4.-Analyze-single-cells-at-the-Protein-Activity-level" title="Permalink to this heading"></a></h2>
 <p>We present some instructive analyses at the protein activity level. Start by running Principal Components Analysis (PCA) on the PES matrix, to reduce the dimensionality of the protein activity space. Use the PCA function avaiable through <code class="docutils literal notranslate"><span class="pre">pyviper.tl</span></code>, a module that provides several wrappers to <code class="docutils literal notranslate"><span class="pre">scanpy.tl</span></code> to simplify the transformation of protein activity data. In contrast to Tutorial 1, all recovered transcription factors, cofactors, signaling and surface proteins will be employed in the
 analysis.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pyviper</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">adata_PA</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;pes&quot;</span><span class="p">,</span> <span class="n">filter_by_feature_groups</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">svd_solver</span><span class="o">=</span><span class="s1">&#39;arpack&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Compute the neighbors graph of cells using the PCA representation of the protein activity matrix. For sake of simplicity, we set 10 nearest neightbors and 30 principal components. Typically, these parameters need tuning.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pyviper</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">adata_PA</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;pes&quot;</span><span class="p">,</span> <span class="n">filter_by_feature_groups</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">svd_solver</span><span class="o">=</span><span class="s1">&#39;arpack&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata_PA</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;correlation&quot;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-(4632, 6659)
+OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active_levels instead.
 </pre></div></div>
 </div>
-<p>Compute the neighbors graph of cells using the PCA representation of the protein activity matrix. For sake of simplicity, we set 10 nearest neightbors and 30 principal components. Typically, these parameters need tuning.</p>
+<p>Generate a <a class="reference external" href="https://arxiv.org/abs/1802.03426">UMAP</a> embedding of the previously computed graph.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata_PA</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;correlation&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<p>Generate a <a class="reference external" href="https://arxiv.org/abs/1802.03426">UMAP</a> embedding of the previously computed graph.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_PA</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_PA</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Display the 2-dimensional UMAP embedding and color by cell type.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">set_figure_params</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
@@ -715,16 +693,29 @@ analysis.</p>
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:369: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:379: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  cax = scatter(
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Tutorial-2_55_0.png" class="no-scaled-link" src="_images/Tutorial-2_55_0.png" style="width: 478px; height: 333px;" />
+<img alt="_images/Tutorial-2_55_1.png" class="no-scaled-link" src="_images/Tutorial-2_55_1.png" style="width: 478px; height: 333px;" />
 </div>
 </div>
 <p>As an example, show the activity of selected markers for of ductal cells and fibroblasts in a dotplot.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">protein_markers_dict</span> <span class="o">=</span> <span class="p">{</span>
@@ -738,16 +729,25 @@ analysis.</p>
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_dotplot.py:749: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39;, &#39;norm&#39; will be ignored
+  dot_ax.scatter(x, y, **kwds)
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Tutorial-2_57_0.png" class="no-scaled-link" src="_images/Tutorial-2_57_0.png" style="width: 426px; height: 360px;" />
+<img alt="_images/Tutorial-2_57_1.png" class="no-scaled-link" src="_images/Tutorial-2_57_1.png" style="width: 422px; height: 360px;" />
 </div>
 </div>
 <p>Identify differentially active proteins on a cell type basis using the Wilcoxon Rank sum test and display a heatmap.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># reduce the verbosity</span>
@@ -773,7 +773,13 @@ Storing dendrogram info using `.uns[&#39;dendrogram_Cell_Type&#39;]`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/av2729/opt/anaconda3/envs/single-cell-env-scvi/lib/python3.8/site-packages/scanpy/tools/_rank_genes_groups.py:420: RuntimeWarning: invalid value encountered in log2
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/tools/_rank_genes_groups.py:420: RuntimeWarning: invalid value encountered in log2
+  self.stats[group_name, &#39;logfoldchanges&#39;] = np.log2(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/tools/_rank_genes_groups.py:420: RuntimeWarning: invalid value encountered in log2
+  self.stats[group_name, &#39;logfoldchanges&#39;] = np.log2(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/tools/_rank_genes_groups.py:420: RuntimeWarning: invalid value encountered in log2
+  self.stats[group_name, &#39;logfoldchanges&#39;] = np.log2(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/tools/_rank_genes_groups.py:420: RuntimeWarning: invalid value encountered in log2
   self.stats[group_name, &#39;logfoldchanges&#39;] = np.log2(
 </pre></div></div>
 </div>
@@ -781,7 +787,7 @@ Storing dendrogram info using `.uns[&#39;dendrogram_Cell_Type&#39;]`
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Tutorial-2_59_2.png" class="no-scaled-link" src="_images/Tutorial-2_59_2.png" style="width: 1248px; height: 712px;" />
+<img alt="_images/Tutorial-2_59_2.png" class="no-scaled-link" src="_images/Tutorial-2_59_2.png" style="width: 1248px; height: 715px;" />
 </div>
 </div>
 </div>
@@ -790,7 +796,7 @@ Storing dendrogram info using `.uns[&#39;dendrogram_Cell_Type&#39;]`
 <p>Perform an enrichment analysis to identify biological functions associated to malignant cells by leveraging functional gene sets from the <a class="reference external" href="https://www.gsea-msigdb.org/gsea/msigdb/index.jsp">MSigDB</a> collection. Through its <code class="docutils literal notranslate"><span class="pre">load</span></code> module,<code class="docutils literal notranslate"><span class="pre">pyviper</span></code> allows the user to choose between several MSigDB collections, including curated gene sets from online pathway databases (‘c2’), ontology (‘c5’) and oncogenic signature (‘c6’) gene sets and immunologic signature gene sets (‘c7’).</p>
 <p>Load the ‘hallmark gene sets’ as an object of class <code class="docutils literal notranslate"><span class="pre">Interactome</span></code> and retain only the targets in common with the protein activity matrix.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hallmarks_MSigDB</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">load</span><span class="o">.</span><span class="n">msigdb_regulon</span><span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">)</span> <span class="c1"># load hallmark of cancer MSigDB as an interactome</span>
@@ -806,12 +812,12 @@ Storing dendrogram info using `.uns[&#39;dendrogram_Cell_Type&#39;]`
 Removed 3587 targets.
 </pre></div></div>
 </div>
-<p>Perform the enrichment analysis using <code class="docutils literal notranslate"><span class="pre">viper</span></code>.</p>
+<p>Perform the enrichment analysis using the <code class="docutils literal notranslate"><span class="pre">path_enr</span></code> function from <code class="docutils literal notranslate"><span class="pre">pyviper.tl</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_PA</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">viper</span><span class="p">(</span><span class="n">adata_PA</span><span class="p">,</span> <span class="n">interactome</span><span class="o">=</span><span class="n">hallmarks_MSigDB</span><span class="p">,</span> <span class="n">enrichment</span><span class="o">=</span><span class="s2">&quot;narnea&quot;</span><span class="p">,</span> <span class="n">min_targets</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="s2">&quot;False&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pathways_enrichment</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">path_enr</span><span class="p">(</span><span class="n">adata_PA</span><span class="p">,</span> <span class="n">pathway_interactome</span><span class="o">=</span><span class="n">hallmarks_MSigDB</span><span class="p">,</span> <span class="n">enrichment</span><span class="o">=</span><span class="s2">&quot;narnea&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="s2">&quot;False&quot;</span><span class="p">,</span> <span class="n">store_input_data</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -820,6 +826,7 @@ Removed 3587 targets.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+Removed 0 targets.
 Preparing the association scores
 Computing regulons enrichment with NaRnEa
 reordering genes
@@ -831,27 +838,26 @@ Calculating PES...
 </div>
 <p>Focus on malignant ductal cells and compute the mean NES for each gene set.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_DC2</span> <span class="o">=</span> <span class="n">adata_PA</span><span class="p">[</span><span class="n">adata_PA</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;Cell_Type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Ductal cell type 2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">Integrated_hallmarks_NES</span> <span class="o">=</span> <span class="n">adata_DC2</span><span class="o">.</span><span class="n">to_df</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="c1">#Integrated_hallmarks_NES = pyviper.tl.stouffer_clusters_df(adata_DC2.to_df(), cluster_vector=[&quot;Ductal cell type 2&quot;] * adata_DC2.shape[0])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pathways_enrichment</span> <span class="o">=</span> <span class="n">pathways_enrichment</span><span class="p">[</span><span class="n">pathways_enrichment</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;Cell_Type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Ductal cell type 2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">Integrated_hallmarks_NES</span> <span class="o">=</span> <span class="n">pathways_enrichment</span><span class="o">.</span><span class="n">to_df</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Convert NES for each hallmark into p values and adjust for multiple hypothesis testing with the <a class="reference external" href="https://www.jstor.org/stable/2346101">Benjamini-Hochberg</a> procedure.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Integrated_hallmarks_pvals</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">nes_to_pval_df</span><span class="p">(</span><span class="n">Integrated_hallmarks_NES</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Integrated_hallmarks_pvals</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">_pp</span><span class="o">.</span><span class="n">_nes_to_pval_df</span><span class="p">(</span><span class="n">Integrated_hallmarks_NES</span><span class="p">,</span> <span class="n">lower_tail</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Compute the -log10(P value) and display the top 5 enriched pathways.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Integrated_hallmarks_mlog10</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">Integrated_hallmarks_pvals</span><span class="p">)</span> <span class="c1"># convert to -log10(P adjust)</span>
@@ -878,14 +884,6 @@ Calculating PES...
 <div class="section" id="Key-takeaways">
 <h2>Key takeaways<a class="headerlink" href="#Key-takeaways" title="Permalink to this heading"></a></h2>
 <p>This Tutorial describes how to generate a gene expression signature by exploiting the inter-operatibility between <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> and <code class="docutils literal notranslate"><span class="pre">scanpy</span></code> and showed how to infer protein activity in single cells from multiple populations with the <a class="reference external" href="https://www.nature.com/articles/s41467-018-03843-3">metaVIPER</a> approach, that leverages multiple lineage-specific regulatory networks. We conclude this Tutorial by presenting another key module used to perform pathway enrichment analysis.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
-</div>
 </div>
 </div>
 
@@ -900,7 +898,7 @@ Calculating PES...
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, ..</p>
+    <p>&#169; Copyright 2023.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

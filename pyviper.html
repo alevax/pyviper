@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pyviper package &mdash; pyviper 1.0.0 documentation</title>
+  <title>pyviper package &mdash; pyviper 1.0.6 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -15,7 +15,6 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -46,93 +45,15 @@
               <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pyviper package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-pyviper.config">pyviper.config</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.config.set_regulators_filepath"><code class="docutils literal notranslate"><span class="pre">set_regulators_filepath()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.config.set_regulators_species_to_use"><code class="docutils literal notranslate"><span class="pre">set_regulators_species_to_use()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">set_regulators_filepath()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">set_regulators_species_to_use()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pyviper.interactome">pyviper.interactome</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.interactome.Interactome"><code class="docutils literal notranslate"><span class="pre">Interactome</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#pyviper.interactome.Interactome.copy"><code class="docutils literal notranslate"><span class="pre">Interactome.copy()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pyviper.interactome.Interactome.filter_regulators"><code class="docutils literal notranslate"><span class="pre">Interactome.filter_regulators()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pyviper.interactome.Interactome.filter_targets"><code class="docutils literal notranslate"><span class="pre">Interactome.filter_targets()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pyviper.interactome.Interactome.get_reg"><code class="docutils literal notranslate"><span class="pre">Interactome.get_reg()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pyviper.interactome.Interactome.get_regulonNames"><code class="docutils literal notranslate"><span class="pre">Interactome.get_regulonNames()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pyviper.interactome.Interactome.get_targetSet"><code class="docutils literal notranslate"><span class="pre">Interactome.get_targetSet()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pyviper.interactome.Interactome.icMat"><code class="docutils literal notranslate"><span class="pre">Interactome.icMat()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pyviper.interactome.Interactome.icpVec"><code class="docutils literal notranslate"><span class="pre">Interactome.icpVec()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pyviper.interactome.Interactome.integrate"><code class="docutils literal notranslate"><span class="pre">Interactome.integrate()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pyviper.interactome.Interactome.morMat"><code class="docutils literal notranslate"><span class="pre">Interactome.morMat()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pyviper.interactome.Interactome.prune"><code class="docutils literal notranslate"><span class="pre">Interactome.prune()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pyviper.interactome.Interactome.save"><code class="docutils literal notranslate"><span class="pre">Interactome.save()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pyviper.interactome.Interactome.size"><code class="docutils literal notranslate"><span class="pre">Interactome.size()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pyviper.interactome.Interactome.translate_regulators"><code class="docutils literal notranslate"><span class="pre">Interactome.translate_regulators()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pyviper.interactome.Interactome.translate_targets"><code class="docutils literal notranslate"><span class="pre">Interactome.translate_targets()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pyviper.pl">pyviper.pl</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.__get_stored_uns_data_and_prep_to_plot"><code class="docutils literal notranslate"><span class="pre">__get_stored_uns_data_and_prep_to_plot()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.pca"><code class="docutils literal notranslate"><span class="pre">pca()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.umap"><code class="docutils literal notranslate"><span class="pre">umap()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.tsne"><code class="docutils literal notranslate"><span class="pre">tsne()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.diffmap"><code class="docutils literal notranslate"><span class="pre">diffmap()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.draw_graph"><code class="docutils literal notranslate"><span class="pre">draw_graph()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.spatial"><code class="docutils literal notranslate"><span class="pre">spatial()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.embedding"><code class="docutils literal notranslate"><span class="pre">embedding()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.embedding_density"><code class="docutils literal notranslate"><span class="pre">embedding_density()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.heatmap"><code class="docutils literal notranslate"><span class="pre">heatmap()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.dotplot"><code class="docutils literal notranslate"><span class="pre">dotplot()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.tracksplot"><code class="docutils literal notranslate"><span class="pre">tracksplot()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.violin"><code class="docutils literal notranslate"><span class="pre">violin()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.stacked_violin"><code class="docutils literal notranslate"><span class="pre">stacked_violin()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.matrixplot"><code class="docutils literal notranslate"><span class="pre">matrixplot()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.clustermap"><code class="docutils literal notranslate"><span class="pre">clustermap()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.ranking"><code class="docutils literal notranslate"><span class="pre">ranking()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pl.dendrogram"><code class="docutils literal notranslate"><span class="pre">dendrogram()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pyviper.pp">pyviper.pp</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pp._mad_from_R"><code class="docutils literal notranslate"><span class="pre">_mad_from_R()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pp.rank_norm"><code class="docutils literal notranslate"><span class="pre">rank_norm()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pp.__sigT"><code class="docutils literal notranslate"><span class="pre">__sigT()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pp.viper_similarity"><code class="docutils literal notranslate"><span class="pre">viper_similarity()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pp.aracne3_to_regulon"><code class="docutils literal notranslate"><span class="pre">aracne3_to_regulon()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pp.select_cells"><code class="docutils literal notranslate"><span class="pre">select_cells()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pp.sparse_argsort"><code class="docutils literal notranslate"><span class="pre">sparse_argsort()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pp.generateRandomCellID"><code class="docutils literal notranslate"><span class="pre">generateRandomCellID()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.pp.generateMetacellAnnData"><code class="docutils literal notranslate"><span class="pre">generateMetacellAnnData()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pyviper.tl">pyviper.tl</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.tl.pca"><code class="docutils literal notranslate"><span class="pre">pca()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.tl.dendrogram"><code class="docutils literal notranslate"><span class="pre">dendrogram()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.tl.stouffer"><code class="docutils literal notranslate"><span class="pre">stouffer()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.tl.stouffer_clusters_df"><code class="docutils literal notranslate"><span class="pre">stouffer_clusters_df()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.tl.nes_to_pval_df"><code class="docutils literal notranslate"><span class="pre">nes_to_pval_df()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.tl._generate_interactome_from_pax_data"><code class="docutils literal notranslate"><span class="pre">_generate_interactome_from_pax_data()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.tl.OncoMatch"><code class="docutils literal notranslate"><span class="pre">OncoMatch()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pyviper.aREA.aREA_classic">pyviper.aREA.aREA_classic</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.aREA.aREA_classic.aREA_classic"><code class="docutils literal notranslate"><span class="pre">aREA_classic()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pyviper.aREA.aREA_meta">pyviper.aREA.aREA_meta</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.aREA.aREA_meta.aREA"><code class="docutils literal notranslate"><span class="pre">aREA()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pyviper.NaRnEA.NaRnEA_classic">pyviper.NaRnEA.NaRnEA_classic</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.NaRnEA.NaRnEA_classic.NaRnEA_classic"><code class="docutils literal notranslate"><span class="pre">NaRnEA_classic()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pyviper.NaRnEA.NaRnEA_meta">pyviper.NaRnEA.NaRnEA_meta</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pyviper.NaRnEA.NaRnEA_meta.NaRnEA"><code class="docutils literal notranslate"><span class="pre">NaRnEA()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#pyviper-config">pyviper.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pyviper.interactome">pyviper.interactome</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pyviper-pl">pyviper.pl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pyviper-pp">pyviper.pp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pyviper-tl">pyviper.tl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pyviper.aREA.aREA_classic">pyviper.aREA.aREA_classic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pyviper.aREA.aREA_meta">pyviper.aREA.aREA_meta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pyviper.NaRnEA.NaRnEA_classic">pyviper.NaRnEA.NaRnEA_classic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pyviper.NaRnEA.NaRnEA_meta">pyviper.NaRnEA.NaRnEA_meta</a></li>
 </ul>
 </li>
 </ul>
@@ -169,8 +90,8 @@
              
   <div class="section" id="pyviper-package">
 <h1>pyviper package<a class="headerlink" href="#pyviper-package" title="Permalink to this heading"></a></h1>
-<div class="section" id="module-pyviper.config">
-<span id="pyviper-config"></span><h2>pyviper.config<a class="headerlink" href="#module-pyviper.config" title="Permalink to this heading"></a></h2>
+<div class="section" id="pyviper-config">
+<h2>pyviper.config<a class="headerlink" href="#pyviper-config" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyviper.config.set_regulators_filepath">
 <span class="sig-prename descclassname"><span class="pre">pyviper.config.</span></span><span class="sig-name descname"><span class="pre">set_regulators_filepath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_filepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.config.set_regulators_filepath" title="Permalink to this definition"></a></dt>
@@ -193,40 +114,6 @@ default ones within pyVIPER’s data folder.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyviper.config.set_regulators_species_to_use">
 <span class="sig-prename descclassname"><span class="pre">pyviper.config.</span></span><span class="sig-name descname"><span class="pre">set_regulators_species_to_use</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.config.set_regulators_species_to_use" title="Permalink to this definition"></a></dt>
-<dd><p>Allows the user to specify which species they are currently studying, so the
-correct sets of regulatory proteins will be used during analysis.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>species</strong> – The species to which the group of proteins belongs to: “human” or “mouse”.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-prename descclassname"><span class="pre">pyviper.config.</span></span><span class="sig-name descname"><span class="pre">set_regulators_filepath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_filepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
-<dd><p>Allows the user to use a custom list of regulatory proteins instead of the
-default ones within pyVIPER’s data folder.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>group</strong> – A group of regulatory proteins of either: “tfs”, “cotfs”, “sig” or “surf”.</p></li>
-<li><p><strong>species</strong> – The species to which the group of proteins belongs to: “human” or “mouse”.</p></li>
-<li><p><strong>new_filepath</strong> – The new filepath that should be used to retrieve these sets of proteins.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="id1">
-<span class="sig-prename descclassname"><span class="pre">pyviper.config.</span></span><span class="sig-name descname"><span class="pre">set_regulators_species_to_use</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Permalink to this definition"></a></dt>
 <dd><p>Allows the user to specify which species they are currently studying, so the
 correct sets of regulatory proteins will be used during analysis.</p>
 <dl class="field-list simple">
@@ -333,8 +220,8 @@ network. When left as None, this parameter is not used to filter.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyviper.interactome.Interactome.get_regulonNames">
-<span class="sig-name descname"><span class="pre">get_regulonNames</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.interactome.Interactome.get_regulonNames" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pyviper.interactome.Interactome.get_reg_names">
+<span class="sig-name descname"><span class="pre">get_reg_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.interactome.Interactome.get_reg_names" title="Permalink to this definition"></a></dt>
 <dd><p>Get an array of all unique regulators in this Interactome.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -344,8 +231,8 @@ network. When left as None, this parameter is not used to filter.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyviper.interactome.Interactome.get_targetSet">
-<span class="sig-name descname"><span class="pre">get_targetSet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.interactome.Interactome.get_targetSet" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pyviper.interactome.Interactome.get_target_names">
+<span class="sig-name descname"><span class="pre">get_target_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.interactome.Interactome.get_target_names" title="Permalink to this definition"></a></dt>
 <dd><p>Get a set of the unique targets in this Interactome</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -355,8 +242,8 @@ network. When left as None, this parameter is not used to filter.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyviper.interactome.Interactome.icMat">
-<span class="sig-name descname"><span class="pre">icMat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.interactome.Interactome.icMat" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pyviper.interactome.Interactome.ic_mat">
+<span class="sig-name descname"><span class="pre">ic_mat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.interactome.Interactome.ic_mat" title="Permalink to this definition"></a></dt>
 <dd><p>Get the DataFrame of all the likelihood values. Targets are in the rows,
 while Regulators are in the columns.</p>
 <dl class="field-list simple">
@@ -367,8 +254,8 @@ while Regulators are in the columns.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyviper.interactome.Interactome.icpVec">
-<span class="sig-name descname"><span class="pre">icpVec</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.interactome.Interactome.icpVec" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pyviper.interactome.Interactome.icp_vec">
+<span class="sig-name descname"><span class="pre">icp_vec</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.interactome.Interactome.icp_vec" title="Permalink to this definition"></a></dt>
 <dd><p>Get the vector containing the proportion of the “Interaction Confidence”
 (IC) score for each interaction in a network, relative to the maximum IC
 score in the network. This vector is generated by taking each individual
@@ -407,8 +294,8 @@ and scaled from 0 to 1.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyviper.interactome.Interactome.morMat">
-<span class="sig-name descname"><span class="pre">morMat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.interactome.Interactome.morMat" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pyviper.interactome.Interactome.mor_mat">
+<span class="sig-name descname"><span class="pre">mor_mat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.interactome.Interactome.mor_mat" title="Permalink to this definition"></a></dt>
 <dd><p>Get the DataFrame of all the correlation values. Targets are in the rows,
 while Regulators are in the columns.</p>
 <dl class="field-list simple">
@@ -519,654 +406,14 @@ interactome that once had consistent number of targets.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-pyviper.pl">
-<span id="pyviper-pl"></span><h2>pyviper.pl<a class="headerlink" href="#module-pyviper.pl" title="Permalink to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.__get_stored_uns_data_and_prep_to_plot">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">__get_stored_uns_data_and_prep_to_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uns_data_slot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obsm_slot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uns_slot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.__get_stored_uns_data_and_prep_to_plot" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.pca">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.pca" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.pca.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’] on adata.obsm[‘X_pca’].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’] on adata.obsm[‘X_pca’].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.pca function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.umap">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">umap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.umap" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.umap.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’] on adata.obsm[‘X_umap’].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’] on adata.obsm[‘X_umap’].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.umap function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.tsne">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">tsne</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.tsne" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.tsne.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’] on adata.obsm[‘X_tsne’].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’] on adata.obsm[‘X_tsne’].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.tsne function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.diffmap">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">diffmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.diffmap" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.diffmap.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’] on adata.obsm[‘X_diffmap’].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’] on adata.obsm[‘X_diffmap’].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.diffmap function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.draw_graph">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">draw_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.draw_graph" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.draw_graph.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’] on adata.obsm[‘X_draw_graph_fa’] or adata.obsm[‘X_draw_graph_fr’].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’] on adata.obsm[‘X_draw_graph_fa’] or adata.obsm[‘X_draw_graph_fr’].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.draw_graph function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.spatial">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">spatial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.spatial" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.spatial.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’] on adata.uns[‘spatial’].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’] on adata.uns[‘spatial’].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.spatial function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.embedding">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.embedding" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.embedding.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>basis</strong> – The name of the represenation in adata.obsm that should be used for plotting.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’] on adata.obsm[basis].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’] on adata.obsm[basis].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.embedding function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.embedding_density">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">embedding_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'umap'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.embedding_density" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.embedding_density.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – The name of the represenation in adata.obsm that should be used for plotting.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘gex_data’] on adata.obsm[basis].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’] on adata.obsm[basis].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.embedding_density function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.heatmap">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.heatmap" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.heatmap.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.heatmap function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.dotplot">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">dotplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.dotplot" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.dotplot.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.dotplot function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.tracksplot">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">tracksplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.tracksplot" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.tracksplot.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.tracksplot function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.violin">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">violin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.violin" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.violin.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.violin function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.stacked_violin">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">stacked_violin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.stacked_violin" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.stacked_violin.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.stacked_violin function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.matrixplot">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">matrixplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.matrixplot" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.matrixplot.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.matrixplot function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.clustermap">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">clustermap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.clustermap" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.clustermap.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.clustermap function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.ranking">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">ranking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.ranking" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.ranking.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.ranking function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pl.dendrogram">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pl.</span></span><span class="sig-name descname"><span class="pre">dendrogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_gex_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stored_pax_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pl.dendrogram" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.pl.dendrogram.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>plot_stored_pax_data</em>) – Plot adata.uns[‘gex_data’].</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Plot adata.uns[‘pax_data’].</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.pl.dendrogram function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A plot of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
+<div class="section" id="pyviper-pl">
+<h2>pyviper.pl<a class="headerlink" href="#pyviper-pl" title="Permalink to this heading"></a></h2>
 </div>
-<div class="section" id="module-pyviper.pp">
-<span id="pyviper-pp"></span><h2>pyviper.pp<a class="headerlink" href="#module-pyviper.pp" title="Permalink to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pp._mad_from_R">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pp.</span></span><span class="sig-name descname"><span class="pre">_mad_from_R</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.4826</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pp._mad_from_R" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pp.rank_norm">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pp.</span></span><span class="sig-name descname"><span class="pre">rank_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NUM_FUN=&lt;function</span> <span class="pre">median&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DEM_FUN=&lt;function</span> <span class="pre">_mad_from_R&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_input=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_output=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pp.rank_norm" title="Permalink to this definition"></a></dt>
-<dd><p>Compute a double rank normalization on an anndata, np.array, or pd.DataFrame.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> – Data stored in an anndata object, np.array or pd.DataFrame.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>verbose</em>) – The first function to be applied across each column.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – The second function to be applied across each column.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – For an anndata input, the layer to use. When None, the input layer is anndata.X.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – For an anndata input, the name of the layer where to store.
-When None, this is anndata.X.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Whether to give additional output about the progress of the function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A double rank transformed version of the input data</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pp.__sigT">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pp.</span></span><span class="sig-name descname"><span class="pre">__sigT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inflection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pp.__sigT" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pp.viper_similarity">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pp.</span></span><span class="sig-name descname"><span class="pre">viper_similarity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[4,</span> <span class="pre">2]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['two-sided',</span> <span class="pre">'greater',</span> <span class="pre">'less']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_by_feature_groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pp.viper_similarity" title="Permalink to this definition"></a></dt>
-<dd><p>If ws is a single number, weighting is performed using an exponential function.
-If ws is a 2 numbers vector, weighting is performed with a symmetric sigmoid
-function using the first element as inflection point and the second as trend.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – An anndata.AnnData containing protein activity (NES), where rows are
-observations/samples (e.g. cells or groups) and columns are features
-(e.g. proteins or pathways).</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>filter_by_feature_groups</em>) – Optional number of top regulators to consider for computing the similarity</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Number indicating the weighting exponent for the signature, or vector of
-2 numbers indicating the inflection point and the value corresponding to
-a weighting score of .1 for a sigmoid transformation, only used if nn is
-ommited.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Character string indicating whether the most active (greater), less
-active (less) or both tails (two.sided) of the signature should be used
-for computing the similarity.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – The layer to use as input data to compute the signatures.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – The selected regulators, such that all other regulators are filtered out
-from the input data. If None, all regulators will be included. Regulator
-sets must be from one of the following: “tfs”, “cotfs”, “sig”, “surf”.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><em>The original anndata.AnnData object where adata.obsp[‘viper_similarity’]</em></p></li>
-<li><p><em>contains a signature-based distance numpy.ndarray.</em></p></li>
-</ul>
-</p>
-</dd>
-</dl>
-<p class="rubric">References</p>
-<p>Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H.,
-&amp; Califano, A. (2016). Functional characterization of somatic mutations in
-cancer using network-based inference of protein activity. Nature genetics,
-48(8), 838-847.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pp.aracne3_to_regulon">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pp.</span></span><span class="sig-name descname"><span class="pre">aracne3_to_regulon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">net_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anno</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MI_thres</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regul_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_count_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pp.aracne3_to_regulon" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pp.select_cells">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pp.</span></span><span class="sig-name descname"><span class="pre">select_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_cells_per_metacell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probability_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_decay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cells_gq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adata_gq_cells</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pp.select_cells" title="Permalink to this definition"></a></dt>
-<dd><p>Select a set of cells for a metacell based on specified probability weights. A good quality cell is defined as a cell with
-silouhette score greater than 0.1.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>n_cells_per_metacell</strong> (<em>int</em>) – Number of cells to select for the metacell.</p></li>
-<li><p><strong>probability_weights</strong> (<em>numpy.ndarray</em>) – Array of probability weights for each cell.</p></li>
-<li><p><strong>use_decay</strong> (<em>bool</em>) – If True, use penalized probability sampling with decay.</p></li>
-<li><p><strong>decay_factor</strong> (<em>float</em>) – Decay factor for penalized probability.</p></li>
-<li><p><strong>num_cells_gq</strong> (<em>int</em>) – Total number of good-quality cells.</p></li>
-<li><p><strong>adata_gq_cells</strong> (<em>anndata.AnnData</em>) – Anndata object containing good-quality cells data.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Array of selected cell indices for the metacell.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>numpy.ndarray</p>
-</dd>
-</dl>
-<p>If <cite>use_decay</cite> is True, the function performs penalized probability sampling
-using the specified probability weights and decay factor. It selects <cite>n_cells_per_metacell</cite>
-cells based on a combined score of probabilities and distances. If <cite>use_decay</cite> is False,
-the function performs uniform probability sampling.</p>
-<p>The selected cell indices are returned as a numpy array.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pp.sparse_argsort">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pp.</span></span><span class="sig-name descname"><span class="pre">sparse_argsort</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pp.sparse_argsort" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pp.generateRandomCellID">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pp.</span></span><span class="sig-name descname"><span class="pre">generateRandomCellID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pp.generateRandomCellID" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.pp.generateMetacellAnnData">
-<span class="sig-prename descclassname"><span class="pre">pyviper.pp.</span></span><span class="sig-name descname"><span class="pre">generateMetacellAnnData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_metacells_per_cluster</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_metacells</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cells_per_metacell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'clusters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'proportional'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_dir_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_decay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.pp.generateMetacellAnnData" title="Permalink to this definition"></a></dt>
-<dd><p>Generate an AnnData object representing metacells from an input AnnData object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>arg0</strong> (<em>anndata.AnnData</em>) – Input AnnData object containing single-cell data.</p></li>
-<li><p><strong>n_metacells_per_cluster</strong> (<em>int</em>) – Number of metacells to generate for each cluster.</p></li>
-<li><p><strong>n_metacells</strong> (<em>int</em>) – Total number of metacells to generate.</p></li>
-<li><p><strong>n_cells_per_metacell</strong> (<em>int</em>) – Number of cells to include in each metacell.</p></li>
-<li><p><strong>n_neighbors</strong> (<em>int</em>) – Number of neighbors for computing cell-cell distances.</p></li>
-<li><p><strong>cluster_label</strong> (<em>str</em>) – Name of the column in the obs attribute specifying cell clusters.</p></li>
-<li><p><strong>method</strong> (<em>str</em>) – Method for generating metacells (“proportional”, “absolute”, “relative”).</p></li>
-<li><p><strong>experiment_dir_path</strong> (<em>str</em>) – Path to the directory to save the generated data.</p></li>
-<li><p><strong>use_decay</strong> (<em>bool</em>) – If True, use probability decay during metacell generation.</p></li>
-<li><p><strong>decay_factor</strong> (<em>float</em>) – Decay factor for probability during metacell generation.</p></li>
-<li><p><strong>seed</strong> (<em>int</em>) – Seed for random number generation.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>AnnData object representing the generated metacells.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>anndata.AnnData</p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Method Differences:</dt><dd><ul class="simple">
-<li><p>“proportional”: This method generates metacells based on the proportion of cells in each cluster.
-Metacells are created proportionally to the cluster sizes, and cell probabilities may decay.</p></li>
-<li><p>“absolute”: Metacells are generated with an absolute number of cells per metacell.
-The method creates a fixed number of cells in each metacell, and cell probabilities may decay.</p></li>
-<li><p>“relative”: Metacells are generated with a relative number of cells per metacell.
-The method creates a variable number of cells based on cluster sizes, and cell probabilities may decay.</p></li>
-</ul>
-</dd>
-</dl>
-<p>This function generates metacells from the input single-cell data in the form of an AnnData object.
-The method of metacell generation can be selected based on the <cite>method</cite> parameter. The resulting
-AnnData object contains metacell data, and the generated metacells are saved in the specified
-<cite>experiment_dir_path</cite>.</p>
-</dd></dl>
-
+<div class="section" id="pyviper-pp">
+<h2>pyviper.pp<a class="headerlink" href="#pyviper-pp" title="Permalink to this heading"></a></h2>
 </div>
-<div class="section" id="module-pyviper.tl">
-<span id="pyviper-tl"></span><h2>pyviper.tl<a class="headerlink" href="#module-pyviper.tl" title="Permalink to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.tl.pca">
-<span class="sig-prename descclassname"><span class="pre">pyviper.tl.</span></span><span class="sig-name descname"><span class="pre">pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_by_feature_groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.tl.pca" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.tl.pca.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>filter_by_feature_groups</em>) – The layer to use as input data.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – The selected regulators, such that all other regulators are filtered out
-from the input data. If None, all regulators will be included. Regulator
-sets must be from one of the following: “tfs”, “cotfs”, “sig”, “surf”.</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.tl.pca function.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.tl.dendrogram">
-<span class="sig-prename descclassname"><span class="pre">pyviper.tl.</span></span><span class="sig-name descname"><span class="pre">dendrogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupby</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_added</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_by_feature_groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.tl.dendrogram" title="Permalink to this definition"></a></dt>
-<dd><p>A wrapper for the scanpy function sc.tl.dendrogram.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>filter_by_feature_groups</em>) – The key in adata.uns where the dendrogram should be stored.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – The layer to use as input data.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – The selected regulators, such that all other regulators are filtered out
-from the input data. If None, all regulators will be included. Regulator
-sets must be from one of the following: “tfs”, “cotfs”, “sig”, “surf”.</p></li>
-<li><p><strong>**kwargs</strong> – Arguments to provide to the sc.tl.dendrogram function.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.tl.stouffer">
-<span class="sig-prename descclassname"><span class="pre">pyviper.tl.</span></span><span class="sig-name descname"><span class="pre">stouffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_column_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_by_feature_groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.tl.stouffer" title="Permalink to this definition"></a></dt>
-<dd><p>Compute a stouffer signature on each of your clusters in an anndata object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> – Gene expression, protein activity or pathways stored in an anndata object.</p></li>
-<li><p><strong>obs_column_name</strong> – The name of the column of observations to use as clusters.</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>filter_by_feature_groups</em>) – The layer to use as input data to compute the signatures.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – The selected regulators, such that all other regulators are filtered out
-from the input data. If None, all regulators will be included. Regulator
-sets must be from one of the following: “tfs”, “cotfs”, “sig”, “surf”.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A new anndata object containing cluster stouffer signatures.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.tl.stouffer_clusters_df">
-<span class="sig-prename descclassname"><span class="pre">pyviper.tl.</span></span><span class="sig-name descname"><span class="pre">stouffer_clusters_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dat_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_vector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.tl.stouffer_clusters_df" title="Permalink to this definition"></a></dt>
-<dd><p>Compute a stouffer signature on each of your clusters from a DataFrame.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dat_df</strong> – A pandas dataframe containing input data.</p></li>
-<li><p><strong>cluster_vector</strong> – A cluster vector corresponding to observations in the pd.DataFrame.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A new pd.DataFrame containing cluster stouffer signatures.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.tl.nes_to_pval_df">
-<span class="sig-prename descclassname"><span class="pre">pyviper.tl.</span></span><span class="sig-name descname"><span class="pre">nes_to_pval_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dat_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjust</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.tl.nes_to_pval_df" title="Permalink to this definition"></a></dt>
-<dd><p>Compute (adjusted) p-value associated to the viper-computed NES in a pd.DataFrame.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dat_df</strong> – A pd.Series or pd.DataFrame containing protein activity (NES), pathways (NES) data or
-Stouffer-integrated NES data, where rows are observations/samples (e.g. cells or groups) and
-columns are features (e.g. proteins or pathways).</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>axs</em>) – If <cite>True</cite>, returns adjusted p values using FDR Benjamini-Hochberg procedure.
-If <cite>False</cite>, does not adjust p values</p></li>
-<li><p><strong>(</strong><strong>default</strong> – axis along which to perform the p-value correction (Used only if the input is a pd.DataFrame).
-Possible values are 0 or 1.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>A pd.Series or pd.DataFrame objects of (adjusted) p-values.</p>
-</dd>
-</dl>
-<p class="rubric">References</p>
-<dl class="simple">
-<dt>Benjamini, Y., &amp; Hochberg, Y. (1995). Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing.</dt><dd><p>Journal of the Royal Statistical Society. Series B (Methodological), 57(1), 289–300.
-<a class="reference external" href="http://www.jstor.org/stable/2346101">http://www.jstor.org/stable/2346101</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.tl._generate_interactome_from_pax_data">
-<span class="sig-prename descclassname"><span class="pre">pyviper.tl.</span></span><span class="sig-name descname"><span class="pre">_generate_interactome_from_pax_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pax_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactome_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vpmat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_top</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_symmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.tl._generate_interactome_from_pax_data" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyviper.tl.OncoMatch">
-<span class="sig-prename descclassname"><span class="pre">pyviper.tl.</span></span><span class="sig-name descname"><span class="pre">OncoMatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pax_data_to_test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pax_data_for_cMRs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tcm_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">both_ways</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">om_max_NES_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">om_min_logp_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enrichment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'area'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_added</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'om'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.tl.OncoMatch" title="Permalink to this definition"></a></dt>
-<dd><p>The OncoMatch function that computes -log10 p-values for each sample in pax_data_to_test
-of the MRs of each sample in pax_data_for_cMRs.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pax_data_to_test</strong> – An anndata.AnnData or pd.DataFrame containing protein activity (NES),
-where rows are observations/samples (e.g. cells or groups) and
-columns are features (e.g. proteins or pathways).</p></li>
-<li><p><strong>pax_data_for_cMRs</strong> – An anndata.AnnData or pd.DataFrame containing protein activity (NES),
-where rows are observations/samples (e.g. cells or groups) and
-columns are features (e.g. proteins or pathways).</p></li>
-<li><p><strong>(</strong><strong>default</strong> (<em>key_added</em>) – Number of top MRs from each sample to use to compute regulators.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – Whether to also use the candidate MRs of pax_data_to_test to compute
-NES for the samples in pax_data_for_cMRs, and then average.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – The maximum NES scores before using a cutoff.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – The minimum logp value threshold, such that all logp values smaller than
-this value are set to 0.</p></li>
-<li><p><strong>(</strong><strong>default</strong> – The method of compute enrichment. ‘area’ or ‘narnea’</p></li>
-<li><p><strong>(</strong><strong>default</strong> – The slot in pax_data_to_test.obsm to store the oncomatch results.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><em>A pd.DataFrame objects of -log10 p-values with shape n_samples in</em></p></li>
-<li><p><em>pax_data_to_test by n_samples pax_data_for_cMRs.</em></p></li>
-</ul>
-</p>
-</dd>
-</dl>
-<p class="rubric">References</p>
-<p>Alvarez, M. J. et al. A precision oncology approach to the pharmacological
-targeting of mechanistic dependencies in neuroendocrine tumors. Nat Genet 50,
-979–989, doi:10.1038/s41588-018-0138-4 (2018).</p>
-<p>Alvarez, M. J. et al. Reply to ’H-STS, L-STS and KRJ-I are not authentic GEPNET
-cell lines’. Nat Genet 51, 1427–1428, doi:10.1038/s41588-019-0509-5 (2019).</p>
-</dd></dl>
-
+<div class="section" id="pyviper-tl">
+<h2>pyviper.tl<a class="headerlink" href="#pyviper-tl" title="Permalink to this heading"></a></h2>
 </div>
 <div class="section" id="module-pyviper.aREA.aREA_classic">
 <span id="pyviper-area-area-classic"></span><h2>pyviper.aREA.aREA_classic<a class="headerlink" href="#module-pyviper.aREA.aREA_classic" title="Permalink to this heading"></a></h2>
@@ -1181,7 +428,8 @@ by Enriched Regulon analysis) algorithm.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>gex_data</strong> – Gene expression stored in an anndata object (e.g. from Scanpy).</p></li>
+<li><p><strong>gex_data</strong> – Gene expression stored in an anndata object (e.g. from Scanpy) or in a
+pd.DataFrame.</p></li>
 <li><p><strong>interactome</strong> – The interactome object.</p></li>
 <li><p><strong>layer</strong> – The layer in the anndata object to use as the gene expression input
 (default = None).</p></li>
@@ -1218,7 +466,8 @@ NES scores, such that they cannot be compared to those with fewer targets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>gex_data</strong> – Gene expression stored in an anndata object (e.g. from Scanpy).</p></li>
+<li><p><strong>gex_data</strong> – Gene expression stored in an anndata object (e.g. from Scanpy) or in a
+pd.DataFrame.</p></li>
 <li><p><strong>interactome</strong> – An object of class Interactome.</p></li>
 <li><p><strong>(</strong><strong>default</strong> (<em>verbose</em>) – The layer in the anndata object to use as the gene expression input.</p></li>
 <li><p><strong>(</strong><strong>default</strong> – Whether to filter out genes not present in the interactome (True) or to
@@ -1290,7 +539,8 @@ compared to those with fewer targets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>gex_data</strong> – Gene expression stored in an anndata object (e.g. from Scanpy).</p></li>
+<li><p><strong>gex_data</strong> – Gene expression stored in an anndata object (e.g. from Scanpy) or in a
+pd.DataFrame.</p></li>
 <li><p><strong>interactome</strong> – An object of class Interactome.</p></li>
 <li><p><strong>(</strong><strong>default</strong> (<em>verbose</em>) – The layer in the anndata object to use as the gene expression input.</p></li>
 <li><p><strong>(</strong><strong>default</strong> – Whether to filter out genes not present in the interactome (True) or to
@@ -1332,7 +582,7 @@ given.</p></li>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, ..</p>
+    <p>&#169; Copyright 2023.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
