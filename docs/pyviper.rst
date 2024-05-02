@@ -52,15 +52,14 @@ pyviper\.pp
    :members:
    :undoc-members:
    :show-inheritance:
-.. autofunction:: pyviper.pp._mad_from_R
 .. autofunction:: pyviper.pp.rank_norm
-.. autofunction:: pyviper.pp.__sigT
+.. autofunction:: pyviper.pp.stouffer
+.. autofunction:: pyviper.pp.spearman
 .. autofunction:: pyviper.pp.viper_similarity
 .. autofunction:: pyviper.pp.aracne3_to_regulon
-.. autofunction:: pyviper.pp.select_cells
-.. autofunction:: pyviper.pp.sparse_argsort
-.. autofunction:: pyviper.pp.generateRandomCellID
-.. autofunction:: pyviper.pp.generateMetacellAnnData
+.. autofunction:: pyviper.pp.nes_to_pval
+.. autofunction:: pyviper.pp.repr_subsample
+.. autofunction:: pyviper.pp.repr_metacells
 
 pyviper\.tl
 ----------------
@@ -71,11 +70,9 @@ pyviper\.tl
    :show-inheritance:
 .. autofunction:: pyviper.tl.pca
 .. autofunction:: pyviper.tl.dendrogram
-.. autofunction:: pyviper.tl.stouffer
-.. autofunction:: pyviper.tl.stouffer_clusters_df
-.. autofunction:: pyviper.tl.nes_to_pval_df
-.. autofunction:: pyviper.tl._generate_interactome_from_pax_data
-.. autofunction:: pyviper.tl.OncoMatch
+.. autofunction:: pyviper.tl.oncomatch
+.. autofunction:: pyviper.tl.find_top_mrs
+.. autofunction:: pyviper.tl.path_enr
 
 pyviper\.aREA.aREA\_classic
 --------------------------------
