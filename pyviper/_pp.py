@@ -137,14 +137,15 @@ def _corr_btw_2D_and_1D_arrays(arr_2d, arr_1d, axis):
 
     # Compute correlation coefficient
     if axis == 0:
-        corr = np.sum(arr_2d_centered * arr_1d_centered[:, np.newaxis], axis=axis) / (arr_2d.shape[0] - 1)
-        corr /= (arr_2d_std.squeeze() * arr_1d_std)
+        numerator = np.sum(arr_2d_centered * arr_1d_centered[:, np.newaxis], axis=axis)
+        denominator = np.sum((arr_2d_centered**2), axis=axis)**0.5 * np.sum(arr_1d_centered**2)**0.5
     elif axis == 1:
-        corr = np.sum(arr_2d_centered * arr_1d_centered, axis=axis) / (arr_2d.shape[1] - 1)
-        corr /= (arr_2d_std * arr_1d_std).squeeze()
+        numerator = np.sum(arr_2d_centered * arr_1d_centered, axis=axis)
+        denominator = np.sum((arr_2d_centered**2), axis=axis)**0.5 * np.sum(arr_1d_centered**2)**0.5
     else:
         raise ValueError("axis must be 0 or 1")
 
+    corr = numerator / denominator
     return corr
 
 def _get_closeness_to_centroid(pca_array, cluster_mask):
