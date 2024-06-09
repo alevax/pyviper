@@ -1,0 +1,26 @@
+#!/bin/bash
+
+WD=/ifs/scratch/c2b2/ac_lab/lz2841/pyther_tests/pyVIPER_tests_May_2024/ # cwd
+RAM=16G
+OUTPUT_ID_RUNS=${WD}/pyVIPER_outputs/Py_run_ids_${RAM}.csv # to read in 
+OUTPUT_VMEM=${WD}/pyVIPER_outputs/Py_output_vmem_${RAM}.csv # output file to save runtimes
+
+# Output the header to the output file
+echo "jobname,jobnumber,cpu,mem,maxvmem,exit_status" > ${OUTPUT_VMEM}
+
+# Read the jobnames from the file and loop through them
+tail -n +2 ${OUTPUT_ID_RUNS} | \
+while IFS=, read -r RUN_ID; do
+    # Run qacct command for each jobname and redirect the relevant outputs
+    qacct -j "$RUN_ID" | \
+    awk '
+        BEGIN {OFS=","}
+        /jobname/ {jobname=$2}
+        /jobnumber/ {jobnumber=$2}
+        /cpu/ {cpu=$2}
+        /mem/ {mem=$2}
+        /maxvmem/ {maxvmem=$2}
+        /exit_status/ {exit_status=$2}
+        END {print jobname,jobnumber,cpu,mem,maxvmem,exit_status}
+    '
+done >> "${OUTPUT_VMEM}"
