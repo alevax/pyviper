@@ -39,10 +39,10 @@ def TFs(species = None, path_to_tfs = None):
 
     Parameters
     ----------
-    species (default: None)
+    species : default: None
         When left as None, the species setting in pyviper.config will be used.
         Otherwise, manually specify "human" or "mouse".
-    path_to_tfs (default: None)
+    path_to_tfs : default: None
         When left as None, the path to TFs setting in pyviper.config will be used.
         Otherwise, manually specify a filepath to a .txt file containing TFs,
         one on each line.
@@ -59,10 +59,10 @@ def coTFs(species = None, path_to_cotfs = None):
 
     Parameters
     ----------
-    species (default: None)
+    species : default: None
         When left as None, the species setting in pyviper.config will be used.
         Otherwise, manually specify "human" or "mouse".
-    path_to_cotfs (default: None)
+    path_to_cotfs : default: None
         When left as None, the path to coTFs setting in pyviper.config will be used.
         Otherwise, manually specify a filepath to a .txt file containing coTFs,
         one on each line.
@@ -79,10 +79,10 @@ def sig(species = None, path_to_sig = None):
 
     Parameters
     ----------
-    species (default: None)
+    species : default: None
         When left as None, the species setting in pyviper.config will be used.
         Otherwise, manually specify "human" or "mouse".
-    path_to_sig (default: None)
+    path_to_sig : default: None
         When left as None, the path to sig setting in pyviper.config will be used.
         Otherwise, manually specify a filepath to a .txt file containing
         signaling proteins, one on each line.
@@ -99,10 +99,10 @@ def surf(species = None, path_to_surf = None):
 
     Parameters
     ----------
-    species (default: None)
+    species : default: None
         When left as None, the species setting in pyviper.config will be used.
         Otherwise, manually specify "human" or "mouse".
-    path_to_sig (default: None)
+    path_to_sig : default: None
         When left as None, the path to surf setting in pyviper.config will be used.
         Otherwise, manually specify a filepath to a .txt file containing surface
         proteins, one on each line.

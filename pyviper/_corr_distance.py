@@ -62,17 +62,16 @@ def corr_distance(adata,
     ----------
     adata
         An anndata object containing a signature in adata.X
-    use_reduction (default: True)
+    use_reduction : default: True
         Whether to use a reduction (True) (highly recommended - accurate & much faster)
         or to use the direct matrix (False) for computing distance.
-    reduction_slot (default: "X_pca")
+    reduction_slot : default: "X_pca"
         If reduction is TRUE, then specify which slot for the reduction to use.
-    key_added (default: "corr_dist")
+    key_added : default: "corr_dist"
         Slot in obsp to store the resulting distance matrix.
 
     Returns
     -------
-    Adds fields to the input adata, such that it contains a distance matrix
-    stored in adata.obsp[key_added].
+    Adds fields to the input adata, such that it contains a distance matrix stored in adata.obsp[key_added].
     """
     return _corr_distance(adata, use_reduction, reduction_slot, key_added, copy)

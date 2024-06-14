@@ -23,17 +23,17 @@ def rank_norm(
     ----------
     adata
         Data stored in an anndata object, np.array or pd.DataFrame.
-    NUM_FUN (default: np.median)
+    NUM_FUN : default: np.median
         The first function to be applied across each column.
-    DEM_FUN (default: _mad_from_R)
+    DEM_FUN : default: _mad_from_R
         The second function to be applied across each column.
-    layer (default: None)
+    layer : default: None
         For an anndata input, the layer to use. When None, the input layer is
         anndata.X.
-    key_added (default: None)
+    key_added : default: None
         For an anndata input, the name of the layer where to store. When None,
         this is anndata.X.
-    copy (default: False)
+    copy : default: False
         Whether to return a rank-transformed copy (True) or to instead transform
         the original input (False).
 
@@ -72,31 +72,30 @@ def stouffer(adata,
     obs_column_name
         The name of the column of observations in adata to use as clusters, or a
         cluster vector corresponding to observations.
-    layer (default: None)
+    layer : default: None
         The layer to use as input data to compute the signatures.
-    filter_by_feature_groups (default: None)
+    filter_by_feature_groups : default: None
         The selected regulators, such that all other regulators are filtered out
         from input data. If None, all regulators will be included. Regulator
         sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
-    key_added (default: 'stouffer')
+    key_added : default: 'stouffer'
         The slot in adata.uns to store the stouffer signatures.
-    compute_pvals (default: True)
+    compute_pvals : default: True
         Whether to compute a p-value for each score to return in the results.
-    null_iters (default: 1000)
+    null_iters : default: 1000
         The number of iterations to use to compute a null model to assess the
         p-values of each of the stouffer scores.
-    verbose (default: True)
+    verbose : default: True
         Whether to provide additional output during the execution of the function.
-    return_as_df (default: False)
+    return_as_df : default: False
         If True, returns the stouffer signature in a pd.DataFrame. If False,
         stores it in adata.var[key_added].
-    copy (default: False)
+    copy : default: False
         Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
-    When return_as_df is False, adds the cluster stouffer signatures to
-    adata.var[key_added]. When return_as_df is True, returns as pd.DataFrame.
+    When return_as_df is False, adds the cluster stouffer signatures to adata.var[key_added]. When return_as_df is True, returns as pd.DataFrame.
     """
     return _stouffer(adata,
                      obs_column_name,
@@ -130,28 +129,27 @@ def mwu(adata,
     obs_column_name
         The name of the column of observations in adata to use as clusters, or a
         cluster vector corresponding to observations.
-    layer (default: None)
+    layer : default: None
         The layer to use as input data to compute the signatures.
-    filter_by_feature_groups (default: None)
+    filter_by_feature_groups : default: None
         The selected regulators, such that all other regulators are filtered out
         from input data. If None, all regulators will be included. Regulator
         sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
-    key_added (default: 'mwu')
+    key_added : default: 'mwu'
         The slot in adata.uns to store the MWU signatures.
-    compute_pvals (default: True)
+    compute_pvals : default: True
         Whether to compute a p-value for each score to return in the results.
-    verbose (default: True)
+    verbose : default: True
         Whether to provide additional output during the execution of the function.
-    return_as_df (default: False)
+    return_as_df : default: False
         If True, returns the MWU signature in a pd.DataFrame. If False,
         stores it in adata.var[key_added].
-    copy (default: False)
+    copy : default: False
         Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
-    When return_as_df is False, adds the cluster MWU signatures to
-    adata.var[key_added]. When return_as_df is True, returns as pd.DataFrame.
+    When return_as_df is False, adds the cluster MWU signatures to adata.var[key_added]. When return_as_df is True, returns as pd.DataFrame.
     """
     return _mwu(adata,
                 obs_column_name,
@@ -189,31 +187,30 @@ def spearman(adata,
     obs_column_name
         The name of the column of observations in adata to use as clusters, or a
         cluster vector corresponding to observations.
-    layer (default: None)
+    layer : default: None
         The layer to use as input data to compute the correlation.
-    filter_by_feature_groups (default: None)
+    filter_by_feature_groups : default: None
         The selected regulators, such that all other regulators are filtered out
         from input data. If None, all regulators will be included. Regulator
         sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
-    key_added (default: 'spearman')
+    key_added : default: 'spearman'
         The slot in adata.uns to store the spearman correlation.
-    compute_pvals (default: True)
+    compute_pvals : default: True
         Whether to compute a p-value for each score to return in the results.
-    null_iters (default: 1000)
+    null_iters : default: 1000
         The number of iterations to use to compute a null model to assess the
         p-values of each of the spearman scores.
-    verbose (default: True)
+    verbose : default: True
         Whether to provide additional output during the execution of the function.
-    return_as_df (default: False)
+    return_as_df : default: False
         If True, returns the spearman signature in a pd.DataFrame. If False,
         stores it in adata.var[key_added].
-    copy (default: False)
+    copy : default: False
         Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
-    When return_as_df is False, adds the cluster spearman correlation to
-    adata.var[key_added]. When return_as_df is True, returns as pd.DataFrame.
+    When return_as_df is False, adds the cluster spearman correlation to adata.var[key_added]. When return_as_df is True, returns as pd.DataFrame.
     """
     return _spearman(adata,
                      pca_slot,
@@ -251,26 +248,26 @@ def viper_similarity(adata,
         An anndata.AnnData containing protein activity (NES), where rows are
         observations/samples (e.g. cells or groups) and columns are features
         (e.g. proteins or pathways).
-    nn (default: None)
+    nn : default: None
         Optional number of top regulators to consider for computing the similarity
-    ws (default: [4, 2])
+    ws : default: [4, 2]
         Number indicating the weighting exponent for the signature, or vector of
         2 numbers indicating the inflection point and the value corresponding to
         a weighting score of .1 for a sigmoid transformation, only used if nn is
         ommited.
-    alternative (default: 'two-sided')
+    alternative : default: 'two-sided'
         Character string indicating whether the most active (greater), less
         active (less) or both tails (two.sided) of the signature should be used
         for computing the similarity.
-    layer (default: None)
+    layer : default: None
         The layer to use as input data to compute the signatures.
-    filter_by_feature_groups (default: None)
+    filter_by_feature_groups : default: None
         The selected regulators, such that all other regulators are filtered out
         from the input data. If None, all regulators will be included. Regulator
         sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
-    key_added (default: "viper_similarity")
+    key_added : default: "viper_similarity"
         The name of the slot in the adata.obsp to store the output.
-    copy (default: False)
+    copy : default: False
         Determines whether a copy of the input AnnData is returned.
 
     Returns
@@ -279,12 +276,9 @@ def viper_similarity(adata,
 
     References
     ----------
-    [1] Julio, M. K. -d. et al. Regulation of extra-embryonic endoderm stem cell
-    differentiation by Nodal and Cripto signaling. Development 138, 3885-3895 (2011).
-    [2] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H.,
-    & Califano, A. (2016). Functional characterization of somatic mutations in
-    cancer using network-based inference of protein activity. Nature genetics,
-    48(8), 838-847.
+    [1] Julio, M. K. -d. et al. Regulation of extra-embryonic endoderm stem cell differentiation by Nodal and Cripto signaling. Development 138, 3885-3895 (2011).
+
+    [2] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H., & Califano, A. (2016). Functional characterization of somatic mutations in cancer using network-based inference of protein activity. Nature genetics, 48(8), 838-847.
     """
     return _viper_similarity(
         adata,
@@ -314,21 +308,20 @@ def aracne3_to_regulon(
     ----------
     net_file
         A string containing the path to the ARACNe3 output
-    net_df (default: None)
+    net_df : default: None
         Whether to passt a pd.DataFrame instead of the path
-    anno (default: None)
+    anno : default: None
         Gene ID annotation
-    MI_thres (default: 0)
+    MI_thres : default: 0
         Threshold on Mutual Information (MI) to select the regulators and target pairs
-    regul_size (default: 50)
+    regul_size : default: 50
         Number of (top) targets to include in each regulon
-    normalize_MI_per_regulon (default: True)
+    normalize_MI_per_regulon : default: True
         Whether to normalize MI values each regulon by the maximum value
 
     Returns
     -------
-    A pd.DataFrame containing an ARACNe3-inferred gene regulatory network with the
-    following 4 columns: "regulator", "target", "mor" (mode of regulation) and "likelihood".
+    A pd.DataFrame containing an ARACNe3-inferred gene regulatory network with the following 4 columns: "regulator", "target", "mor" (mode of regulation) and "likelihood".
     """
     return _aracne3_to_regulon(
         net_file,
@@ -382,28 +375,27 @@ def nes_to_pval(
         object, or a pandas dataframe containing input data, where rows are
         observations/samples (e.g. cells or groups) and columns are features
         (e.g. proteins or pathways).
-    layer : (default: None)
+    layer : default: None
         Entry of layers to tranform.
-    key_added : (default: None)
+    key_added : default: None
         Name of layer to save result in a new layer instead of adata.X.
-    lower_tail: default (True)
+    lower_tail : default: True
     	If `True` (default), probabilities are P(X <= x)
     	If `False`, probabilities are P(X > x)
-    adjust (default: True)
+    adjust : default: True
         If `True`, returns adjusted p values using FDR Benjamini-Hochberg procedure.
         If `False`, does not adjust p values
-    axs (default: 1)
+    axs : default: 1
         axis along which to perform the p-value correction (Used only if the input is a pd.DataFrame).
         Possible values are 0 or 1.
-    neg_log : (default: False)
+    neg_log : default: False
         Whether to transform VIPER-computed NES into -log10(p-value).
-    copy (default: False)
+    copy : default: False
         Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
-    Saves the input data as a transformed version. If key_added is specified,
-    saves the results in adata.layers[key_added].
+    Saves the input data as a transformed version. If key_added is specified, saves the results in adata.layers[key_added].
     """
     return _nes_to_pval(adata, layer, key_added, lower_tail, adjust, axs, neg_log, copy)
 
@@ -426,29 +418,29 @@ def repr_subsample(adata,
     ----------
     adata
         An anndata object containing a distance object in adata.obsp.
-    pca_slot (default: "X_pca")
+    pca_slot : default: "X_pca"
         The slot in adata.obsm where the PCA object is stored. One way of
         generating this object is with sc.pp.pca.
-    size (default: 1000)
+    size : default: 1000
         The size of the representative subsample
-    eliminate (default: False)
+    eliminate : default: False
         Whether to trim down adata to the subsample (True) or leave the
         subsample as an annotation in adata.obs[key_added].
-    seed (default: 0)
+    seed : default: 0
         The random seed used when taking samples of the data.
-    verbose (default: True)
+    verbose : default: True
         Whether to provide runtime information.
-    njobs (default: 1)
+    njobs : default: 1
         The number of cores to use for the analysis. Using more than 1 core
         (multicore) speeds up the analysis.
-    copy (default: False)
+    copy : default: False
         Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
     When copy is False, saves the subsample annotation in adata.var[key_added].
-    When copy is True, return an anndata with this annotation. When eliminate is
-    True, modify the adata by subsetting it down to the subsample.
+    When copy is True, return an anndata with this annotation.
+    When eliminate is True, modify the adata by subsetting it down to the subsample.
     """
     return _representative_subsample_anndata(
         adata,
@@ -508,78 +500,73 @@ def repr_metacells(
     ----------
     adata
         An anndata object containing a distance object in adata.obsp.
-    counts (default: None)
+    counts : default: None
         A pandas DataFrame or AnnData object of unnormalized gene expression
         counts that has the same samples in the same order as that of adata.
         If counts are left as None, adata must have counts stored in adata.raw.
-    pca_slot (default: "X_pca")
+    pca_slot : default: "X_pca"
         The slot in adata.obsm where the PCA object is stored. One way of
         generating this object is with sc.pp.pca.
-    dist_slot (default: "corr_dist")
+    dist_slot : default: "corr_dist"
         The slot in adata.obsp where the distance object is stored. One way of
         generating this object is with pyviper.pp.corr_distance.
-    clusters_slot (default: None)
+    clusters_slot : default: None
         The slot in adata.obs where cluster labels are stored. Cluster-specific
         metacells will be generated using the same parameters with the results
         for each cluster being stored separately in adata.uns.
-    score_slot (default: None)
+    score_slot : default: None
         The slot in adata.obs where a score used to determine and filter cell
         quality are stored (e.g. silhouette score).
-    score_min_thresh (default: None)
+    score_min_thresh : default: None
         The score from adata.obs[score_slot] that a cell must have at minimum to
         be used for metacell construction (e.g. 0.25 is the rule of thumb for
         silhouette score).
-    size (default: 500)
+    size : default: 500
         A specific number of metacells to generate. If set to None,
         perc_data_to_use or perc_incl_data_reused can be used to specify the size
         when n_cells_per_metacell or min_median_depth is given.
-    n_cells_per_metacell (default: None)
+    n_cells_per_metacell : default: None
         The number of cells that should be used to generate single metacell.
         Note that this parameter and min_median_depth cannot both be set as
         they directly relate: e.g. higher n_cells_per_metacell leads to higher
         min_median_depth. If left as None, perc_data_to_use or
         perc_incl_data_reused can be used to specify n_cells_per_metacell when
         size is given.
-    min_median_depth (default: 10000)
+    min_median_depth : default: 10000
         The desired minimum median depth for the metacells (indirectly specifies
         n_cells_per_metacell). The default is set to 10000 as this is recommend
         by PISCES[1]. Note that this parameter and n_cells_per_metacell cannot
         both be set as they directly relate: e.g. higher min_median_depth leads
         to higher n_cells_per_metacell.
-    perc_data_to_use (default: None)
+    perc_data_to_use : default: None
         The percent of the total amount of provided samples that will be used in
         the creation of metacells. Note that this parameter and
         perc_incl_data_reused cannot both be set as they directly relate: e.g.
         higher perc_data_to_use leads to higher perc_incl_data_reused.
-    perc_incl_data_reused (default: None)
+    perc_incl_data_reused : default: None
         The percent of samples that are included in the creation of metacells
         that will be reused (i.e. used in more than one metacell). Note that this
         parameter and perc_data_to_use cannot both be set as they directly relate:
         e.g. higher perc_incl_data_reused leads to higher perc_data_to_use.
-    seed (default: 0)
+    seed : default: 0
         The random seed used when taking samples of the data.
-    key_added (default: "metacells")
+    key_added : default: "metacells"
         The name of the slot in the adata.uns to store the output.
-    verbose (default: True)
+    verbose : default: True
         Whether to provide runtime information and quality statistics.
-    njobs (default: 1)
+    njobs : default: 1
         The number of cores to use for the analysis. Using more than 1 core
         (multicore) speeds up the analysis.
-    copy (default: False)
+    copy : default: False
         Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
-    Saves the metacells as a pandas dataframe in adata.uns[key_added]. Attributes
-    that contain parameters for and statistics about the construction of the
-    metacells are stored in adata.uns[key_added].attrs. Set copy = True to
-    return a new AnnData object.
+    Saves the metacells as a pandas dataframe in adata.uns[key_added]. Attributes that contain parameters for and statistics about the construction of the metacells are stored in adata.uns[key_added].attrs. Set copy = True to return a new AnnData object.
 
-    Citations
-    -------
-    Obradovic, A., Vlahos, L., Laise, P., Worley, J., Tan, X., Wang, A., &
-    Califano, A. (2021). PISCES: A pipeline for the systematic, protein activity
-    -based analysis of single cell RNA sequencing data. bioRxiv, 6, 22.
+    References
+    ----------
+    Obradovic, A., Vlahos, L., Laise, P., Worley, J., Tan, X., Wang, A., & Califano, A. (2021). PISCES: A pipeline for the systematic, protein activity -based analysis of single cell RNA sequencing data. bioRxiv, 6, 22.
     """
 
     # Here is a summary of parameter choices and their affects:

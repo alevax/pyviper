@@ -1,5 +1,5 @@
-from .aREA.aREA_meta import aREA
-from .NaRnEA.NaRnEA_meta import NaRnEA
+from .aREA import aREA
+from .NaRnEA import NaRnEA
 from ._viper import *
 from .interactome import *
 

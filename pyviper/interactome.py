@@ -11,41 +11,40 @@ __all__ = ['Interactome']
 
 class Interactome:
     # class initialization
+    """\
+    Create an Interactome object to contain the results of ARACNe.
+    This object describes the relationship between regulator proteins (e.g.
+    TFs and CoTFs) and their downstream target genes with mor (Mode Of
+    Regulation, e.g. spearman correlation) indicating directionality and
+    likelihood (e.g. mutual information) indicating weight of association.
+    An Interactome object can be given to pyviper.viper along with a gene
+    expression signature to generate a protein activity matrix with the
+    VIPER (Virtual Inference of Protein-activity by Enriched Regulon
+    analysis) algorithm[1].
+
+    Parameters
+    ----------
+    name
+        A filepath to one's disk to store the Interactome.
+    net_table : default: None
+        Either
+        (1) a pd.DataFrame containing four columns in this order:
+            "regulator", "target", "mor", "likelihood"
+        (2) a filepath to this pd.DataFrame stored either as a .csv,
+        .tsv or .pkl.
+        (3) a filepath to an Interacome object stored as a .pkl.
+    input_type : default: None
+        Only relevant when net_table is a filepath. If None, the input_type
+        will be inferred from the net_table. Otherwise, specify "csv", "tsv"
+        or "pkl".
+
+    Citations
+    -------
+    [1] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H., & Califano, A. (2016). Functional characterization of somatic
+    mutations in cancer using network-based inference of protein activity.
+    Nature genetics, 48(8), 838-847.
+    """
     def __init__(self, name, net_table=None, input_type=None):
-        """\
-        Create an Interactome object to contain the results of ARACNe.
-        This object describes the relationship between regulator proteins (e.g.
-        TFs and CoTFs) and their downstream target genes with mor (Mode Of
-        Regulation, e.g. spearman correlation) indicating directionality and
-        likelihood (e.g. mutual information) indicating weight of association.
-        An Interactome object can be given to pyviper.viper along with a gene
-        expression signature to generate a protein activity matrix with the
-        VIPER (Virtual Inference of Protein-activity by Enriched Regulon
-        analysis) algorithm[1].
-
-        Parameters
-        ----------
-        name
-            A filepath to one's disk to store the Interactome.
-        net_table (default: None)
-            Either
-            (1) a pd.DataFrame containing four columns in this order:
-                "regulator", "target", "mor", "likelihood"
-            (2) a filepath to this pd.DataFrame stored either as a .csv,
-            .tsv or .pkl.
-            (3) a filepath to an Interacome object stored as a .pkl.
-        input_type (default: None)
-            Only relevant when net_table is a filepath. If None, the input_type
-            will be inferred from the net_table. Otherwise, specify "csv", "tsv"
-            or "pkl".
-
-        Citations
-        -------
-        [1] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye,
-        B. H., & Califano, A. (2016). Functional characterization of somatic
-        mutations in cancer using network-based inference of protein activity.
-        Nature genetics, 48(8), 838-847.
-        """
         self.name = name
         if net_table is None:
             self.net_table = pd.DataFrame(columns=["regulator", "target", "mor", "likelihood"])
@@ -102,7 +101,7 @@ class Interactome:
         ----------
         file_path
             A filepath to one's disk to store the Interactome.
-        output_type (default: None)
+        output_type : default: None
             If None, the output_type will be inferred from the file_path.
             Otherwise, specify "csv", "tsv" or "pkl".
 
@@ -168,12 +167,12 @@ class Interactome:
         ----------
         network_list
             A single object or a list of objects of class Interactome.
-        network_weights (default: None)
+        network_weights : default: None
             An array containing weights for each network being integrated. The
             first weight corresponds to this network, while the others correspond
             to those in the network list in order. If None, equal weights are
             used.
-        normalize_likelihoods (default: False)
+        normalize_likelihoods : default: False
             An extra operation that can performed after the integration
             operation where within each regulator, likelihood values are ranked
             and scaled from 0 to 1.
@@ -415,7 +414,7 @@ class Interactome:
 
         Parameters
         ----------
-        regulators_keep (default: None)
+        regulators_keep : default: None
             This should be either:
             (1) An array or list containing the names of specific regulators you
             wish to keep in the network. When left as None, this parameter is
@@ -423,7 +422,7 @@ class Interactome:
             (2) An array or list containing a group or groups of regulators that
             you wish to keep in the network. These groups should be one of the
             following: "tfs", "cotfs", "sig", "surf".
-        regulators_remove (default: None)
+        regulators_remove : default: None
             This should be either:
             (1) An array or list containing the names of specific regulators you
             wish to remove from the network. When left as None, this parameter
@@ -431,7 +430,7 @@ class Interactome:
             (2) An array or list containing a group or groups of regulators that
             you wish to remove from the network. These groups should be one of the
             following: "tfs", "cotfs", "sig", "surf".
-        verbose (default: True)
+        verbose : default: True
             Report the number of regulators removed during filtering
         """
         # Get the number of regulators before filtering
@@ -475,13 +474,13 @@ class Interactome:
 
         Parameters
         ----------
-        targets_keep (default: None)
+        targets_keep : default: None
             An array containing the names of targets you wish to keep in the
             network. When left as None, this parameter is not used to filter.
-        targets_remove (default: None)
+        targets_remove : default: None
             An array containing the names of targets you wish to remove from the
             network. When left as None, this parameter is not used to filter.
-        verbose (default: True)
+        verbose : default: True
             Report the number of targets removed during filtering
         """
 
@@ -510,17 +509,17 @@ class Interactome:
 
         Parameters
         ----------
-        max_targets (default: 50)
+        max_targets : default: 50
             The maximum number of targets that each regulon is allowed.
-        min_targets (default: None)
+        min_targets : default: None
             The minimum number of targets that each regulon is required.
-        eliminate (default: True)
+        eliminate : default: True
             If eliminate = True, then any regulators with fewer targets than
             max_targets will be removed from the network. In other words, after
             pruning, all regulators will have exactly max_targets number of
             targets. This essentially sets min_targets equal to max_targets
             and ensures all NES scores are comparable with aREA.
-        verbose (default: True)
+        verbose : default: True
             Report the number of targets and regulators removed during pruning
         """
         # Get the number of targets and regulators before pruning
@@ -597,7 +596,7 @@ class Interactome:
         desired_format
             Desired format can be one of four strings: "mouse_symbol",
             "mouse_ensembl", "mouse_entrez", "human_symbol", "human_ensembl" or "human_entrez".
-        verbose (default: True)
+        verbose : default: True
             Report the number of targets successfully and unsucessfully translated
         """
         # Get the number of regulators before translation
@@ -627,7 +626,7 @@ class Interactome:
         desired_format
             Desired format can be one of four strings: "mouse_symbol",
             "mouse_ensembl", "mouse_entrez", "human_symbol", "human_ensembl" or "human_entrez".
-        verbose (default: True)
+        verbose : default: True
             Report the number of regulators successfully and unsucessfully translated
         """
         # Get the number of regulators before translation

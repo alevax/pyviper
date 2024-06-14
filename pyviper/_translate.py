@@ -120,10 +120,10 @@ def translate_adata_index(adata, desired_format, eliminate = True, copy = False)
     desired_format
         Desired format can be one of six strings: "mouse_symbol", "mouse_ensembl",
         "mouse_entrez", "human_symbol", "human_ensembl", or "human_entrez".
-    eliminate (default: True)
+    eliminate : default: True
         Whether to eliminate var rows that don't have a translation. Otherwise,
         None will be left in place in the index.
-    copy (default: False)
+    copy : default: False
         Whether to return a translated copy (True) or to instead translate the
         original input (False).
 
@@ -166,17 +166,16 @@ def translate(adata, desired_format, eliminate = True, copy = False):
     desired_format
         Desired format can be one of six strings: "mouse_symbol", "mouse_ensembl",
         "mouse_entrez", "human_symbol", "human_ensembl", or "human_entrez".
-    eliminate (default: True)
+    eliminate : default: True
         Whether to eliminate var rows that don't have a translation. Otherwise,
         None will be left in place in the index.
-    copy (default: False)
+    copy : default: False
         Whether to return a translated copy (True) or to instead translate the
         original AnnData (False). True when given np.ndarray or list.
 
     Returns
     -------
-    Returns a translated object when copy = True or input is np.ndarray or list.
-    Modifies the original when copy = False and input is AnnData.
+    Returns a translated object when copy = True or input is np.ndarray or list. Modifies the original when copy = False and input is AnnData.
     """
     if isinstance(adata, AnnData):
         if copy is True:

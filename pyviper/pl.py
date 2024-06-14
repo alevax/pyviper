@@ -42,9 +42,9 @@ def pca(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'] on adata.obsm['X_pca'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'] on adata.obsm['X_pca'].
     **kwargs
         Arguments to provide to the sc.pl.pca function.
@@ -74,9 +74,9 @@ def umap(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'] on adata.obsm['X_umap'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'] on adata.obsm['X_umap'].
     **kwargs
         Arguments to provide to the sc.pl.umap function.
@@ -106,9 +106,9 @@ def tsne(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'] on adata.obsm['X_tsne'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'] on adata.obsm['X_tsne'].
     **kwargs
         Arguments to provide to the sc.pl.tsne function.
@@ -138,9 +138,9 @@ def diffmap(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'] on adata.obsm['X_diffmap'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'] on adata.obsm['X_diffmap'].
     **kwargs
         Arguments to provide to the sc.pl.diffmap function.
@@ -170,9 +170,9 @@ def draw_graph(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'] on adata.obsm['X_draw_graph_fa'] or adata.obsm['X_draw_graph_fr'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'] on adata.obsm['X_draw_graph_fa'] or adata.obsm['X_draw_graph_fr'].
     **kwargs
         Arguments to provide to the sc.pl.draw_graph function.
@@ -207,9 +207,9 @@ def spatial(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'] on adata.uns['spatial'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'] on adata.uns['spatial'].
     **kwargs
         Arguments to provide to the sc.pl.spatial function.
@@ -244,9 +244,9 @@ def embedding(adata,
         Gene expression, protein activity or pathways stored in an anndata object.
     basis
         The name of the represenation in adata.obsm that should be used for plotting.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'] on adata.obsm[basis].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'] on adata.obsm[basis].
     **kwargs
         Arguments to provide to the sc.pl.embedding function.
@@ -277,11 +277,11 @@ def embedding_density(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    basis (default: 'umap')
+    basis : default: 'umap'
         The name of the represenation in adata.obsm that should be used for plotting.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'] on adata.obsm[basis].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'] on adata.obsm[basis].
     **kwargs
         Arguments to provide to the sc.pl.embedding_density function.
@@ -311,9 +311,9 @@ def scatter(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'].
     **kwargs
         Arguments to provide to the sc.pl.scatter function.
@@ -339,9 +339,9 @@ def heatmap(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'].
     **kwargs
         Arguments to provide to the sc.pl.heatmap function.
@@ -367,9 +367,9 @@ def dotplot(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'].
     **kwargs
         Arguments to provide to the sc.pl.dotplot function.
@@ -395,9 +395,9 @@ def tracksplot(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'].
     **kwargs
         Arguments to provide to the sc.pl.tracksplot function.
@@ -423,9 +423,9 @@ def violin(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'].
     **kwargs
         Arguments to provide to the sc.pl.violin function.
@@ -451,9 +451,9 @@ def stacked_violin(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'].
     **kwargs
         Arguments to provide to the sc.pl.stacked_violin function.
@@ -479,9 +479,9 @@ def matrixplot(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'].
     **kwargs
         Arguments to provide to the sc.pl.matrixplot function.
@@ -507,9 +507,9 @@ def clustermap(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'].
     **kwargs
         Arguments to provide to the sc.pl.clustermap function.
@@ -535,9 +535,9 @@ def ranking(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'].
     **kwargs
         Arguments to provide to the sc.pl.ranking function.
@@ -563,9 +563,9 @@ def dendrogram(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
-    plot_stored_gex_data (default: False)
+    plot_stored_gex_data : default: False
         Plot adata.uns['gex_data'].
-    plot_stored_pax_data (default: False)
+    plot_stored_pax_data : default: False
         Plot adata.uns['pax_data'].
     **kwargs
         Arguments to provide to the sc.pl.dendrogram function.

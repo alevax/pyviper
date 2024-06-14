@@ -6,7 +6,7 @@ from ..interactome import Interactome
 
 
 ### ---------- EXPORT LIST ----------
-__all__ = ['NaRnEA']
+__all__ = ['NaRnEA_meta']
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
@@ -126,7 +126,7 @@ def integrate_NaRnEA_xes_mats(results, bg_matrix, net_weight, xes_type = 'pes'):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def NaRnEA(gex_data, interactome, layer = None, eset_filter = False, min_targets = 30, verbose = True):
+def NaRnEA_meta(gex_data, interactome, layer = None, eset_filter = False, min_targets = 30, verbose = True):
     """\
     Allows the individual to infer normalized enrichment scores and proportional
     enrichment scores from gene expression data using the Nonparametric
@@ -151,30 +151,28 @@ def NaRnEA(gex_data, interactome, layer = None, eset_filter = False, min_targets
         pd.DataFrame.
     interactome
         An object of class Interactome.
-    layer (default: None)
+    layer : default: None
         The layer in the anndata object to use as the gene expression input.
-    eset_filter (default: False)
+    eset_filter : default: False
         Whether to filter out genes not present in the interactome (True) or to
         keep this biological context (False). This will affect gene rankings.
-    min_targets (default: 30)
+    min_targets : default: 30
         The minimum number of targets that each regulator in the interactome
         should contain. Regulators that contain fewer targets than this minimum
         will be culled from the network (via the Interactome.cull method). The
         reason users may choose to use this threshold is because adequate
         targets are needed to accurately predict enrichment.
-    verbose (default: True)
+    verbose : default: True
         Whether extended output about the progress of the algorithm should be
         given.
 
     Returns
     -------
-    A dictionary containing :class:`~numpy.ndarray` containing NES values
-    (key: 'nes') and PES values (key: 'pes').
+    A dictionary containing :class:`~numpy.ndarray` containing NES values (key: 'nes') and PES values (key: 'pes').
 
-    Citations
-    -------
-    [1] Griffin, A. T., Vlahos, L. J., Chiuzan, C., & Califano, A. (2023). NaRnEA:
-    An Information Theoretic Framework for Gene Set Analysis. Entropy, 25(3), 542.
+    References
+    ----------
+    [1] Griffin, A. T., Vlahos, L. J., Chiuzan, C., & Califano, A. (2023). NaRnEA: An Information Theoretic Framework for Gene Set Analysis. Entropy, 25(3), 542.
     """
     pd.options.mode.chained_assignment = None
 
