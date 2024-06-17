@@ -1,6 +1,7 @@
 ### ---------- IMPORT DEPENDENCIES ----------
 import scanpy as sc
-
+import pandas as pd
+import seaborn
 ### ---------- EXPORT LIST ----------
 __all__ = []
 # __all__ = ['umap',
@@ -578,3 +579,39 @@ def dendrogram(adata,
     elif(plot_stored_pax_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='pax_data')
     sc.pl.dendrogram(adata,**kwargs)
+
+def to_color(df):
+
+    categories = pd.unique(df.values.ravel('K'))
+    palette = seaborn.color_palette('husl', len(categories))
+    category_to_color = dict(zip(categories, palette))
+    color_df = df.applymap(lambda x: category_to_color[x])
+
+    return color_df
+
+def heatmap_seaborn(adata,
+            row_labels = None,
+            col_labels = None,
+            plot_stored_gex_data=False,
+            plot_stored_pax_data=False,
+            **kwargs):
+    '''  
+    if(plot_stored_gex_data is True):
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
+    elif(plot_stored_pax_data is True):
+        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='pax_data')
+    '''
+    
+    if row_labels is None:
+        row_colors = None
+    else:
+        row_colors = to_color(adata.obs[row_labels])
+
+    if col_labels is None:
+        col_colors = None
+    else:
+        col_colors = to_color(adata.var[col_labels])
+    
+
+
+    seaborn.clustermap(adata.to_df(),row_colors=row_colors,col_colors=col_colors,**kwargs)
