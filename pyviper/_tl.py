@@ -204,21 +204,21 @@ def _oncomatch(pax_data_to_test,
 
     if copy: return pax_data_to_test
 
-def _find_top_mrs_from_sig(stouffer_sig, N, both, rank):
+def _find_top_mrs_from_sig(sig, N, both, rank):
     if rank is False:
-        top_mrs_clusts_df = pd.DataFrame(False,index=stouffer_sig.columns, columns=stouffer_sig.index)
+        top_mrs_clusts_df = pd.DataFrame(False,index=sig.columns, columns=sig.index)
     else:
-        top_mrs_clusts_df = pd.DataFrame(0,index=stouffer_sig.columns, columns=stouffer_sig.index)
+        top_mrs_clusts_df = pd.DataFrame(0,index=sig.columns, columns=sig.index)
 
-    for i in range(stouffer_sig.shape[0]):
-        stouffer_sig_clust_i = stouffer_sig.iloc[i,:]
-        sorted_mrs_clust_i = stouffer_sig_clust_i.index.values[np.flip(np.argsort(stouffer_sig_clust_i.values))].flatten()
-        top_mrs_clust_i = stouffer_sig_clust_i[sorted_mrs_clust_i[0:N]].index.values
+    for i in range(sig.shape[0]):
+        sig_clust_i = sig.iloc[i,:]
+        sorted_mrs_clust_i = sig_clust_i.index.values[np.flip(np.argsort(sig_clust_i.values))].flatten()
+        top_mrs_clust_i = sig_clust_i[sorted_mrs_clust_i[0:N]].index.values
         if both is True:
-            bottom_mrs_clust_i = stouffer_sig_clust_i[sorted_mrs_clust_i[-N:]].index.values
+            bottom_mrs_clust_i = sig_clust_i[sorted_mrs_clust_i[-N:]].index.values
             top_mrs_clust_i = np.concatenate((top_mrs_clust_i, bottom_mrs_clust_i))
         if rank is False:
-            top_mrs_clusts_df.iloc[:, i] = np.isin(stouffer_sig_clust_i.index, top_mrs_clust_i)
+            top_mrs_clusts_df.iloc[:, i] = np.isin(sig_clust_i.index, top_mrs_clust_i)
         else:
             N_to_1 = np.flip(np.arange(N)+1)
             neg_1_to_neg_N = -1*(np.arange(N)+1)
@@ -241,7 +241,8 @@ def _find_top_mrs(adata,
                   rank=False,
                   filter_by_top_mrs = False,
                   return_as_df = False,
-                  copy = False):
+                  copy = False,
+                  verbose = True):
     if copy and return_as_df:
         raise ValueError("copy and return_as_df cannot both be True.")
     if copy: adata = adata.copy()
@@ -252,7 +253,8 @@ def _find_top_mrs(adata,
                               filter_by_feature_groups,
                               sig_method = method,
                               compute_pvals = False,
-                              pca_slot = "X_pca")
+                              pca_slot = "X_pca",
+                              verbose = verbose)
     result_df = _find_top_mrs_from_sig(sig, N, both, rank)
     result_df.columns.str.replace('_scores', '')
 
@@ -260,7 +262,6 @@ def _find_top_mrs(adata,
         result_df.columns = [key_added]
     else:
         result_df.columns = key_added + "_" + result_df.columns
-    adata.var = pd.concat([adata.var, result_df], axis=1, join='inner')
 
     if filter_by_top_mrs:
         adata._inplace_subset_var(adata.var[key_added].values.flatten()==True)
@@ -269,6 +270,9 @@ def _find_top_mrs(adata,
         mrs_df = result_df.apply(lambda col: result_df.index[col].tolist())
         return mrs_df
     elif copy:
+        # adata.var = pd.concat([adata.var, result_df], axis=1, join='inner')
+        for col in result_df.columns:
+            adata.var[col] = result_df[col]
         return adata
 
 def _path_enr(gex_data,

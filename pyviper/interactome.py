@@ -534,7 +534,7 @@ class Interactome:
             sorted_df = net_table.sort_values(by=['regulator', 'likelihood'], ascending=[True, False])
 
             # Group by 'regulator' and apply a function to keep the top 'max_targets' rows in each group
-            pruned_df = sorted_df.groupby('regulator').apply(lambda x: x.iloc[:max_targets])
+            pruned_df = sorted_df.groupby('regulator', group_keys=False).apply(lambda x: x.iloc[:max_targets])
 
             # Reset the index to flatten the grouped DataFrame
             pruned_df = pruned_df.reset_index(drop=True)

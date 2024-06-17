@@ -250,7 +250,9 @@ def _gen_sig_clusters_df(dat_df, cluster_vector, compute_pvals = True, null_iter
     dat_array = dat_df.to_numpy()
 
     # Find unique clusters and initialize arrays to store Stouffer scores
-    unique_clusters, cluster_indices = np.unique(cluster_vector, return_inverse=True)
+    unique_clusters, cluster_indices = np.unique(
+        cluster_vector, return_inverse=True
+    )
     n_clusters = len(unique_clusters)
     n_genes = dat_df.shape[1]
     scores_arr = np.zeros((n_clusters, n_genes))
@@ -425,7 +427,9 @@ def _sig_clusters(adata,
     else:
         result_df = result_df.T
         result_df.columns = key_added + "_" + result_df.columns
-        adata.var = pd.concat([adata.var, result_df], axis=1, join='outer')
+        # adata.var = pd.concat([adata.var, result_df], axis=1, join='outer')
+        for col in result_df.columns:
+            adata.var[col] = result_df[col]
     if copy is True:
         return adata
 

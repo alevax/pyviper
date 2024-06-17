@@ -147,7 +147,8 @@ def find_top_mrs(adata,
                  rank=False,
                  filter_by_top_mrs = False,
                  return_as_df = False,
-                 copy = False):
+                 copy = False,
+                 verbose = True):
     """\
     Identify the top N master regulator proteins in a VIPER AnnData object
 
@@ -189,6 +190,8 @@ def find_top_mrs(adata,
         Returns a pd.DataFrame of the top MRs per cluster
     copy : default: False
         Determines whether a copy of the input AnnData is returned.
+    verbose : default: True
+        Whether extended output about the progress of the algorithm is given.
 
     Returns
     -------
@@ -209,7 +212,8 @@ def find_top_mrs(adata,
         rank,
         filter_by_top_mrs,
         return_as_df,
-        copy
+        copy,
+        verbose
     )
 
 def path_enr(gex_data,
@@ -270,8 +274,7 @@ def path_enr(gex_data,
         Maximum number of samples to process at once. Set to None to split all
         samples across provided `njobs`.
     verbose : default: True
-        Whether extended output about the progress of the algorithm should be
-        given.
+        Whether extended output about the progress of the algorithm is given.
     output_as_anndata : default: True
         Way of delivering output.
     transfer_obs : default: True
