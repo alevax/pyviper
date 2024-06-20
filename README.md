@@ -1,24 +1,27 @@
-# pyVIPER (VIPER Analysis in Python for single-cell RNASeq)
+# <img width="50" alt="image" src="https://github.com/alevax/pyviper/assets/92543296/3b1f14ab-68a1-49ab-b5b2-aa4f214ad995"> pyVIPER (VIPER Analysis in Python for single-cell RNASeq) 
+
 <!-- [![PyPI](https://img.shields.io/pypi/v/viper-in-python?logo=PyPI)](https://pypi.org/project/viper-in-python) -->
 [![PyPI](https://img.shields.io/badge/pypi-stable-darkgreeen?logo=PyPI)](https://pypi.org/project/viper-in-python)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Downloads](https://static.pepy.tech/badge/viper-in-python)](https://pepy.tech/project/viper-in-python)
 
-
-
 This package enables network-based protein activity estimation on Python.
 It provides also interfaces for scanpy (single-cell RNASeq analysis in Python).
-Functions are partly transplanted from R package [viper](https://www.bioconductor.org/packages/release/bioc/html/viper.html) and the R package [NaRnEA](https://github.com/califano-lab/NaRnEA).
+Functions are partly transplanted from R package [viper](https://www.bioconductor.org/packages/release/bioc/html/viper.html) and the R package [NaRnEA](https://github.com/califano-lab/NaRnEA). 
+
 
 ---
 
 ## Dependencies
 - `scanpy` for single cell pipeline
-- `pandas` (>=1.3.0 & <2.0, due to `scanpy` incompatibility ([issue](https://github.com/scverse/scanpy/issues/2564))) and `anndata` for data computing and storage. 
+- `pandas` and `anndata` for data computing and storage. 
 - `numpy` and `scipy`  for scientific computation.
 - `joblib` for parallel computing
 - `tqdm` show progress bar
 
+If you are using a version of `scanpy` <1.9.3, it is also advisable to downgrade `pandas` to (>=1.3.0 & <2.0), due to `scanpy` incompatibility ([issue](https://github.com/scverse/scanpy/issues/2564)))
+
+  
 ## Installation
 ### pypi
 ```shell
@@ -44,7 +47,7 @@ ges = anndata.read_text("test/unit_tests/test_1/test_1_inputs/LNCaPWT_gExpr_GES.
 network = pyviper.load.msigdb_regulon("h")
 
 # Translate sample data from ensembl to gene names
-ges = pyviper.translate_adata_index(ges, desired_format = "human_symbol")
+pyviper.pp.translate(ges, desired_format = "human_symbol")
 
 ## Filter targets in the interactome
 network.filter_targets(ges.var_names)
@@ -70,7 +73,7 @@ The main functions available from `pyviper` are:
 - `pyviper.viper`: "pyviper" function for Virtual Inference of Protein Activity by Enriched Regulon Analysis (VIPER). The function allows using 2 enrichment algorithms, aREA and (matrix)-NaRnEA (see below).
 - `pyviper.aREA`: computes [aREA](https://www.nature.com/articles/ng.3593) (analytic rank-based enrichment analysis) and meta-aREA
 - `pyviper.NaRnEA`: computes [matrix-NaRnEA](https://www.biorxiv.org/content/10.1101/2021.05.20.445002v5), a vectorized, implementation of [NaRnEA](https://www.mdpi.com/1099-4300/25/3/542)
-- `pyviper.pp.translate_adata_index`: for translating between species (i.e. mouse vs human) and between ensembl, entrez and gene symbols.
+- `pyviper.pp.translate`: for translating between species (i.e. mouse vs human) and between ensembl, entrez and gene symbols.
 - `pyviper.tl.path_enr`: computes pathway enrichment
 
 Other notable functions include:
