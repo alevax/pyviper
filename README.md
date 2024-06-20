@@ -19,7 +19,7 @@ Functions are partly transplanted from R package [viper](https://www.bioconducto
 - `joblib` for parallel computing
 - `tqdm` show progress bar
 
-If you are using a version of `scanpy` <1.9.3, it is also advisable to downgrade `pandas` to (>=1.3.0 & <2.0), due to `scanpy` incompatibility ([issue](https://github.com/scverse/scanpy/issues/2564)))
+If you are using a version of `scanpy` <1.9.3, it is also advisable to downgrade `pandas` to (>=1.3.0 & <2.0), due to `scanpy` incompatibility ([issue](https://github.com/scverse/scanpy/issues/2564))
 
   
 ## Installation
