@@ -34,8 +34,7 @@ setuptools.setup(
         "tqdm",
         "scanpy",
         "anndata",
-        "pandas>=1.3.0",
-        "pandas<2.0",
+        "pandas",
         "numpy",
         "joblib",
         "statsmodels"

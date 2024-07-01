@@ -177,13 +177,22 @@ def _corr_btw_2D_and_1D_arrays_axis0_precomp2D(arr_1d, arr_2d, arr_2d_centered, 
     corr /= (arr_2d_std_sqz * arr_1d_std)
     return corr
 
-def _spearman_clusters_df(dat_df, pca_array, cluster_vector, compute_pvals = True, null_iters = 1000, verbose = True):
+def _spearman_clusters_df(
+    dat_df,
+    pca_array,
+    cluster_vector,
+    compute_pvals = True,
+    null_iters = 1000,
+    verbose = True
+):
     # Convert the DataFrame to a NumPy array
     dat_array = dat_df.to_numpy()
     dat_array_ranked = rankdata(dat_array, axis = 0)
 
     # Find unique clusters and initialize arrays to store Spearman scores
-    unique_clusters, cluster_indices = np.unique(cluster_vector, return_inverse=True)
+    unique_clusters, cluster_indices = np.unique(
+        cluster_vector, return_inverse=True
+    )
     n_clusters = len(unique_clusters)
     n_genes = dat_df.shape[1]
     spearman_scores_arr = np.zeros((n_clusters, n_genes))
@@ -193,7 +202,9 @@ def _spearman_clusters_df(dat_df, pca_array, cluster_vector, compute_pvals = Tru
     for i in tqdm(range(n_clusters)) if verbose else range(n_clusters):
         cluster_mask = (cluster_indices == i)
 
-        spearman_scores = _get_var_corr_with_clust(dat_array_ranked, pca_array, cluster_mask)
+        spearman_scores = _get_var_corr_with_clust(
+            dat_array_ranked, pca_array, cluster_mask
+        )
         spearman_scores_arr[i, :] = spearman_scores
 
         if compute_pvals:

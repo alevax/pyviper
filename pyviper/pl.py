@@ -595,13 +595,13 @@ def heatmap_seaborn(adata,
             plot_stored_gex_data=False,
             plot_stored_pax_data=False,
             **kwargs):
-    '''  
+    '''
     if(plot_stored_gex_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
     elif(plot_stored_pax_data is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='pax_data')
     '''
-    
+
     if row_labels is None:
         row_colors = None
     else:
@@ -611,7 +611,7 @@ def heatmap_seaborn(adata,
         col_colors = None
     else:
         col_colors = to_color(adata.var[col_labels])
-    
+
 
 
     seaborn.clustermap(adata.to_df(),row_colors=row_colors,col_colors=col_colors,**kwargs)
