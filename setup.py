@@ -37,6 +37,7 @@ setuptools.setup(
         "pandas",
         "numpy",
         "joblib",
-        "statsmodels"
+        "statsmodels",
+        "loompy"
     ]
 )
