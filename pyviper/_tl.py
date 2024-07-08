@@ -80,16 +80,16 @@ def _generate_interactome_from_pax_data(pax_data,
     return Interactome(interactome_name, net_table)
 
 def _oncomatch(pax_data_to_test,
-                pax_data_for_cMRs,
-                tcm_size = 50,
-                both_ways = False,
-                om_max_NES_threshold = 30,
-                om_min_logp_threshold = 0,
-                lower_tail = True,
-                enrichment = 'aREA',
-                key_added = 'om',
-                return_as_df = False,
-                copy = False):
+               pax_data_for_cMRs,
+               tcm_size = 50,
+               both_ways = False,
+               lower_tail = True,
+               om_max_NES_threshold = 30,
+               om_min_logp_threshold = 0,
+               enrichment = 'aREA',
+               key_added = 'om',
+               return_as_df = False,
+               copy = False):
     if copy: pax_data_to_test = pax_data_to_test.copy()
 
     if enrichment is None:
