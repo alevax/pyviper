@@ -83,7 +83,6 @@ def _oncomatch(pax_data_to_test,
                pax_data_for_cMRs,
                tcm_size = 50,
                both_ways = False,
-               lower_tail = True,
                om_max_NES_threshold = 30,
                om_min_logp_threshold = 0,
                enrichment = 'aREA',
@@ -188,7 +187,7 @@ def _oncomatch(pax_data_to_test,
     # om[~cond] = norm.logcdf(om[~cond])*-1 # accurate (i.e. same as R) when NES scores are big (e.g. 10)
 
     om = pd.DataFrame(om, index = vpmat_to_test.index, columns = vpmat_for_cMRs.index)
-    om = _nes_to_pval_df(om, lower_tail=lower_tail)
+    om = _nes_to_pval_df(om, lower_tail=False)
 
     # Log transform
     om = -np.log10(om)
