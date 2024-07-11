@@ -77,7 +77,7 @@ The main functions available from `pyviper` are:
 - `pyviper.tl.path_enr`: computes pathway enrichment
 
 Other notable functions include:
-- `pyviper.tl.OncoMatch`: computes [OncoMatch](https://www.nature.com/articles/s41588-018-0138-4), an algorithm to assess the overlap in differentially active MR proteins between two sets of samples (e.g. validate GEMMs as effective models of human samples)
+- `pyviper.tl.OncoMatch`: computes [OncoMatch](https://doi.org/10.1158/2159-8290.CD-22-0342), an algorithm to assess the activity conservation of MR proteins between two sets of samples (e.g. validate GEMMs as effective models of human samples)
 - `pyviper.pp.stouffer`: computes signatures on a cluster-by-cluster basis using Cluster integration method for pathway enrichment
 - `pyviper.pp.viper_similarity`: computes the [similarity](https://s3.jcloud.sjtu.edu.cn/899a892efef34b1b944a19981040f55b-oss01/bioconductor/3.14/bioc/vignettes/viper/inst/doc/viper.pdf) between VIPER signatures
 - `pyviper.pp.repr_metacells`: compute representative metacells (e.g. for ARACNe) using our method to maximize unique sample usage and minimize resampling (users can specify depth, percent data usage, etc).
