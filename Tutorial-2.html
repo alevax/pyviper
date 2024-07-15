@@ -1,28 +1,31 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach &mdash; pyviper 1.0.6 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/nbsphinx-code-cells.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=e2a723ec"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Tutorial 3 - Generating Metacells for ARACNe3 network generation and VIPER protein activity analysis" href="Tutorial-3.html" />
+    <link rel="next" title="Tutorial 3 - Generating metacells for reverse-engineering of ARACNe gene regulatory networks" href="Tutorial-3.html" />
     <link rel="prev" title="Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level" href="Tutorial-1.html" /> 
 </head>
 
@@ -66,7 +69,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#Key-takeaways">Key takeaways</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Tutorial-3.html">Tutorial 3 - Generating Metacells for ARACNe3 network generation and VIPER protein activity analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-3.html">Tutorial 3 - Generating metacells for reverse-engineering of ARACNe gene regulatory networks</a></li>
 </ul>
 
         </div>
@@ -93,8 +96,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="Tutorial-2---Inferring-Protein-Activity-from-scRNA-seq-data-from-multiple-cell-populations-with-the-meta-VIPER-approach">
-<h1>Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach<a class="headerlink" href="#Tutorial-2---Inferring-Protein-Activity-from-scRNA-seq-data-from-multiple-cell-populations-with-the-meta-VIPER-approach" title="Permalink to this heading"></a></h1>
+  <section id="Tutorial-2---Inferring-Protein-Activity-from-scRNA-seq-data-from-multiple-cell-populations-with-the-meta-VIPER-approach">
+<h1>Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach<a class="headerlink" href="#Tutorial-2---Inferring-Protein-Activity-from-scRNA-seq-data-from-multiple-cell-populations-with-the-meta-VIPER-approach" title="Link to this heading"></a></h1>
 <p>This tutorial explores the use of metaVIPER to assess protein activity by integrative analysis using multiple gene regulatory networks. metaVIPER is particularly useful in real-world scenarios to infer protein activity in a tissue-independent manner by using multiple, non-tissue-matched interactomes, assuming that transcriptional targets of each protein can be recapitulated by one or more available interactomes. The <code class="docutils literal notranslate"><span class="pre">viper</span></code> function allows running metaVIPER using both
 <a class="reference external" href="https://www.nature.com/articles/ng.3593">aREA</a> and <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">NaRnEA</a> enrichment methods. For additional details, please refer to <a class="reference external" href="https://www.nature.com/articles/s41467-018-03843-3">Ding et al., 2016</a>. After a brief description of the installation procedure and the modules needed, this notebook is organized in the following sections.</p>
 <p><strong>Table of Contents</strong></p>
@@ -106,8 +109,8 @@
 <div class="line">Step 5. Pathway enrichment analysis</div>
 <div class="line">Key Takeaways</div>
 </div>
-<div class="section" id="Install-PyVIPER">
-<h2>Install PyVIPER<a class="headerlink" href="#Install-PyVIPER" title="Permalink to this heading"></a></h2>
+<section id="Install-PyVIPER">
+<h2>Install PyVIPER<a class="headerlink" href="#Install-PyVIPER" title="Link to this heading"></a></h2>
 <p>Install <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> from PyPI using pip. Alternatively, refer to the README in the current GitHub to install from the local directory.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -117,9 +120,9 @@
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Import-modules">
-<h2>Import modules<a class="headerlink" href="#Import-modules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="Import-modules">
+<h2>Import modules<a class="headerlink" href="#Import-modules" title="Link to this heading"></a></h2>
 <p>Load <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> and additional modules required used in this tutorial.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -161,9 +164,9 @@
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Step-1.-Load-a-gene-expression-matrix-and-associated-metadata">
-<h2>Step 1. Load a gene expression matrix and associated metadata<a class="headerlink" href="#Step-1.-Load-a-gene-expression-matrix-and-associated-metadata" title="Permalink to this heading"></a></h2>
+</section>
+<section id="Step-1.-Load-a-gene-expression-matrix-and-associated-metadata">
+<h2>Step 1. Load a gene expression matrix and associated metadata<a class="headerlink" href="#Step-1.-Load-a-gene-expression-matrix-and-associated-metadata" title="Link to this heading"></a></h2>
 <p>Load the gene expression matrix (UMIs) and store it into an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> object to enable interoperability with <a class="reference external" href="https://scanpy-tutorials.readthedocs.io/en/latest/#">scanpy</a>. Cells used in this tutorial were sampled from scRNA-seq data published in <a class="reference external" href="https://www.nature.com/articles/s41422-019-0195-y">Peng et al., 2019</a>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -334,9 +337,9 @@ AnnData object with n_obs × n_vars = 4632 × 24005
 </div></div>
 </div>
 <p>Data contain 4 cells types: B cell, (malignant) ductal cells of type 2, fibroblasts, and stellate cells (myofibroblast-like cells).</p>
-</div>
-<div class="section" id="Step-2.-Preprocess-and-generate-a-gene-expression-signature-at-the-single-cell-level">
-<h2>Step 2. Preprocess and generate a gene expression signature at the single-cell level<a class="headerlink" href="#Step-2.-Preprocess-and-generate-a-gene-expression-signature-at-the-single-cell-level" title="Permalink to this heading"></a></h2>
+</section>
+<section id="Step-2.-Preprocess-and-generate-a-gene-expression-signature-at-the-single-cell-level">
+<h2>Step 2. Preprocess and generate a gene expression signature at the single-cell level<a class="headerlink" href="#Step-2.-Preprocess-and-generate-a-gene-expression-signature-at-the-single-cell-level" title="Link to this heading"></a></h2>
 <p>The UMI matrix can be processed using the standard <code class="docutils literal notranslate"><span class="pre">scanpy</span></code> preprocessing workflow. For a more detailed explanation of quality control steps, refer to the preprocessing tutorials by <a class="reference external" href="https://scanpy-tutorials.readthedocs.io/en/latest/pbmc3k.html">scanpy</a> or <a class="reference external" href="https://satijalab.org/seurat/articles/pbmc3k_tutorial">Seurat</a>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
@@ -492,9 +495,9 @@ AnnData object with n_obs × n_vars = 4632 × 20197
 </table>
 </div></div>
 </div>
-</div>
-<div class="section" id="Step-3.-Load-multiple-ARACNe-inferred-gene-regulatory-networks">
-<h2>Step 3. Load multiple ARACNe-inferred gene regulatory networks<a class="headerlink" href="#Step-3.-Load-multiple-ARACNe-inferred-gene-regulatory-networks" title="Permalink to this heading"></a></h2>
+</section>
+<section id="Step-3.-Load-multiple-ARACNe-inferred-gene-regulatory-networks">
+<h2>Step 3. Load multiple ARACNe-inferred gene regulatory networks<a class="headerlink" href="#Step-3.-Load-multiple-ARACNe-inferred-gene-regulatory-networks" title="Link to this heading"></a></h2>
 <p>Load 4 lineage-specific <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">ARACNe3</a>-inferred gene regulatory networks. These networks were generated from B cells, malignant ductal, fibroblasts and stellate cells, respectively. Refer to the <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">ARACNe3</a> and <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/27153652/">ARACNe-AP</a> manuscripts for additional information. The time required is approximately 1 s per network (when loading from local) and 40 s per network (when
 loading from the remote url).</p>
 <div class="nbinput nblast docutils container">
@@ -577,8 +580,8 @@ Removed 6427448 targets.
 Removed 64 regulators.
 </pre></div></div>
 </div>
-<div class="section" id="Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-pyviper-(metaVIPER-approach)">
-<h3>Convert the gene expression signature into a protein activity matrix using pyviper (metaVIPER approach)<a class="headerlink" href="#Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-pyviper-(metaVIPER-approach)" title="Permalink to this heading"></a></h3>
+<section id="Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-pyviper-(metaVIPER-approach)">
+<h3>Convert the gene expression signature into a protein activity matrix using pyviper (metaVIPER approach)<a class="headerlink" href="#Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-pyviper-(metaVIPER-approach)" title="Link to this heading"></a></h3>
 <p>Convert previously computed gene expression signature into protein activity by using multiple interactomes simultaneousely via the metaVIPER approach. Use <code class="docutils literal notranslate"><span class="pre">enrichment=&quot;narnea&quot;</span></code> with 1 core and store the result in an <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> object (default). See Tutorial 1 for details on the available modalities to compute enrichment.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
@@ -643,10 +646,10 @@ AnnData object with n_obs × n_vars = 4632 × 6659
     layers: &#39;pes&#39;
 </pre></div></div>
 </div>
-</div>
-</div>
-<div class="section" id="Step-4.-Analyze-single-cells-at-the-Protein-Activity-level">
-<h2>Step 4. Analyze single-cells at the Protein Activity level<a class="headerlink" href="#Step-4.-Analyze-single-cells-at-the-Protein-Activity-level" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+<section id="Step-4.-Analyze-single-cells-at-the-Protein-Activity-level">
+<h2>Step 4. Analyze single-cells at the Protein Activity level<a class="headerlink" href="#Step-4.-Analyze-single-cells-at-the-Protein-Activity-level" title="Link to this heading"></a></h2>
 <p>We present some instructive analyses at the protein activity level. Start by running Principal Components Analysis (PCA) on the PES matrix, to reduce the dimensionality of the protein activity space. Use the PCA function avaiable through <code class="docutils literal notranslate"><span class="pre">pyviper.tl</span></code>, a module that provides several wrappers to <code class="docutils literal notranslate"><span class="pre">scanpy.tl</span></code> to simplify the transformation of protein activity data. In contrast to Tutorial 1, all recovered transcription factors, cofactors, signaling and surface proteins will be employed in the
 analysis.</p>
 <div class="nbinput nblast docutils container">
@@ -790,9 +793,9 @@ Storing dendrogram info using `.uns[&#39;dendrogram_Cell_Type&#39;]`
 <img alt="_images/Tutorial-2_59_2.png" class="no-scaled-link" src="_images/Tutorial-2_59_2.png" style="width: 1248px; height: 715px;" />
 </div>
 </div>
-</div>
-<div class="section" id="Pathway-enrichment-analysis">
-<h2>Pathway enrichment analysis<a class="headerlink" href="#Pathway-enrichment-analysis" title="Permalink to this heading"></a></h2>
+</section>
+<section id="Pathway-enrichment-analysis">
+<h2>Pathway enrichment analysis<a class="headerlink" href="#Pathway-enrichment-analysis" title="Link to this heading"></a></h2>
 <p>Perform an enrichment analysis to identify biological functions associated to malignant cells by leveraging functional gene sets from the <a class="reference external" href="https://www.gsea-msigdb.org/gsea/msigdb/index.jsp">MSigDB</a> collection. Through its <code class="docutils literal notranslate"><span class="pre">load</span></code> module,<code class="docutils literal notranslate"><span class="pre">pyviper</span></code> allows the user to choose between several MSigDB collections, including curated gene sets from online pathway databases (‘c2’), ontology (‘c5’) and oncogenic signature (‘c6’) gene sets and immunologic signature gene sets (‘c7’).</p>
 <p>Load the ‘hallmark gene sets’ as an object of class <code class="docutils literal notranslate"><span class="pre">Interactome</span></code> and retain only the targets in common with the protein activity matrix.</p>
 <div class="nbinput docutils container">
@@ -880,19 +883,19 @@ Calculating PES...
 <img alt="_images/Tutorial-2_69_0.png" class="no-scaled-link" src="_images/Tutorial-2_69_0.png" style="width: 642px; height: 395px;" />
 </div>
 </div>
-</div>
-<div class="section" id="Key-takeaways">
-<h2>Key takeaways<a class="headerlink" href="#Key-takeaways" title="Permalink to this heading"></a></h2>
+</section>
+<section id="Key-takeaways">
+<h2>Key takeaways<a class="headerlink" href="#Key-takeaways" title="Link to this heading"></a></h2>
 <p>This Tutorial describes how to generate a gene expression signature by exploiting the inter-operatibility between <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> and <code class="docutils literal notranslate"><span class="pre">scanpy</span></code> and showed how to infer protein activity in single cells from multiple populations with the <a class="reference external" href="https://www.nature.com/articles/s41467-018-03843-3">metaVIPER</a> approach, that leverages multiple lineage-specific regulatory networks. We conclude this Tutorial by presenting another key module used to perform pathway enrichment analysis.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Tutorial-1.html" class="btn btn-neutral float-left" title="Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Tutorial-3.html" class="btn btn-neutral float-right" title="Tutorial 3 - Generating Metacells for ARACNe3 network generation and VIPER protein activity analysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Tutorial-3.html" class="btn btn-neutral float-right" title="Tutorial 3 - Generating metacells for reverse-engineering of ARACNe gene regulatory networks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

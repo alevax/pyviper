@@ -1,21 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tutorial 3 - Generating Metacells for ARACNe3 network generation and VIPER protein activity analysis &mdash; pyviper 1.0.6 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/nbsphinx-code-cells.css" type="text/css" />
+  <title>Tutorial 3 - Generating metacells for reverse-engineering of ARACNe gene regulatory networks &mdash; pyviper 1.0.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=e2a723ec"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -52,12 +55,16 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-1.html">Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-2.html">Tutorial 2 - Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial 3 - Generating Metacells for ARACNe3 network generation and VIPER protein activity analysis</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial 3 - Generating metacells for reverse-engineering of ARACNe gene regulatory networks</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#Install-Pyviper">Install Pyviper</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Import-modules">Import modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Step-1.-Load-a-gene-expression-matrix-and-associated-metadata">Step 1. Load a gene expression matrix and associated metadata</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Step-2.-Perform-basic-preprocessing-and-clustering">Step 2. Perform basic preprocessing and clustering</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#3.-Generate-Metacells">3. Generate Metacells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3.-Generate-Metacells">3. Generate Metacells</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Comparing-metacell-and-original-single-cells">Comparing metacell and original single-cells</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Key-takeaways">Key takeaways</a></li>
 </ul>
 </li>
 </ul>
@@ -76,7 +83,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Tutorial 3 - Generating Metacells for ARACNe3 network generation and VIPER protein activity analysis</li>
+      <li class="breadcrumb-item active">Tutorial 3 - Generating metacells for reverse-engineering of ARACNe gene regulatory networks</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Tutorial-3.ipynb.txt" rel="nofollow"> View page source</a>
       </li>
@@ -86,13 +93,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="Tutorial-3---Generating-Metacells-for-ARACNe3-network-generation-and-VIPER-protein-activity-analysis">
-<h1>Tutorial 3 - Generating Metacells for ARACNe3 network generation and VIPER protein activity analysis<a class="headerlink" href="#Tutorial-3---Generating-Metacells-for-ARACNe3-network-generation-and-VIPER-protein-activity-analysis" title="Permalink to this heading"></a></h1>
-<p>This tutorial explores different approaches of generating metacells for a scRNA-seq dataset. Metacells can potentially reduce sparseness in single-cell transcriptomics and improve protein activity inference and computational efficiency. For ARACNe3’s mutual information estimation, it is vital to have metacells that are independent and identically distributed. Therefore, we have implemented a weighted random sampling approach with a probability decay to disincentivize re-using the same
-single-cell expression profiles to create multiple metacells.</p>
-<div class="section" id="Install-Pyviper">
-<h2>Install Pyviper<a class="headerlink" href="#Install-Pyviper" title="Permalink to this heading"></a></h2>
-<p>Install pyviper from PyPI using pip. Alternatively, refer to the README in the current GitHub to install from the local directory.</p>
+  <section id="Tutorial-3---Generating-metacells-for-reverse-engineering-of-ARACNe-gene-regulatory-networks">
+<h1>Tutorial 3 - Generating metacells for reverse-engineering of ARACNe gene regulatory networks<a class="headerlink" href="#Tutorial-3---Generating-metacells-for-reverse-engineering-of-ARACNe-gene-regulatory-networks" title="Link to this heading"></a></h1>
+<p>This tutorial explores different approaches to generate metacells from scRNA-seq data. Metacells are used as a means to counteract sparsity in single-cell transcriptomics and improve gene regulatory network (GRN) inference, for instance using the <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">ARACNe3</a> and <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/27153652/">ARACNe-AP</a> algorithms for GRN reconstruction by mutual information estimation. After a brief description of the pyVIPER installation procedure and
+the modules needed, this notebook is organized in the following sections.</p>
+<p><strong>Table of Contents</strong></p>
+<div class="line-block">
+<div class="line">Step 1. Load a gene expression matrix and associated metadata</div>
+<div class="line">Step 2. Perform basic preprocessing and clustering</div>
+<div class="line">Step 3. Generate metacells</div>
+<div class="line">Key Takeaways</div>
+</div>
+<section id="Install-Pyviper">
+<h2>Install Pyviper<a class="headerlink" href="#Install-Pyviper" title="Link to this heading"></a></h2>
+<p>Install <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> from PyPI using pip. Alternatively, refer to the README in the current GitHub to install from the local directory.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -101,9 +115,10 @@ single-cell expression profiles to create multiple metacells.</p>
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Import-modules">
-<h2>Import modules<a class="headerlink" href="#Import-modules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="Import-modules">
+<h2>Import modules<a class="headerlink" href="#Import-modules" title="Link to this heading"></a></h2>
+<p>Load <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> and additional modules required used in this tutorial.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -114,6 +129,7 @@ single-cell expression profiles to create multiple metacells.</p>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">rc_context</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">silhouette_samples</span>
 
 <span class="kn">import</span> <span class="nn">warnings</span>
@@ -121,22 +137,33 @@ single-cell expression profiles to create multiple metacells.</p>
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Step-1.-Load-a-gene-expression-matrix-and-associated-metadata">
-<h2>Step 1. Load a gene expression matrix and associated metadata<a class="headerlink" href="#Step-1.-Load-a-gene-expression-matrix-and-associated-metadata" title="Permalink to this heading"></a></h2>
-<p>Load the same gene expression matrix (UMIs) as tutorial 2 and store it into an AnnData object to enable interoperability with scanpy. Cells used in this tutorial were sampled from scRNA-seq data published in Peng et al., 2019.</p>
+</section>
+<section id="Step-1.-Load-a-gene-expression-matrix-and-associated-metadata">
+<h2>Step 1. Load a gene expression matrix and associated metadata<a class="headerlink" href="#Step-1.-Load-a-gene-expression-matrix-and-associated-metadata" title="Link to this heading"></a></h2>
+<p>Load the same gene expression matrix (UMIs) used in Tutorial 2 and store it into an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> object to enable interoperability with <a class="reference external" href="https://scanpy-tutorials.readthedocs.io/en/latest/#">scanpy</a>. Cells used in this tutorial were sampled from scRNA-seq data published in <a class="reference external" href="https://www.nature.com/articles/s41422-019-0195-y">Peng et al., 2019</a>.</p>
 <p>Display matrix dimensions (cells x genes)</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gExpr_url</span> <span class="o">=</span> <span class="s2">&quot;https://zenodo.org/records/10059791/files/Tutorial_2_counts_mixed_4632.tsv.gz&quot;</span> <span class="c1"># path to gene expression matrix (UMI counts)</span>
 <span class="n">adata_gExpr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">gExpr_url</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1"># read from remote</span>
 <span class="n">adata_gExpr</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">AnnData</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">)</span> <span class="c1"># convert to AnnData object</span>
+
+<span class="n">adata_gExpr</span>
 </pre></div>
 </div>
 </div>
-<p>Load cell-associated metadata. Metadata are stored on GitHub.</p>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+AnnData object with n_obs × n_vars = 4632 × 24005
+</pre></div></div>
+</div>
+<p>Load cell-associated metadata.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -146,26 +173,18 @@ single-cell expression profiles to create multiple metacells.</p>
 </pre></div>
 </div>
 </div>
-<p>Store the metadata in the adata_gExpr object as observation annotation.</p>
-<div class="nbinput nblast docutils container">
+<p>Store the metadata in the <code class="docutils literal notranslate"><span class="pre">adata_gExpr</span></code> object and display the observation annotation.</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">obs</span><span class="p">,</span> <span class="n">cells_metadata</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span><span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># store cell-specific metadata as annotation observation</span>
-</pre></div>
-</div>
-</div>
-<p>Display the observation annotation from the AnnData object.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="n">adata_gExpr</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -215,9 +234,9 @@ single-cell expression profiles to create multiple metacells.</p>
 </table>
 </div></div>
 </div>
-<p>The observation annotations include the patient from which each cell was sequenced and the annotated cell type. List the cell types.</p>
+<p>The observation annotations include the patient from which each cell was sequenced and the annotated cell type. List the number of cells for each cell types.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;Cell_Type&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;n&#39;</span><span class="p">)</span> <span class="c1"># show cell types and number of cells for each type in AnnData</span>
@@ -225,7 +244,7 @@ single-cell expression profiles to create multiple metacells.</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -276,367 +295,1037 @@ single-cell expression profiles to create multiple metacells.</p>
 </table>
 </div></div>
 </div>
-</div>
-<div class="section" id="Step-2.-Perform-basic-preprocessing-and-clustering">
-<h2>Step 2. Perform basic preprocessing and clustering<a class="headerlink" href="#Step-2.-Perform-basic-preprocessing-and-clustering" title="Permalink to this heading"></a></h2>
-<p>First, we can perform some preprocessing. The UMI matrix can be processed using the standard Scanpy preprocessing workflow. Since the quality of the provided data was pre-assessed and found to be high, cell filtering will be minimal. For a more detailed explanation of QC steps, refer to the preprocessing tutorials at Scanpy or Seurat.</p>
-<p>If we want to generate metacells for each cell type, we eventually need to generate a nearest neighbor graph and then compute silouhette scores.</p>
+</section>
+<section id="Step-2.-Perform-basic-preprocessing-and-clustering">
+<h2>Step 2. Perform basic preprocessing and clustering<a class="headerlink" href="#Step-2.-Perform-basic-preprocessing-and-clustering" title="Link to this heading"></a></h2>
+<p>Perform some standard preprocessing. The UMI matrix can be processed using the standard Scanpy preprocessing workflow. Since the quality of the provided data was pre-assessed and found to be high, cell filtering will be minimal. For a more detailed explanation of quality control steps, refer to the preprocessing tutorials by <a class="reference external" href="https://scanpy-tutorials.readthedocs.io/en/latest/pbmc3k.html">Scanpy</a> or <a class="reference external" href="https://satijalab.org/seurat/articles/pbmc3k_tutorial">Seurat</a>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">calculate_qc_metrics</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_cells</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">min_genes</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span> <span class="c1"># filter out cells with &lt;200 genes expressed</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">min_cells</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># filter out genes that are detected in &lt;3 cells</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">min_counts</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="c1"># filter out genes that are present with &lt;10 UMIs</span>
 
 <span class="c1">#adata_gExpr = calcMitoRiboPercent(adata_gExpr)</span>
 <span class="c1">#adata_gExpr = filterCellsHighMito(adata_gExpr,0.2)</span>
+
+<span class="c1"># Store UMI in .raw</span>
+<span class="n">adata_gExpr</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">adata_gExpr</span>
 
 <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">normalize_total</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">target_sum</span><span class="o">=</span><span class="mf">1e4</span><span class="p">)</span>
 <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">)</span>
 <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">highly_variable_genes</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">flavor</span><span class="o">=</span><span class="s2">&quot;seurat&quot;</span><span class="p">,</span> <span class="n">n_top_genes</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="n">adata_gExpr</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">adata_gExpr</span>
-
 <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>scRNA-seq data are known to exhibit high sparsity, typically &gt;80-90%. Compute the sparsity of cells labelled as Fibroblasts as the percentage of zero-entries in the dataset.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Fibroblast_matrix</span> <span class="o">=</span> <span class="n">adata_gExpr</span><span class="p">[</span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;Cell_Type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Fibroblast cell&#39;</span><span class="p">]</span>
+<span class="n">sparsity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Fibroblast_matrix</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">X</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="k">del</span> <span class="n">Fibroblast_matrix</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sparsity (fibroblasts, single cells): &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">sparsity</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
 <br/><br/></pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
 </div>
-<div class="section" id="3.-Generate-Metacells">
-<h2>3. Generate Metacells<a class="headerlink" href="#3.-Generate-Metacells" title="Permalink to this heading"></a></h2>
-<p>First, we will compute silhouette scores for the cells using their principal components. Then, we will pass the Anndata object with silhouette scores into pyviper’s function generating metacells. This function uses a probability re-weighting approach to incentivize different minimal overlap of single cells in multiple metacells. This probability decay approach can be used with the “use_decay” and “decay_factor” parameters.</p>
-<p>The new dataset with generated metacells will be stored in experiment_dir_path under the subfolder with_penalty or without_penalty, depending on whether use_decay is set to True or False, respectively. For each folder, there will be further subfolders for n_cells_per_metacell. This is to aid organization, especially since one could want to compare results across different number of cells per metacell or the use of penalty.</p>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Sparsity (fibroblasts, single cells): 85.0%
+</pre></div></div>
+</div>
+</section>
+<section id="3.-Generate-Metacells">
+<h2>3. Generate Metacells<a class="headerlink" href="#3.-Generate-Metacells" title="Link to this heading"></a></h2>
+<p>Compute a distance matrix between each pair of cells on the PCA-projected space in the dataset using the <code class="docutils literal notranslate"><span class="pre">corr_distance</span></code> function. Any distance matrix can be used for metacell generation by setting ‘dist_slot’ to the corresponding value in the <code class="docutils literal notranslate"><span class="pre">repr_metacells</span></code> function (see below).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">svd_solver</span><span class="o">=</span><span class="s1">&#39;arpack&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">666</span><span class="p">)</span>
-<span class="n">adata_gExpr</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;silhouette_score&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">silhouette_samples</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s1">&#39;X_pca&#39;</span><span class="p">],</span> <span class="n">labels</span><span class="o">=</span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;Cell_Type&quot;</span><span class="p">])</span>
-<br/><br/></pre></div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">svd_solver</span><span class="o">=</span><span class="s1">&#39;arpack&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">pyviper</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">corr_distance</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">)</span> <span class="c1"># compute correlation distance</span>
+</pre></div>
 </div>
 </div>
+<p>Generate a set of metacell matrices for each cellular population (cluster), as represented by the ‘Cell_Type’ annotation in .obs. The metacell generation function allows several combination of inputs. Specifically, exactly two of the following parameters must be set: <strong>1.</strong> ‘size’, <strong>2a.</strong> ‘min_median_depth’ or <strong>2b.</strong> ‘n_cells_per_metacell’, <strong>3a.</strong> ‘perc_data_to_use’ or <strong>3b.</strong> ‘perc_incl_data_reused’.</p>
+<p>Please notice that 2a-2b and 3a-3b are mutually exclusive, i.e. they cannot be set together.</p>
+<ul class="simple">
+<li><p><strong>Example 1</strong>: generate 400 metacells per cell population requiring an attempt minimum depth of 12,000 UMI/metacell.</p></li>
+</ul>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_metacell</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">generateMetacellAnnData</span><span class="p">(</span><span class="n">arg0</span><span class="o">=</span><span class="n">adata_gExpr</span><span class="p">,</span>
-                                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;relative&quot;</span><span class="p">,</span>
-                                         <span class="n">cluster_label</span><span class="o">=</span><span class="s2">&quot;Cell_Type&quot;</span><span class="p">,</span>
-                                         <span class="n">n_metacells</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="c1">#not used</span>
-                                         <span class="n">n_metacells_per_cluster</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-                                         <span class="n">n_neighbors</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span>
-                                         <span class="n">n_cells_per_metacell</span><span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
-                                         <span class="n">experiment_dir_path</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-                                         <span class="n">use_decay</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                         <span class="n">decay_factor</span><span class="o">=</span> <span class="mf">0.10</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_metacells</span><span class="o">=</span><span class="mi">400</span>
+<span class="n">min_target_depth</span><span class="o">=</span><span class="mi">12000</span>
+
+<span class="n">pyviper</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">repr_metacells</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span>
+                          <span class="n">counts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">pca_slot</span><span class="o">=</span><span class="s1">&#39;X_pca&#39;</span><span class="p">,</span>
+                          <span class="n">dist_slot</span><span class="o">=</span><span class="s1">&#39;corr_dist&#39;</span><span class="p">,</span>
+                          <span class="n">size</span><span class="o">=</span><span class="n">n_metacells</span><span class="p">,</span>
+                          <span class="n">min_median_depth</span><span class="o">=</span><span class="n">min_target_depth</span><span class="p">,</span>
+                          <span class="n">clusters_slot</span><span class="o">=</span><span class="s2">&quot;Cell_Type&quot;</span><span class="p">,</span>
+                          <span class="n">key_added</span><span class="o">=</span><span class="s2">&quot;metacells_approach_1&quot;</span><span class="p">)</span>  <span class="c1"># size=n_meta, n_cells_per_metacell=k, clusters_slot=&quot;putative_tumor_infercnv_output&quot;</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Good quality cells  1000
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "62da51ecc51a4aae8090451c9dc7c437", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-(200, 20197)
-Good quality cells  1455
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "769a257bb8944883b11a650cabe6fef9", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-(200, 20197)
-(291, 20197)
-Good quality cells  1277
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "d989511299db47fcb34601b2dc67a496", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-(200, 20197)
-(291, 20197)
-(255, 20197)
-Good quality cells  900
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "523011a962e24763b915c699203c1fff", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-(200, 20197)
-(291, 20197)
-(255, 20197)
-(180, 20197)
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/Users/av2729/opt/anaconda3/envs/single-cell-env-scvi/lib/python3.8/site-packages/scanpy/preprocessing/_normalization.py:197: UserWarning: Some cells have zero counts
-  warn(UserWarning(&#39;Some cells have zero counts&#39;))
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-(926, 20197)
+cluster metacells:  25%|██▌       | 1/4 [00:00&lt;00:02,  1.17it/s]/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/numpy/core/fromnumeric.py:3464: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/numpy/core/_methods.py:192: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/numpy/core/_methods.py:269: RuntimeWarning: Degrees of freedom &lt;= 0 for slice
+  ret = _var(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/numpy/core/_methods.py:226: RuntimeWarning: invalid value encountered in divide
+  arrmean = um.true_divide(arrmean, div, out=arrmean,
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/numpy/core/_methods.py:261: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
+cluster metacells: 100%|██████████| 4/4 [00:03&lt;00:00,  1.14it/s]
 </pre></div></div>
 </div>
-<p>After metacells are generated, we want to ensure that the distribution of single cells and metacells is qualitatively similar in UMAP space.</p>
+<p>While the generation of the minimum target depth cannot be guaranteed in all cases, pyVIPER attempts to satisfy this request by tuning the number of nearest neighbors used in metacell generation.</p>
+<p>Display <code class="docutils literal notranslate"><span class="pre">adata_gExpr</span></code>.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">)</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span><span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;Cell_Type&quot;</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;Set2&quot;</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;UMAP by Cell Types&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_gExpr</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Tutorial-3_28_0.png" src="_images/Tutorial-3_28_0.png" />
+<div class="highlight"><pre>
+AnnData object with n_obs × n_vars = 4632 × 18160
+    obs: &#39;Cell_Type&#39;, &#39;n_genes_by_counts&#39;, &#39;log1p_n_genes_by_counts&#39;, &#39;total_counts&#39;, &#39;log1p_total_counts&#39;, &#39;pct_counts_in_top_50_genes&#39;, &#39;pct_counts_in_top_100_genes&#39;, &#39;pct_counts_in_top_200_genes&#39;, &#39;pct_counts_in_top_500_genes&#39;, &#39;n_genes&#39;
+    var: &#39;n_cells_by_counts&#39;, &#39;mean_counts&#39;, &#39;log1p_mean_counts&#39;, &#39;pct_dropout_by_counts&#39;, &#39;total_counts&#39;, &#39;log1p_total_counts&#39;, &#39;n_counts&#39;, &#39;highly_variable&#39;, &#39;means&#39;, &#39;dispersions&#39;, &#39;dispersions_norm&#39;, &#39;mean&#39;, &#39;std&#39;
+    uns: &#39;log1p&#39;, &#39;hvg&#39;, &#39;pca&#39;, &#39;metacells_approach_1_B cell&#39;, &#39;metacells_approach_1_Ductal cell type 2&#39;, &#39;metacells_approach_1_Fibroblast cell&#39;, &#39;metacells_approach_1_Stellate cell&#39;
+    obsm: &#39;X_pca&#39;
+    varm: &#39;PCs&#39;
+    obsp: &#39;corr_dist&#39;
+</pre></div></div>
 </div>
-</div>
+<p>4 new matrices, one for each cell type, were stored as Pandas dataframe in <code class="docutils literal notranslate"><span class="pre">adata.uns</span></code>.</p>
+<p>Display the metacell matrix for the population of Ductal cell type 2.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">adata_metacell</span><span class="p">,</span> <span class="n">svd_solver</span><span class="o">=</span><span class="s1">&#39;arpack&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">666</span><span class="p">)</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata_metacell</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_metacell</span><span class="p">)</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_metacell</span><span class="p">,</span><span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;Cell_Type&quot;</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;Set2&quot;</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;UMAP by Cell Types - Metacells&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;metacells_approach_1_Ductal cell type 2&quot;</span><span class="p">]</span>
 </pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>AL627309.1</th>
+      <th>AP006222.2</th>
+      <th>RP11-206L10.3</th>
+      <th>RP11-206L10.2</th>
+      <th>RP11-206L10.9</th>
+      <th>LINC00115</th>
+      <th>FAM41C</th>
+      <th>RP11-54O7.3</th>
+      <th>SAMD11</th>
+      <th>NOC2L</th>
+      <th>...</th>
+      <th>RP11-332K15.1</th>
+      <th>RP11-157E21.1</th>
+      <th>DMRT2</th>
+      <th>RP11-309M23.1</th>
+      <th>NLRP7</th>
+      <th>IGLL1</th>
+      <th>EGFR-AS1</th>
+      <th>RSPO2</th>
+      <th>KCNC2</th>
+      <th>AGTR2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>metacell_0</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>metacell_1</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>metacell_2</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>metacell_3</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>metacell_4</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>metacell_395</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>metacell_396</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>metacell_397</th>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>metacell_398</th>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>metacell_399</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>400 rows × 18160 columns</p>
+</div></div>
+</div>
+<p>Each metacell matrix can be used as input to ARACNe3 to reverse engineer the corresponding GRN which can then be provided as an input to VIPER. Each metacell matrix is associated with a dictionary collecting relevant metacell statistics.</p>
+<p>Display metacell-associated statistics for the population of fibroblasts.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attrs_dict</span> <span class="o">=</span> <span class="n">adata_gExpr</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;metacells_approach_1_Fibroblast cell&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span>
+<span class="n">attrs_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">attrs_dict</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Values&#39;</span><span class="p">])</span> <span class="c1"># convert to df</span>
+
+<span class="n">attrs_df</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Values</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>size</th>
+      <td>400.000000</td>
+    </tr>
+    <tr>
+      <th>n_cells_per_metacell</th>
+      <td>2.000000</td>
+    </tr>
+    <tr>
+      <th>min_median_depth</th>
+      <td>12000.000000</td>
+    </tr>
+    <tr>
+      <th>median_depth</th>
+      <td>18104.000000</td>
+    </tr>
+    <tr>
+      <th>perc_total_samples_used</th>
+      <td>58.418168</td>
+    </tr>
+    <tr>
+      <th>perc_included_samples_used_mult_times</th>
+      <td>6.970509</td>
+    </tr>
+    <tr>
+      <th>mean_n_times_samples_used</th>
+      <td>1.072386</td>
+    </tr>
+    <tr>
+      <th>stdev_n_times_samples_used</th>
+      <td>0.269274</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The report is highly informative. The metacell matrix contains 400 metacells, each generated by aggregation of 2 nearest neighbors after requesting an “attempt” minimum target depth of 12,000 UMI/metacell. The median depth for the inferred metacells is ~18,000 UMI/metacell. 58% of the original single-cells from the fibroblasts population was used for metacell generation, with &lt;7% of cells being aggregated in more than 1 metacell.</p>
+<p>The data sparsity is expected to be decreased in the metacells.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sparsity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;metacells_approach_1_Fibroblast cell&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sparsity (fibroblasts, metacells example 1): &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">sparsity</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+<br/></pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Tutorial-3_29_0.png" src="_images/Tutorial-3_29_0.png" />
+<div class="highlight"><pre>
+Sparsity (fibroblasts, metacells example 1): 77.0%
+</pre></div></div>
 </div>
-</div>
-<p>We notice that there are still two distinct clusters of B cells and of Fibroblast cells, but some B cells are not closer to Stellate cells and Fibroblast cells in UMAP space. We can perform this without a penalty to compare, and then we can also see that the distribution of cells re-used in different metacells has changed due to the penalty.</p>
+<p>Display the statistics for metacells of another cluster (B cells).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_metacell_nopenalty</span> <span class="o">=</span> <span class="n">pyviper</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">generateMetacellAnnData</span><span class="p">(</span><span class="n">arg0</span><span class="o">=</span><span class="n">adata_gExpr</span><span class="p">,</span>
-                                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;relative&quot;</span><span class="p">,</span>
-                                         <span class="n">cluster_label</span><span class="o">=</span><span class="s2">&quot;Cell_Type&quot;</span><span class="p">,</span>
-                                         <span class="n">n_metacells</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="c1">#not used</span>
-                                         <span class="n">n_metacells_per_cluster</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-                                         <span class="n">n_neighbors</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span>
-                                         <span class="n">n_cells_per_metacell</span><span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
-                                         <span class="n">experiment_dir_path</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-                                         <span class="n">use_decay</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1">#decay factor will not matter now that use_decay is false</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attrs_dict</span> <span class="o">=</span> <span class="n">adata_gExpr</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;metacells_approach_1_B cell&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span>
+<span class="n">attrs_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">attrs_dict</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Values&#39;</span><span class="p">])</span> <span class="c1"># convert to df</span>
+
+<span class="n">attrs_df</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Values</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>size</th>
+      <td>400.000000</td>
+    </tr>
+    <tr>
+      <th>n_cells_per_metacell</th>
+      <td>3.000000</td>
+    </tr>
+    <tr>
+      <th>min_median_depth</th>
+      <td>12000.000000</td>
+    </tr>
+    <tr>
+      <th>median_depth</th>
+      <td>11097.500000</td>
+    </tr>
+    <tr>
+      <th>perc_total_samples_used</th>
+      <td>81.800000</td>
+    </tr>
+    <tr>
+      <th>perc_included_samples_used_mult_times</th>
+      <td>30.929095</td>
+    </tr>
+    <tr>
+      <th>mean_n_times_samples_used</th>
+      <td>1.466993</td>
+    </tr>
+    <tr>
+      <th>stdev_n_times_samples_used</th>
+      <td>0.907459</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>As mentioned before, <code class="docutils literal notranslate"><span class="pre">repr_metacells</span></code> allows several combinations of parameters. Let’s consider another combination.</p>
+<ul class="simple">
+<li><p><strong>Example 2</strong>: generate 400 metacells per cluster such that each metacell should incorporate 20 single-cells (<code class="docutils literal notranslate"><span class="pre">n_cells_per_metacell=20</span></code>; <code class="docutils literal notranslate"><span class="pre">min_median_depth=None</span></code>).</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_cells_per_metacell</span><span class="o">=</span><span class="mi">20</span>
+
+<span class="n">pyviper</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">repr_metacells</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span>
+                          <span class="n">counts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">pca_slot</span><span class="o">=</span><span class="s1">&#39;X_pca&#39;</span><span class="p">,</span>
+                          <span class="n">dist_slot</span><span class="o">=</span><span class="s1">&#39;corr_dist&#39;</span><span class="p">,</span>
+                          <span class="n">size</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+                          <span class="n">n_cells_per_metacell</span><span class="o">=</span><span class="n">n_cells_per_metacell</span><span class="p">,</span>
+                          <span class="n">min_median_depth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">clusters_slot</span><span class="o">=</span><span class="s2">&quot;Cell_Type&quot;</span><span class="p">,</span>
+                          <span class="n">key_added</span><span class="o">=</span><span class="s2">&quot;metacells_approach_2&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+cluster metacells: 100%|██████████| 4/4 [00:07&lt;00:00,  1.79s/it]
+</pre></div></div>
+</div>
+<p>Display metacell-associated statistics for the Fibroblast population. The median depth is expected to be much higher than before, due to the larger number of cells per metacells specified.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attrs_dict</span> <span class="o">=</span> <span class="n">adata_gExpr</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;metacells_approach_2_Fibroblast cell&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span>
+<span class="n">attrs_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">attrs_dict</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Values&#39;</span><span class="p">])</span> <span class="c1"># convert to df</span>
+
+<span class="n">attrs_df</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Values</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>size</th>
+      <td>400.000000</td>
+    </tr>
+    <tr>
+      <th>n_cells_per_metacell</th>
+      <td>20.000000</td>
+    </tr>
+    <tr>
+      <th>min_median_depth</th>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>median_depth</th>
+      <td>196668.500000</td>
+    </tr>
+    <tr>
+      <th>perc_total_samples_used</th>
+      <td>97.963978</td>
+    </tr>
+    <tr>
+      <th>perc_included_samples_used_mult_times</th>
+      <td>89.928058</td>
+    </tr>
+    <tr>
+      <th>mean_n_times_samples_used</th>
+      <td>6.394884</td>
+    </tr>
+    <tr>
+      <th>stdev_n_times_samples_used</th>
+      <td>4.219301</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Data sparsity is also strongly decreased due to the higher number of nearest neighbors being aggregated.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sparsity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;metacells_approach_2_Fibroblast cell&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sparsity (fibroblasts, metacells example 2): &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">sparsity</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Good quality cells  1000
+Sparsity (fibroblasts, metacells example 2): 40.0%
 </pre></div></div>
 </div>
-<div class="nboutput docutils container">
+<ul class="simple">
+<li><p><strong>Example 3</strong>: Generate 400 metacells and allow for only the 20% of the cells to be incorporated in more than 1 metacell (<code class="docutils literal notranslate"><span class="pre">perc_incl_data_reused=20</span></code>)</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">perc_incl_data_reused</span><span class="o">=</span><span class="mi">20</span>
+
+<span class="n">pyviper</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">repr_metacells</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span>
+                          <span class="n">counts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">pca_slot</span><span class="o">=</span><span class="s1">&#39;X_pca&#39;</span><span class="p">,</span>
+                          <span class="n">dist_slot</span><span class="o">=</span><span class="s1">&#39;corr_dist&#39;</span><span class="p">,</span>
+                          <span class="n">size</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+                          <span class="n">perc_incl_data_reused</span><span class="o">=</span><span class="n">perc_incl_data_reused</span><span class="p">,</span>
+                          <span class="n">min_median_depth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">clusters_slot</span><span class="o">=</span><span class="s2">&quot;Cell_Type&quot;</span><span class="p">,</span>
+                          <span class="n">key_added</span><span class="o">=</span><span class="s2">&quot;metacells_approach_3&quot;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "532a9c33e6d64c5da799e4a68d49f5e6", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-(200, 20197)
-Good quality cells  1455
+cluster metacells: 100%|██████████| 4/4 [00:04&lt;00:00,  1.08s/it]
 </pre></div></div>
 </div>
-<div class="nboutput docutils container">
+<p>Display metacell statistics for the B cell population: the percentage of included cells is now lower than in the example 1. This approach can be useful if the goal is to generate metacells that are independent.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attrs_dict</span> <span class="o">=</span> <span class="n">adata_gExpr</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;metacells_approach_3_B cell&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span>
+<span class="n">attrs_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">attrs_dict</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Values&#39;</span><span class="p">])</span> <span class="c1"># convert to df</span>
+
+<span class="n">attrs_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Values</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>size</th>
+      <td>400.000000</td>
+    </tr>
+    <tr>
+      <th>n_cells_per_metacell</th>
+      <td>2.000000</td>
+    </tr>
+    <tr>
+      <th>min_median_depth</th>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>median_depth</th>
+      <td>7523.000000</td>
+    </tr>
+    <tr>
+      <th>perc_total_samples_used</th>
+      <td>69.800000</td>
+    </tr>
+    <tr>
+      <th>perc_included_samples_used_mult_times</th>
+      <td>12.034384</td>
+    </tr>
+    <tr>
+      <th>mean_n_times_samples_used</th>
+      <td>1.146132</td>
+    </tr>
+    <tr>
+      <th>stdev_n_times_samples_used</th>
+      <td>0.436669</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<section id="Comparing-metacell-and-original-single-cells">
+<h3>Comparing metacell and original single-cells<a class="headerlink" href="#Comparing-metacell-and-original-single-cells" title="Link to this heading"></a></h3>
+<p>As a simple and quick sanity check, we compare the original cells and the derived cell metacells. Extract all the metacell matrices generated with the first approach.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Extract and concatenate all population-specific metacell matrices</span>
+<span class="n">B_meta</span><span class="o">=</span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;metacells_approach_1_B cell&quot;</span><span class="p">]</span>
+<span class="n">Ductal_meta</span><span class="o">=</span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;metacells_approach_1_Ductal cell type 2&quot;</span><span class="p">]</span>
+<span class="n">Fibroblast_meta</span><span class="o">=</span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;metacells_approach_1_Fibroblast cell&quot;</span><span class="p">]</span>
+<span class="n">Stellate_meta</span><span class="o">=</span><span class="n">adata_gExpr</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;metacells_approach_1_Stellate cell&quot;</span><span class="p">]</span>
+
+<span class="c1"># rename all indexes before merging</span>
+<span class="n">B_meta</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="s2">&quot;B_&quot;</span><span class="o">+</span><span class="n">B_meta</span><span class="o">.</span><span class="n">index</span>
+<span class="n">Ductal_meta</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="s2">&quot;Ductal_&quot;</span><span class="o">+</span><span class="n">Ductal_meta</span><span class="o">.</span><span class="n">index</span>
+<span class="n">Fibroblast_meta</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="s2">&quot;Fibroblast_&quot;</span><span class="o">+</span><span class="n">Fibroblast_meta</span><span class="o">.</span><span class="n">index</span>
+<span class="n">Stellate_meta</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="s2">&quot;Stellate_&quot;</span><span class="o">+</span><span class="n">Stellate_meta</span><span class="o">.</span><span class="n">index</span>
+
+<span class="c1"># concatenate all dataframes</span>
+<span class="n">metacells_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">B_meta</span><span class="p">,</span> <span class="n">Ductal_meta</span><span class="p">,</span> <span class="n">Fibroblast_meta</span><span class="p">,</span> <span class="n">Stellate_meta</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<p>Annotate each metacell with its cell type.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Dictionary mapping index prefixes to cell types</span>
+<span class="n">cell_type_map</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;B cell&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Ductal&#39;</span><span class="p">:</span> <span class="s1">&#39;Ductal cell type 2&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Fibroblast&#39;</span><span class="p">:</span> <span class="s1">&#39;Fibroblast cell&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Stellate&#39;</span><span class="p">:</span> <span class="s1">&#39;Stellate cell&#39;</span>
+<span class="p">}</span>
+
+<span class="c1"># Generate the &quot;Cell_Type&quot; column based on the index</span>
+<span class="n">cell_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">cell_type_map</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">metacells_df</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+
+<span class="c1"># metacell observation dataframe</span>
+<span class="n">observation_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Cell_Type&#39;</span><span class="p">:</span> <span class="n">cell_types</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">metacells_df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<p>Generate an AnnData object from metacells.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_metacell</span> <span class="o">=</span> <span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">metacells_df</span><span class="p">,</span> <span class="n">obs</span><span class="o">=</span><span class="n">observation_df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Preprocess the concatenated metacells for PCA and UMAP visualization.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_metacell</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">adata_metacell</span>
+
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">normalize_total</span><span class="p">(</span><span class="n">adata_metacell</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">target_sum</span><span class="o">=</span><span class="mf">1e4</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">adata_metacell</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">highly_variable_genes</span><span class="p">(</span><span class="n">adata_metacell</span><span class="p">,</span> <span class="n">flavor</span><span class="o">=</span><span class="s2">&quot;seurat&quot;</span><span class="p">,</span> <span class="n">n_top_genes</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">adata_metacell</span><span class="p">)</span>
+
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">adata_metacell</span><span class="p">,</span> <span class="n">svd_solver</span><span class="o">=</span><span class="s1">&#39;arpack&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata_metacell</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_metacell</span><span class="p">)</span>
+<br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "90ca73d993b74a1f898b4e1452ef50e4", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-(200, 20197)
-(291, 20197)
-Good quality cells  1277
+OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active_levels instead.
 </pre></div></div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
+<p>Visualize the original single-cells in PCA and UMAP embeddings.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
 </div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "0f2f805195754cae9bfc62b60709e28a", "version_major": 2, "version_minor": 0}</script></div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">))</span>
+
+<span class="k">with</span> <span class="n">rc_context</span><span class="p">({</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">)}):</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Cell_Type&quot;</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;Set2&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;PCA by Cell Types&quot;</span><span class="p">,</span> <span class="n">add_outline</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">rc_context</span><span class="p">({</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">)}):</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_gExpr</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Cell_Type&quot;</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;Set2&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;UMAP by Cell Types&quot;</span><span class="p">,</span> <span class="n">add_outline</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Gene expression - single cells&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<br/></pre></div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-(200, 20197)
-(291, 20197)
-(255, 20197)
-Good quality cells  900
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "88c53e29b66e455b8e6af8114f00d48e", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-(200, 20197)
-(291, 20197)
-(255, 20197)
-(180, 20197)
-</pre></div></div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/av2729/opt/anaconda3/envs/single-cell-env-scvi/lib/python3.8/site-packages/scanpy/preprocessing/_normalization.py:197: UserWarning: Some cells have zero counts
-  warn(UserWarning(&#39;Some cells have zero counts&#39;))
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:369: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:379: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  cax = scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:369: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:379: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  cax = scatter(
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
+<img alt="_images/Tutorial-3_50_1.png" src="_images/Tutorial-3_50_1.png" />
+</div>
+</div>
+<p>Visualize the cell population-specific metacells in PCA and UMAP embeddings.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">))</span>
+
+<span class="k">with</span> <span class="n">rc_context</span><span class="p">({</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">)}):</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">adata_metacell</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Cell_Type&quot;</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;Set2&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;PCA by Cell Types&quot;</span><span class="p">,</span> <span class="n">add_outline</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">rc_context</span><span class="p">({</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">)}):</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_metacell</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Cell_Type&quot;</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;Set2&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;UMAP by Cell Types&quot;</span><span class="p">,</span> <span class="n">add_outline</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Gene expression - metacells&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-(926, 20197)
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:369: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:379: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  cax = scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:369: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:379: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  ax.scatter(
+/Users/lucazanella7/mambaforge/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+  cax = scatter(
 </pre></div></div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">adata_metacell_nopenalty</span><span class="p">,</span> <span class="n">svd_solver</span><span class="o">=</span><span class="s1">&#39;arpack&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">666</span><span class="p">)</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata_metacell_nopenalty</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_metacell_nopenalty</span><span class="p">)</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_metacell_nopenalty</span><span class="p">,</span><span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;Cell_Type&quot;</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;Set2&quot;</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;UMAP by Cell Types - Metacells&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Tutorial-3_32_0.png" src="_images/Tutorial-3_32_0.png" />
+<img alt="_images/Tutorial-3_52_1.png" src="_images/Tutorial-3_52_1.png" />
 </div>
 </div>
-<p>We observe a similar general distribution of metacells in UMAP space. We can quantitatively identify whether a penalty achieves our desired goal of minimizing overlap across metacells.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#this works if you are working on the source directory of the jupyter notebook</span>
-<span class="n">metacell_counts_penalty</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;with_penalty/5/metacell_counts_5.csv&quot;</span><span class="p">)</span>
-<span class="n">metacell_counts_nopenalty</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;without_penalty/5/metacell_counts_5.csv&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create and save histograms and bar plots for the cluster</span>
-<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
-<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Histograms of Counts - Cell Types&quot;</span><span class="p">)</span>
-
-<span class="c1"># Plot histograms for &quot;Penalty&quot; and &quot;No Penalty&quot;, 5 and 10 cells per metacell</span>
-<span class="k">def</span> <span class="nf">plot_bar</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
-    <span class="n">unique_counts</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Count&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
-    <span class="n">counts</span> <span class="o">=</span> <span class="n">unique_counts</span><span class="o">.</span><span class="n">index</span>
-    <span class="n">frequencies</span> <span class="o">=</span> <span class="n">unique_counts</span><span class="o">.</span><span class="n">values</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Count&quot;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Frequency&quot;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
-
-<span class="n">plot_bar</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">metacell_counts_nopenalty</span><span class="p">,</span> <span class="s2">&quot;5 Cells per Metacell - No Penalty&quot;</span><span class="p">)</span>
-<span class="n">plot_bar</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metacell_counts_penalty</span><span class="p">,</span> <span class="s2">&quot;5 Cells per Metacell - Penalty&quot;</span><span class="p">)</span>
-
-<span class="c1"># Add labels</span>
-<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="o">.</span><span class="n">flat</span><span class="p">:</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Count&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Frequency&quot;</span><span class="p">)</span>
-
-<span class="c1"># Adjust spacing between subplots</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="n">rect</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">])</span>
-<br/><br/><br/></pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="_images/Tutorial-3_35_0.png" src="_images/Tutorial-3_35_0.png" />
-</div>
-</div>
-<p>Using a probability penalty, we have changed from a right tailed distribution to one that peaks at 1, indicating that most of the single cells are selected only once in a metacell.</p>
-<p>Now, the metacell datasets can be used to build ARACNe3 networks which can then be used for Py-VIPER analysis.</p>
-</div>
-</div>
+<p>The cell type distribution is consistent between single-cells and metacells, with stellate cells and fibroblasts partially overlapping in the PCA as expected, and all the three lineages been separated along the directions of maximal variance.</p>
+</section>
+</section>
+<section id="Key-takeaways">
+<h2>Key takeaways<a class="headerlink" href="#Key-takeaways" title="Link to this heading"></a></h2>
+<p>This Tutorial describes how to generate metacells with pyVIPER. Metacells can be used for pseudo-bulk analysis of specific cellular populations or as input to ARACNe, when the original cell depth is not adequate to robustly infer regulatory networks (typically below 10,000 UMI/cell). The <code class="docutils literal notranslate"><span class="pre">repr_metacell</span></code> function computes several metacell-associated statistics and allows the users to specify several parameter combinations, among which the current Tutorial provides three examples.</p>
+</section>
+</section>
 
 
            </div>
