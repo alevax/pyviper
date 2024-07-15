@@ -89,6 +89,8 @@ Additionally, the following submodules are available:
 - `pyviper.tl`: submodule containing pyviper-wrappers for `scanpy` data transformation
 - `pyviper.config`: submodule allowing users to specify current species and filepaths for regulators
 
+Last, a new `Interactome` class allows users to load and interrogate ARACNe- and SCENIC-inferred gene regulatory networks.
+
 ## Contact
 Please, report any issues that you experience through this repository ["Issues"](https://github.com/alevax/pyviper/issues).
 
