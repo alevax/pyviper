@@ -147,8 +147,8 @@ def viper(gex_data,
     A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values when output_as_anndata=False and enrichment = "aREA".
     An anndata object containin NES values in .X when output_as_anndata=True (default). Will contain PES values in the layer 'pes' when enrichment = 'NaRnEA'. Will contain .gex_data and/or .pax_data in the unstructured data slot (.uns) when store_input_data = True. Will contain identical .obs to the input anndata when transfer_obs = True.
 
-    Citations
-    -------
+    References
+    ----------
     [1] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H., & Califano, A. (2016). Functional characterization of somatic mutations in cancer using network-based inference of protein activity. Nature genetics, 48(8), 838-847.
 
     [2] Griffin, A. T., Vlahos, L. J., Chiuzan, C., & Califano, A. (2023). NaRnEA: An Information Theoretic Framework for Gene Set Analysis. Entropy, 25(3), 542.

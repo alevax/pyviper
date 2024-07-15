@@ -1,6 +1,18 @@
 pyviper package
 =================
 
+pyviper.aREA
+--------------------
+
+.. autofunction:: pyviper.aREA
+   :noindex:
+
+pyviper.NaRnEA
+--------------------
+
+.. autofunction:: pyviper.NaRnEA
+   :noindex:
+
 pyviper\.config
 --------------------
 
@@ -11,13 +23,29 @@ pyviper\.config
 .. autofunction:: pyviper.config.set_regulators_filepath
 .. autofunction:: pyviper.config.set_regulators_species_to_use
 
-pyviper\.interactome
+pyviper.Interactome
 -------------------------
 
-.. automodule:: pyviper.interactome
+.. automodule:: pyviper.Interactome
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+pyviper\.load
+----------------
+
+.. automodule:: pyviper.load
+   :members:
+   :undoc-members:
+   :show-inheritance:
+.. autofunction:: pyviper.load.TFs
+.. autofunction:: pyviper.load.coTFs
+.. autofunction:: pyviper.load.human2mouse
+.. autofunction:: pyviper.load.msigdb_regulon
+.. autofunction:: pyviper.tl.sig
+.. autofunction:: pyviper.tl.surf
+
 
 pyviper\.pl
 ----------------
@@ -75,34 +103,9 @@ pyviper\.tl
 .. autofunction:: pyviper.tl.find_top_mrs
 .. autofunction:: pyviper.tl.path_enr
 
-pyviper\.aREA.aREA\_classic
---------------------------------
+pyviper.viper
+--------------------
 
-.. automodule:: pyviper.aREA.aREA_classic
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. autofunction:: pyviper.viper
+   :noindex:
 
-pyviper\.aREA.aREA\_meta
------------------------------
-
-.. automodule:: pyviper.aREA.aREA_meta
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pyviper\.NaRnEA.NaRnEA\_classic
-------------------------------------
-
-.. automodule:: pyviper.NaRnEA.NaRnEA_classic
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pyviper\.NaRnEA.NaRnEA\_meta
----------------------------------
-
-.. automodule:: pyviper.NaRnEA.NaRnEA_meta
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -40,8 +40,8 @@ class Interactome:
         will be inferred from the net_table. Otherwise, specify "csv", "tsv"
         or "pkl".
 
-    Citations
-    -------
+    References
+    ----------
     [1] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H., & Califano, A. (2016). Functional characterization of somatic
     mutations in cancer using network-based inference of protein activity.
     Nature genetics, 48(8), 838-847.
