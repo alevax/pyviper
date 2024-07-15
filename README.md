@@ -9,6 +9,7 @@ This package enables network-based protein activity estimation on Python.
 It provides also interfaces for scanpy (single-cell RNASeq analysis in Python).
 Functions are partly transplanted from R package [viper](https://www.bioconductor.org/packages/release/bioc/html/viper.html) and the R package [NaRnEA](https://github.com/califano-lab/NaRnEA). 
 
+The user-friendly documentation is available at: https://alevax.github.io/pyviper/index.html
 
 ---
 
