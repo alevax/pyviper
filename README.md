@@ -65,7 +65,7 @@ print(activity.to_df())
 ## Tutorials
 1. [Analyzing scRNA-seq data at the Protein Activity Level](https://github.com/alevax/pyviper/blob/main/Tutorials/Tutorial-1.ipynb)
 2. [Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach](https://github.com/alevax/pyviper/blob/main/Tutorials/Tutorial-2.ipynb)
-3. [Generating Metacells for ARACNe3 network generation and VIPER protein activity analysis](https://github.com/alevax/pyviper/blob/main/Tutorials/Tutorial-3.ipynb) (note: to be updated soon)
+3. [Generating Metacells for ARACNe3 network generation and VIPER protein activity analysis](https://github.com/alevax/pyviper/blob/main/Tutorials/Tutorial-3.ipynb) 
 
 ## Structure and rationale
 
