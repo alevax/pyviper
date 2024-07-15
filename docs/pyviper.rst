@@ -54,6 +54,7 @@ pyviper\.pp
    :show-inheritance:
 .. autofunction:: pyviper.pp.rank_norm
 .. autofunction:: pyviper.pp.stouffer
+.. autofunction:: pyviper.pp.mwu
 .. autofunction:: pyviper.pp.spearman
 .. autofunction:: pyviper.pp.viper_similarity
 .. autofunction:: pyviper.pp.aracne3_to_regulon
