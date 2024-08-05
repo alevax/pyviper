@@ -11,7 +11,8 @@ Functions are partly transplanted from R package [viper](https://www.bioconducto
 
 The user-friendly documentation is available at: https://alevax.github.io/pyviper/index.html
 
-<img width="1512" alt="viper_visualized" src="https://github.com/user-attachments/assets/60ae218d-8b17-4cea-9153-83a2978492db">
+<img style="width: 50%;" alt="viper_visualized" src="https://github.com/user-attachments/assets/44d230cd-7eb3-4cc1-8e27-4cb9d49c269d">
+
 
 
 ---
