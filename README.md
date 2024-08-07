@@ -106,7 +106,7 @@ For any other info or queries please write to Alessandro Vasciaveo (av2729@cumc.
 `pyviper` is distributed under a MIT License (see [LICENSE](https://github.com/alevax/pyviper/blob/main/LICENSE)).
 
 ## Citation
-If you used PaCMAP in your publication, or you used the implementation in this repository, please cite our work here:
+If you used pyVIPER in your publication, please cite our work here:
 
 Zanella, L., Wang, A. L., Lin, Z. J., Vlahos, L. J., Girotto, M. A., Zafar, A., ... & Vasciaveo, A. (2024). PyVIPER: A fast and scalable toolkit for the identification of dysregulated proteins in tumor-derived single-cell RNA-seq data. _Cancer Research, 84_(6_Supplement), 7410-7410.
 
