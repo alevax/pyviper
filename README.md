@@ -108,6 +108,6 @@ For any other info or queries please write to Alessandro Vasciaveo (av2729@cumc.
 ## Citation
 If you used PaCMAP in your publication, or you used the implementation in this repository, please cite our work here:
 
-Zanella, L., Wang, A. L., Lin, Z. J., Vlahos, L. J., Girotto, M. A., Zafar, A., ... & Vasciaveo, A. (2024). PyVIPER: A fast and scalable toolkit for the identification of dysregulated proteins in tumor-derived single-cell RNA-seq data. _Cancer Research_, 84(6_Supplement), 7410-7410.
+Zanella, L., Wang, A. L., Lin, Z. J., Vlahos, L. J., Girotto, M. A., Zafar, A., ... & Vasciaveo, A. (2024). PyVIPER: A fast and scalable toolkit for the identification of dysregulated proteins in tumor-derived single-cell RNA-seq data. _Cancer Research, 84_(6_Supplement), 7410-7410.
 
 _Manuscript in review_
