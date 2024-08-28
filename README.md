@@ -9,7 +9,7 @@ This package enables network-based protein activity estimation on Python.
 It provides also interfaces for scanpy (single-cell RNASeq analysis in Python).
 Functions are partly transplanted from R package [viper](https://www.bioconductor.org/packages/release/bioc/html/viper.html) and the R package [NaRnEA](https://github.com/califano-lab/NaRnEA). 
 
-The user-friendly documentation is available at: https://alevax.github.io/pyviper/index.html
+The user-friendly documentation is available at: https://alevax.github.io/pyviper/index.html.
 
 <div align="center">
     <img style="width: 80%;" alt="viper_visualized" src="https://github.com/user-attachments/assets/44d230cd-7eb3-4cc1-8e27-4cb9d49c269d">
@@ -108,6 +108,6 @@ For any other info or queries please write to Alessandro Vasciaveo (av2729@cumc.
 ## Citation
 If you used pyVIPER in your publication, please cite our work here:
 
-Zanella, L., Wang, A. L., Lin, Z. J., Vlahos, L. J., Girotto, M. A., Zafar, A., ... & Vasciaveo, A. (2024). PyVIPER: A fast and scalable toolkit for the identification of dysregulated proteins in tumor-derived single-cell RNA-seq data. _Cancer Research, 84_(6_Supplement), 7410-7410.
+Wang, A.L.E., Lin, Z., Zanella, L., Vlahos, L., Girotto, M.A., Zafar, A., ... & Vasciaveo, A. (2024). pyVIPER: A fast and scalable Python package for rank-based enrichment analysis of single-cell RNASeq data. _bioRxiv_, 2024-08. doi: https://doi.org/10.1101/2024.08.25.609585.
 
 _Manuscript in review_
