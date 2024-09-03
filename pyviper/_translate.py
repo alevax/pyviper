@@ -88,10 +88,20 @@ def _translate_genes_array(current_gene_names, desired_format):
     translation = np.array([None] * len(current_gene_names))
     translation[mask] = dict_column_desired_format[positions[mask]]
 
+    translation = _uniform_missing_values(translation)
+
     return translation
 
-def keep_first_duplicate_strings(arr):
-    arr[arr == None] = '-1'
+def _uniform_missing_values(arr):
+    arr[pd.isna(arr)] = np.nan
+    arr[arr == '-1'] = np.nan
+    arr[arr == None] = np.nan
+    arr[arr == "nan"] = np.nan
+    arr[arr == "NaN"] = np.nan
+    return arr
+
+def _keep_first_duplicate_strings(arr):
+    arr[pd.isna(arr)] = '-1'
     _, index = np.unique(arr, return_index=True)
     result = np.full_like(arr, fill_value=np.nan, dtype=object)
     result[index] = arr[index]
@@ -105,7 +115,13 @@ def keep_first_duplicate_strings(arr):
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 
-def translate_adata_index(adata, desired_format, eliminate = True, copy = False):
+def translate_adata_index(
+    adata,
+    desired_format,
+    eliminate = True,
+    remove_dupls = True,
+    copy = False
+):
     """\
     Take adata.var.index.names, replace them with a translation of desired_format,
     and move the original names to a new column in var. The current name format
@@ -123,6 +139,9 @@ def translate_adata_index(adata, desired_format, eliminate = True, copy = False)
     eliminate : default: True
         Whether to eliminate var rows that don't have a translation. Otherwise,
         None will be left in place in the index.
+    remove_dupls : default: True
+        Whether to eliminate duplicates. Useful in cases where different Ensembl
+        IDs match to the same gene symbol.
     copy : default: False
         Whether to return a translated copy (True) or to instead translate the
         original input (False).
@@ -137,19 +156,24 @@ def translate_adata_index(adata, desired_format, eliminate = True, copy = False)
     current_format = _detect_name_type(adata.var.index.values)
     adata.var[current_format] = adata.var.index.values.astype(str)
     adata.var[desired_format] = _translate_genes_array(adata.var[current_format], desired_format)
-    # return adata
-    adata.var[desired_format] = keep_first_duplicate_strings(adata.var[desired_format].values)
+    if remove_dupls: adata.var[desired_format] = _keep_first_duplicate_strings(adata.var[desired_format].values)
     if eliminate:
         adata._inplace_subset_var(~pd.isna(adata.var[desired_format]))
-        adata._inplace_subset_var(adata.var[desired_format] != "nan")
-        adata._inplace_subset_var(adata.var[desired_format] != "NaN")
+        # adata._inplace_subset_var(adata.var[desired_format] != "nan")
+        # adata._inplace_subset_var(adata.var[desired_format] != "NaN")
 
     adata.var.set_index(desired_format, inplace=True)
 
     if copy: return adata
 
 
-def translate(adata, desired_format, eliminate = True, copy = False):
+def translate(
+    adata,
+    desired_format,
+    eliminate = True,
+    remove_dupls = True,
+    copy = False
+):
     """\
     Performs translation of an AnnData, np.ndarray, or list object. For AnnData,
     takes adata.var.index.names, replaces them with a translation of desired_format,
@@ -169,6 +193,9 @@ def translate(adata, desired_format, eliminate = True, copy = False):
     eliminate : default: True
         Whether to eliminate var rows that don't have a translation. Otherwise,
         None will be left in place in the index.
+    remove_dupls : default: True
+        Whether to eliminate duplicates. Useful in cases where different Ensembl
+        IDs match to the same gene symbol.
     copy : default: False
         Whether to return a translated copy (True) or to instead translate the
         original AnnData (False). True when given np.ndarray or list.
@@ -191,14 +218,12 @@ def translate(adata, desired_format, eliminate = True, copy = False):
         current_format = _detect_name_type(adata)
         adata = _translate_genes_array(adata, desired_format)
         # Switch to "-1" so shape isn't affected
-        adata[adata == None] = '-1'
-        adata[adata == np.nan] = '-1'
-        adata = keep_first_duplicate_strings(adata)
+        if remove_dupls: adata = _keep_first_duplicate_strings(adata)
         adata = adata.reshape(original_shape)
         if eliminate:
             adata = adata[~pd.isna(adata)]
-            adata = adata[adata != "nan"]
-            adata = adata[adata != "NaN"]
+            # adata = adata[adata != "nan"]
+            # adata = adata[adata != "NaN"]
         return adata
     elif isinstance(adata, list):
         if copy is False:
@@ -207,10 +232,10 @@ def translate(adata, desired_format, eliminate = True, copy = False):
         adata = np.array(adata)
         current_format = _detect_name_type(adata)
         adata = _translate_genes_array(adata, desired_format)
-        adata = keep_first_duplicate_strings(adata)
+        if remove_dupls: adata = _keep_first_duplicate_strings(adata)
         if eliminate:
             adata = adata[~pd.isna(adata)]
-            adata = adata[adata != "nan"]
-            adata = adata[adata != "NaN"]
+            # adata = adata[adata != "nan"]
+            # adata = adata[adata != "NaN"]
         adata = list(adata)
         return adata
