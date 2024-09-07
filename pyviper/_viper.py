@@ -167,6 +167,7 @@ def viper(gex_data,
         gex_df = gex_data.to_df(layer)
     elif isinstance(gex_data, pd.DataFrame):
         gex_df = gex_data
+        gex_data = anndata.AnnData(gex_df)
     else:
         raise ValueError("gex_data is type: " + str(type(gex_data)) + ". Must be anndata.AnnData or pd.DataFrame.")
 

@@ -87,8 +87,8 @@ class Interactome:
         ))
         if n_duplicates > 1:
             warn(
-                "There are " + str(n_duplicates) + " duplicate pairs" +\
-                "of regulator and target in your net_table.\n" +\
+                "There are " + str(n_duplicates) + " duplicate regulator" +\
+                "-target pairs in your Interactome" + interactome.name + "." +\
                 "Use Interactome.remove_duplicate_pairs() to resolve them."
             )
 

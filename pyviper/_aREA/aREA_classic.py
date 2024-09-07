@@ -88,13 +88,12 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     n_targets_not_in_exp_genes = np.count_nonzero(~np.isin(targetSet, varNames))
     if n_targets_not_in_exp_genes > 0:
         # raise ValueError(
-        warnings.warn(
-                         'interactome "' + str(interactome.name) + '" contains ' +
+        warnings.warn('interactome "' + str(interactome.name) + '" contains ' +
                          str(n_targets_not_in_exp_genes) + " targets missing from gex_data.var.\n\t" +
                         "Please run interactome.filter_targets(gex_data.var_names) on your network to\n\t" +
                          "resolve this. It is highly recommend to do this on the unPruned network and\n\t"+
-                         "then prune to the pruned network contains a consistent number of targets per\n\t"
-                         "regulator, allow of which exist within gex_data.")
+                         "then prune. This way the Pruned network contains a consistent number of targets per\n\t"
+                         "regulator, all of which exist within gex_data.")
         interactome.filter_targets(varNames, verbose = verbose)
 
     # rank transform the GES using the rankdata function from scipy.stats

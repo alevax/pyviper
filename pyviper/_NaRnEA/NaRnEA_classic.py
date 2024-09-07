@@ -190,8 +190,8 @@ def NaRnEA_classic(gex_data,
                          str(n_targets_not_in_exp_genes) + " targets missing from gex_data.var.\n\t" +
                         "Please run interactome.filter_targets(gex_data.var_names) on your network to\n\t" +
                          "resolve this. It is highly recommend to do this on the unPruned network and\n\t"+
-                         "then prune to the pruned network contains a consistent number of targets per\n\t"
-                         "regulator, allow of which exist within gex_data.")
+                         "then prune. This way the Pruned network contains a consistent number of targets per\n\t"
+                         "regulator, all of which exist within gex_data.")
         interactome.filter_targets(gex_df.columns)
     int_table = interactome.net_table
     filtered_table = int_table
@@ -207,8 +207,8 @@ def NaRnEA_classic(gex_data,
     ))
     if n_duplicates > 1:
         raise ValueError(
-            "There are " + str(n_duplicates) + " duplicate " +\
-            "pairs of regulator and target in your net_table.\n" +\
+            "There are " + str(n_duplicates) + " duplicate regulator" +\
+            "-target pairs in your Interactome" + interactome.name + "." +\
             "Use Interactome.remove_duplicate_pairs() to resolve them."
         )
 

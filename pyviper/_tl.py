@@ -246,7 +246,7 @@ def _find_top_mrs(adata,
         raise ValueError("copy and return_as_df cannot both be True.")
     if copy: adata = adata.copy()
 
-    sig = _sig_clusters_adata(adata,
+    sig = pyviper._tl._sig_clusters_adata(adata,
                               obs_column_name,
                               layer,
                               filter_by_feature_groups,
@@ -254,7 +254,7 @@ def _find_top_mrs(adata,
                               compute_pvals = False,
                               pca_slot = "X_pca",
                               verbose = verbose)
-    result_df = _find_top_mrs_from_sig(sig, N, both, rank)
+    result_df = pyviper._tl._find_top_mrs_from_sig(sig, N, both, rank)
     result_df.columns.str.replace('_scores', '')
 
     if obs_column_name is None:
@@ -266,13 +266,19 @@ def _find_top_mrs(adata,
         adata._inplace_subset_var(adata.var[key_added].values.flatten()==True)
 
     if return_as_df:
-        mrs_df = result_df.apply(lambda col: result_df.index[col].tolist())
+        if rank is True:
+            mrs_df = result_df.apply(lambda col: col[col != 0].sort_values(ascending=False).index.tolist())
+        else:
+            mrs_df = result_df.apply(lambda col: result_df.index[col].tolist())
         return mrs_df
     elif copy:
         # adata.var = pd.concat([adata.var, result_df], axis=1, join='inner')
         for col in result_df.columns:
             adata.var[col] = result_df[col]
         return adata
+    else:
+        for col in result_df.columns:
+            adata.var[col] = result_df[col]
 
 def _path_enr(gex_data,
              pathway_interactome,
