@@ -201,6 +201,17 @@ def NaRnEA_classic(gex_data,
     filtered_table['mor'].replace(-1 ,-0.999, inplace= True)
     filtered_table['mor'] = filtered_table['mor'].apply(lambda x: replace_random(x, -0.001, 0.001))
 
+    # INT_TABLE DOESN'T WORK WITH DUPLICATE ENTIRES WITH NARNEA
+    n_duplicates = np.sum(filtered_table.duplicated(
+        subset=['regulator', 'target'], keep=False
+    ))
+    if n_duplicates > 1:
+        raise ValueError(
+            "There are " + str(n_duplicates) + " duplicate " +\
+            "pairs of regulator and target in your net_table.\n" +\
+            "Use Interactome.remove_duplicate_pairs() to resolve them."
+        )
+
     #filtered_table['mor'].replace(0 ,0.999, inplace= True)
     # why we cant have 0, 1 and -1?
 
