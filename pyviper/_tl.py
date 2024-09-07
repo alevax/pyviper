@@ -246,7 +246,7 @@ def _find_top_mrs(adata,
         raise ValueError("copy and return_as_df cannot both be True.")
     if copy: adata = adata.copy()
 
-    sig = pyviper._tl._sig_clusters_adata(adata,
+    sig = _sig_clusters_adata(adata,
                               obs_column_name,
                               layer,
                               filter_by_feature_groups,
@@ -254,7 +254,7 @@ def _find_top_mrs(adata,
                               compute_pvals = False,
                               pca_slot = "X_pca",
                               verbose = verbose)
-    result_df = pyviper._tl._find_top_mrs_from_sig(sig, N, both, rank)
+    result_df = _find_top_mrs_from_sig(sig, N, both, rank)
     result_df.columns.str.replace('_scores', '')
 
     if obs_column_name is None:
