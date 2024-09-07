@@ -9,6 +9,7 @@ from multiprocessing import cpu_count
 from scipy.stats import rankdata
 from scipy.stats import ttest_1samp
 from anndata import AnnData
+from tqdm import tqdm
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['viper']
@@ -208,34 +209,71 @@ def viper(gex_data,
         if verbose: print("Computing regulons enrichment with aREA")
 
         if njobs==1:
-            preOp = aREA(
-                gex_df,
-                interactome, layer, eset_filter,
-                min_targets, mvws, verbose
-            )
+            if n_batches == 1:
+                preOp = aREA(
+                    gex_df,
+                    interactome, layer, eset_filter,
+                    min_targets, mvws, verbose
+                )
+            else:
+                results = []
+                for batch_i in tqdm(range(n_batches), desc="Batches") if verbose else range(n_batches):
+                    results.append(
+                        aREA(
+                            gex_df.iloc[
+                                batch_i*batch_size:batch_i*batch_size+batch_size
+                            ],
+                            interactome, layer, eset_filter,
+                            min_targets, mvws,
+                            verbose = False
+                        )
+                    )
+                preOp = pd.concat(results)
+
         else:
-            preOp = Parallel(njobs)(
+            results = Parallel(njobs)(
                 delayed(aREA)(
-                    gex_df.iloc[batch_i*batch_size:batch_i*batch_size+batch_size],
+                    gex_df.iloc[
+                        batch_i*batch_size:batch_i*batch_size+batch_size
+                    ],
                     interactome, layer, eset_filter,
                     min_targets, mvws, verbose
                 ) for batch_i in range(n_batches)
             )
-            preOp = pd.concat(preOp)
+            preOp = pd.concat(results)
 
     elif enrichment == 'narnea':
         if verbose: print("Computing regulons enrichment with NaRnEa")
 
         if njobs==1:
-            preOp = NaRnEA(
-                gex_df,
-                interactome, layer, eset_filter,
-                min_targets, verbose
-            )
+            if n_batches == 1:
+                preOp = NaRnEA(
+                    gex_df,
+                    interactome, layer, eset_filter,
+                    min_targets, verbose
+                )
+            else:
+                results = []
+                for batch_i in tqdm(range(n_batches), desc="Batches") if verbose else range(n_batches):
+                    results.append(
+                        NaRnEA(
+                            gex_df.iloc[
+                                batch_i*batch_size:batch_i*batch_size+batch_size
+                            ],
+                            interactome, layer, eset_filter,
+                            min_targets, verbose = False
+                        )
+                    )
+                preOp = {
+                    "nes": pd.concat([res["nes"] for res in results]),
+                    "pes": pd.concat([res["pes"] for res in results])
+                }
         else:
             results = Parallel(njobs)(
                 delayed(NaRnEA)(
-                    gex_df.iloc[batch_i*batch_size:batch_i*batch_size+batch_size],
+                    gex_df.iloc[
+                        batch_i*batch_size:batch_i*batch_size+batch_size
+                    ],
                     interactome, layer, eset_filter,
                     min_targets, verbose
                 ) for batch_i in range(n_batches)

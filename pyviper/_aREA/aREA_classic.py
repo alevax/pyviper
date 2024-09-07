@@ -95,7 +95,7 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
                          "resolve this. It is highly recommend to do this on the unPruned network and\n\t"+
                          "then prune to the pruned network contains a consistent number of targets per\n\t"
                          "regulator, allow of which exist within gex_data.")
-        interactome.filter_targets(varNames)
+        interactome.filter_targets(varNames, verbose = verbose)
 
     # rank transform the GES using the rankdata function from scipy.stats
     if(verbose): print("Rank transforming the data")
