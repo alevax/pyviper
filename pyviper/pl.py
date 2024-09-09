@@ -1,9 +1,13 @@
 ### ---------- IMPORT DEPENDENCIES ----------
 import scanpy as sc
 import pandas as pd
+import numpy as np
 import seaborn
 from ._pl_sns_heatmap import _completemap
 from ._pl_sns_heatmap import _mrs
+from anndata import AnnData
+import matplotlib.pyplot as plt
+from warnings import warn
 
 ### ---------- EXPORT LIST ----------
 __all__ = []
@@ -52,6 +56,15 @@ def __parse_keys(adata, kwargs):
         kwargs['keys'] = keys
     return kwargs
 
+def __get_indices_for_B_same_order_as_A(A, B):
+    # Step 1: Create a mapping from values in B to their indices
+    b_indices = {value: idx for idx, value in enumerate(B)}
+
+    # Step 2: Use the mapping to create the index order for B that matches A
+    reorder_indices = np.array([b_indices[value] for value in A])
+
+    return reorder_indices
+
 def __get_stored_uns_data_and_prep_to_plot(
     adata,
     uns_data_slot,
@@ -59,19 +72,226 @@ def __get_stored_uns_data_and_prep_to_plot(
     uns_slot = None
 ):
     adata_stored = adata.uns[uns_data_slot].copy()
+    order_adata_as_adata_stored = __get_indices_for_B_same_order_as_A(
+        adata_stored.obs_names.values, adata.obs_names.values
+    )
+
     if obsm_slot is not None:
-        adata_stored.obsm[obsm_slot] = adata.obsm[obsm_slot]
+        adata_stored.obsm[obsm_slot] =\
+            adata.obsm[obsm_slot][order_adata_as_adata_stored,:]
     if uns_slot is not None:
-        adata_stored.obsm[uns_slot] = adata.obsm[uns_slot]
+        adata_stored.obsm[uns_slot] =\
+            adata.obsm[uns_slot][order_adata_as_adata_stored,:]
     adata = adata_stored
     return adata
+
+def __get_adata_comb(adata, my_colors, basis = "X_pca"):
+    obs_comb = pd.DataFrame(index=adata.obs_names)
+    X_comb = pd.DataFrame(index=adata.obs_names)
+
+    gex_order_as_pax = __get_indices_for_B_same_order_as_A(
+                    adata.obs_names,
+                    adata.uns['gex_data'].obs_names
+    )
+
+    missing_colors = []
+
+    for c in my_colors:
+        if c in adata.obs.columns:
+            obs_comb[c] = adata.obs[c]
+        elif c in adata.uns['gex_data'].obs:
+            obs_comb[c] = adata.uns['gex_data'].obs[c][
+                gex_order_as_pax
+            ]
+        else:
+            if c in adata.var_names:
+                X_comb[c] = adata.to_df()[c]
+            if c in adata.uns["gex_data"].var_names:
+                X_comb[c + "_gExpr"] = adata.uns["gex_data"].to_df()[c][gex_order_as_pax]
+                my_colors = my_colors + [c + "_gExpr"]
+
+            if c not in adata.var_names and c not in adata.uns["gex_data"].var_names:
+                missing_colors+=[c]
+
+    adata_comb = AnnData(X_comb)
+    adata_comb.obs = obs_comb
+    adata_comb.obsm[basis] = adata.obsm[basis]
+
+    missing_colors = set(missing_colors)
+    my_colors = [item for item in my_colors if item not in missing_colors]
+
+    return adata_comb, my_colors
+
+def __change_gexpr_cmap_to_viridis(fig1):
+    for i in range(len(fig1.get_children())):
+        child = fig1.get_children()[i]
+        # Check if the ax is an instance of Axes
+        if isinstance(child, plt.Axes):
+            # Extract the title from the Axes object
+            title = child.get_title()
+            # Modify the cmap of gExpr plots
+            if "_gExpr" in title:
+                path_collection = child.get_children()[0]
+                path_collection.cmap = plt.get_cmap('viridis')
+                cbar = fig1.get_children()[i+1]
+                cbar.get_children()[1].cmap = plt.get_cmap('viridis')
+
+def _plot(plot_func, basis, adata, plot_pax_data, plot_gex_data, kwargs):
+    if plot_pax_data is True and plot_gex_data is True:
+        adata_combo, my_colors = __get_adata_comb(
+            adata,
+            kwargs['color'],
+            basis = basis
+        )
+        kwargs['color'] = my_colors
+        if 'cmap' not in kwargs:
+            kwargs['cmap'] = "RdBu_r"
+            plot_func(adata_combo, **kwargs)
+            fig1 = plt.gcf()
+            __change_gexpr_cmap_to_viridis(fig1)
+        else:
+            plot_func(adata_combo, **kwargs)
+    elif plot_pax_data is True:
+        pax_kwargs = __get_pax_params(kwargs)
+        pax_kwargs = __parse_color(adata, pax_kwargs)
+        plot_func(adata, **pax_kwargs)
+    elif plot_gex_data is True:
+        adata = __get_stored_uns_data_and_prep_to_plot(
+            adata,
+            uns_data_slot='gex_data',
+            obsm_slot=basis
+        )
+        kwargs = __parse_color(adata, kwargs)
+        plot_func(adata, **kwargs)
+
+def _combo_dotplot(adata, kwargs, spacing_factor = 1):
+    kwargs = kwargs.copy()
+    groupby = kwargs['groupby']
+
+    # Get n_dots
+    proteins = np.intersect1d(kwargs['var_names'], adata.var_names)
+    genes = np.intersect1d(kwargs['var_names'], adata.uns['gex_data'].var_names)
+    del kwargs['var_names']
+
+    # Create a new figure with the proportional size
+    n_dots_max = np.max([len(proteins), len(genes)])
+    n_categories = len(np.unique(adata.obs[groupby]))
+    fig_new, (ax1, ax2) = plt.subplots(
+        2, 1,
+        figsize=(3 + n_dots_max*0.5*spacing_factor,
+                 3 + n_categories*1*spacing_factor)
+    )
+
+    if groupby not in adata.uns['gex_data'].obs.columns:
+        adata.uns['gex_data'].obs[groupby] = \
+            adata.obs[groupby][__get_indices_for_B_same_order_as_A(
+                adata.uns['gex_data'].obs_names.values,
+                adata.obs_names.values
+        )]
+
+    sc.pl.dotplot(
+        adata,
+        var_names = proteins,
+        ax = ax1,
+        show=False,
+        **kwargs,
+    )
+
+    if 'cmap' not in kwargs:
+        kwargs['cmap'] = "Greens"
+
+    sc.pl.dotplot(
+        adata.uns['gex_data'],
+        var_names = genes,
+        ax = ax2,
+        show=False,
+        **kwargs
+    )
+    plt.show()
+
+    for ax in fig_new.axes:
+        if ax.get_title() == 'Mean expression\nin group':
+            selected_ax = ax
+            break
+    selected_ax.set_title('Mean activity\nin group')
+    title_obj = selected_ax.title
+    fontsize = title_obj.get_fontsize()
+    selected_ax.set_title('Mean activity\nin group', fontsize=fontsize-3)
+
+def _combo_violin(
+    adata,
+    n_cols = 4,
+    w_spacing_factor=1,
+    h_spacing_factor = 1,
+    **kwargs
+):
+    adata_combo, keys_combo = __get_adata_comb(
+        adata,
+        kwargs['keys'],
+        basis = "X_pca"
+    )
+    kwargs['keys'] = keys_combo
+
+    if 'groupby' in kwargs:
+        groupby = kwargs['groupby']
+        if groupby in adata.obs.columns:
+            adata_combo.obs[groupby] = adata.obs[groupby]
+        elif groupby in adata.uns['gex_data'].obs.columns:
+            adata_combo.obs[groupby] = adata.uns['gex_data'].obs[groupby][
+                _get_indices_for_B_same_order_as_A(
+                    adata.obs_names.values,
+                    adata.uns['gex_data'].obs_names.values
+                )
+            ]
+
+    n_rows = int(np.ceil(len(kwargs['keys']) / n_cols))
+
+    if n_rows == 1:
+        sc.pl.violin(adata_combo,**kwargs)
+    else:
+        fig_new, axes = plt.subplots(
+            n_rows,
+            n_cols,
+            figsize=(4*n_cols*w_spacing_factor, 4*n_rows*h_spacing_factor)
+        )
+        all_keys = kwargs['keys']
+        del kwargs['keys']
+        # for i in range(n_rows):
+        #     start_idx = i * n_cols
+        #     end_idx = min((i + 1) * n_cols, len(all_keys))
+        #     row_keys = all_keys[start_idx:end_idx]
+        #     sc.pl.violin(adata_combo,keys=row_keys,ax=axes[i],show=False,**kwargs)
+        k = 0
+        if n_cols == 1:
+            for i in range(n_rows):
+                if k>=len(all_keys): break
+                sc.pl.violin(
+                    adata_combo,
+                    keys=all_keys[k],
+                    ax=axes[i],
+                    show=False,
+                    **kwargs
+                )
+                k+=1
+        else:
+            for i in range(n_rows):
+                for j in range(n_cols):
+                    if k>=len(all_keys): break
+                    sc.pl.violin(
+                        adata_combo,
+                        keys=all_keys[k],
+                        ax=axes[i,j],
+                        show=False,
+                        **kwargs
+                    )
+                    k+=1
 
 # -----------------------------------------------------------------------------
 # ------------------------------- MAIN FUNCTIONS ------------------------------
 # -----------------------------------------------------------------------------
 def pca(adata,
         *,
-        plot_pax_data=False,
+        plot_pax_data=True,
         plot_gex_data=False,
         **kwargs):
     """\
@@ -92,18 +312,7 @@ def pca(adata,
     -------
     A plot of :class:`~matplotlib.axes.Axes`.
     """
-    if plot_pax_data is True:
-        pax_kwargs = __get_pax_params(kwargs)
-        pax_kwargs = __parse_color(adata, pax_kwargs)
-        sc.pl.pca(adata, **pax_kwargs)
-    if plot_gex_data is True:
-        adata = __get_stored_uns_data_and_prep_to_plot(
-            adata,
-            uns_data_slot='gex_data',
-            obsm_slot='X_pca'
-        )
-        kwargs = __parse_color(adata, kwargs)
-        sc.pl.pca(adata, **kwargs)
+    _plot(sc.pl.pca, "X_pca", adata, plot_pax_data, plot_gex_data, kwargs)
 
 def umap(adata,
          *,
@@ -128,18 +337,7 @@ def umap(adata,
     -------
     A plot of :class:`~matplotlib.axes.Axes`.
     """
-    if plot_pax_data is True:
-        pax_kwargs = __get_pax_params(kwargs)
-        pax_kwargs = __parse_color(adata, pax_kwargs)
-        sc.pl.umap(adata, **pax_kwargs)
-    if plot_gex_data is True:
-        adata = __get_stored_uns_data_and_prep_to_plot(
-            adata,
-            uns_data_slot='gex_data',
-            obsm_slot='X_umap'
-        )
-        kwargs = __parse_color(adata, kwargs)
-        sc.pl.umap(adata, **kwargs)
+    _plot(sc.pl.umap, "X_umap", adata, plot_pax_data, plot_gex_data, kwargs)
 
 def tsne(adata,
          *,
@@ -164,18 +362,7 @@ def tsne(adata,
     -------
     A plot of :class:`~matplotlib.axes.Axes`.
     """
-    if plot_pax_data is True:
-        pax_kwargs = __get_pax_params(kwargs)
-        pax_kwargs = __parse_color(adata, pax_kwargs)
-        sc.pl.tsne(adata, **pax_kwargs)
-    if plot_gex_data is True:
-        adata = __get_stored_uns_data_and_prep_to_plot(
-            adata,
-            uns_data_slot='gex_data',
-            obsm_slot='X_tsne'
-        )
-        kwargs = __parse_color(adata, kwargs)
-        sc.pl.tsne(adata, **kwargs)
+    _plot(sc.pl.tsne, "X_tsne", adata, plot_pax_data, plot_gex_data, kwargs)
 
 def diffmap(adata,
             *,
@@ -200,18 +387,13 @@ def diffmap(adata,
     -------
     A plot of :class:`~matplotlib.axes.Axes`.
     """
-    if plot_pax_data is True:
-        pax_kwargs = __get_pax_params(kwargs)
-        pax_kwargs = __parse_color(adata, pax_kwargs)
-        sc.pl.diffmap(adata, **pax_kwargs)
-    if plot_gex_data is True:
-        adata = __get_stored_uns_data_and_prep_to_plot(
-            adata,
-            uns_data_slot='gex_data',
-            obsm_slot='X_diffmap'
-        )
-        kwargs = __parse_color(adata, kwargs)
-        sc.pl.diffmap(adata, **kwargs)
+    _plot(sc.pl.diffmap,
+          "X_diffmap",
+          adata,
+          plot_pax_data,
+          plot_gex_data,
+          kwargs
+    )
 
 def draw_graph(adata,
                *,
@@ -430,6 +612,7 @@ def dotplot(adata,
             *,
             plot_pax_data=True,
             plot_gex_data=False,
+            spacing_factor = 1,
             **kwargs):
     """\
     A wrapper for the scanpy function sc.pl.dotplot.
@@ -443,26 +626,30 @@ def dotplot(adata,
         Plot VIPER stored in adata.
     plot_gex_data : default: False
         Plot gExpr stored in adata.uns['gex_data'].
+    spacing_factor : default: 1
+        When plotting both pax and gex, adjust the size of the plot.
     **kwargs
         Arguments to provide to the sc.pl.dotplot function.
     Returns
     -------
     A plot of :class:`~matplotlib.axes.Axes`.
     """
-    if plot_pax_data is True:
+    if plot_pax_data is True and plot_gex_data is True:
+        _combo_dotplot(adata, kwargs, spacing_factor)
+    elif plot_pax_data is True:
         pax_kwargs = kwargs.copy()
         if 'cmap' not in kwargs:
             pax_kwargs['cmap'] = 'Reds'
         pax_kwargs = __parse_var_names(adata, kwargs)
         sc.pl.dotplot(adata, **pax_kwargs)
-    if plot_gex_data is True:
+    elif plot_gex_data is True:
         gex_kwargs = kwargs.copy()
         if 'cmap' not in kwargs:
             gex_kwargs['cmap'] = 'Greens'
         adata = __get_stored_uns_data_and_prep_to_plot(
             adata, uns_data_slot='gex_data'
         )
-        kwargs = __parse_var_names(adata, kwargs)
+        gex_kwargs = __parse_var_names(adata, gex_kwargs)
         sc.pl.dotplot(adata, **gex_kwargs)
 
 def tracksplot(adata,
@@ -502,6 +689,9 @@ def violin(adata,
            *,
            plot_pax_data=True,
            plot_gex_data=False,
+           n_cols = 4,
+           w_spacing_factor=1,
+           h_spacing_factor=1,
            **kwargs):
     """\
     A wrapper for the scanpy function sc.pl.violin.
@@ -521,10 +711,18 @@ def violin(adata,
     -------
     A plot of :class:`~matplotlib.axes.Axes`.
     """
-    if plot_pax_data:
+    if plot_pax_data and plot_gex_data:
+        _combo_violin(
+            adata,
+            n_cols,
+            w_spacing_factor,
+            h_spacing_factor,
+            **kwargs
+        )
+    elif plot_pax_data:
         pax_kwargs = __parse_keys(adata, kwargs)
         sc.pl.violin(adata,**pax_kwargs)
-    if plot_gex_data:
+    elif plot_gex_data:
         adata = __get_stored_uns_data_and_prep_to_plot(
             adata, uns_data_slot='gex_data'
         )
