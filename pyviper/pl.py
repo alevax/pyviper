@@ -7,7 +7,6 @@ from ._pl_sns_heatmap import _completemap
 from ._pl_sns_heatmap import _mrs
 from anndata import AnnData
 import matplotlib.pyplot as plt
-from warnings import warn
 
 ### ---------- EXPORT LIST ----------
 __all__ = []
@@ -207,7 +206,6 @@ def _combo_dotplot(adata, kwargs, spacing_factor = 1):
         show=False,
         **kwargs
     )
-    plt.show()
 
     for ax in fig_new.axes:
         if ax.get_title() == 'Mean expression\nin group':
@@ -217,6 +215,8 @@ def _combo_dotplot(adata, kwargs, spacing_factor = 1):
     title_obj = selected_ax.title
     fontsize = title_obj.get_fontsize()
     selected_ax.set_title('Mean activity\nin group', fontsize=fontsize-3)
+
+    plt.show()
 
 def _combo_violin(
     adata,
