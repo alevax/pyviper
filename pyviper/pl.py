@@ -167,6 +167,8 @@ def _combo_dotplot(adata, kwargs, spacing_factor = 1):
     kwargs = kwargs.copy()
     groupby = kwargs['groupby']
 
+    kwargs['show'] = False
+
     # Get n_dots
     proteins = np.intersect1d(kwargs['var_names'], adata.var_names)
     genes = np.intersect1d(kwargs['var_names'], adata.uns['gex_data'].var_names)
@@ -192,7 +194,6 @@ def _combo_dotplot(adata, kwargs, spacing_factor = 1):
         adata,
         var_names = proteins,
         ax = ax1,
-        show=False,
         **kwargs,
     )
 
@@ -203,7 +204,6 @@ def _combo_dotplot(adata, kwargs, spacing_factor = 1):
         adata.uns['gex_data'],
         var_names = genes,
         ax = ax2,
-        show=False,
         **kwargs
     )
 
@@ -215,8 +215,6 @@ def _combo_dotplot(adata, kwargs, spacing_factor = 1):
     title_obj = selected_ax.title
     fontsize = title_obj.get_fontsize()
     selected_ax.set_title('Mean activity\nin group', fontsize=fontsize-3)
-
-    plt.show()
 
 def _combo_violin(
     adata,
@@ -231,6 +229,11 @@ def _combo_violin(
         basis = "X_pca"
     )
     kwargs['keys'] = keys_combo
+    kwargs['show'] = False
+    if 'wspace' not in kwargs:
+        kwargs['wspace'] = 0.25
+    if 'hspace' not in kwargs:
+        kwargs['hspace'] = 0.25
 
     if 'groupby' in kwargs:
         groupby = kwargs['groupby']
@@ -245,46 +248,50 @@ def _combo_violin(
             ]
 
     n_rows = int(np.ceil(len(kwargs['keys']) / n_cols))
+    fig_new, axes = plt.subplots(
+        n_rows,
+        n_cols,
+        figsize=(4*n_cols*w_spacing_factor, 4*n_rows*h_spacing_factor)
+    )
+    fig_new.subplots_adjust(
+        wspace=kwargs['wspace'],
+        hspace=kwargs['hspace']
+    )
 
+    all_keys = kwargs['keys']
+    del kwargs['keys']
+    k = 0
     if n_rows == 1:
-        sc.pl.violin(adata_combo,**kwargs)
+        for j in range(n_cols):
+            if k>=len(all_keys): break
+            sc.pl.violin(
+                adata_combo,
+                keys=all_keys[k],
+                ax=axes[j],
+                **kwargs
+            )
+            k+=1
+    elif n_cols == 1:
+        for i in range(n_rows):
+            if k>=len(all_keys): break
+            sc.pl.violin(
+                adata_combo,
+                keys=all_keys[k],
+                ax=axes[i],
+                **kwargs
+            )
+            k+=1
     else:
-        fig_new, axes = plt.subplots(
-            n_rows,
-            n_cols,
-            figsize=(4*n_cols*w_spacing_factor, 4*n_rows*h_spacing_factor)
-        )
-        all_keys = kwargs['keys']
-        del kwargs['keys']
-        # for i in range(n_rows):
-        #     start_idx = i * n_cols
-        #     end_idx = min((i + 1) * n_cols, len(all_keys))
-        #     row_keys = all_keys[start_idx:end_idx]
-        #     sc.pl.violin(adata_combo,keys=row_keys,ax=axes[i],show=False,**kwargs)
-        k = 0
-        if n_cols == 1:
-            for i in range(n_rows):
+        for i in range(n_rows):
+            for j in range(n_cols):
                 if k>=len(all_keys): break
                 sc.pl.violin(
                     adata_combo,
                     keys=all_keys[k],
-                    ax=axes[i],
-                    show=False,
+                    ax=axes[i,j],
                     **kwargs
                 )
                 k+=1
-        else:
-            for i in range(n_rows):
-                for j in range(n_cols):
-                    if k>=len(all_keys): break
-                    sc.pl.violin(
-                        adata_combo,
-                        keys=all_keys[k],
-                        ax=axes[i,j],
-                        show=False,
-                        **kwargs
-                    )
-                    k+=1
 
 # -----------------------------------------------------------------------------
 # ------------------------------- MAIN FUNCTIONS ------------------------------
@@ -705,12 +712,20 @@ def violin(adata,
         Plot adata.
     plot_gex_data : default: False
         Plot adata.uns['gex_data'].
+    n_cols : default: 4
+        Number of columns in the violin plot.
+    w_spacing_factor : default: 1
+        Multiply the current width by this factor to stretch the plot.
+    h_spacing_factor : default: 1
+        Multiply the current height by this factor to stretch the plot.
     **kwargs
         Arguments to provide to the sc.pl.violin function.
     Returns
     -------
     A plot of :class:`~matplotlib.axes.Axes`.
     """
+    if isinstance(kwargs['keys'], str): kwargs['keys'] = [kwargs['keys']]
+
     if plot_pax_data and plot_gex_data:
         _combo_violin(
             adata,
