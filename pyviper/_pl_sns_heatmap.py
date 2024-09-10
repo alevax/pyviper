@@ -559,7 +559,7 @@ def _get_legend_vars_list(g):
     return [legend_x, legend_y, legend_width, legend_height]
 
 # Add colorbars for continuous annotations
-def _add_annotation_cbar(heatmap_pos, data, var_name, y_coord, cmap):
+def _add_annotation_cbar(g, heatmap_pos, data, var_name, y_coord, cmap):
     legend_height = 0.02
     h_padding = 0.25
     legend_width = 0.15
@@ -607,6 +607,7 @@ def _add_annotation_legends(
     if viper_metadata is not None:
         for protein in reversed(viper_metadata):
             y_coord = _add_annotation_cbar(
+                g,
                 heatmap_pos,
                 data = viper_df,
                 var_name = protein,
@@ -619,6 +620,7 @@ def _add_annotation_legends(
     if gexpr_metadata is not None:
         for gene in reversed(gexpr_metadata):
             y_coord = _add_annotation_cbar(
+                g,
                 heatmap_pos,
                 data = gexpr_df,
                 var_name = gene,
@@ -787,7 +789,7 @@ def _general_heatmap(
         viper_metadata
     )
 
-def _completemap(
+def _ss_heatmap(
     adata,
     var_names,
     cluster_column=None,

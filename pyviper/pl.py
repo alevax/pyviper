@@ -3,7 +3,7 @@ import scanpy as sc
 import pandas as pd
 import numpy as np
 import seaborn
-from ._pl_sns_heatmap import _completemap
+from ._pl_sns_heatmap import _ss_heatmap
 from ._pl_sns_heatmap import _mrs
 from anndata import AnnData
 import matplotlib.pyplot as plt
@@ -983,7 +983,7 @@ def dendrogram(adata,
     if plot_gex:
         adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
 
-def completemap(
+def ss_heatmap(
     adata,
     var_names,
     cluster_column=None,
@@ -1032,7 +1032,7 @@ def completemap(
     A plot of :class:`ClusterGrid`.
 
     """
-    _completemap(
+    _ss_heatmap(
         adata,
         var_names,
         cluster_column,
@@ -1061,7 +1061,7 @@ def mrs(
     mr_col=None
 ):
     """\
-    A wrapper around pyviper.pl.completemap to visualize the top master regulators (MRs) from each cluster using the VIPER anndata object.
+    A wrapper around pyviper.pl.ss_heatmap to visualize the top master regulators (MRs) from each cluster using the VIPER anndata object.
 
     Parameters
     ----------
