@@ -124,6 +124,7 @@ def __get_adata_comb(adata, my_colors, basis = "X_pca"):
 def __change_gexpr_cmap_to_viridis(fig1):
     for i in range(len(fig1.get_children())):
         child = fig1.get_children()[i]
+
         # Check if the ax is an instance of Axes
         if isinstance(child, plt.Axes):
             # Extract the title from the Axes object
@@ -136,6 +137,9 @@ def __change_gexpr_cmap_to_viridis(fig1):
                 cbar.get_children()[1].cmap = plt.get_cmap('viridis')
 
 def _plot(plot_func, basis, adata, plot_pax_data, plot_gex_data, kwargs):
+    if 'color' in kwargs and isinstance(kwargs['color'], str):
+        kwargs['color'] = [kwargs['color']]
+
     if plot_pax_data is True and plot_gex_data is True:
         adata_combo, my_colors = __get_adata_comb(
             adata,
@@ -145,8 +149,8 @@ def _plot(plot_func, basis, adata, plot_pax_data, plot_gex_data, kwargs):
         kwargs['color'] = my_colors
         if 'cmap' not in kwargs:
             kwargs['cmap'] = "RdBu_r"
-            plot_func(adata_combo, **kwargs)
-            fig1 = plt.gcf()
+            kwargs['return_fig'] = True
+            fig1 = plot_func(adata_combo, **kwargs)
             __change_gexpr_cmap_to_viridis(fig1)
         else:
             plot_func(adata_combo, **kwargs)
