@@ -242,36 +242,18 @@ def _combo_dotplot(
     fontsize = title_obj.get_fontsize()
     selected_ax.set_title('Mean activity\nin group', fontsize=fontsize-3)
 
-def _combo_violin(
+def _violin_grid(
     adata,
     n_cols = 4,
     w_spacing_factor=1,
     h_spacing_factor = 1,
     **kwargs
 ):
-    adata_combo, keys_combo = __get_adata_comb(
-        adata,
-        kwargs['keys'],
-        basis = "X_pca"
-    )
-    kwargs['keys'] = keys_combo
     kwargs['show'] = False
     if 'wspace' not in kwargs:
         kwargs['wspace'] = 0.25
     if 'hspace' not in kwargs:
         kwargs['hspace'] = 0.25
-
-    if 'groupby' in kwargs:
-        groupby = kwargs['groupby']
-        if groupby in adata.obs.columns:
-            adata_combo.obs[groupby] = adata.obs[groupby]
-        elif groupby in adata.uns['gex_data'].obs.columns:
-            adata_combo.obs[groupby] = adata.uns['gex_data'].obs[groupby][
-                _get_indices_for_B_same_order_as_A(
-                    adata.obs_names.values,
-                    adata.uns['gex_data'].obs_names.values
-                )
-            ]
 
     n_rows = int(np.ceil(len(kwargs['keys']) / n_cols))
     fig_new, axes = plt.subplots(
@@ -289,35 +271,80 @@ def _combo_violin(
     k = 0
     if n_rows == 1:
         for j in range(n_cols):
-            if k>=len(all_keys): break
-            sc.pl.violin(
-                adata_combo,
-                keys=all_keys[k],
-                ax=axes[j],
-                **kwargs
-            )
+            if k<len(all_keys):
+                sc.pl.violin(
+                    adata,
+                    keys=all_keys[k],
+                    ax=axes[j],
+                    **kwargs
+                )
+            else:
+                axes[j].axis('off')
             k+=1
     elif n_cols == 1:
         for i in range(n_rows):
-            if k>=len(all_keys): break
-            sc.pl.violin(
-                adata_combo,
-                keys=all_keys[k],
-                ax=axes[i],
-                **kwargs
-            )
+            if k<len(all_keys):
+                sc.pl.violin(
+                    adata,
+                    keys=all_keys[k],
+                    ax=axes[i],
+                    **kwargs
+                )
+            else:
+                axes[i].axis('off')
             k+=1
     else:
         for i in range(n_rows):
             for j in range(n_cols):
-                if k>=len(all_keys): break
-                sc.pl.violin(
-                    adata_combo,
-                    keys=all_keys[k],
-                    ax=axes[i,j],
-                    **kwargs
-                )
+                if k<len(all_keys):
+                    sc.pl.violin(
+                        adata,
+                        keys=all_keys[k],
+                        ax=axes[i,j],
+                        **kwargs
+                    )
+                else:
+                    axes[i,j].axis('off')
                 k+=1
+
+def __add_groupby_to_adata_gex_obs(adata, kwargs):
+    if 'groupby' in kwargs:
+        groupby = kwargs['groupby']
+        if groupby not in adata.uns['gex_data'].obs.columns:
+            if groupby in adata.obs.columns:
+                adata.uns['gex_data'].obs[groupby] = adata.obs[groupby][
+                    __get_indices_for_B_same_order_as_A(
+                        adata.uns['gex_data'].obs_names.values,
+                        adata.obs_names.values
+                    )
+                ]
+
+def __add_groupby_to_adata_combo_obs(adata_combo, adata, kwargs):
+    if 'groupby' in kwargs:
+        groupby = kwargs['groupby']
+        if groupby in adata.obs.columns:
+            adata_combo.obs[groupby] = adata.obs[groupby]
+        elif groupby in adata.uns['gex_data'].obs.columns:
+            adata_combo.obs[groupby] = adata.uns['gex_data'].obs[groupby][
+                __get_indices_for_B_same_order_as_A(
+                    adata.obs_names.values,
+                    adata.uns['gex_data'].obs_names.values
+                )
+            ]
+
+def __get_adata_comb_w_kwargs(
+    adata,
+    **kwargs
+):
+    adata_combo, keys_combo = __get_adata_comb(
+        adata,
+        kwargs['keys'],
+        basis = "X_pca"
+    )
+    kwargs['keys'] = keys_combo
+    __add_groupby_to_adata_combo_obs(adata_combo, adata, kwargs)
+
+    return adata_combo, kwargs
 
 # -----------------------------------------------------------------------------
 # ------------------------------- MAIN FUNCTIONS ------------------------------
@@ -812,22 +839,26 @@ def violin(adata,
     if isinstance(kwargs['keys'], str): kwargs['keys'] = [kwargs['keys']]
 
     if plot_pax and plot_gex:
-        _combo_violin(
+        adata, kwargs = __get_adata_comb_w_kwargs(
             adata,
-            n_cols,
-            w_spacing_factor,
-            h_spacing_factor,
             **kwargs
         )
     elif plot_pax:
-        pax_kwargs = __parse_keys(adata, kwargs)
-        sc.pl.violin(adata,**pax_kwargs)
+        kwargs = __parse_keys(adata, kwargs)
     elif plot_gex:
+        __add_groupby_to_adata_gex_obs(adata, kwargs)
         adata = __get_stored_uns_data_and_prep_to_plot(
             adata, uns_data_slot='gex_data'
         )
         kwargs = __parse_keys(adata, kwargs)
-        sc.pl.violin(adata,**kwargs)
+
+    _violin_grid(
+        adata,
+        n_cols,
+        w_spacing_factor,
+        h_spacing_factor,
+        **kwargs
+    )
 
 def stacked_violin(adata,
                    *,
