@@ -28,7 +28,7 @@ def __get_gex_param(kwargs):
     else:
         cmap = 'viridis'
 
-def __parse_color(adata, kwargs):
+def __remove_missing_items(adata, kwargs):
     adata_vars = list(adata.var_names.values) + list(adata.obs.columns.values)
     kwargs = kwargs.copy()
     if 'color' in kwargs:
@@ -112,8 +112,11 @@ def __get_adata_comb(adata, my_colors, basis = "X_pca"):
             if c not in adata.var_names and c not in adata.uns["gex_data"].var_names:
                 missing_colors+=[c]
 
-    adata_comb = AnnData(X_comb)
-    adata_comb.obs = obs_comb
+    if X_comb.shape[1] > 0:
+        adata_comb = AnnData(X_comb)
+        adata_comb.obs = obs_comb
+    else:
+        adata_comb = AnnData(obs=obs_comb)
     adata_comb.obsm[basis] = adata.obsm[basis]
 
     missing_colors = set(missing_colors)
@@ -121,7 +124,7 @@ def __get_adata_comb(adata, my_colors, basis = "X_pca"):
 
     return adata_comb, my_colors
 
-def __change_gexpr_cmap_to_viridis(fig1, cmap_gex = 'viridis'):
+def __change_gexpr_cmap(fig1, cmap_gex = 'viridis'):
     for i in range(len(fig1.get_children())):
         child = fig1.get_children()[i]
 
@@ -136,6 +139,22 @@ def __change_gexpr_cmap_to_viridis(fig1, cmap_gex = 'viridis'):
                 cbar = fig1.get_children()[i+1]
                 cbar.get_children()[1].cmap = plt.get_cmap(cmap_gex)
 
+def __change_obs_cmap(fig1, adata, cmap_obs = 'inferno'):
+    for i in range(len(fig1.get_children())):
+        child = fig1.get_children()[i]
+        # Check if the ax is an instance of Axes
+        if isinstance(child, plt.Axes):
+            # Extract the title from the Axes object
+            title = child.get_title()
+            # Modify the cmap of gExpr plots
+            if title in adata.obs.columns.values:
+                is_numeric = pd.api.types.is_numeric_dtype(adata.obs[title])
+                if is_numeric:
+                    path_collection = child.get_children()[0]
+                    path_collection.cmap = plt.get_cmap(cmap_obs)
+                    cbar = fig1.get_children()[i+1]
+                    cbar.get_children()[1].cmap = plt.get_cmap(cmap_obs)
+
 def _plot(
     plot_func,
     basis,
@@ -144,6 +163,7 @@ def _plot(
     plot_gex,
     cmap_pax,
     cmap_gex,
+    cmap_obs,
     kwargs):
 
     if 'color' in kwargs and isinstance(kwargs['color'], str):
@@ -160,23 +180,33 @@ def _plot(
             kwargs['cmap'] = cmap_pax
             kwargs['return_fig'] = True
             fig1 = plot_func(adata_combo, **kwargs)
-            __change_gexpr_cmap_to_viridis(fig1, cmap_gex)
+            __change_gexpr_cmap(fig1, cmap_gex)
+            __change_obs_cmap(fig1, adata, cmap_obs)
         else:
             plot_func(adata_combo, **kwargs)
     elif plot_pax is True:
         pax_kwargs = __get_pax_params(kwargs, cmap_pax)
-        pax_kwargs = __parse_color(adata, pax_kwargs)
-        plot_func(adata, **pax_kwargs)
-    elif plot_gex is True:
+        pax_kwargs = __remove_missing_items(adata, pax_kwargs)
         if 'cmap' not in kwargs:
-            kwargs['cmap'] = cmap_gex
+            pax_kwargs['return_fig'] = True
+            fig1 = plot_func(adata, **pax_kwargs)
+            __change_obs_cmap(fig1, adata, cmap_obs)
+        else:
+            plot_func(adata, **pax_kwargs)
+    elif plot_gex is True:
         adata = __get_stored_uns_data_and_prep_to_plot(
             adata,
             uns_data_slot='gex_data',
             obsm_slot=basis
         )
-        kwargs = __parse_color(adata, kwargs)
-        plot_func(adata, **kwargs)
+        kwargs = __remove_missing_items(adata, kwargs)
+        if 'cmap' not in kwargs:
+            kwargs['cmap'] = cmap_gex
+            kwargs['return_fig'] = True
+            fig1 = plot_func(adata, **kwargs)
+            __change_obs_cmap(fig1, adata, cmap_obs)
+        else:
+            fig1 = plot_func(adata, **kwargs)
 
 def _combo_dotplot(
     adata,
@@ -187,12 +217,17 @@ def _combo_dotplot(
 ):
     kwargs = kwargs.copy()
     groupby = kwargs['groupby']
+    if 'show' in kwargs:
+        plot_show = kwargs['show']
+    else:
+        plot_show = True
 
     kwargs['show'] = False
 
     # Get n_dots
-    proteins = np.intersect1d(kwargs['var_names'], adata.var_names)
-    genes = np.intersect1d(kwargs['var_names'], adata.uns['gex_data'].var_names)
+    proteins = [x for x in kwargs['var_names'] if x in adata.var_names]
+    genes = [x for x in kwargs['var_names'] \
+             if x in adata.uns['gex_data'].var_names]
     del kwargs['var_names']
 
     # Create a new figure with the proportional size
@@ -242,6 +277,8 @@ def _combo_dotplot(
     fontsize = title_obj.get_fontsize()
     selected_ax.set_title('Mean activity\nin group', fontsize=fontsize-3)
 
+    if plot_show: plt.show()
+
 def _violin_grid(
     adata,
     n_cols = 4,
@@ -249,6 +286,10 @@ def _violin_grid(
     h_spacing_factor = 1,
     **kwargs
 ):
+    if 'show' in kwargs:
+        plot_show = kwargs['show']
+    else:
+        plot_show = True
     kwargs['show'] = False
     if 'wspace' not in kwargs:
         kwargs['wspace'] = 0.25
@@ -307,6 +348,8 @@ def _violin_grid(
                     axes[i,j].axis('off')
                 k+=1
 
+    if plot_show: plt.show()
+
 def __add_groupby_to_adata_gex_obs(adata, kwargs):
     if 'groupby' in kwargs:
         groupby = kwargs['groupby']
@@ -355,6 +398,7 @@ def pca(adata,
         plot_gex=False,
         cmap_pax="RdBu_r",
         cmap_gex="viridis",
+        cmap_obs="inferno",
         **kwargs):
     """\
     A wrapper for the scanpy function sc.pl.pca.
@@ -372,6 +416,8 @@ def pca(adata,
         cmap to use for visualizing VIPER proteins.
     cmap_gex : default: "viridis"
         cmap to use for visualizing stored gExpr.
+    cmap_obs : default: "inferno"
+        cmap to use for visualizing stored numeric obs.
     **kwargs
         Arguments to provide to the sc.pl.pca function.
     Returns
@@ -386,6 +432,7 @@ def pca(adata,
         plot_gex,
         cmap_pax,
         cmap_gex,
+        cmap_obs,
         kwargs
     )
 
@@ -395,6 +442,7 @@ def umap(adata,
          plot_gex=False,
          cmap_pax="RdBu_r",
          cmap_gex="viridis",
+         cmap_obs="inferno",
          **kwargs):
     """\
     A wrapper for the scanpy function sc.pl.umap.
@@ -412,6 +460,8 @@ def umap(adata,
         cmap to use for visualizing VIPER proteins.
     cmap_gex : default: "viridis"
         cmap to use for visualizing stored gExpr.
+    cmap_obs : default: "inferno"
+        cmap to use for visualizing stored numeric obs.
     **kwargs
         Arguments to provide to the sc.pl.pca function.
     Returns
@@ -426,6 +476,7 @@ def umap(adata,
         plot_gex,
         cmap_pax,
         cmap_gex,
+        cmap_obs,
         kwargs
     )
 
@@ -435,6 +486,7 @@ def tsne(adata,
          plot_gex=False,
          cmap_pax="RdBu_r",
          cmap_gex="viridis",
+         cmap_obs="inferno",
          **kwargs):
     """\
     A wrapper for the scanpy function sc.pl.tsne.
@@ -452,6 +504,8 @@ def tsne(adata,
         cmap to use for visualizing VIPER proteins.
     cmap_gex : default: "viridis"
         cmap to use for visualizing stored gExpr.
+    cmap_obs : default: "inferno"
+        cmap to use for visualizing stored numeric obs.
     **kwargs
         Arguments to provide to the sc.pl.tsne function.
     Returns
@@ -466,6 +520,7 @@ def tsne(adata,
         plot_gex,
         cmap_pax,
         cmap_gex,
+        cmap_obs,
         kwargs
     )
 
@@ -475,6 +530,7 @@ def diffmap(adata,
             plot_gex=False,
             cmap_pax="RdBu_r",
             cmap_gex="viridis",
+            cmap_obs="inferno",
             **kwargs):
     """\
     A wrapper for the scanpy function sc.pl.diffmap.
@@ -492,6 +548,8 @@ def diffmap(adata,
         cmap to use for visualizing VIPER proteins.
     cmap_gex : default: "viridis"
         cmap to use for visualizing stored gExpr.
+    cmap_obs : default: "inferno"
+        cmap to use for visualizing stored numeric obs.
     **kwargs
         Arguments to provide to the sc.pl.diffmap function.
     Returns
@@ -505,6 +563,7 @@ def diffmap(adata,
           plot_gex,
           cmap_pax,
           cmap_gex,
+          cmap_obs,
           kwargs
     )
 
@@ -533,7 +592,7 @@ def draw_graph(adata,
     """
     if plot_pax is True:
         pax_kwargs = __get_pax_params(kwargs, cmap_pax)
-        pax_kwargs = __parse_color(adata, pax_kwargs)
+        pax_kwargs = __remove_missing_items(adata, pax_kwargs)
         sc.pl.draw_graph(adata, **pax_kwargs)
 
     if plot_gex is True:
@@ -546,7 +605,7 @@ def draw_graph(adata,
             adata_stored.obsm["X_draw_graph_fr"] = adata.obsm["X_draw_graph_fr"]
         adata = adata_stored
 
-        kwargs = __parse_color(adata, kwargs)
+        kwargs = __remove_missing_items(adata, kwargs)
         sc.pl.draw_graph(adata, **kwargs)
 
 def spatial(adata,
@@ -573,14 +632,14 @@ def spatial(adata,
     A plot of :class:`~matplotlib.axes.Axes`.
     """
     if plot_pax:
-        pax_kwargs = __parse_color(adata, kwargs)
+        pax_kwargs = __remove_missing_items(adata, kwargs)
         sc.pl.spatial(adata, **pax_kwargs)
     if(plot_gex is True):
         adata = __get_stored_uns_data_and_prep_to_plot(adata,
                                                        uns_data_slot='gex_data',
                                                        obsm_slot=None,
                                                        uns_slot='spatial')
-        kwargs = __parse_color(adata, kwargs)
+        kwargs = __remove_missing_items(adata, kwargs)
         sc.pl.spatial(adata, **kwargs)
 
 
@@ -611,10 +670,10 @@ def embedding(adata,
     A plot of :class:`~matplotlib.axes.Axes`.
     """
     if plot_pax:
-        pax_kwargs = __parse_color(adata, kwargs)
+        pax_kwargs = __remove_missing_items(adata, kwargs)
         sc.pl.embedding(adata, basis, **pax_kwargs)
     if plot_gex:
-        kwargs = __parse_color(adata, kwargs)
+        kwargs = __remove_missing_items(adata, kwargs)
         adata = __get_stored_uns_data_and_prep_to_plot(
             adata,
             uns_data_slot='gex_data',
@@ -680,13 +739,13 @@ def scatter(adata,
     A plot of :class:`~matplotlib.axes.Axes`.
     """
     if plot_pax:
-        pax_kwargs = __parse_color(adata, kwargs)
+        pax_kwargs = __remove_missing_items(adata, kwargs)
         sc.pl.scatter(adata,**pax_kwargs)
     if plot_gex:
         adata = __get_stored_uns_data_and_prep_to_plot(
             adata, uns_data_slot='gex_data'
         )
-        kwargs = __parse_color(adata, kwargs)
+        kwargs = __remove_missing_items(adata, kwargs)
         sc.pl.scatter(adata,**kwargs)
 
 def heatmap(adata,
