@@ -1,6 +1,6 @@
 import pandas as pd
 import anndata
-from .config import config
+# from .config import config
 from ._load._load_regulators import load_TFs, load_coTFs, load_sig, load_surf
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&

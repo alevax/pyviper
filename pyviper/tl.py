@@ -211,29 +211,27 @@ def find_top_mrs(adata,
         verbose
     )
 
-def path_enr(gex_data,
-             pathway_interactome,
-             layer=None,
-             eset_filter=True,
-             method=None,  # [None, "scale", "rank", "mad", "ttest"],
-             enrichment='aREA',  # [None, 'area','narnea'],
-             mvws=1,
-             njobs=1,
-             batch_size=10000,
-             verbose=True,
-             output_as_anndata=True,
-             transfer_obs=True,
-             store_input_data=True
-             ):
+def path_enrich(
+    adata,
+    interactome,
+    layer=None,
+    eset_filter=True,
+    method=None,  # [None, "scale", "rank", "mad", "ttest"],
+    enrichment='aREA',  # [None, 'area','narnea'],
+    mvws=1,
+    njobs=1,
+    batch_size=10000,
+    verbose=True
+):
     """\
     Run the variation of VIPER that is specific to pathway enrichment analysis:
     a single interactome and min_targets is set to 0.
 
     Parameters
     ----------
-    gex_data
-        Gene expression stored in an anndata object (e.g. from Scanpy).
-    pathway_interactome
+    adata
+        An anndata object (e.g. from Scanpy).
+    interactome
         An object of class Interactome or one of the following strings that
         corresponds to msigdb regulons: "c2", "c5", "c6", "c7", "h".
     layer : default: None
@@ -270,24 +268,14 @@ def path_enr(gex_data,
         samples across provided `njobs`.
     verbose : default: True
         Whether extended output about the progress of the algorithm is given.
-    output_as_anndata : default: True
-        Way of delivering output.
-    transfer_obs : default: True
-        Whether to transfer the observation metadata from the input anndata to
-        the output anndata. Thus, not applicable when output_as_anndata==False.
-    store_input_data : default: True
-        Whether to store the input anndata in an unstructured data slot (.uns) of
-        the output anndata. Thus, not applicable when output_as_anndata==False.
-        If input anndata already contains 'gex_data' in .uns, the input will
-        assumed to be protein activity and will be stored in .uns as 'pax_data'.
-        Otherwise, the data will be stored as 'gex_data' in .uns.
 
     Returns
     -------
-    Returns an AnnData object containing the pathways. When store_input_data, the input gex_data AnnData is stored within the dataframe.
+    Stores the resulting enrichment of each the genesets in the interactome in
+    adata.obs.
     """
-    return _path_enr(gex_data,
-                     pathway_interactome,
+    return _path_enr(adata,
+                     interactome,
                      layer,
                      eset_filter,
                      method,
@@ -295,7 +283,4 @@ def path_enr(gex_data,
                      mvws,
                      njobs,
                      batch_size,
-                     verbose,
-                     output_as_anndata,
-                     transfer_obs,
-                     store_input_data)
+                     verbose)

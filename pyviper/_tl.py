@@ -280,33 +280,31 @@ def _find_top_mrs(adata,
         for col in result_df.columns:
             adata.var[col] = result_df[col]
 
-def _path_enr(gex_data,
-             pathway_interactome,
-             layer=None,
-             eset_filter=True,
-             method=None,  # [None, "scale", "rank", "mad", "ttest"],
-             enrichment='aREA',  # [None, 'area','narnea'],
-             mvws=1,
-             njobs=1,
-             batch_size=10000,
-             verbose=True,
-             output_as_anndata=True,
-             transfer_obs=True,
-             store_input_data=True
-             ):
-    if isinstance(pathway_interactome, str):
-        collection = pathway_interactome.lower()
+def _path_enr(
+    adata,
+    interactome,
+    layer=None,
+    eset_filter=True,
+    method=None,  # [None, "scale", "rank", "mad", "ttest"],
+    enrichment='aREA',  # [None, 'area','narnea'],
+    mvws=1,
+    njobs=1,
+    batch_size=10000,
+    verbose=True
+):
+    if isinstance(interactome, str):
+        collection = interactome.lower()
         if collection in ["c2", "c5", "c6", "c7", "h"]:
-            pathway_interactome = msigdb_regulon(collection)
+            interactome = msigdb_regulon(collection)
         else:
             raise ValueError(
-                'pathway_interactome "' + str(pathway_interactome) + '" is not in "c2", "c5", "c6", "c7", "h".'
+                'interactome "' + str(interactome) + '" is not in "c2", "c5", "c6", "c7", "h".'
             )
 
-    pathway_interactome.filter_targets(gex_data.var_names)
-    return viper(
-        gex_data,
-        pathway_interactome,
+    interactome.filter_targets(adata.var_names)
+    enr_data = viper(
+        adata,
+        interactome,
         layer,
         eset_filter,
         method,
@@ -316,7 +314,16 @@ def _path_enr(gex_data,
         njobs,
         batch_size,
         verbose,
-        output_as_anndata,
-        transfer_obs,
-        store_input_data
+        output_as_anndata=False,
+        transfer_obs=False,
+        store_input_data=False
     )
+
+    # First, update the existing columns in adata.obs
+    adata.obs.update(enr_data)
+
+    # Now, find the columns that are in enr_data but not in adata.obs
+    new_columns = enr_data.columns.difference(adata.obs.columns)
+
+    # Concatenate the new columns to adata.obs
+    adata.obs = pd.concat([adata.obs, enr_data[new_columns]], axis=1)
