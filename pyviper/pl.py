@@ -42,7 +42,13 @@ def __parse_var_names(adata, kwargs):
     kwargs = kwargs.copy()
     if 'var_names' in kwargs:
         var_names = kwargs['var_names']
-        var_names = [v for v in var_names if v in adata_vars]
+        if isinstance(var_names, list):
+            var_names = [v for v in var_names if v in adata_vars]
+        elif isinstance(var_names, dict):
+            for key in var_names:
+                var_names[key] = [v for v in var_names[key] if v in adata_vars]
+        else:
+            raise ValueError("var_names must be list or dict.")
         kwargs['var_names'] = var_names
     return kwargs
 
@@ -239,12 +245,13 @@ def _combo_dotplot(
                  3 + n_categories*1*spacing_factor)
     )
 
-    if groupby not in adata.uns['gex_data'].obs.columns:
-        adata.uns['gex_data'].obs[groupby] = \
-            adata.obs[groupby][__get_indices_for_B_same_order_as_A(
-                adata.uns['gex_data'].obs_names.values,
-                adata.obs_names.values
-        )]
+    # if groupby not in adata.uns['gex_data'].obs.columns:
+    #     adata.uns['gex_data'].obs[groupby] = \
+    #         adata.obs[groupby][__get_indices_for_B_same_order_as_A(
+    #             adata.uns['gex_data'].obs_names.values,
+    #             adata.obs_names.values
+    #     )]
+    __add_groupby_to_adata_gex_obs(adata, kwargs)
 
     pax_kwargs = kwargs.copy()
     if 'cmap' not in pax_kwargs:
@@ -774,6 +781,7 @@ def heatmap(adata,
         pax_kwargs = __parse_var_names(adata, kwargs)
         sc.pl.heatmap(adata,**pax_kwargs)
     if plot_gex:
+        __add_groupby_to_adata_gex_obs(adata, kwargs)
         adata = __get_stored_uns_data_and_prep_to_plot(
             adata, uns_data_slot='gex_data'
         )
@@ -824,6 +832,7 @@ def dotplot(adata,
         gex_kwargs = kwargs.copy()
         if 'cmap' not in gex_kwargs:
             gex_kwargs['cmap'] = cmap_gex
+        __add_groupby_to_adata_gex_obs(adata, kwargs)
         adata = __get_stored_uns_data_and_prep_to_plot(
             adata, uns_data_slot='gex_data'
         )
@@ -857,6 +866,7 @@ def tracksplot(adata,
         pax_kwargs = __parse_var_names(adata, kwargs)
         sc.pl.tracksplot(adata,**pax_kwargs)
     if plot_gex:
+        __add_groupby_to_adata_gex_obs(adata, kwargs)
         adata = __get_stored_uns_data_and_prep_to_plot(
             adata, uns_data_slot='gex_data'
         )
@@ -946,6 +956,7 @@ def stacked_violin(adata,
         pax_kwargs = __parse_var_names(adata, pax_kwargs)
         sc.pl.stacked_violin(adata,**pax_kwargs)
     if plot_gex:
+        __add_groupby_to_adata_gex_obs(adata, kwargs)
         adata = __get_stored_uns_data_and_prep_to_plot(
             adata, uns_data_slot='gex_data'
         )
@@ -979,6 +990,7 @@ def matrixplot(adata,
         pax_kwargs = __parse_var_names(adata, pax_kwargs)
         sc.pl.matrixplot(adata,**pax_kwargs)
     if plot_gex:
+        __add_groupby_to_adata_gex_obs(adata, kwargs)
         adata = __get_stored_uns_data_and_prep_to_plot(
             adata, uns_data_slot='gex_data'
         )
@@ -1071,7 +1083,10 @@ def dendrogram(adata,
     if plot_pax:
         sc.pl.dendrogram(adata,**kwargs)
     if plot_gex:
-        adata = __get_stored_uns_data_and_prep_to_plot(adata, uns_data_slot='gex_data')
+        __add_groupby_to_adata_gex_obs(adata, kwargs)
+        adata = __get_stored_uns_data_and_prep_to_plot(
+            adata, uns_data_slot='gex_data'
+        )
 
 def ss_heatmap(
     adata,
