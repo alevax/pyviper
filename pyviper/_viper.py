@@ -62,7 +62,7 @@ def viper(gex_data,
           njobs=1,
           batch_size=10000,
           verbose=True,
-          output_as_anndata=True,
+          return_as_df=False,
           transfer_obs=True,
           store_input_data=True
           ):
@@ -130,23 +130,24 @@ def viper(gex_data,
     verbose : default: True
         Whether extended output about the progress of the algorithm should be
         given.
-    output_as_anndata : default: True
-        Way of delivering output.
+    return_as_df : default: False
+        Way of delivering output. If True, return as pd.DataFrame. If False,
+        return as anndata.AnnData.
     transfer_obs : default: True
         Whether to transfer the observation metadata from the input anndata to
-        the output anndata. Thus, not applicable when output_as_anndata==False.
+        the output anndata. Thus, not applicable when return_as_df==True.
     store_input_data : default: True
-        Whether to store the input anndata in an unstructured data slot (.uns) of
-        the output anndata. Thus, not applicable when output_as_anndata==False.
+        Whether to store the input anndata in an unstructured data slot (.uns)
+        of the output anndata. Thus, not applicable when return_as_df==True.
         If input anndata already contains 'gex_data' in .uns, the input will
         assumed to be protein activity and will be stored in .uns as 'pax_data'.
         Otherwise, the data will be stored as 'gex_data' in .uns.
 
     Returns
     -------
-    A dictionary containing :class:`~numpy.ndarray` containing NES values (key: 'nes') and PES values (key: 'pes') when output_as_anndata=False and enrichment = "NaRnEA".
-    A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values when output_as_anndata=False and enrichment = "aREA".
-    An anndata object containin NES values in .X when output_as_anndata=True (default). Will contain PES values in the layer 'pes' when enrichment = 'NaRnEA'. Will contain .gex_data and/or .pax_data in the unstructured data slot (.uns) when store_input_data = True. Will contain identical .obs to the input anndata when transfer_obs = True.
+    A dictionary containing :class:`~numpy.ndarray` containing NES values (key: 'nes') and PES values (key: 'pes') when return_as_df=True and enrichment = "NaRnEA".
+    A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values when return_as_df=True and enrichment = "aREA".
+    An anndata object containin NES values in .X when return_as_df=False (default). Will contain PES values in the layer 'pes' when enrichment = 'NaRnEA'. Will contain .gex_data and/or .pax_data in the unstructured data slot (.uns) when store_input_data = True. Will contain identical .obs to the input anndata when transfer_obs = True.
 
     References
     ----------
@@ -287,9 +288,9 @@ def viper(gex_data,
     else:
         raise ValueError("Unsupported enrichment type:" + str(enrichment))
 
-    if output_as_anndata == False:
+    if return_as_df == True:
         op = preOp
-    else: #output_as_anndata == True:
+    else:
         if enrichment == 'area':
             op = AnnData(preOp)
         else: #enrichment == 'narnea':
