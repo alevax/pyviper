@@ -34,8 +34,8 @@ class Interactome:
         (1) a pd.DataFrame containing four columns in this order:
             "regulator", "target", "mor", "likelihood"
         (2) a filepath to this pd.DataFrame stored either as a .csv,
-        .tsv or .pkl.
-        (3) a filepath to an Interacome object stored as a .pkl.
+        .tsv, .parquet, .parquet.gzip, .pkl, or .loom.
+        (3) a filepath to an Interactome object stored as a .pkl.
     input_type : default: None
         Only relevant when net_table is a filepath. If None, the input_type
         will be inferred from the net_table. Otherwise, specify "csv", "tsv"
@@ -57,10 +57,21 @@ class Interactome:
             if input_type is None:
                 file_extension = os.path.splitext(file_path)[-1].lower()
                 input_type = file_extension[1:]
+
+                if input_type == "gzip":
+                    ext = file_extension = os.path.splitext(
+                        os.path.splitext(file_path)[0].lower()
+                    )[1][1:]
+                    if ext == 'parquet': input_type = "parquet.gzip"
+
             if input_type in ["csv", ".csv"]:
                 self.net_table = pd.read_csv(file_path, sep=",")
             elif input_type in ["tsv", ".tsv"]:
                 self.net_table = pd.read_csv(file_path, sep="\t")
+            elif input_type in [
+                    '.parquet.gzip', '.parquet', 'parquet.gzip', 'parquet'
+            ]:
+                self.net_table = pd.read_parquet(file_path)
             elif input_type in ["pkl", ".pkl", "pickle"]:
                 with open(file_path, 'rb') as file:
                     pkl_obj = pickle.load(file)
@@ -171,7 +182,8 @@ class Interactome:
             A filepath to one's disk to store the Interactome.
         output_type : default: None
             If None, the output_type will be inferred from the file_path.
-            Otherwise, specify "csv", "tsv" or "pkl".
+            Otherwise, specify "csv", "tsv", "pkl", "parquet", or
+            "parquet.gzip".
 
         Returns
         -------
@@ -188,6 +200,10 @@ class Interactome:
         elif output_type in ["pkl", ".pkl", "pickle"]:
             with open(file_path, 'wb') as file:
                 pickle.dump(self, file)
+        elif output_type in ["parquet.gzip", ".parquet.gzip"]:
+            self.net_table.to_parquet(file_path, compression="gzip")
+        elif output_type in ["parquet", ".parquet"]:
+            self.net_table.to_parquet(file_path)
         else:
             raise ValueError("Unsupported file format: {}".format(output_type))
 
