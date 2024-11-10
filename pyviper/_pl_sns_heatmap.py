@@ -83,6 +83,20 @@ def _get_ss(adata, cluster_column):
     silhouette_scores = pd.Series(silhouette_scores, index=adata.obs.index)
     return silhouette_scores
 
+def _get_sorted_indices(adata, cluster_column):
+    if cluster_column is not None:
+        # Calculate silhouette scores
+        silhouette_scores = _get_ss(adata, cluster_column)
+
+        # Sort samples by silhouette score within each cluster
+        adata.obs['silhouette_score'] = silhouette_scores
+        adata.obs['sort_order'] = \
+            adata.obs.groupby(cluster_column, observed=True)['silhouette_score'].rank(ascending=False)
+        sorted_indices = adata.obs.sort_values([cluster_column, 'sort_order']).index
+    else:
+        sorted_indices = adata.obs.index
+    return sorted_indices
+
 # ----------------------------------
 # -------- COLOR PALETTES --------
 # ----------------------------------
@@ -718,18 +732,8 @@ def _general_heatmap(
     hm_data = adata[:, var_names].X.T  # Extract and transpose data
     hm_data = np.array(hm_data, dtype=float)
 
-    # Calculate silhouette scores
-    if cluster_column is not None:
-        silhouette_scores = _get_ss(adata, cluster_column)
-
-        # Sort samples by silhouette score within each cluster
-        adata.obs['silhouette_score'] = silhouette_scores
-        adata.obs['sort_order'] = \
-            adata.obs.groupby(cluster_column, observed=True)['silhouette_score'].rank(ascending=False)
-        sorted_indices = adata.obs.sort_values([cluster_column, 'sort_order']).index
-        hm_data = hm_data[:, adata.obs.index.get_indexer(sorted_indices)]
-    else:
-        sorted_indices = adata.obs.index
+    sorted_indices = _get_sorted_indices(adata, cluster_column)
+    hm_data = hm_data[:, adata.obs.index.get_indexer(sorted_indices)]
 
     # Prepare color maps
     cluster_color_dict = _get_cluster_color_dict(adata, cluster_column)

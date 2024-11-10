@@ -132,7 +132,7 @@ def _oncomatch(pax_data_to_test,
                      interactome=interactome_cMRs,
                      enrichment=enrichment,
                      min_targets=0,
-                     output_as_anndata=False,
+                     return_as_df=True,
                      verbose=False)
         if enrichment == 'narnea': om_t = om_t['nes']
 
@@ -140,7 +140,7 @@ def _oncomatch(pax_data_to_test,
                      interactome=interactome_test,
                      enrichment=enrichment,
                      min_targets=0,
-                     output_as_anndata=False,
+                     return_as_df=True,
                      verbose=False)
         if enrichment == 'narnea': om_q = om_q['nes']
 
@@ -171,7 +171,7 @@ def _oncomatch(pax_data_to_test,
                    interactome=interactome_cMRs,
                    enrichment=enrichment,
                    min_targets=0,
-                   output_as_anndata=False,
+                   return_as_df=True,
                    verbose=False)
         if enrichment == 'narnea': om = om['nes']
 
@@ -314,7 +314,7 @@ def _path_enr(
         njobs,
         batch_size,
         verbose,
-        output_as_anndata=False,
+        return_as_df=True,
         transfer_obs=False,
         store_input_data=False
     )
