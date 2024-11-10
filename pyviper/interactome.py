@@ -193,6 +193,12 @@ class Interactome:
             file_extension = os.path.splitext(file_path)[-1].lower()
             output_type = file_extension[1:]
 
+            if output_type == "gzip":
+                ext = file_extension = os.path.splitext(
+                    os.path.splitext(file_path)[0].lower()
+                )[1][1:]
+                if ext == 'parquet': output_type = "parquet.gzip"
+
         if output_type in ["csv", ".csv"]:
             self.net_table.to_csv(file_path, sep=",", index=False)
         elif output_type in ["tsv", ".tsv"]:
@@ -669,7 +675,9 @@ class Interactome:
 
         return net_table
 
-    def translate_targets(self, desired_format, verbose = True):
+    def translate_targets(
+        self, desired_format, verbose = True
+    ):
         """\
         Translate the targets of the Interactome.  The current name format of
         the targets should be one of the following:
