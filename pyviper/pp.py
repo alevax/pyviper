@@ -332,29 +332,6 @@ def aracne3_to_regulon(
         normalize_MI_per_regulon
     )
 
-# def nes_to_neg_log(adata, layer = None, key_added = None):
-#     """\
-#     Transform VIPER-computed NES into -log10(p-value).
-#
-#     Parameters
-#     ----------
-#     adata
-#         Gene expression, protein activity or pathways stored in an anndata
-#         object, or a pandas dataframe containing input data, where rows are
-#         observations/samples (e.g. cells or groups) and columns are features
-#         (e.g. proteins or pathways).
-#     layer : (default: None)
-#         Entry of layers to tranform.
-#     key_added : (default: None)
-#         Name of layer to save result in a new layer instead of adata.X.
-#
-#     Returns
-#     -------
-#     Saves the input data as a transformed version. If key_added is specified,
-#     saves the results in adata.layers[key_added].
-#     """
-#     _nes_to_neg_log(adata, layer, key_added)
-
 def nes_to_pval(
     adata,
     layer = None,
@@ -363,6 +340,7 @@ def nes_to_pval(
     adjust=True,
     axs=1,
     neg_log = False,
+    pseudocount = 1e-300,
     copy = False
 ):
     """\
@@ -390,24 +368,36 @@ def nes_to_pval(
         Possible values are 0 or 1.
     neg_log : default: False
         Whether to transform VIPER-computed NES into -log10(p-value).
+    pseudocount : default: 1e-300
+        When neg_log is True, add a small value to pvals to avoid log(0).
     copy : default: False
         Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
-    Saves the input data as a transformed version. If key_added is specified, saves the results in adata.layers[key_added].
+    Saves the input data as a transformed version. If key_added is specified,
+    saves the results in adata.layers[key_added].
+
+    References
+    ----------
+    Benjamini, Y., & Hochberg, Y. (1995). Controlling the False Discovery Rate:
+    A Practical and Powerful Approach to Multiple Testing.
+        Journal of the Royal Statistical Society. Series B (Methodological),
+        57(1), 289–300. http://www.jstor.org/stable/2346101
     """
     return _nes_to_pval(adata, layer, key_added, lower_tail, adjust, axs, neg_log, copy)
 
-def repr_subsample(adata,
-                   pca_slot="X_pca",
-                   size=1000,
-                   seed=0,
-                   key_added = "repr_subsample",
-                   eliminate = False,
-                   verbose=True,
-                   njobs=1,
-                   copy = False):
+def repr_subsample(
+    adata,
+    pca_slot="X_pca",
+    size=1000,
+    seed=0,
+    key_added = "repr_subsample",
+    eliminate = False,
+    verbose=True,
+    njobs=1,
+    copy = False
+    ):
     """\
     A tool for create a subsample of the input data such it is well
     representative of all the populations within the input data rather than
@@ -469,6 +459,7 @@ def repr_metacells(
     clusters_slot = None,
     score_slot = None,
     score_min_thresh = None,
+    minimize_replacement = True,
     size = 500,
     n_cells_per_metacell = None,
     min_median_depth = 10000,
@@ -521,10 +512,14 @@ def repr_metacells(
         The score from adata.obs[score_slot] that a cell must have at minimum to
         be used for metacell construction (e.g. 0.25 is the rule of thumb for
         silhouette score).
+    minimize_replacement : default: True
+        If True, then identify a subsample that minimizes overlap between the
+        KNN of the metacells. If False, use an entirely random subsample, but
+        have faster runtime.
     size : default: 500
         A specific number of metacells to generate. If set to None,
-        perc_data_to_use or perc_incl_data_reused can be used to specify the size
-        when n_cells_per_metacell or min_median_depth is given.
+        perc_data_to_use or perc_incl_data_reused can be used to specify the
+        size when n_cells_per_metacell or min_median_depth is given.
     n_cells_per_metacell : default: None
         The number of cells that should be used to generate single metacell.
         Note that this parameter and min_median_depth cannot both be set as
@@ -545,9 +540,9 @@ def repr_metacells(
         higher perc_data_to_use leads to higher perc_incl_data_reused.
     perc_incl_data_reused : default: None
         The percent of samples that are included in the creation of metacells
-        that will be reused (i.e. used in more than one metacell). Note that this
-        parameter and perc_data_to_use cannot both be set as they directly relate:
-        e.g. higher perc_incl_data_reused leads to higher perc_data_to_use.
+        that will be reused (i.e. used in more than one metacell). Note that
+        this parameter and perc_data_to_use cannot both be set as they directly
+        relate: e.g. higher perc_incl_data_reused leads to higher perc_data_to_use.
     seed : default: 0
         The random seed used when taking samples of the data.
     key_added : default: "metacells"
@@ -617,6 +612,6 @@ def repr_metacells(
         key_added = key_added,
         verbose = verbose,
         njobs = njobs,
-        smart_sample = True,
+        smart_sample = minimize_replacement,
         copy = copy
     )

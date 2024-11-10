@@ -661,7 +661,7 @@ def _representative_metacells(
     # do they just want to set a minimum median depth and the point will fall wherever?
     # It would be great if they could have that option.
     counts = get_counts_as_df(counts, adata)
-	
+
     if size is not None:
         if adata.shape[0] < size:
             raise ValueError("Number of metacells requested (" + str(size) + \
@@ -717,6 +717,9 @@ def _representative_metacells(
             smart_sample
         )
     else:
+        if smart_sample is False:
+            raise ValueError("Cannot use perc_data_to_use or perc_incl_data_reused when minimize_replacement is False.")
+
         adata, size, n_cells_per_metacell = get_sample_indices_by_optimizing_params(
             adata,
             pca_slot,

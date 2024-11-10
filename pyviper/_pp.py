@@ -671,37 +671,14 @@ def _adjust_p_values(p_values):
     _, corrected_p_values, _, _ = multitest.multipletests(p_values, method='fdr_bh')
     return corrected_p_values
 
-def _nes_to_pval_df(dat_df, lower_tail=True, adjust = True, axs = 1, neg_log = False):
-    """\
-    Compute (adjusted) p-value associated to the viper-computed NES in a pd.DataFrame.
-
-    Parameters
-    ----------
-    dat_df
-        A pd.Series or pd.DataFrame containing protein activity (NES), pathways (NES) data or
-        Stouffer-integrated NES data, where rows are observations/samples (e.g. cells or groups) and
-        columns are features (e.g. proteins or pathways).
-    lower_tail (default: True)
-        If `True` (default), probabilities are P(X <= x)
-        If `False`, probabilities are P(X > x)
-    adjust (default: True)
-        If `True`, returns adjusted p values using FDR Benjamini-Hochberg procedure.
-        If `False`, does not adjust p values
-    axs (default: 1)
-        axis along which to perform the p-value correction (Used only if the input is a pd.DataFrame).
-        Possible values are 0 or 1.
-
-    Returns
-    -------
-    A pd.Series or pd.DataFrame objects of (adjusted) p-values.
-
-    References
-    ----------
-    Benjamini, Y., & Hochberg, Y. (1995). Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing.
-        Journal of the Royal Statistical Society. Series B (Methodological), 57(1), 289–300.
-        http://www.jstor.org/stable/2346101
-    """
-
+def _nes_to_pval_df(
+    dat_df,
+    lower_tail=True,
+    adjust = True,
+    axs = 1,
+    neg_log = False,
+    pseudocount = 1e-300
+):
     if lower_tail == False:
         p_values_array = norm_sf(dat_df)
 
@@ -733,7 +710,7 @@ def _nes_to_pval_df(dat_df, lower_tail=True, adjust = True, axs = 1, neg_log = F
     else:
         raise ValueError("dat_df must have 1 or 2 dimensions.")
 
-    if neg_log: p_values_df = -1 * np.log10(norm_sf(p_values_df))
+    if neg_log: p_values_df = -1 * np.log10(p_values_df + pseudocount)
 
     return p_values_df
 
@@ -745,19 +722,34 @@ def _nes_to_pval(
     adjust = True,
     axs = 1,
     neg_log = False,
+    pseudocount = 1e-300,
     copy = False
 ):
     if copy: adata = adata.copy()
 
     if isinstance(adata, pd.DataFrame) or isinstance(adata, np.ndarray):
-        adata[:] = _nes_to_pval_df(adata, lower_tail, adjust, axs, neg_log)
+        adata[:] = _nes_to_pval_df(
+            adata,
+            lower_tail,
+            adjust,
+            axs,
+            neg_log,
+            pseudocount
+        )
     elif(isinstance(adata, anndata.AnnData) or isinstance(adata, anndata._core.anndata.AnnData)):
         if layer is None:
             input_array = adata.X
         else:
             input_array = adata.layers[layer]
 
-        transformed_array = _nes_to_pval_df(input_array, lower_tail, adjust, axs, neg_log)
+        transformed_array = _nes_to_pval_df(
+            input_array,
+            lower_tail,
+            adjust,
+            axs,
+            neg_log,
+            pseudocount
+        )
 
         if key_added is not None:
             adata.layers[key_added] = transformed_array
