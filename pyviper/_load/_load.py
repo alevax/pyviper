@@ -2,24 +2,14 @@
 from ._load_translate import *
 from ._load_regulators import *
 from ._load_msigdb import *
+from ._load_pisces import *
 
 ### EXPORT LIST
 __all__ = [#'mouse2human',
            'human2mouse',
            'TFs', 'coTFs', 'sig', 'surf',
-           'msigdb_regulon']
-
-# def mouse2human():
-#     """\
-#     Retrieves the mouse to human translation pd.DataFrame from pyVIPER's data
-#     folder. This dataframe contains four columns:
-#         human_symbol, human_ensembl, mouse_ensembl, mouse_symbol
-#
-#     Returns
-#     -------
-#     A dataframe of :class:`~pandas.core.frame.DataFrame`.
-#     """
-#     return load_mouse2human()
+           'msigdb_regulon',
+           'pisces_network']
 
 def human2mouse():
     """\
@@ -143,3 +133,154 @@ def msigdb_regulon(collection):
     An individual object or list of objects of class pyviper.interactome.Interactome.
     """
     return load_msigdb_regulon(collection)
+
+def pisces_network(tissue, celltype, desired_format = "human_ensembl"):
+    """\
+    The pipeline for Protein Activity Inference in Single Cells (PISCES) is a
+    regulatory-network-based methdology for the analysis of single cell gene
+    expression profiles. PISCES leverages the assembly of lineage-specific gene
+    regulatory networks, to accurately measure activity of each protein based
+    on the expression its transcriptional targets (regulon), using the ARACNe
+    and metaVIPER algorithms, respectively. These networks are available to
+    be loaded from the GitHub repository with this function. Reference using
+    the citation below.
+
+    Parameters
+    ----------
+    tissue
+        The tissue type of the network. See options below.
+    celltype
+        The celltype of the network. See options below.
+    desired_format : default: human_ensembl
+        The gene name format of the regulators and targets in the network.
+        Choose from: human_ensembl (default), human_symbol, human_entrez,
+        mouse_ensembl, mouse_symbol, or mouse_entrez.
+
+    Returns
+    -------
+    An individual object of class pyviper.interactome.Interactome.
+
+    Overview of celltypes
+    -------
+    Choose from one of the following networks (tissue: celltype):
+        adipose_tissue:
+            adipocytes
+            dendritic
+            fibroblasts
+            lymphoid
+            myeloid
+            smc
+        bone_marrow
+            lymphoid
+        brain
+            neuron
+        breast
+            adipocytes
+            dendritic
+            endothelial
+            epithelial
+            fibroblasts
+            lymphoid
+            myeloid
+            smc
+        bronchus
+            epithelial
+            keratinocytes
+        colon
+            enterocyte
+            goblet
+            lymphoid
+        endometrium
+            adipocytes
+            endothelial
+            epithelial
+            fibroblasts
+            lymphoid
+        esophagus
+            epithelial
+            fibroblasts
+        eye
+            bipolar
+            muller-glia
+            photoreceptor
+        heart_muscle
+            cardiomyocyte
+            endothelial
+            fibroblasts
+            smc
+        kidney
+            lymphoid
+            myeloid
+            tubular
+        liver
+            hepatocytes
+            kupffer
+            lymphoid
+        lung
+            alveolar
+            macrophages
+        lymph_node
+            lymphoid
+        ovary
+            endothelial
+            fibroblasts
+            granulosa
+            macrophages
+            smc
+            theca
+        pancreas
+            ductal
+            endocrine
+            exocrine-glandular
+        pbmc
+            lymphoid
+            myeloid
+        placenta
+            fibroblasts
+            hofbauer-cells
+            trophoblasts
+        prostate
+            basal-prostatic
+            endothelial
+            fibroblasts
+            prostatic-glandular
+            smc
+            urothelial
+        rectum
+            enterocytes
+            goblet-cells
+            paneth
+        skeletal_muscle
+            endothelial
+            fibroblasts
+            lymphoid
+            myeloid
+            myocytes
+            smc
+        skin
+            endothelial
+            fibroblasts
+            keratinocytes
+            langerhans-cells
+            lymphoid
+            smc
+        small_intestine
+            enterocytes
+        spleen
+            lymphoid
+        stomach
+            lymphoid
+        testis
+            endothelial
+            leydig-cells
+            monocyte
+            peritubular-cells
+            spermatids
+            spermatocytes
+            spermatogonia
+
+    References
+    ----------
+    [1] Obradovic, A., Vlahos, L., Laise, P., Worley, J., Tan, X., Wang, A., & Califano, A. (2021). PISCES: A pipeline for the systematic, protein activity-based analysis of single cell RNA sequencing data. Biorxiv, 6, 22.
+    """
+    return load_pisces_network(tissue, celltype, desired_format)
