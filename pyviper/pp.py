@@ -52,7 +52,7 @@ def rank_norm(
     )
 
 def stouffer(adata,
-             obs_column_name = None,
+             groupby = None,
              layer = None,
              filter_by_feature_groups = None,
              key_added = 'stouffer',
@@ -69,7 +69,7 @@ def stouffer(adata,
     adata
         Gene expression, protein activity or pathways stored in an anndata
         object, or a pandas dataframe containing input data.
-    obs_column_name
+    groupby
         The name of the column of observations in adata to use as clusters, or a
         cluster vector corresponding to observations.
     layer : default: None
@@ -98,7 +98,7 @@ def stouffer(adata,
     When return_as_df is False, adds the cluster stouffer signatures to adata.var[key_added]. When return_as_df is True, returns as pd.DataFrame.
     """
     return _stouffer(adata,
-                     obs_column_name,
+                     groupby,
                      layer,
                      filter_by_feature_groups,
                      key_added,
@@ -109,7 +109,7 @@ def stouffer(adata,
                      copy)
 
 def mwu(adata,
-        obs_column_name = None,
+        groupby = None,
         layer = None,
         filter_by_feature_groups = None,
         key_added = 'mwu',
@@ -126,7 +126,7 @@ def mwu(adata,
     adata
         Gene expression, protein activity or pathways stored in an anndata
         object, or a pandas dataframe containing input data.
-    obs_column_name
+    groupby
         The name of the column of observations in adata to use as clusters, or a
         cluster vector corresponding to observations.
     layer : default: None
@@ -152,7 +152,7 @@ def mwu(adata,
     When return_as_df is False, adds the cluster MWU signatures to adata.var[key_added]. When return_as_df is True, returns as pd.DataFrame.
     """
     return _mwu(adata,
-                obs_column_name,
+                groupby,
                 layer,
                 filter_by_feature_groups,
                 key_added,
@@ -163,7 +163,7 @@ def mwu(adata,
 
 def spearman(adata,
              pca_slot = "X_pca",
-             obs_column_name = None,
+             groupby = None,
              layer = None,
              filter_by_feature_groups = None,
              key_added = 'stouffer',
@@ -184,7 +184,7 @@ def spearman(adata,
         object, or a pandas dataframe containing input data.
     pca_slot
         The slot in adata.obsm where a PCA is stored.
-    obs_column_name
+    groupby
         The name of the column of observations in adata to use as clusters, or a
         cluster vector corresponding to observations.
     layer : default: None
@@ -214,7 +214,7 @@ def spearman(adata,
     """
     return _spearman(adata,
                      pca_slot,
-                     obs_column_name,
+                     groupby,
                      layer,
                      filter_by_feature_groups,
                      key_added,

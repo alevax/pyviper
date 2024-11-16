@@ -230,7 +230,7 @@ def _find_top_mrs_from_sig(sig, N, both, rank):
 
 def _find_top_mrs(adata,
                   pca_slot = "X_pca",
-                  obs_column_name = None,
+                  groupby = None,
                   layer = None,
                   N = 50,
                   both = True,
@@ -247,7 +247,7 @@ def _find_top_mrs(adata,
     if copy: adata = adata.copy()
 
     sig = _sig_clusters_adata(adata,
-                              obs_column_name,
+                              groupby,
                               layer,
                               filter_by_feature_groups,
                               sig_method = method,
@@ -257,7 +257,7 @@ def _find_top_mrs(adata,
     result_df = _find_top_mrs_from_sig(sig, N, both, rank)
     result_df.columns.str.replace('_scores', '')
 
-    if obs_column_name is None:
+    if groupby is None:
         result_df.columns = [key_added]
     else:
         result_df.columns = key_added + "_" + result_df.columns

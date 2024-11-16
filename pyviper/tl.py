@@ -132,7 +132,7 @@ def oncomatch(pax_data_to_test,
 
 def find_top_mrs(adata,
                  pca_slot = "X_pca",
-                 obs_column_name = None,
+                 groupby = None,
                  layer = None,
                  N = 50,
                  both = True,
@@ -154,7 +154,7 @@ def find_top_mrs(adata,
     pca_slot
         The slot in adata.obsm where a PCA is stored. Only required when method
         is "spearman".
-    obs_column_name
+    groupby
         The name of the column of observations in adata to use as clusters, or a
         cluster vector corresponding to observations. Required when method is
         "mwu" or "spearman".
@@ -197,7 +197,7 @@ def find_top_mrs(adata,
     return _find_top_mrs(
         adata,
         pca_slot,
-        obs_column_name,
+        groupby,
         layer,
         N,
         both,

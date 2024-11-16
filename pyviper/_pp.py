@@ -365,7 +365,7 @@ def _mwu_clusters_df(dat_df, cluster_vector, compute_pvals = True, verbose = Tru
     return result_df
 
 def _sig_clusters_adata(adata,
-                        obs_column_name = None,
+                        groupby = None,
                         layer = None,
                         filter_by_feature_groups = None,
                         sig_method = "stouffer",
@@ -382,12 +382,12 @@ def _sig_clusters_adata(adata,
         dat_df = pd.DataFrame(adata_filt.layers[layer],
                               index=adata_filt.obs_names,
                               columns=adata_filt.var_names)
-    if obs_column_name is None:
+    if groupby is None:
         cluster_vector = np.zeros(adata_filt.shape[0]).astype(int).astype(str)
-    elif isinstance(obs_column_name, str):
-        cluster_vector = adata.obs[obs_column_name]
+    elif isinstance(groupby, str):
+        cluster_vector = adata.obs[groupby]
     else:
-        cluster_vector = obs_column_name
+        cluster_vector = groupby
 
     if sig_method == "stouffer":
         result_df = _stouffer_clusters_df(dat_df, cluster_vector, compute_pvals, null_iters, verbose)
@@ -403,7 +403,7 @@ def _sig_clusters_adata(adata,
     return result_df
 
 def _sig_clusters(adata,
-                  obs_column_name = None,
+                  groupby = None,
                   layer = None,
                   filter_by_feature_groups = None,
                   key_added = 'stouffer',
@@ -425,7 +425,7 @@ def _sig_clusters(adata,
     if copy is True: adata = adata.copy()
 
     result_df = _sig_clusters_adata(adata,
-                                    obs_column_name,
+                                    groupby,
                                     layer,
                                     filter_by_feature_groups,
                                     sig_method,
@@ -445,7 +445,7 @@ def _sig_clusters(adata,
         return adata
 
 def _stouffer(adata,
-              obs_column_name = None,
+              groupby = None,
               layer = None,
               filter_by_feature_groups = None,
               key_added = 'stouffer',
@@ -456,7 +456,7 @@ def _stouffer(adata,
               copy = False):
     return _sig_clusters(
         adata,
-        obs_column_name,
+        groupby,
         layer,
         filter_by_feature_groups,
         key_added,
@@ -470,7 +470,7 @@ def _stouffer(adata,
     )
 
 def _mwu(adata,
-         obs_column_name = None,
+         groupby = None,
          layer = None,
          filter_by_feature_groups = None,
          key_added = 'mwu',
@@ -480,7 +480,7 @@ def _mwu(adata,
          copy = False):
     return _sig_clusters(
         adata,
-        obs_column_name,
+        groupby,
         layer,
         filter_by_feature_groups,
         key_added,
@@ -495,7 +495,7 @@ def _mwu(adata,
 
 def _spearman(adata,
               pca_slot = "X_pca",
-              obs_column_name = None,
+              groupby = None,
               layer = None,
               filter_by_feature_groups = None,
               key_added = 'spearman',
@@ -506,7 +506,7 @@ def _spearman(adata,
               copy = False):
     return _sig_clusters(
         adata,
-        obs_column_name,
+        groupby,
         layer,
         filter_by_feature_groups,
         key_added,
@@ -520,7 +520,7 @@ def _spearman(adata,
     )
 
 def _mean_diffs(adata,
-                obs_column_name = None,
+                groupby = None,
                 layer = None,
                 filter_by_feature_groups = None,
                 key_added = 'mean_diffs',
@@ -530,7 +530,7 @@ def _mean_diffs(adata,
                 copy = False):
     return _sig_clusters(
         adata,
-        obs_column_name,
+        groupby,
         layer,
         filter_by_feature_groups,
         key_added,
