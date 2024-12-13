@@ -49,9 +49,14 @@ class Interactome:
     """
     def __init__(self, name, net_table=None, input_type=None):
 
-        self.name = name
+        if not isinstance(name, str) and not isinstance(name, int):
+            raise ValueError("Interactome constructor not properly called! name must be str or int.")
+        else:
+            self.name = name
         if net_table is None:
-            self.net_table = pd.DataFrame(columns=["regulator", "target", "mor", "likelihood"])
+            self.net_table = pd.DataFrame(
+                columns=["regulator", "target", "mor", "likelihood"]
+            )
         elif type(net_table) is str:
             file_path = net_table
             if input_type is None:
