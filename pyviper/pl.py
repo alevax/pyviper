@@ -3,8 +3,8 @@ import scanpy as sc
 import pandas as pd
 import numpy as np
 import seaborn
-from ._pl_sns_heatmap import _ss_heatmap
-from ._pl_sns_heatmap import _mrs
+from ._pl_sns_heatmap import _ss_heatmap, _mrs
+from ._pl_vis_net import _vis_net
 from anndata import AnnData
 import matplotlib.pyplot as plt
 
@@ -1220,4 +1220,25 @@ def mrs(
         method,
         top_mrs_list,
         mr_col
+    )
+
+def vis_net(
+    net_Pruned,
+    pax_data,
+    gex_data,
+    mr_list,
+    cluster_labels = None,
+    layout_alg='davidson_harel',
+    seed = 0,
+    figsize=(15, 15)
+):
+    _vis_net(
+        net_Pruned,
+        pax_data,
+        gex_data,
+        mr_list,
+        cluster_labels,
+        layout_alg,
+        seed,
+        figsize
     )
