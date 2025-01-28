@@ -21,37 +21,42 @@ class TestPyViper(unittest.TestCase):
         self.network2.filter_targets(self.data.var_names)
     
     def test_viper_area(self):
-        activity = pyviper.viper(
+        activity: ad.AnnData = pyviper.viper(
             gex_data=self.data, 
             interactome=[self.network1, self.network2],
             enrichment="area",
             eset_filter=True
         )
         expected_activity = ad.read_csv(join(rootdir, "test/unit_test_1/viper_area_nes_R.csv")).T
-        compare_anndata(activity, expected_activity)
+        compare_dataframes(activity.to_df(), expected_activity.to_df())
 
     def test_viper_narnea(self):
-        activity = pyviper.viper(
+        activity: ad.AnnData = pyviper.viper(
             gex_data=self.data, 
             interactome=[self.network1, self.network2],
             enrichment="narnea",
             eset_filter=False
         )
-        expected_activity = ad.read_csv(join(rootdir, "test/unit_test_1/viper_narnea_nes_R.csv")).T
-        compare_anndata(activity, expected_activity)
+        activity_expected_nes = ad.read_csv(join(rootdir, "test/unit_test_1/viper_narnea_nes_R.csv")).T
+        compare_dataframes(activity.to_df(), activity_expected_nes.to_df())
 
+        activity_expected_pes = ad.read_csv(join(rootdir, "test/unit_test_1/viper_narnea_pes_R.csv")).T
+        compare_dataframes(activity.to_df(layer="pes"), activity_expected_pes.to_df())
 
-def compare_anndata(adata1, adata2, tol=1e-2):
-    if set(adata1.obs_names) != set(adata2.obs_names):
-        raise ValueError("The sets of obs_names are not the same.")
+def compare_dataframes(df1, df2, tol=1e-2):
+    # Check if the index sets are the same
+    if set(df1.index) != set(df2.index):
+        raise ValueError("The index sets of the two DataFrames are not the same.")
     
-    if set(adata1.var_names) != set(adata2.var_names):
-        raise ValueError("The sets of var_names are not the same.")
+    # Check if the column sets are the same
+    if set(df1.columns) != set(df2.columns):
+        raise ValueError("The column sets of the two DataFrames are not the same.")
     
-    adata2 = adata2[adata1.obs_names, adata1.var_names]
+    # Align df2 to the order of df1
+    df2 = df2.loc[df1.index, df1.columns]
     
     # Compute discrepancies
-    differences = np.abs(adata1.X - adata2.X)
+    differences = np.abs(df1.values - df2.values)
     mean_discrepancy = differences.mean()
     max_discrepancy = differences.max()
     
@@ -59,11 +64,11 @@ def compare_anndata(adata1, adata2, tol=1e-2):
     print(f"Mean discrepancy: {mean_discrepancy}")
     print(f"Maximum absolute (MA) discrepancy: {max_discrepancy}")
 
-    if not np.allclose(adata1.X, adata2.X, atol=tol):
-        raise ValueError(f"Numerical values in X are not equal within tolerance {tol}.")
+    # Check if the values are close within tolerance
+    if not np.allclose(df1.values, df2.values, atol=tol):
+        raise ValueError(f"Numerical values in the DataFrames are not equal within tolerance {tol}.")
     
-    print("The two AnnData objects are equal within the given tolerance.")    
-
+    print("The two DataFrames are equal within the given tolerance.")
 
 if __name__ == "__main__":
     unittest.main()
