@@ -116,6 +116,21 @@ class TestMetacells(unittest.TestCase):
         self.assertTrue(metacells_sparsity < self.initial_sparsity)
         self.assertTrue(metacells_median_depth > self.initial_mean_depth)
 
+    def test_repr_subsample(self):
+        sample = pyviper.pp.repr_subsample(
+            self.data,
+            pca_slot="X_pca",
+            size=14,
+            seed=0,
+            key_added="repr_subsample",
+            eliminate=True,
+            verbose=True,
+            njobs=1,
+            copy=True
+        )
+        self.assertTrue(14, sample.n_obs)
+        self.assertTrue(self.data.n_vars, sample.n_vars)
+
 
 if __name__ == "__main__":
     unittest.main()
