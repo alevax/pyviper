@@ -33,7 +33,8 @@ def _mad_from_R(x, center=None, constant=1.4826, low=False, high=False):
             raise ValueError("'low' and 'high' cannot be both True")
         n2 = n // 2 + int(high)
         return constant * np.sort(np.abs(x - center))[n2]
-    return constant * np.median(np.abs(x - center))
+    abs_deviation = np.abs(x - center)
+    return constant * np.median(abs_deviation)
 
 # Function assumes features as rows and observations as columns
 # Numerator Functions:
@@ -44,7 +45,7 @@ def _mad_from_R(x, center=None, constant=1.4826, low=False, high=False):
     # Standard deviation - statistics.stdev
 def _rank_norm_df(x, NUM_FUN=np.median, DEM_FUN = _mad_from_R, verbose = False):
     rank = rankdata(x, axis=0)
-    median = NUM_FUN(rank, axis=1, keepdims=True)#np.median(rank, axis=1, keepdims=True)
+    median = NUM_FUN(rank, axis=1, keepdims=True)
     mad = np.apply_along_axis(DEM_FUN, 1, rank)
 
     x = ((rank - median)/mad[:, np.newaxis])
@@ -713,7 +714,7 @@ def _nes_to_pval_df(dat_df, lower_tail=True, adjust = True, axs = 1, neg_log = F
 
 
     if dat_df.ndim == 1:
-    # Calculate P values and corrected P values
+        # Calculate P values and corrected P values
         if adjust==True:
             _, p_values_array, _, _ = multitest.multipletests(p_values_array, method='fdr_bh')
             # Generate pd.DataFrames for (adjusted) p values
