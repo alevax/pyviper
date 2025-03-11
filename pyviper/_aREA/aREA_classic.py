@@ -65,7 +65,10 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
 
     if (eset_filter):
         # This will affect the rankings of genes by eliminating those not present in the interactome
-        tmp = np.unique(np.concatenate((interactome.get_target_names(), interactome.get_reg_names())))
+        tmp = np.unique(np.concatenate((
+            interactome.get_target_names().astype(str), 
+            interactome.get_reg_names().astype(str)
+        )))
         gex_df = gex_df.iloc[:,gex_df.columns.isin(pd.Series(tmp))]
 
     # Collect important data from gex_df before creating ges_arr
