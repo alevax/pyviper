@@ -26,3 +26,13 @@ jobs:
         coverage run -m unittest discover -s tests
         coverage report
         coverage xml
+
+    - name: Generate coverage HTML report
+      run: |
+        coverage html
+
+    - name: Upload coverage HTML report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: htmlcov/
