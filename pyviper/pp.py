@@ -1,5 +1,5 @@
 ### ---------- IMPORT DEPENDENCIES ----------
-from ._pp import _rank_norm, _stouffer, _mwu, _spearman, _viper_similarity, _aracne3_to_regulon, _nes_to_pval, _mad_from_R, _median
+from ._pp import _rank_norm, _stouffer, _mwu, _spearman, _viper_similarity, _aracne3_to_regulon, _nes_to_pval, _mad_from_R, _median, _mean_diffs
 from ._corr_distance import corr_distance
 from ._rep_subsample_funcs import _representative_subsample_anndata
 from ._metacell_funcs import _representative_metacells_multiclusters
@@ -166,7 +166,7 @@ def spearman(adata,
              obs_column_name = None,
              layer = None,
              filter_by_feature_groups = None,
-             key_added = 'stouffer',
+             key_added = 'spearman',
              compute_pvals = True,
              null_iters = 1000,
              verbose = True,
