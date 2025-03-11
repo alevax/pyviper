@@ -1,7 +1,5 @@
 
-import os
 import numpy as np
-import pandas as pd
 from os.path import dirname, abspath, join
 import unittest
 import anndata as ad
@@ -115,6 +113,30 @@ class TestMetacells(unittest.TestCase):
         self.assertTrue(metacells_count, 7)
         self.assertTrue(metacells_sparsity < self.initial_sparsity)
         self.assertTrue(metacells_median_depth > self.initial_mean_depth)
+
+        pyviper.pp.repr_metacells(
+            adata=self.data, 
+            counts=None,
+            pca_slot="X_pca", 
+            dist_slot="corr_dist", 
+            size=None,
+            n_cells_per_metacell=4,
+            perc_data_to_use=100, 
+            min_median_depth=None,
+            clusters_slot=None,
+            key_added=f"metacells",
+            seed=12345,
+            verbose=False
+        )
+        metacells = self.data.uns["metacells"]
+        metacells_count = metacells.shape[0]
+        metacells_sparsity = np.mean(metacells.to_numpy() == 0)
+        metacells_median_depth = metacells.attrs["median_depth"]
+
+        self.assertTrue(metacells_count, 7)
+        self.assertTrue(metacells_sparsity < self.initial_sparsity)
+        self.assertTrue(metacells_median_depth > self.initial_mean_depth)
+
 
     def test_repr_subsample(self):
         sample = pyviper.pp.repr_subsample(

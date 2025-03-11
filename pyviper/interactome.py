@@ -131,8 +131,6 @@ class Interactome:
         net= pd.DataFrame(net)
         return(net)
 
-
-
     # string representation
     def __str__(self):
         net_table_absMOR = self.net_table.copy()
@@ -142,11 +140,14 @@ class Interactome:
         retStr = "Object of class Interactome:"
         retStr += "\n\tName: " + self.name
         retStr += "\n\tNumber of regulons: " + str(self.size())
-        retStr += "\n\tMedian average targets per regulon: " + str(np.median(self.net_table.groupby('regulator')['target'].nunique()))
+        retStr += "\n\tMedian average targets per regulon: " + str(np.median(self.targets_per_regulon()))
         retStr += "\n\tMedian average abs(mor) per regulon: " + median_abs_mor_per_reg
         retStr += "\n\tMedian average likelihood per regulon: " + str(np.median(self.net_table.groupby('regulator')['likelihood'].mean()))
 
         return retStr
+
+    def targets_per_regulon(self):
+        return self.net_table.groupby('regulator')['target'].nunique()
 
     def save(self, file_path, output_type=None):
         """\
