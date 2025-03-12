@@ -56,3 +56,6 @@ vignettes/*.pdf
 *.pyc
 *.pyc
 .DS_Store
+
+# code coverage
+.coverage

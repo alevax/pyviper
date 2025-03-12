@@ -38,6 +38,8 @@ setuptools.setup(
         "numpy",
         "joblib",
         "statsmodels",
-        "loompy"
+        "loompy",
+        "igraph",
+        "leidenalg"
     ]
 )

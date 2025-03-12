@@ -668,11 +668,14 @@ def _representative_metacells(
             	             ") is greater than the number of samples in adata (" +  \
                 	         str(adata.shape[0]) + ").")
 
-    if np.sum([size != None,
-               min_median_depth != None,
-               n_cells_per_metacell != None,
-               perc_data_to_use != None,
-               perc_incl_data_reused != None]) != 2:
+    num_options_set = np.sum([
+        size != None,
+        min_median_depth != None,
+        n_cells_per_metacell != None,
+        perc_data_to_use != None,
+        perc_incl_data_reused != None
+    ])
+    if num_options_set != 2:
         print("Currently set parameters:")
         if size is not None: print("\tsize=" + str(size))
         if min_median_depth is not None: print("\tmin_median_depth=" + str(min_median_depth))
