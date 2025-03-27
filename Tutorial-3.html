@@ -1,24 +1,21 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tutorial 3 - Generating metacells for reverse-engineering of ARACNe gene regulatory networks &mdash; pyviper 1.0.6 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/nbsphinx-code-cells.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=e2a723ec"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -93,8 +90,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="Tutorial-3---Generating-metacells-for-reverse-engineering-of-ARACNe-gene-regulatory-networks">
-<h1>Tutorial 3 - Generating metacells for reverse-engineering of ARACNe gene regulatory networks<a class="headerlink" href="#Tutorial-3---Generating-metacells-for-reverse-engineering-of-ARACNe-gene-regulatory-networks" title="Link to this heading"></a></h1>
+  <div class="section" id="Tutorial-3---Generating-metacells-for-reverse-engineering-of-ARACNe-gene-regulatory-networks">
+<h1>Tutorial 3 - Generating metacells for reverse-engineering of ARACNe gene regulatory networks<a class="headerlink" href="#Tutorial-3---Generating-metacells-for-reverse-engineering-of-ARACNe-gene-regulatory-networks" title="Permalink to this heading"></a></h1>
 <p>This tutorial explores different approaches to generate metacells from scRNA-seq data. Metacells are used as a means to counteract sparsity in single-cell transcriptomics and improve gene regulatory network (GRN) inference, for instance using the <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">ARACNe3</a> and <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/27153652/">ARACNe-AP</a> algorithms for GRN reconstruction by mutual information estimation. After a brief description of the pyVIPER installation procedure and
 the modules needed, this notebook is organized in the following sections.</p>
 <p><strong>Table of Contents</strong></p>
@@ -104,8 +101,8 @@ the modules needed, this notebook is organized in the following sections.</p>
 <div class="line">Step 3. Generate metacells</div>
 <div class="line">Key Takeaways</div>
 </div>
-<section id="Install-Pyviper">
-<h2>Install Pyviper<a class="headerlink" href="#Install-Pyviper" title="Link to this heading"></a></h2>
+<div class="section" id="Install-Pyviper">
+<h2>Install Pyviper<a class="headerlink" href="#Install-Pyviper" title="Permalink to this heading"></a></h2>
 <p>Install <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> from PyPI using pip. Alternatively, refer to the README in the current GitHub to install from the local directory.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -115,9 +112,9 @@ the modules needed, this notebook is organized in the following sections.</p>
 </pre></div>
 </div>
 </div>
-</section>
-<section id="Import-modules">
-<h2>Import modules<a class="headerlink" href="#Import-modules" title="Link to this heading"></a></h2>
+</div>
+<div class="section" id="Import-modules">
+<h2>Import modules<a class="headerlink" href="#Import-modules" title="Permalink to this heading"></a></h2>
 <p>Load <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> and additional modules required used in this tutorial.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -137,9 +134,9 @@ the modules needed, this notebook is organized in the following sections.</p>
 </pre></div>
 </div>
 </div>
-</section>
-<section id="Step-1.-Load-a-gene-expression-matrix-and-associated-metadata">
-<h2>Step 1. Load a gene expression matrix and associated metadata<a class="headerlink" href="#Step-1.-Load-a-gene-expression-matrix-and-associated-metadata" title="Link to this heading"></a></h2>
+</div>
+<div class="section" id="Step-1.-Load-a-gene-expression-matrix-and-associated-metadata">
+<h2>Step 1. Load a gene expression matrix and associated metadata<a class="headerlink" href="#Step-1.-Load-a-gene-expression-matrix-and-associated-metadata" title="Permalink to this heading"></a></h2>
 <p>Load the same gene expression matrix (UMIs) used in Tutorial 2 and store it into an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> object to enable interoperability with <a class="reference external" href="https://scanpy-tutorials.readthedocs.io/en/latest/#">scanpy</a>. Cells used in this tutorial were sampled from scRNA-seq data published in <a class="reference external" href="https://www.nature.com/articles/s41422-019-0195-y">Peng et al., 2019</a>.</p>
 <p>Display matrix dimensions (cells x genes)</p>
 <div class="nbinput docutils container">
@@ -295,9 +292,9 @@ AnnData object with n_obs × n_vars = 4632 × 24005
 </table>
 </div></div>
 </div>
-</section>
-<section id="Step-2.-Perform-basic-preprocessing-and-clustering">
-<h2>Step 2. Perform basic preprocessing and clustering<a class="headerlink" href="#Step-2.-Perform-basic-preprocessing-and-clustering" title="Link to this heading"></a></h2>
+</div>
+<div class="section" id="Step-2.-Perform-basic-preprocessing-and-clustering">
+<h2>Step 2. Perform basic preprocessing and clustering<a class="headerlink" href="#Step-2.-Perform-basic-preprocessing-and-clustering" title="Permalink to this heading"></a></h2>
 <p>Perform some standard preprocessing. The UMI matrix can be processed using the standard Scanpy preprocessing workflow. Since the quality of the provided data was pre-assessed and found to be high, cell filtering will be minimal. For a more detailed explanation of quality control steps, refer to the preprocessing tutorials by <a class="reference external" href="https://scanpy-tutorials.readthedocs.io/en/latest/pbmc3k.html">Scanpy</a> or <a class="reference external" href="https://satijalab.org/seurat/articles/pbmc3k_tutorial">Seurat</a>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -342,9 +339,9 @@ AnnData object with n_obs × n_vars = 4632 × 24005
 Sparsity (fibroblasts, single cells): 85.0%
 </pre></div></div>
 </div>
-</section>
-<section id="3.-Generate-Metacells">
-<h2>3. Generate Metacells<a class="headerlink" href="#3.-Generate-Metacells" title="Link to this heading"></a></h2>
+</div>
+<div class="section" id="3.-Generate-Metacells">
+<h2>3. Generate Metacells<a class="headerlink" href="#3.-Generate-Metacells" title="Permalink to this heading"></a></h2>
 <p>Compute a distance matrix between each pair of cells on the PCA-projected space in the dataset using the <code class="docutils literal notranslate"><span class="pre">corr_distance</span></code> function. Any distance matrix can be used for metacell generation by setting ‘dist_slot’ to the corresponding value in the <code class="docutils literal notranslate"><span class="pre">repr_metacells</span></code> function (see below).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -1145,8 +1142,8 @@ cluster metacells: 100%|██████████| 4/4 [00:04&lt;00:00,  1.
 </table>
 </div></div>
 </div>
-<section id="Comparing-metacell-and-original-single-cells">
-<h3>Comparing metacell and original single-cells<a class="headerlink" href="#Comparing-metacell-and-original-single-cells" title="Link to this heading"></a></h3>
+<div class="section" id="Comparing-metacell-and-original-single-cells">
+<h3>Comparing metacell and original single-cells<a class="headerlink" href="#Comparing-metacell-and-original-single-cells" title="Permalink to this heading"></a></h3>
 <p>As a simple and quick sanity check, we compare the original cells and the derived cell metacells. Extract all the metacell matrices generated with the first approach.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
@@ -1319,13 +1316,13 @@ OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active
 </div>
 </div>
 <p>The cell type distribution is consistent between single-cells and metacells, with stellate cells and fibroblasts partially overlapping in the PCA as expected, and all the three lineages been separated along the directions of maximal variance.</p>
-</section>
-</section>
-<section id="Key-takeaways">
-<h2>Key takeaways<a class="headerlink" href="#Key-takeaways" title="Link to this heading"></a></h2>
+</div>
+</div>
+<div class="section" id="Key-takeaways">
+<h2>Key takeaways<a class="headerlink" href="#Key-takeaways" title="Permalink to this heading"></a></h2>
 <p>This Tutorial describes how to generate metacells with pyVIPER. Metacells can be used for pseudo-bulk analysis of specific cellular populations or as input to ARACNe, when the original cell depth is not adequate to robustly infer regulatory networks (typically below 10,000 UMI/cell). The <code class="docutils literal notranslate"><span class="pre">repr_metacell</span></code> function computes several metacell-associated statistics and allows the users to specify several parameter combinations, among which the current Tutorial provides three examples.</p>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>

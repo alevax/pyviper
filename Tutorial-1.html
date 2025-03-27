@@ -1,24 +1,21 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level &mdash; pyviper 1.0.6 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/nbsphinx-code-cells.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=e2a723ec"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -96,8 +93,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="Tutorial-1---Analyzing-scRNA-seq-data-at-the-Protein-Activity-Level">
-<h1>Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level<a class="headerlink" href="#Tutorial-1---Analyzing-scRNA-seq-data-at-the-Protein-Activity-Level" title="Link to this heading"></a></h1>
+  <div class="section" id="Tutorial-1---Analyzing-scRNA-seq-data-at-the-Protein-Activity-Level">
+<h1>Tutorial 1 - Analyzing scRNA-seq data at the Protein Activity Level<a class="headerlink" href="#Tutorial-1---Analyzing-scRNA-seq-data-at-the-Protein-Activity-Level" title="Permalink to this heading"></a></h1>
 <p>This Tutorial will guide the user thorugh the analysis of single-cell RNA-seq (scRNA-seq) data at the Protein Activity level using <code class="docutils literal notranslate"><span class="pre">pyviper</span></code>. Specifically, we will show how to transform a gene expression signature generated from sparse scRNA-seq data into a protein activity matrix using the <a class="reference external" href="https://www.nature.com/articles/ng.3593">VIPER</a> algorithm. After a brief description of the installation procedure and the modules needed, this Jupyter Notebook is organized in the following sections.</p>
 <p><strong>Table of Contents</strong></p>
 <div class="line-block">
@@ -107,8 +104,8 @@
 <div class="line">Step 4. Analyze single-cells at the Protein Activity level</div>
 <div class="line">Key Takeaways</div>
 </div>
-<section id="Install-PyVIPER">
-<h2>Install PyVIPER<a class="headerlink" href="#Install-PyVIPER" title="Link to this heading"></a></h2>
+<div class="section" id="Install-PyVIPER">
+<h2>Install PyVIPER<a class="headerlink" href="#Install-PyVIPER" title="Permalink to this heading"></a></h2>
 <p>Install <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> from PyPI using pip. Alternatively, refer to the README in the current GitHub to install from the local directory.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -118,9 +115,9 @@
 </pre></div>
 </div>
 </div>
-</section>
-<section id="Import-modules">
-<h2>Import modules<a class="headerlink" href="#Import-modules" title="Link to this heading"></a></h2>
+</div>
+<div class="section" id="Import-modules">
+<h2>Import modules<a class="headerlink" href="#Import-modules" title="Permalink to this heading"></a></h2>
 <p>Load <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> and additional modules required used in this tutorial.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -160,9 +157,9 @@
 </pre></div>
 </div>
 </div>
-</section>
-<section id="Step-1.-Load-a-gene-expression-signature-for-single-cells">
-<h2>Step 1. Load a gene expression signature for single-cells<a class="headerlink" href="#Step-1.-Load-a-gene-expression-signature-for-single-cells" title="Link to this heading"></a></h2>
+</div>
+<div class="section" id="Step-1.-Load-a-gene-expression-signature-for-single-cells">
+<h2>Step 1. Load a gene expression signature for single-cells<a class="headerlink" href="#Step-1.-Load-a-gene-expression-signature-for-single-cells" title="Permalink to this heading"></a></h2>
 <p>Load a gene expression signature to be used as input for the <code class="docutils literal notranslate"><span class="pre">viper</span></code> function for Protein Activity inference and store it as an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> object to enable interoperability with <a class="reference external" href="https://scanpy-tutorials.readthedocs.io/en/latest/#">scanpy</a>. The time required for this process is approximately 5 s and 30 s if loading from the local directory or remote url, respectively.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -194,9 +191,9 @@
 AnnData object with n_obs × n_vars = 5802 × 5000
 </pre></div></div>
 </div>
-</section>
-<section id="Step-2.-Load-an-inspect-a-lineage-specific-gene-regulatory-network">
-<h2>Step 2. Load an inspect a lineage-specific gene regulatory network<a class="headerlink" href="#Step-2.-Load-an-inspect-a-lineage-specific-gene-regulatory-network" title="Link to this heading"></a></h2>
+</div>
+<div class="section" id="Step-2.-Load-an-inspect-a-lineage-specific-gene-regulatory-network">
+<h2>Step 2. Load an inspect a lineage-specific gene regulatory network<a class="headerlink" href="#Step-2.-Load-an-inspect-a-lineage-specific-gene-regulatory-network" title="Permalink to this heading"></a></h2>
 <p>Load and inspect a lineage-specific gene regulatory network generated with the <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">ARACNe3</a>. The time required to load a network is approximately 1 s (from local directory) and 40 s (from remote url).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -342,12 +339,12 @@ Removed 3047484 targets.
 The number of targets of MYC and SERPINA12 are 284 and 183, respectively.
 </pre></div></div>
 </div>
-</section>
-<section id="Step-3.-Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-VIPER">
-<h2>Step 3. Convert the gene expression signature into a protein activity matrix using VIPER<a class="headerlink" href="#Step-3.-Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-VIPER" title="Link to this heading"></a></h2>
+</div>
+<div class="section" id="Step-3.-Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-VIPER">
+<h2>Step 3. Convert the gene expression signature into a protein activity matrix using VIPER<a class="headerlink" href="#Step-3.-Convert-the-gene-expression-signature-into-a-protein-activity-matrix-using-VIPER" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">viper</span></code> transforms a gene expression signature into a protein activity matrix by performing enrichment analysis on regulons. Two methods for enrichment analysis are available, <a class="reference external" href="https://www.nature.com/articles/ng.3593">aREA</a> (default) and <a class="reference external" href="https://www.mdpi.com/1099-4300/25/3/542">NaRnEA</a> (by setting <code class="docutils literal notranslate"><span class="pre">enrichment=&quot;narnea&quot;</span></code>).</p>
-<section id="Method-1---protein-activity-inference-using-aREA">
-<h3>Method 1 - protein activity inference using aREA<a class="headerlink" href="#Method-1---protein-activity-inference-using-aREA" title="Link to this heading"></a></h3>
+<div class="section" id="Method-1---protein-activity-inference-using-aREA">
+<h3>Method 1 - protein activity inference using aREA<a class="headerlink" href="#Method-1---protein-activity-inference-using-aREA" title="Permalink to this heading"></a></h3>
 <p>As shown above, different regulators can have a different number of targets. Prune each regulon to have the same number of targets (50 in this case). This preprocessing step is advisable to avoid regulators with exceedingly number of targets dominating those having fewer in the computation of Normalized Enrichment Scores (NES), to make NES comparable.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
@@ -728,9 +725,9 @@ Number of EGFR targets: 50
 <p>5802 rows × 6390 columns</p>
 </div></div>
 </div>
-</section>
-<section id="Method-2---protein-activity-inference-using-(matrix)-NaRnEA">
-<h3>Method 2 - protein activity inference using (matrix)-NaRnEA<a class="headerlink" href="#Method-2---protein-activity-inference-using-(matrix)-NaRnEA" title="Link to this heading"></a></h3>
+</div>
+<div class="section" id="Method-2---protein-activity-inference-using-(matrix)-NaRnEA">
+<h3>Method 2 - protein activity inference using (matrix)-NaRnEA<a class="headerlink" href="#Method-2---protein-activity-inference-using-(matrix)-NaRnEA" title="Permalink to this heading"></a></h3>
 <div class="alert alert-block alert-success"><p>Run <code class="docutils literal notranslate"><span class="pre">viper</span></code> to compute the protein activity matrix using (matrix-based) NaRnEA .</p>
 </div><p>Compute the protein activity using <code class="docutils literal notranslate"><span class="pre">viper</span></code> with NaRnEA as the enrichment method. Unlike aREA, the NaRnEA framework is suitable also for regulons of different size. Store the output in an <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> object (default).</p>
 <div class="nbinput nblast docutils container">
@@ -1501,10 +1498,10 @@ AnnData object with n_obs × n_vars = 5802 × 6413
 </table>
 </div></div>
 </div>
-</section>
-</section>
-<section id="Step-4.-Analyze-single-cells-at-the-Protein-Activity-level">
-<h2>Step 4. Analyze single-cells at the Protein Activity level<a class="headerlink" href="#Step-4.-Analyze-single-cells-at-the-Protein-Activity-level" title="Link to this heading"></a></h2>
+</div>
+</div>
+<div class="section" id="Step-4.-Analyze-single-cells-at-the-Protein-Activity-level">
+<h2>Step 4. Analyze single-cells at the Protein Activity level<a class="headerlink" href="#Step-4.-Analyze-single-cells-at-the-Protein-Activity-level" title="Permalink to this heading"></a></h2>
 <p>This section presents some useful postprocessing functions that can be used on the protein activity matrix.</p>
 <p>First, set the set of regulatory proteins to be those for the human species. This is step is redundant, since <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> sets <code class="docutils literal notranslate"><span class="pre">&quot;human&quot;</span></code> as default, but it demonstrates how to have complete control over the analysis, if fine-tuning is desired.</p>
 <div class="nbinput nblast docutils container">
@@ -1811,13 +1808,13 @@ dtype: object
 <img alt="_images/Tutorial-1_62_0.png" class="no-scaled-link" src="_images/Tutorial-1_62_0.png" style="width: 832px; height: 556px;" />
 </div>
 </div>
-</section>
-<section id="Key-takeaways">
-<h2>Key takeaways<a class="headerlink" href="#Key-takeaways" title="Link to this heading"></a></h2>
+</div>
+<div class="section" id="Key-takeaways">
+<h2>Key takeaways<a class="headerlink" href="#Key-takeaways" title="Permalink to this heading"></a></h2>
 <p>This Tutorial describes how to inspect and process gene regulatory networks, by manipulating objects of class <code class="docutils literal notranslate"><span class="pre">Interactome</span></code>, and shows how to generate protein activity profiles from single-cell data using the <code class="docutils literal notranslate"><span class="pre">viper</span></code> function. Last, we presented key functions for the post-processing and visualization of protein activity data. In Tutorial 2 we will introduce the user to the generation of suitable gene expression signatures for <code class="docutils literal notranslate"><span class="pre">viper</span></code> and extend the VIPER analysis to simultaneously account
 for multiple cell pupulations through the exploitation of the <a class="reference external" href="https://www.nature.com/articles/s41467-018-03843-3">metaVIPER</a> paradigm.</p>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>

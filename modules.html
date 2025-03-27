@@ -1,23 +1,20 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyviper &mdash; pyviper 1.0.6 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=e2a723ec"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -78,76 +75,26 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="pyviper">
-<h1>pyviper<a class="headerlink" href="#pyviper" title="Link to this heading"></a></h1>
+  <div class="section" id="pyviper">
+<h1>pyviper<a class="headerlink" href="#pyviper" title="Permalink to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="pyviper.html">pyviper package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-area">pyviper.aREA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-narnea">pyviper.NaRnEA</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.config">pyviper.config</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.config.set_regulators_filepath"><code class="docutils literal notranslate"><span class="pre">set_regulators_filepath()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.config.set_regulators_species_to_use"><code class="docutils literal notranslate"><span class="pre">set_regulators_species_to_use()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#id0"><code class="docutils literal notranslate"><span class="pre">set_regulators_filepath()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#id1"><code class="docutils literal notranslate"><span class="pre">set_regulators_species_to_use()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.Interactome">pyviper.Interactome</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.load">pyviper.load</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.load.TFs"><code class="docutils literal notranslate"><span class="pre">TFs()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.load.coTFs"><code class="docutils literal notranslate"><span class="pre">coTFs()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.load.human2mouse"><code class="docutils literal notranslate"><span class="pre">human2mouse()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.load.msigdb_regulon"><code class="docutils literal notranslate"><span class="pre">msigdb_regulon()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.pl">pyviper.pl</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.__get_stored_uns_data_and_prep_to_plot"><code class="docutils literal notranslate"><span class="pre">__get_stored_uns_data_and_prep_to_plot()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.pca"><code class="docutils literal notranslate"><span class="pre">pca()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.umap"><code class="docutils literal notranslate"><span class="pre">umap()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.tsne"><code class="docutils literal notranslate"><span class="pre">tsne()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.diffmap"><code class="docutils literal notranslate"><span class="pre">diffmap()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.draw_graph"><code class="docutils literal notranslate"><span class="pre">draw_graph()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.spatial"><code class="docutils literal notranslate"><span class="pre">spatial()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.embedding"><code class="docutils literal notranslate"><span class="pre">embedding()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.embedding_density"><code class="docutils literal notranslate"><span class="pre">embedding_density()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.heatmap"><code class="docutils literal notranslate"><span class="pre">heatmap()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.dotplot"><code class="docutils literal notranslate"><span class="pre">dotplot()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.tracksplot"><code class="docutils literal notranslate"><span class="pre">tracksplot()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.violin"><code class="docutils literal notranslate"><span class="pre">violin()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.stacked_violin"><code class="docutils literal notranslate"><span class="pre">stacked_violin()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.matrixplot"><code class="docutils literal notranslate"><span class="pre">matrixplot()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.clustermap"><code class="docutils literal notranslate"><span class="pre">clustermap()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.ranking"><code class="docutils literal notranslate"><span class="pre">ranking()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pl.dendrogram"><code class="docutils literal notranslate"><span class="pre">dendrogram()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.pp">pyviper.pp</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pp.rank_norm"><code class="docutils literal notranslate"><span class="pre">rank_norm()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pp.stouffer"><code class="docutils literal notranslate"><span class="pre">stouffer()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pp.mwu"><code class="docutils literal notranslate"><span class="pre">mwu()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pp.spearman"><code class="docutils literal notranslate"><span class="pre">spearman()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pp.viper_similarity"><code class="docutils literal notranslate"><span class="pre">viper_similarity()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pp.aracne3_to_regulon"><code class="docutils literal notranslate"><span class="pre">aracne3_to_regulon()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pp.nes_to_pval"><code class="docutils literal notranslate"><span class="pre">nes_to_pval()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pp.repr_subsample"><code class="docutils literal notranslate"><span class="pre">repr_subsample()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.pp.repr_metacells"><code class="docutils literal notranslate"><span class="pre">repr_metacells()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.tl">pyviper.tl</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.tl.pca"><code class="docutils literal notranslate"><span class="pre">pca()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.tl.dendrogram"><code class="docutils literal notranslate"><span class="pre">dendrogram()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.tl.oncomatch"><code class="docutils literal notranslate"><span class="pre">oncomatch()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.tl.find_top_mrs"><code class="docutils literal notranslate"><span class="pre">find_top_mrs()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyviper.html#pyviper.tl.path_enr"><code class="docutils literal notranslate"><span class="pre">path_enr()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-config">pyviper.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-interactome">pyviper.Interactome</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-load">pyviper.load</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-pl">pyviper.pl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-pp">pyviper.pp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-tl">pyviper.tl</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-viper">pyviper.viper</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">setup module</a></li>
 </ul>
 </div>
-</section>
+</div>
 
 
            </div>

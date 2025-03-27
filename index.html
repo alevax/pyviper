@@ -1,26 +1,21 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyVIPER (VIPER Analysis in Python for single-cell RNASeq) &mdash; pyviper 1.0.6 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=e2a723ec"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -81,8 +76,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="pyviper-viper-analysis-in-python-for-single-cell-rnaseq">
-<h1><img width="50" alt="image" src="https://github.com/alevax/pyviper/assets/92543296/3b1f14ab-68a1-49ab-b5b2-aa4f214ad995"> pyVIPER (VIPER Analysis in Python for single-cell RNASeq)<a class="headerlink" href="#pyviper-viper-analysis-in-python-for-single-cell-rnaseq" title="Link to this heading"></a></h1>
+  <div class="section" id="img-width-50-alt-image-src-https-github-com-alevax-pyviper-assets-92543296-3b1f14ab-68a1-49ab-b5b2-aa4f214ad995-pyviper-viper-analysis-in-python-for-single-cell-rnaseq">
+<h1><img width="50" alt="image" src="https://github.com/alevax/pyviper/assets/92543296/3b1f14ab-68a1-49ab-b5b2-aa4f214ad995"> pyVIPER (VIPER Analysis in Python for single-cell RNASeq)<a class="headerlink" href="#img-width-50-alt-image-src-https-github-com-alevax-pyviper-assets-92543296-3b1f14ab-68a1-49ab-b5b2-aa4f214ad995-pyviper-viper-analysis-in-python-for-single-cell-rnaseq" title="Permalink to this heading"></a></h1>
 <!-- [![PyPI](https://img.shields.io/pypi/v/viper-in-python?logo=PyPI)](https://pypi.org/project/viper-in-python) -->
 <p><a class="reference external" href="https://pypi.org/project/viper-in-python"><img alt="PyPI" src="https://img.shields.io/badge/pypi-stable-darkgreeen?logo=PyPI" /></a>
 <a class="reference external" href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" /></a>
@@ -90,9 +85,13 @@
 <p>This package enables network-based protein activity estimation on Python.
 It provides also interfaces for scanpy (single-cell RNASeq analysis in Python).
 Functions are partly transplanted from R package <a class="reference external" href="https://www.bioconductor.org/packages/release/bioc/html/viper.html">viper</a> and the R package <a class="reference external" href="https://github.com/califano-lab/NaRnEA">NaRnEA</a>.</p>
+<p>The user-friendly documentation is available at: https://alevax.github.io/pyviper/index.html.</p>
+<div align="center">
+    <img style="width: 80%;" alt="viper_visualized" src="https://github.com/user-attachments/assets/44d230cd-7eb3-4cc1-8e27-4cb9d49c269d">
+</div>
 <hr class="docutils" />
-<section id="dependencies">
-<h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h2>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading"></a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">scanpy</span></code> for single cell pipeline</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pandas</span></code> and <code class="docutils literal notranslate"><span class="pre">anndata</span></code> for data computing and storage.</p></li>
@@ -101,26 +100,26 @@ Functions are partly transplanted from R package <a class="reference external" h
 <li><p><code class="docutils literal notranslate"><span class="pre">tqdm</span></code> show progress bar</p></li>
 </ul>
 <p>If you are using a version of <code class="docutils literal notranslate"><span class="pre">scanpy</span></code> &lt;1.9.3, it is also advisable to downgrade <code class="docutils literal notranslate"><span class="pre">pandas</span></code> to (&gt;=1.3.0 &amp; &lt;2.0), due to <code class="docutils literal notranslate"><span class="pre">scanpy</span></code> incompatibility (<a class="reference external" href="https://github.com/scverse/scanpy/issues/2564">issue</a>)</p>
-</section>
-<section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
-<section id="pypi">
-<h3>pypi<a class="headerlink" href="#pypi" title="Link to this heading"></a></h3>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<div class="section" id="pypi">
+<h3>pypi<a class="headerlink" href="#pypi" title="Permalink to this heading"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>viper-in-python
 </pre></div>
 </div>
-</section>
-<section id="local">
-<h3>local<a class="headerlink" href="#local" title="Link to this heading"></a></h3>
+</div>
+<div class="section" id="local">
+<h3>local<a class="headerlink" href="#local" title="Permalink to this heading"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/alevax/pyviper/
 <span class="nb">cd</span><span class="w"> </span>pyviper
 pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </pre></div>
 </div>
-</section>
-</section>
-<section id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
+</div>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">anndata</span>
 <span class="kn">import</span> <span class="nn">pyviper</span>
@@ -147,17 +146,17 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <span class="nb">print</span><span class="p">(</span><span class="n">activity</span><span class="o">.</span><span class="n">to_df</span><span class="p">())</span>
 </pre></div>
 </div>
-</section>
-<section id="tutorials">
-<h2>Tutorials<a class="headerlink" href="#tutorials" title="Link to this heading"></a></h2>
+</div>
+<div class="section" id="tutorials">
+<h2>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p><a class="reference external" href="https://github.com/alevax/pyviper/blob/main/Tutorials/Tutorial-1.ipynb">Analyzing scRNA-seq data at the Protein Activity Level</a></p></li>
 <li><p><a class="reference external" href="https://github.com/alevax/pyviper/blob/main/Tutorials/Tutorial-2.ipynb">Inferring Protein Activity from scRNA-seq data from multiple cell populations with the meta-VIPER approach</a></p></li>
 <li><p><a class="reference external" href="https://github.com/alevax/pyviper/blob/main/Tutorials/Tutorial-3.ipynb">Generating Metacells for ARACNe3 network generation and VIPER protein activity analysis</a></p></li>
 </ol>
-</section>
-<section id="structure-and-rationale">
-<h2>Structure and rationale<a class="headerlink" href="#structure-and-rationale" title="Link to this heading"></a></h2>
+</div>
+<div class="section" id="structure-and-rationale">
+<h2>Structure and rationale<a class="headerlink" href="#structure-and-rationale" title="Permalink to this heading"></a></h2>
 <p>The main functions available from <code class="docutils literal notranslate"><span class="pre">pyviper</span></code> are:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">pyviper.viper</span></code>: “pyviper” function for Virtual Inference of Protein Activity by Enriched Regulon Analysis (VIPER). The function allows using 2 enrichment algorithms, aREA and (matrix)-NaRnEA (see below).</p></li>
@@ -182,18 +181,20 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <li><p><code class="docutils literal notranslate"><span class="pre">pyviper.config</span></code>: submodule allowing users to specify current species and filepaths for regulators</p></li>
 </ul>
 <p>Last, a new <code class="docutils literal notranslate"><span class="pre">Interactome</span></code> class allows users to load and interrogate ARACNe- and SCENIC-inferred gene regulatory networks.</p>
-</section>
-<section id="contact">
-<h2>Contact<a class="headerlink" href="#contact" title="Link to this heading"></a></h2>
+</div>
+<div class="section" id="contact">
+<h2>Contact<a class="headerlink" href="#contact" title="Permalink to this heading"></a></h2>
 <p>Please, report any issues that you experience through this repository <a class="reference external" href="https://github.com/alevax/pyviper/issues">“Issues”</a>.</p>
 <p>For any other info or queries please write to Alessandro Vasciaveo (av2729&#64;cumc.columbia.edu)</p>
-</section>
-<section id="license">
-<h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">pyviper</span></code> is distributed under a MIT License (see <a class="reference external" href="https://github.com/alevax/pyviper/blob/main/LICENSE">LICENSE</a>).</p>
-</section>
-<section id="citation">
-<h2>Citation<a class="headerlink" href="#citation" title="Link to this heading"></a></h2>
+</div>
+<div class="section" id="citation">
+<h2>Citation<a class="headerlink" href="#citation" title="Permalink to this heading"></a></h2>
+<p>If you used pyVIPER in your publication, please cite our work here:</p>
+<p>Wang, A.L.E., Lin, Z., Zanella, L., Vlahos, L., Girotto, M.A., Zafar, A., … &amp; Vasciaveo, A. (2024). pyVIPER: A fast and scalable Python package for rank-based enrichment analysis of single-cell RNASeq data. <em>bioRxiv</em>, 2024-08. doi: https://doi.org/10.1101/2024.08.25.609585.</p>
 <p><em>Manuscript in review</em></p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
@@ -201,12 +202,12 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <li class="toctree-l1"><a class="reference internal" href="pyviper.html">pyviper package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-area">pyviper.aREA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-narnea">pyviper.NaRnEA</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.config">pyviper.config</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.Interactome">pyviper.Interactome</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.load">pyviper.load</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.pl">pyviper.pl</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.pp">pyviper.pp</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pyviper.html#module-pyviper.tl">pyviper.tl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-config">pyviper.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-interactome">pyviper.Interactome</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-load">pyviper.load</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-pl">pyviper.pl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-pp">pyviper.pp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-tl">pyviper.tl</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pyviper.html#pyviper-viper">pyviper.viper</a></li>
 </ul>
 </li>
@@ -247,8 +248,8 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 </li>
 </ul>
 </div>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>
