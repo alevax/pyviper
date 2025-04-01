@@ -257,6 +257,8 @@ class Interactome:
             network_weights = np.ones(n_networks)
 
         # Get all pairs of regulators and targets
+        if verbose:
+            print('Calculating unique pairs of regulators and targets.')
         reg_targ = ['regulator', 'target']
         all_pairs = np.vstack([df[reg_targ].values for df in network_list])
         unique_pairs_df = pd.DataFrame(all_pairs).drop_duplicates()
@@ -330,6 +332,8 @@ class Interactome:
         # still want the weights to add up to the original total, which they
         # originally didn't with NaN values, so we multiply by the sum of the
         # original weights.
+        if verbose:
+            print(f'Integrating {n_networks} networks.')
         weights_stack = weights_stack / np.nansum(weights_stack, axis = 0) * np.sum(network_weights)
 
         # We compute the weighted mean here across the network stacks
