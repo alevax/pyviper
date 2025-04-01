@@ -277,7 +277,7 @@ class Interactome:
             pairs_in_single_df = net_df[reg_targ]
             
             ## Convert the columns to sets for faster set operations
-            # all_pairs_set = set(map(tuple, all_pairs_df[['regulator', 'target']].values)) # We can just use unique_pairs_df which was already computed
+            # all_pairs_set = set(map(tuple, all_pairs_df[['regulator', 'target']].values)) # We can just use all_pairs_df which was already computed
             # single_pairs_set = set(map(tuple, pairs_in_single_df[['regulator', 'target']].values))  # We can just use drop_duplicates() again
             ## Find missing pairs using set difference
             # missing_pairs_set = all_pairs_set - single_pairs_set
@@ -286,7 +286,7 @@ class Interactome:
             
             # Using pd.merge avoids expensive set conversion operations
             single_pairs_set = pairs_in_single_df[reg_targ].drop_duplicates()
-            mrg = unique_pairs_df.merge(single_pairs_set, how='left', on=reg_targ, indicator=True)
+            mrg = all_pairs_df.merge(single_pairs_set, how='left', on=reg_targ, indicator=True)
             missing_pairs_df = mrg[mrg['_merge'] == 'left_only'][reg_targ]
             
             # Check if regulators in missing_pairs_df are in net_df["regulator"]
