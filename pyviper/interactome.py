@@ -5,6 +5,7 @@ import os
 import pickle
 import loompy
 import re
+from tqdm.notebook import tqdm
 from ._translate import _translate_genes_array
 from ._load._load_regulators import _load_regulators
 
@@ -211,7 +212,7 @@ class Interactome:
         """
         return self.net_table["regulator"].unique()
 
-    def integrate(self, network_list, network_weights = None, normalize_likelihoods = False):
+    def integrate(self, network_list, network_weights = None, normalize_likelihoods = False, verbose=False):
         """\
         Integrate this Interactome object with one or more other Interacome
         objects to create a consensus network. In general, this should be done
@@ -266,7 +267,9 @@ class Interactome:
         # adding empty rows of 0s so they be all lined up together in a stack
         net_array_list = []
 
-        for i in range(0, n_networks):
+        loop = (tqdm(range(0, n_networks), 'Standardizing network') 
+                if verbose else range(0, n_networks))
+        for i in loop:
             # Get the missing pairs from a single dataframe
             net_df = network_list[i]
             pairs_in_single_df = net_df[reg_targ]
