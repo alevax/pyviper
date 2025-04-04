@@ -13,10 +13,12 @@ sphinx-quickstart
 # edit `conf.py` and `index.rst` to select options and create modules
 
 # run sphinx API
-sphinx-apidoc -o . ..
+sphinx-apidoc -o . .. # edit .rst files for module import
 
 # make html page, this generates the _build directory
 make html
+
+# check if it worked properly opening _build/html/index.html in a browser
 
 # move built html directory outside the package to update gh-pages branch
 mv _build/html ~/Downloads/
@@ -51,6 +53,8 @@ sphinx-apidoc -o . ..
 
 # make html page
 make html
+
+# check if it worked properly opening _build/html/index.html in a browser
 
 # move built html directory outside the package to update gh-pages branch
 mv _build/html ~/Downloads/
