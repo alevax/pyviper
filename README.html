@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>how to build html documentation &mdash; pyviper 1.0.6 documentation</title>
+  <title>Create documentation for the first time in a gh-pages branch &mdash; pyviper 1.0.6 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -65,7 +65,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">how to build html documentation</li>
+      <li class="breadcrumb-item active">Create documentation for the first time in a gh-pages branch</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/README.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -75,10 +75,87 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="how-to-build-html-documentation">
-<h1>how to build html documentation<a class="headerlink" href="#how-to-build-html-documentation" title="Permalink to this heading"></a></h1>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># from this directory</span>
+  <div class="section" id="create-documentation-for-the-first-time-in-a-gh-pages-branch">
+<h1>Create documentation for the first time in a gh-pages branch<a class="headerlink" href="#create-documentation-for-the-first-time-in-a-gh-pages-branch" title="Permalink to this heading"></a></h1>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># install sphinx</span>
+pip<span class="w"> </span>install<span class="w"> </span>python-sphinx<span class="w"> </span>-y
+
+<span class="c1"># create docs folder</span>
+mkdir<span class="w"> </span>docs
+
+<span class="c1"># go in it and start sphinx</span>
+<span class="nb">cd</span><span class="w"> </span>docs
+sphinx-quickstart
+
+<span class="c1"># edit `conf.py` and `index.rst` to select options and create modules</span>
+
+<span class="c1"># run sphinx API</span>
+sphinx-apidoc<span class="w"> </span>-o<span class="w"> </span>.<span class="w"> </span>..<span class="w"> </span><span class="c1"># edit .rst files for module import</span>
+
+<span class="c1"># make html page, this generates the _build directory</span>
 make<span class="w"> </span>html
+
+<span class="c1"># check if it worked properly opening _build/html/index.html in a browser</span>
+
+<span class="c1"># move built html directory outside the package to update gh-pages branch</span>
+mv<span class="w"> </span>_build/html<span class="w"> </span>~/Downloads/
+
+<span class="c1"># remove the _build directory</span>
+rm<span class="w"> </span>-r<span class="w"> </span>_build
+
+<span class="c1"># go to repo root</span>
+<span class="nb">cd</span><span class="w"> </span>..
+
+<span class="c1"># checkout the gh-pages branch</span>
+git<span class="w"> </span>checkout<span class="w"> </span>gh-pages
+
+<span class="c1"># copy the contents of the built website</span>
+mv<span class="w"> </span>~/Downloads/html/*<span class="w"> </span>.
+
+<span class="c1"># update to github</span>
+git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;udpated documentation&quot;</span>
+git<span class="w"> </span>push
+</pre></div>
+</div>
+</div>
+<div class="section" id="update-documentation-in-a-gh-pages-branch">
+<h1>Update documentation in a gh-pages branch<a class="headerlink" href="#update-documentation-in-a-gh-pages-branch" title="Permalink to this heading"></a></h1>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># update files, `conf.py` and `index.rst`</span>
+
+<span class="c1"># go to docs directory</span>
+<span class="nb">cd</span><span class="w"> </span>docs
+
+<span class="c1"># run sphinx API</span>
+sphinx-apidoc<span class="w"> </span>-o<span class="w"> </span>.<span class="w"> </span>..
+
+<span class="c1"># make html page</span>
+make<span class="w"> </span>html
+
+<span class="c1"># check if it worked properly opening _build/html/index.html in a browser</span>
+
+<span class="c1"># move built html directory outside the package to update gh-pages branch</span>
+mv<span class="w"> </span>_build/html<span class="w"> </span>~/Downloads/
+
+<span class="c1"># remove the _build directory</span>
+rm<span class="w"> </span>-r<span class="w"> </span>_build
+
+<span class="c1"># go to repo root</span>
+<span class="nb">cd</span><span class="w"> </span>..
+
+<span class="c1"># checkout the gh-pages branch</span>
+git<span class="w"> </span>checkout<span class="w"> </span>gh-pages
+
+<span class="c1"># remove everythin non-hidden</span>
+rm<span class="w"> </span>-r<span class="w"> </span>*
+
+<span class="c1"># copy the contents of the built website</span>
+mv<span class="w"> </span>~/Downloads/html/*<span class="w"> </span>.
+
+<span class="c1"># update to github</span>
+git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;udpated documentation&quot;</span>
+git<span class="w"> </span>push
 </pre></div>
 </div>
 </div>
