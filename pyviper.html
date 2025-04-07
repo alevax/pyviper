@@ -48,7 +48,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pyviper-area">pyviper.aREA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pyviper-narnea">pyviper.NaRnEA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pyviper.config">pyviper.config</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pyviper.Interactome">pyviper.Interactome</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pyviper-interactome">pyviper.Interactome</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pyviper.load">pyviper.load</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pyviper.pl">pyviper.pl</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pyviper.pp">pyviper.pp</a></li>
@@ -92,9 +92,9 @@
 <h1>pyviper package<a class="headerlink" href="#pyviper-package" title="Permalink to this heading"></a></h1>
 <div class="section" id="pyviper-area">
 <h2>pyviper.aREA<a class="headerlink" href="#pyviper-area" title="Permalink to this heading"></a></h2>
-<dl class="py function">
+<dl class="py class">
 <dt class="sig sig-object py">
-<span class="sig-prename descclassname"><span class="pre">pyviper.</span></span><span class="sig-name descname"><span class="pre">aREA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gex_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactome</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eset_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyviper.</span></span><span class="sig-name descname"><span class="pre">aREA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gex_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactome</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eset_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Allows the individual to infer normalized enrichment scores from gene
 expression data using the Analytical Ranked Enrichment Analysis (aREA)[1]
 function.</p>
@@ -151,9 +151,9 @@ given.</p></li>
 </div>
 <div class="section" id="pyviper-narnea">
 <h2>pyviper.NaRnEA<a class="headerlink" href="#pyviper-narnea" title="Permalink to this heading"></a></h2>
-<dl class="py function">
+<dl class="py class">
 <dt class="sig sig-object py">
-<span class="sig-prename descclassname"><span class="pre">pyviper.</span></span><span class="sig-name descname"><span class="pre">NaRnEA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gex_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactome</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eset_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyviper.</span></span><span class="sig-name descname"><span class="pre">NaRnEA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gex_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactome</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eset_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Allows the individual to infer normalized enrichment scores and proportional
 enrichment scores from gene expression data using the Nonparametric
 Analytical Rank-based Enrichment Analysis (NaRnEA)[1] function.</p>
@@ -270,8 +270,12 @@ correct sets of regulatory proteins will be used during analysis.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-pyviper.Interactome">
-<span id="pyviper-interactome"></span><h2>pyviper.Interactome<a class="headerlink" href="#module-pyviper.Interactome" title="Permalink to this heading"></a></h2>
+<div class="section" id="pyviper-interactome">
+<h2>pyviper.Interactome<a class="headerlink" href="#pyviper-interactome" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyviper.Interactome">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyviper.</span></span><span class="sig-name descname"><span class="pre">Interactome</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net_table</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Create an Interactome object to contain the results of ARACNe.
 This object describes the relationship between regulator proteins (e.g.
 TFs and CoTFs) and their downstream target genes with mor (Mode Of
@@ -281,36 +285,306 @@ An Interactome object can be given to pyviper.viper along with a gene
 expression signature to generate a protein activity matrix with the
 VIPER (Virtual Inference of Protein-activity by Enriched Regulon
 analysis) algorithm[1].</p>
-<dl class="field-list">
-<dt class="field-odd">param name</dt>
-<dd class="field-odd"><p>A filepath to one’s disk to store the Interactome.</p>
-</dd>
-<dt class="field-even">param net_table</dt>
-<dd class="field-even"><p>Either
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – A filepath to one’s disk to store the Interactome.</p></li>
+<li><p><strong>net_table</strong> (<em>default: None</em>) – <p>Either
 (1) a pd.DataFrame containing four columns in this order:</p>
 <blockquote>
-<div><p>“regulator”, “target”, “mor”, “likelihood”</p>
+<div><p>”regulator”, “target”, “mor”, “likelihood”</p>
 </div></blockquote>
 <p>(2) a filepath to this pd.DataFrame stored either as a .csv,
 .tsv or .pkl.
 (3) a filepath to an Interacome object stored as a .pkl.</p>
-</dd>
-<dt class="field-odd">type net_table</dt>
-<dd class="field-odd"><p>default: None</p>
-</dd>
-<dt class="field-even">param input_type</dt>
-<dd class="field-even"><p>Only relevant when net_table is a filepath. If None, the input_type
+</p></li>
+<li><p><strong>input_type</strong> (<em>default: None</em>) – Only relevant when net_table is a filepath. If None, the input_type
 will be inferred from the net_table. Otherwise, specify “csv”, “tsv”
-or “pkl”.</p>
-</dd>
-<dt class="field-odd">type input_type</dt>
-<dd class="field-odd"><p>default: None</p>
+or “pkl”.</p></li>
+</ul>
 </dd>
 </dl>
 <p class="rubric">References</p>
 <p>[1] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H., &amp; Califano, A. (2016). Functional characterization of somatic
 mutations in cancer using network-based inference of protein activity.
 Nature genetics, 48(8), 838-847.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.copy" title="Permalink to this definition"></a></dt>
+<dd><p>Create a copy of this Interactome object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>An object of <a class="reference internal" href="#pyviper.Interactome" title="pyviper.interactome.Interactome"><code class="xref py py-class docutils literal notranslate"><span class="pre">Interactome</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.filter_regulators">
+<span class="sig-name descname"><span class="pre">filter_regulators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regulators_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regulators_remove</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.filter_regulators" title="Permalink to this definition"></a></dt>
+<dd><p>Filter regulators by choosing by name or by group which ones you intend
+to keep and which ones you intend to remove from this Interactome.</p>
+<p>Note that the names of regulator that belong to the groups “tfs”, “cotfs”,
+“sig” and “surf” will be sourced via the paths specified in pyviper.config.
+To update these paths, use the pyviper.config.set_regulators_filepath
+function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>regulators_keep</strong> (<em>default: None</em>) – This should be either:
+(1) An array or list containing the names of specific regulators you
+wish to keep in the network. When left as None, this parameter is
+not used to filter.
+(2) An array or list containing a group or groups of regulators that
+you wish to keep in the network. These groups should be one of the
+following: “tfs”, “cotfs”, “sig”, “surf”.</p></li>
+<li><p><strong>regulators_remove</strong> (<em>default: None</em>) – This should be either:
+(1) An array or list containing the names of specific regulators you
+wish to remove from the network. When left as None, this parameter
+is not used to filter.
+(2) An array or list containing a group or groups of regulators that
+you wish to remove from the network. These groups should be one of the
+following: “tfs”, “cotfs”, “sig”, “surf”.</p></li>
+<li><p><strong>verbose</strong> (<em>default: True</em>) – Report the number of regulators removed during filtering</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.filter_targets">
+<span class="sig-name descname"><span class="pre">filter_targets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets_remove</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.filter_targets" title="Permalink to this definition"></a></dt>
+<dd><p>Filter targets by choosing by name which ones you intend to keep and
+which ones you intend remove from this Interactome.</p>
+<p>When working with an anndata object or a gene expression array, it is
+highly recommended to filter the unPruned network before pruning. This
+is to ensure the pruned network contains a consistent number of targets
+per regulator regulator, all of which exist within gex_data. A regulator
+that has more targets than others will have “boosted” NES scores, such
+that they cannot be compared to those with fewer targets.
+For example, with an anndata object named gex_data, one may is suggested
+to do:</p>
+<blockquote>
+<div><p>interactome.filter_targets(gex_data.var_names)</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets_keep</strong> (<em>default: None</em>) – An array containing the names of targets you wish to keep in the
+network. When left as None, this parameter is not used to filter.</p></li>
+<li><p><strong>targets_remove</strong> (<em>default: None</em>) – An array containing the names of targets you wish to remove from the
+network. When left as None, this parameter is not used to filter.</p></li>
+<li><p><strong>verbose</strong> (<em>default: True</em>) – Report the number of targets removed during filtering</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.get_reg">
+<span class="sig-name descname"><span class="pre">get_reg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.get_reg" title="Permalink to this definition"></a></dt>
+<dd><p>Get the rows of the net_table where the regulator is regName.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>regName</strong> – The name of a regulator in this Interactome.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>A dataframe of <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.get_reg_names">
+<span class="sig-name descname"><span class="pre">get_reg_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.get_reg_names" title="Permalink to this definition"></a></dt>
+<dd><p>Get an array of all unique regulators in this Interactome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>An array of strings of <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.get_regulon_from_loom">
+<span class="sig-name descname"><span class="pre">get_regulon_from_loom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.get_regulon_from_loom" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.get_target_names">
+<span class="sig-name descname"><span class="pre">get_target_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.get_target_names" title="Permalink to this definition"></a></dt>
+<dd><p>Get a set of the unique targets in this Interactome</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>A 1D NumPy array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.ic_mat">
+<span class="sig-name descname"><span class="pre">ic_mat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.ic_mat" title="Permalink to this definition"></a></dt>
+<dd><p>Get the DataFrame of all the likelihood values. Targets are in the rows,
+while Regulators are in the columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>A dataframe of <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.icp_vec">
+<span class="sig-name descname"><span class="pre">icp_vec</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.icp_vec" title="Permalink to this definition"></a></dt>
+<dd><p>Get the vector containing the proportion of the “Interaction Confidence”
+(IC) score for each interaction in a network, relative to the maximum IC
+score in the network. This vector is generated by taking each individual
+regulon in the newtork and calculating the likelihood index proportion
+to all interactions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>An array of <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_likelihoods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.integrate" title="Permalink to this definition"></a></dt>
+<dd><p>Integrate this Interactome object with one or more other Interacome
+objects to create a consensus network. In general, this should be done
+when interactome objects have the same epigenetics (e.g. due to being
+made from different datasets of same celltype). MetaVIPER should be used
+instead when you have multiple interactomes with different epigenetics
+(e.g. due to being made of data with different celltypes).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network_list</strong> – A single object or a list of objects of class Interactome.</p></li>
+<li><p><strong>network_weights</strong> (<em>default: None</em>) – An array containing weights for each network being integrated. The
+first weight corresponds to this network, while the others correspond
+to those in the network list in order. If None, equal weights are
+used.</p></li>
+<li><p><strong>normalize_likelihoods</strong> (<em>default: False</em>) – An extra operation that can performed after the integration
+operation where within each regulator, likelihood values are ranked
+and scaled from 0 to 1.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.mor_mat">
+<span class="sig-name descname"><span class="pre">mor_mat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.mor_mat" title="Permalink to this definition"></a></dt>
+<dd><p>Get the DataFrame of all the correlation values. Targets are in the rows,
+while Regulators are in the columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>A dataframe of <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.prune">
+<span class="sig-name descname"><span class="pre">prune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eliminate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.prune" title="Permalink to this definition"></a></dt>
+<dd><p>Prune the Interactome by eliminating extra targets from regulators and,
+with eliminate = True, remove regulators with too few targets from the
+network. Note that by ensuring the pruned networks contains the same
+number of targets for each regulator, NES scores are comparable. If one
+regulator has more targest than another, than its NES score will be
+“boosted” and they cannot be compared against each other.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>max_targets</strong> (<em>default: 50</em>) – The maximum number of targets that each regulon is allowed.</p></li>
+<li><p><strong>min_targets</strong> (<em>default: None</em>) – The minimum number of targets that each regulon is required.</p></li>
+<li><p><strong>eliminate</strong> (<em>default: True</em>) – If eliminate = True, then any regulators with fewer targets than
+max_targets will be removed from the network. In other words, after
+pruning, all regulators will have exactly max_targets number of
+targets. This essentially sets min_targets equal to max_targets
+and ensures all NES scores are comparable with aREA.</p></li>
+<li><p><strong>verbose</strong> (<em>default: True</em>) – Report the number of targets and regulators removed during pruning</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.save" title="Permalink to this definition"></a></dt>
+<dd><p>Save the Interactome object to one’s disk. If saved as “csv” or
+“tsv”, just the interactome.net_table will be saved. If saved as
+“pkl”, the whole interactome object will be saved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> – A filepath to one’s disk to store the Interactome.</p></li>
+<li><p><strong>output_type</strong> (<em>default: None</em>) – If None, the output_type will be inferred from the file_path.
+Otherwise, specify “csv”, “tsv” or “pkl”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.size">
+<span class="sig-name descname"><span class="pre">size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.size" title="Permalink to this definition"></a></dt>
+<dd><p>Get the the number of regulators in this Interactome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>An int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.translate_regulators">
+<span class="sig-name descname"><span class="pre">translate_regulators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">desired_format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.translate_regulators" title="Permalink to this definition"></a></dt>
+<dd><p>Translate the regulators of the Interactome. The current name format of
+the regulators should be one of the following:</p>
+<blockquote>
+<div><p>mouse_symbol, mouse_ensembl, mouse_entrez, human_symbol, human_ensembl or human_entrez</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>desired_format</strong> – Desired format can be one of four strings: “mouse_symbol”,
+“mouse_ensembl”, “mouse_entrez”, “human_symbol”, “human_ensembl” or “human_entrez”.</p></li>
+<li><p><strong>verbose</strong> (<em>default: True</em>) – Report the number of regulators successfully and unsucessfully translated</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyviper.Interactome.translate_targets">
+<span class="sig-name descname"><span class="pre">translate_targets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">desired_format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyviper.Interactome.translate_targets" title="Permalink to this definition"></a></dt>
+<dd><p>Translate the targets of the Interactome.  The current name format of
+the targets should be one of the following:</p>
+<blockquote>
+<div><p>mouse_symbol, mouse_ensembl, mouse_entrez, human_symbol, human_ensembl or human_entrez</p>
+</div></blockquote>
+<p>It is recommended to do this before pruning to ensure a consistent number
+of targets because if targets do not have a translation, they will be
+deleted, resulting in different numbers of targets in a pruned
+interactome that once had consistent number of targets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>desired_format</strong> – Desired format can be one of four strings: “mouse_symbol”,
+“mouse_ensembl”, “mouse_entrez”, “human_symbol”, “human_ensembl” or “human_entrez”.</p></li>
+<li><p><strong>verbose</strong> (<em>default: True</em>) – Report the number of targets successfully and unsucessfully translated</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-pyviper.load">
 <span id="pyviper-load"></span><h2>pyviper.load<a class="headerlink" href="#module-pyviper.load" title="Permalink to this heading"></a></h2>

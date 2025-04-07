@@ -4,13 +4,13 @@ pyviper package
 pyviper\.aREA
 --------------------
 
-.. autofunction:: pyviper.aREA
+.. autoclass:: pyviper.aREA
    :noindex:
 
 pyviper\.NaRnEA
 --------------------
 
-.. autofunction:: pyviper.NaRnEA
+.. autoclass:: pyviper.NaRnEA
    :noindex:
 
 pyviper\.config
@@ -26,7 +26,7 @@ pyviper\.config
 pyviper.Interactome
 -------------------------
 
-.. automodule:: pyviper.Interactome
+.. autoclass:: pyviper.Interactome
    :members:
    :undoc-members:
    :show-inheritance:
