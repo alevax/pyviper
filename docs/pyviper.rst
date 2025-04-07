@@ -26,7 +26,7 @@ pyviper\.config
 pyviper.Interactome
 -------------------------
 
-.. automodule:: pyviper.Interactome
+.. autoclass:: pyviper.Interactome
    :members:
    :undoc-members:
    :show-inheritance:
