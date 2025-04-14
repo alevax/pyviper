@@ -4,6 +4,7 @@ library(patchwork)
 library(PISCES)
 library(viper)
 library(patchwork)
+library(optparse)
 
 
 # Create an option parser
@@ -14,12 +15,12 @@ option_list <- list(
     help = "input matrix"  # Option description
   ),
   make_option(
-    c("--network1", "-n1"),
+    c("--network1", "-n"),
     type = "character",   # Option type 
     help = "network1 to use"  # Option description
   ),
   make_option(
-    c("--network2", "-n2"),
+    c("--network2", "-m"),
     type = "character",   # Option type 
     help = "network2 to use"  # Option description
   ),
@@ -40,7 +41,7 @@ opt <- parse_args(opt_parser)
 #let's set csv to be both input
 #test_exp = read.csv(opt$input,row.names = 1)
 #use this to saveRDS(mtcars, "mtcars.rds")
-ges = readRDS(opt$ges)
+ges = readRDS(opt$input)
 test_net1 = readRDS(opt$network1) 
 test_net2 = readRDS(opt$network2) 
 #prepare data

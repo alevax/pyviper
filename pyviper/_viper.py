@@ -20,15 +20,15 @@ __all__ = ['viper']
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 def sample_ttest(i,array):
-    return ttest_1samp((array[i] - np.delete(array, i, 0)), 0).statistic
+    return ttest_1samp((array[i] - np.delete(array, i, 0)), popmean=0, axis=0, alternative="two-sided").statistic
 
 def apply_method_on_gex_df(gex_df, method = None, layer = None):
     if method is None:
         return gex_df
-    gesMat = gex_data.values
+    gesMat = gex_df.values
 
     if method == 'scale':
-        gesMat = (gesMat - np.mean(gesMat,axis=0))/np.std(gesMat,axis=0)
+        gesMat = (gesMat - np.mean(gesMat,axis=0))/np.std(gesMat,ddof=1,axis=0)
     elif method == 'rank':
         #gesMat = rankdata(gesMat,axis=0)*(np.random.random(gesMat.shape)*2/10-0.1)
         gesMat = rankdata(gesMat, axis=0)
@@ -36,13 +36,13 @@ def apply_method_on_gex_df(gex_df, method = None, layer = None):
         median = np.median(gesMat, axis=0)
         gesMat = (gesMat-median)/(np.median(np.abs(gesMat-median),axis=0)*1.4826)
     elif method == 'ttest':
-        gesMat = np.array([sample_ttest(i, gesMat.copy()) for i in range(gex_data.shape[0])])
+        gesMat = np.array([sample_ttest(i, gesMat.copy()) for i in range(gex_df.shape[0])])
     elif method == "doublerank":
         gesMat = rank_norm(gesMat)
     else:
         raise ValueError("Unsupported method:" + str(method))
     gex_df[:] = gesMat
-    return gex_data
+    return gex_df
 
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
