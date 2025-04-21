@@ -40,6 +40,7 @@ setuptools.setup(
         "statsmodels",
         "loompy",
         "igraph",
-        "leidenalg"
+        "leidenalg",
+        "pyarrow"
     ]
 )
