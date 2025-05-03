@@ -19,12 +19,12 @@ class TestPathwayEnrichment(unittest.TestCase):
         self.network.filter_targets(self.data.var_names)
         
     def test_path_enr(self):
-        enrichment = pyviper.tl.path_enr(
+        enrichment = pyviper.tl.path_enrich(
             self.data, 
-            pathway_interactome=self.network, 
+            interactome=self.network, 
             enrichment="narnea", 
-            verbose="False", 
-            store_input_data=False
+            verbose=False,
+            method="ttest"
         )
         pvalues = pyviper._pp._nes_to_pval_df(
             enrichment.to_df().mean(axis=0), 

@@ -79,7 +79,7 @@ class TestIntegrate(unittest.TestCase):
         self.assertTrue(np.all((pvals.values >= 0) & (pvals.values <= 1)))
 
     def test_spearman(self):
-        integrated = pyviper.pp.spearman(self.activity, obs_column_name="leiden", filter_by_feature_groups=["tfs","cotfs"], compute_pvals=True, return_as_df=True)
+        integrated = pyviper.pp.spearman(self.activity, groupby="leiden", filter_by_feature_groups=["tfs","cotfs"], compute_pvals=True, return_as_df=True)
         self.assertEqual(0, integrated.isna().sum().sum())
         pvals = integrated.filter(like="pval", axis=0)
         stats = integrated.loc[integrated.index.isin(pvals.index), :]
