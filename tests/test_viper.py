@@ -107,8 +107,13 @@ def compare_dataframes(df1, df2, max_tol=1e-2, mean_tol=1e-6, prefix=""):
     abs_discrepancies = np.abs(df1.values - df2.values)
     mean_discrepancy = abs_discrepancies.mean()
     max_discrepancy = abs_discrepancies.max()
-    
-    relative_discrepancies = abs_discrepancies / np.abs(df1.values)
+     
+    with np.errstate(divide='ignore', invalid='ignore'):
+        relative_discrepancies = np.where(
+            np.abs(df1.values) == 0,
+            0,  # or np.nan, depending on whether you want to ignore or flag these
+            abs_discrepancies / np.abs(df1.values)
+        )
     mean_err = relative_discrepancies.mean()
     max_err = relative_discrepancies.max()
 

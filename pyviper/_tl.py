@@ -317,7 +317,7 @@ def _path_enr(
         return_as_df=True,
         transfer_obs=False,
         store_input_data=False
-    )
+    )['nes']
 
     # First, update the existing columns in adata.obs
     adata.obs.update(enr_data)
@@ -327,3 +327,5 @@ def _path_enr(
 
     # Concatenate the new columns to adata.obs
     adata.obs = pd.concat([adata.obs, enr_data[new_columns]], axis=1)
+
+    return adata
