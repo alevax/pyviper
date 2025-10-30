@@ -1,4 +1,6 @@
+
 ### ---------- IMPORT DEPENDENCIES ----------
+import os
 import pandas as pd
 import numpy as np
 from .aREA import aREA
@@ -10,6 +12,8 @@ from scipy.stats import rankdata
 from scipy.stats import ttest_1samp
 from anndata import AnnData
 from tqdm import tqdm
+from .pleiotropy import TableToInteractome, ShadowRegulon_py, areareg
+
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['viper']
@@ -51,7 +55,7 @@ def apply_method_on_gex_df(gex_df, method = None, layer = None):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def viper(gex_data,
+def viper( gex_data,
           interactome,
           layer=None,
           eset_filter=True,
@@ -64,8 +68,10 @@ def viper(gex_data,
           verbose=True,
           return_as_df=False,
           transfer_obs=True,
-          store_input_data=True
+          store_input_data=True,
+          pleiotropy: bool = False
           ):
+         
     """\
     The VIPER (Virtual Inference of Protein-activity by Enriched Regulon
     analysis) algorithm[1] allows individuals to compute protein activity
@@ -87,8 +93,7 @@ def viper(gex_data,
     ----------
     gex_data
         Gene expression stored in an anndata object (e.g. from Scanpy).
-    interactome
-        An object of class Interactome or a list of Interactome objects.
+    interactome        An object of class Interactome or a list of Interactome objects.
     layer : default: None
         The layer in the anndata object to use as the gene expression input.
     eset_filter : default: False
@@ -307,4 +312,149 @@ def viper(gex_data,
                 op.uns['pax_data'] = gex_data
             else:
                 op.uns['gex_data'] = gex_data
-    return op #final result
+        # ---- Pleiotropy hook (placeholder) ----
+    if pleiotropy and verbose:
+        print("[pleiotropy] hook reached")   
+
+ # ---- Pleiotropy post-processing (TableToInteractome → ShadowRegulon_py → areareg) ----
+    if pleiotropy:
+
+        # progress bar (optional)
+        try:
+            from tqdm import tqdm
+            try:
+                # joblib integration
+                from tqdm.contrib import tqdm_joblib
+            except Exception:
+                tqdm_joblib = None
+        except Exception:
+            def tqdm(x, **kwargs):
+                return x
+            tqdm_joblib = None
+
+        # 0) require aREA (matches your notebook)
+        if str(enrichment).lower() != "area":
+            if verbose:
+                print("[pleiotropy] skipped (enrichment != 'area').")
+            return op
+
+        # 1) regulon from interactome table
+        if not (hasattr(interactome, "net_table") and isinstance(interactome.net_table, pd.DataFrame)):
+            raise ValueError("[pleiotropy] interactome must expose a .net_table DataFrame with regulator/target/likelihood/mor")
+        regulon = TableToInteractome(interactome.net_table)
+
+        # 2) Build ss: genes (rows) × samples (cols) from gex_data (AnnData expected)
+        if not hasattr(gex_data, "X"):
+            raise TypeError("[pleiotropy] gex_data must be AnnData (samples×genes).")
+        X = gex_data.X
+        try:
+            X = X.toarray() if hasattr(X, "toarray") else np.asarray(X)
+        except Exception:
+            X = np.asarray(X)
+        tt = pd.DataFrame(
+            X.T,
+            index=gex_data.var_names.astype(str),      # genes
+            columns=gex_data.obs_names.astype(str),    # samples
+        )
+        ss = tt.copy()
+        if verbose:
+            print("[pleiotropy] ss shape:", ss.shape)
+
+        # 3) Build NES0: TFs (rows) × samples (cols) from current output 'op'
+        if return_as_df:
+            if not isinstance(op, pd.DataFrame):
+                raise TypeError("[pleiotropy] expected DataFrame when return_as_df=True for aREA.")
+            NES0 = op.T.copy()
+        else:
+            NES0 = pd.DataFrame(op.X, index=op.obs_names, columns=op.var_names).T
+        NES0.index = NES0.index.astype(str)
+        NES0.columns = NES0.columns.astype(str)
+        if verbose:
+            print("[pleiotropy] NES0 shape (TFs×samples):", NES0.shape)
+
+        # knobs (like your notebook)
+        area_mode   = "global"
+        minsize     = 5
+        eset_filter = True
+        shadow_params = dict(regulators=0.05, shadow=0.05, targets=10, penalty=20.0, method="adaptive")
+
+        # 4) eset.filter: keep only regulon target genes in ss
+        if eset_filter:
+            all_targets = set().union(*[set(v["tfmode"].index.astype(str)) for v in regulon.values()]) if len(regulon) else set()
+            ss = ss.loc[ss.index.astype(str).isin(all_targets)].copy()
+
+        # 5) parallel worker (per sample)
+        req_workers = max(1, int(njobs))
+        cpu_env = int(os.environ.get("SLURM_CPUS_PER_TASK", "0")) or os.cpu_count() or 4
+        n_workers = max(1, min(req_workers, cpu_env))
+        if verbose:
+            print(f"[pleiotropy] workers: {n_workers}")
+
+        def _run_one(sample: str):
+            try:
+                ss_i  = ss.loc[:, sample]
+                nes_i = NES0.loc[:, sample]
+                sreg  = ShadowRegulon_py(ss=ss_i, nes=nes_i, regul=regulon, **shadow_params)
+                if not sreg:
+                    return sample, None, 0
+                nes_updated = areareg(ss_i, sreg, minsize=minsize, mode=area_mode)
+                tf_overlap = nes_updated.index.intersection(NES0.index.astype(str))
+                return sample, nes_updated.loc[tf_overlap], int(tf_overlap.size)
+            except Exception as e:
+                if verbose:
+                    print(f"[pleiotropy][warn] sample {sample} failed: {e}")
+                return sample, None, 0
+
+        samples = list(NES0.columns.astype(str))
+
+        # ---- Progress bar integration ----
+        results = None
+        if n_workers > 1:
+            try:
+                if verbose and tqdm_joblib is not None:
+                    with tqdm_joblib(tqdm(total=len(samples), desc="[pleiotropy] samples", unit="sample")):
+                        results = Parallel(n_jobs=n_workers, backend="loky", prefer="processes")(
+                            delayed(_run_one)(s) for s in samples
+                        )
+                else:
+                    results = Parallel(n_jobs=n_workers, backend="loky", prefer="processes")(
+                        delayed(_run_one)(s) for s in samples
+                    )
+            except Exception as e:
+                if verbose:
+                    print(f"[pleiotropy] parallel failed ({e}); running serial")
+                results = None
+
+        if results is None:
+            if verbose:
+                results = []
+                for s in tqdm(samples, desc="[pleiotropy] samples", unit="sample"):
+                    results.append(_run_one(s))
+            else:
+                results = [_run_one(s) for s in samples]
+
+        # 6) merge back into NES0
+        updates = {}
+        updated_samples = 0
+        for s, nes_u, n_upd in results:
+            updates[s] = n_upd
+            if nes_u is None or n_upd == 0:
+                continue
+            NES0.loc[nes_u.index, s] = pd.to_numeric(nes_u, errors="coerce").values
+            updated_samples += 1
+        if verbose:
+            med_upd = int(pd.Series(updates).median()) if len(updates) else 0
+            print(f"[pleiotropy] updated {updated_samples}/{len(samples)} samples (median TFs updated: {med_upd})")
+
+        # 7) write back to op preserving output type
+        if return_as_df:
+            op = NES0.T  # samples×TFs
+        else:
+            updated = NES0.T
+            op.X = updated.values
+            op.obs_names = updated.index
+            op.var_names = updated.columns
+    # ---- end pleiotropy ----
+
+
+    return op  # final result
