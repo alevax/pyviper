@@ -5,6 +5,7 @@ import os
 import pickle
 import loompy
 import re
+from tqdm.notebook import tqdm
 from ._translate import _translate_genes_array
 from ._load._load_regulators import _load_regulators
 
@@ -211,7 +212,7 @@ class Interactome:
         """
         return self.net_table["regulator"].unique()
 
-    def integrate(self, network_list, network_weights = None, normalize_likelihoods = False):
+    def integrate(self, network_list, network_weights = None, normalize_likelihoods = False, verbose=False):
         """\
         Integrate this Interactome object with one or more other Interacome
         objects to create a consensus network. In general, this should be done
@@ -256,26 +257,38 @@ class Interactome:
             network_weights = np.ones(n_networks)
 
         # Get all pairs of regulators and targets
-        all_pairs = np.vstack([df[['regulator', 'target']].values for df in network_list])
+        if verbose:
+            print('Calculating unique pairs of regulators and targets.')
+        reg_targ = ['regulator', 'target']
+        all_pairs = np.vstack([df[reg_targ].values for df in network_list])
         unique_pairs_df = pd.DataFrame(all_pairs).drop_duplicates()
-        unique_pairs_df.columns = ["regulator", "target"]
-        all_pairs_df = unique_pairs_df.sort_values(by=['regulator', 'target'])
+        unique_pairs_df.columns = reg_targ
+        all_pairs_df = unique_pairs_df.sort_values(by=reg_targ)
 
         # Modify each network to have the same regulator-target pairs by
         # adding empty rows of 0s so they be all lined up together in a stack
         net_array_list = []
 
-        for i in range(0, n_networks):
+        loop = (tqdm(range(0, n_networks), 'Standardizing network') 
+                if verbose else range(0, n_networks))
+        for i in loop:
             # Get the missing pairs from a single dataframe
             net_df = network_list[i]
-            pairs_in_single_df = net_df[['regulator', 'target']]
-            # Convert the columns to sets for faster set operations
-            all_pairs_set = set(map(tuple, all_pairs_df[['regulator', 'target']].values))
-            single_pairs_set = set(map(tuple, pairs_in_single_df[['regulator', 'target']].values))
-            # Find missing pairs using set difference
-            missing_pairs_set = all_pairs_set - single_pairs_set
-            # Convert the missing pairs back to a DataFrame
-            missing_pairs_df = pd.DataFrame(list(missing_pairs_set), columns=['regulator', 'target'])
+            pairs_in_single_df = net_df[reg_targ]
+            
+            ## Convert the columns to sets for faster set operations
+            # all_pairs_set = set(map(tuple, all_pairs_df[['regulator', 'target']].values)) # We can just use all_pairs_df which was already computed
+            # single_pairs_set = set(map(tuple, pairs_in_single_df[['regulator', 'target']].values))  # We can just use drop_duplicates() again
+            ## Find missing pairs using set difference
+            # missing_pairs_set = all_pairs_set - single_pairs_set
+            ## Convert the missing pairs back to a DataFrame
+            # missing_pairs_df = pd.DataFrame(list(missing_pairs_set), columns=['regulator', 'target'])
+            
+            # Using pd.merge avoids expensive set conversion operations
+            single_pairs_set = pairs_in_single_df[reg_targ].drop_duplicates()
+            mrg = all_pairs_df.merge(single_pairs_set, how='left', on=reg_targ, indicator=True)
+            missing_pairs_df = mrg[mrg['_merge'] == 'left_only'][reg_targ]
+            
             # Check if regulators in missing_pairs_df are in net_df["regulator"]
             in_net_df = missing_pairs_df['regulator'].isin(net_df['regulator'])
             # Create two DataFrames based on the condition
@@ -299,7 +312,7 @@ class Interactome:
                                 missing_pairs_shared_regs_df,
                                 missing_pairs_nonshared_regs_df], ignore_index=True)
             # Sort so all DataFrames have the same columns for regulator and target
-            net_df = net_df.sort_values(by=['regulator', 'target'])
+            net_df = net_df.sort_values(by=reg_targ)
             values_df = net_df.loc[:, ['mor', 'likelihood']].values
             net_array_list.append(values_df)
 
@@ -319,6 +332,8 @@ class Interactome:
         # still want the weights to add up to the original total, which they
         # originally didn't with NaN values, so we multiply by the sum of the
         # original weights.
+        if verbose:
+            print(f'Integrating {n_networks} networks.')
         weights_stack = weights_stack / np.nansum(weights_stack, axis = 0) * np.sum(network_weights)
 
         # We compute the weighted mean here across the network stacks
