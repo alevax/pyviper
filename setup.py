@@ -12,7 +12,7 @@ long_description = (this_directory / "README.md").read_text()
 setuptools.setup(
     name="viper-in-python",
     version="1.0.10",
-    author="Alexander L.E. Wang & Zizhao Lin & Luca Zanella",
+    author="Alexander L.E. Wang & Luca Zanella & Zizhao Lin",
     author_email="aw3436@cumc.columbia.edu",
     packages=setuptools.find_packages(),
     package_data={'pyviper': ['data/*']},  # Include data directory

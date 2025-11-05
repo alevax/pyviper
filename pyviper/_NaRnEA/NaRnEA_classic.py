@@ -197,8 +197,10 @@ def NaRnEA_classic(gex_data,
     filtered_table = int_table
 
     # why I need to remove that, there is no filtered_table[filtered_table['mor'] == -1]
-    filtered_table['mor'].replace(1 ,0.999, inplace= True)
-    filtered_table['mor'].replace(-1 ,-0.999, inplace= True)
+    #filtered_table['mor'].replace(1 ,0.999, inplace= True) # inplace will be deprecated
+    #filtered_table['mor'].replace(-1 ,-0.999, inplace= True) # inplace will be deprecated
+    filtered_table['mor'] = filtered_table['mor'].replace(1 ,0.999)
+    filtered_table['mor'] = filtered_table['mor'].replace(-1 ,-0.999)    
     filtered_table['mor'] = filtered_table['mor'].apply(lambda x: replace_random(x, -0.001, 0.001))
 
     # INT_TABLE DOESN'T WORK WITH DUPLICATE ENTIRES WITH NARNEA

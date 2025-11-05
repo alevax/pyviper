@@ -157,7 +157,8 @@ def more_equal_sampling_with_nn(NN_array, size, seed = 0):
         index_i = randomized_indices[i]
         if not index_i in excluded_from_sampling:
             # Add index_i as our newest sample
-            df.loc[n_added_samps]["sample_index"] = index_i
+            #df.loc[n_added_samps]["sample_index"] = index_i # compatibility with Pandas 3.0
+            df.loc[n_added_samps, "sample_index"] = index_i
             # Prevent index_i from being treated as a neighbor
             # of a future sample
             excluded_from_sampling.append(index_i)
@@ -166,7 +167,8 @@ def more_equal_sampling_with_nn(NN_array, size, seed = 0):
             index_i_NN_sorted = NN_array[index_i,:]
             NN_not_excluded = index_i_NN_sorted[~np.isin(index_i_NN_sorted, excluded_from_sampling)]
             first_NN_not_excluded = NN_not_excluded[0]
-            df.loc[n_added_samps]["nn_index"] = first_NN_not_excluded
+            #df.loc[n_added_samps]["nn_index"] = first_NN_not_excluded # compatibility with Pandas 3.0
+            df.loc[n_added_samps, "nn_index"] = first_NN_not_excluded
             # Prevent index_i from being treated as a sample or
             # a different sample's neighbor
             excluded_from_sampling.append(first_NN_not_excluded)
