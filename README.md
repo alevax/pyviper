@@ -19,11 +19,12 @@ The user-friendly documentation is available [here](https://pyviper.readthedocs.
 ---
 
 ## Dependencies
-- `scanpy` for single cell pipeline
+- `scanpy` for single cell pipeline.
 - `pandas` and `anndata` for data computing and storage. 
-- `numpy` and `scipy`  for scientific computation.
-- `joblib` for parallel computing
-- `tqdm` show progress bar
+- `numpy`, `scipy` and `statsmodel` for scientific computation and statistical inference.
+- `joblib` for prallel computing
+- `loompy` and `pyarrow` for Loom file format support and efficient data serialization and I/O
+- `tqdm` for progress bar visualization
 
 If you are using a version of `scanpy` <1.9.3, it is also advisable to downgrade `pandas` to (>=1.3.0 & <2.0), due to `scanpy` incompatibility ([issue](https://github.com/scverse/scanpy/issues/2564))
 
