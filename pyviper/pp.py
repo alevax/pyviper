@@ -248,41 +248,52 @@ def viper_similarity(
 
     Parameters
     ----------
-    adata
-        An anndata.AnnData containing protein activity (NES), where rows are
-        observations/samples (e.g. cells or groups) and columns are features
-        (e.g. proteins or pathways).
-    nn : default: None
-        Optional number of top regulators to consider for computing the similarity
-    ws : default: [4, 2]
-        Number indicating the weighting exponent for the signature, or vector of
-        2 numbers indicating the inflection point and the value corresponding to
-        a weighting score of .1 for a sigmoid transformation, only used if nn is
-        ommited.
-    alternative : default: 'two-sided'
-        Character string indicating whether the most active (greater), less
-        active (less) or both tails (two.sided) of the signature should be used
-        for computing the similarity.
-    layer : default: None
-        The layer to use as input data to compute the signatures.
-    filter_by_feature_groups : default: None
-        The selected regulators, such that all other regulators are filtered out
-        from the input data. If None, all regulators will be included. Regulator
-        sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
-    key_added : default: "viper_similarity"
-        The name of the slot in the adata.obsp to store the output.
-    copy : default: False
-        Determines whether a copy of the input AnnData is returned.
+    nes : pandas.DataFrame or anndata.AnnData
+        Matrix of normalized enrichment scores (NES) from VIPER, where rows are
+        regulators (e.g., transcription factors) and columns are samples.
+        If an AnnData is provided, the `.to_df()` representation is used.
+    nn : int, optional
+        Number of top regulators to consider per sample. If provided, only the
+        `nn` most extreme regulators (according to `method`) are retained; all others
+        are set to zero. If None (default), continuous weighting is applied instead.
+    ws : tuple of float, default (4.0, 2.0)
+        Weighting parameters. If a single value is given, the exponent applied to
+        regulator weights. If two values are given, they define a symmetric sigmoid
+        weighting function where the first is the inflection point and the second
+        corresponds to the input value giving a weight ≈ 0.1.
+    method : {'two.sided', 'greater', 'less'}, default 'two.sided'
+        Specifies which tail(s) of the signature to use when computing similarity:
+        - `'greater'`: only positive regulators are used,
+        - `'less'`: only negative regulators are used,
+        - `'two.sided'`: both tails are used.
+        The alias `'two-sided'` is also accepted.
+    random_state : int, default 0
+        Random seed used for breaking ties in rank-based operations.
+    store_in_adata : bool, default False
+        If True and `nes` is an AnnData object, store the resulting similarity matrix
+        in `nes.obsp[key_added]`.
+    key_added : str, default "viper_similarity"
+        Key name under which to store the result in `AnnData.obsp` if `store_in_adata` is True.
 
     Returns
     -------
-    Saves a signature-based distance numpy.ndarray in adata.obsp[key_added].
+    pandas.DataFrame
+        A symmetric sample-by-sample similarity matrix where each element (i,j)
+        reflects the weighted concordance of regulator activity between samples i and j.
+
+    Notes
+    -----
+    This implementation mirrors the R `viperSimilarity` function and follows the
+    principles of the aREA (analytic rank-based enrichment analysis) algorithm used
+    in VIPER. It supports both continuous and discrete (top-N) similarity computation.
 
     References
     ----------
-    [1] Julio, M. K. -d. et al. Regulation of extra-embryonic endoderm stem cell differentiation by Nodal and Cripto signaling. Development 138, 3885-3895 (2011).
+    [1] Julio M. K.-d. et al. Regulation of extra-embryonic endoderm stem cell differentiation
+        by Nodal and Cripto signaling. *Development*, 138, 3885–3895 (2011).
 
-    [2] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H., & Califano, A. (2016). Functional characterization of somatic mutations in cancer using network-based inference of protein activity. Nature genetics, 48(8), 838-847.
+    [2] Alvarez M. J. et al. Functional characterization of somatic mutations in cancer using
+        network-based inference of protein activity. *Nature Genetics*, 48(8), 838–847 (2016).
     """
     return _viper_similarity(
         nes=nes,
