@@ -8,11 +8,11 @@ import pandas as pd
 
 import pyviper
 
-rootdir = dirname(dirname(abspath(__file__)))
+resources_dir = join(dirname(abspath(__file__)), "resources")
 
 class TestInteractome(unittest.TestCase):
     def setUp(self):
-        self.table = pd.read_table(join(rootdir, "test/unit_test_1/test_net1.tsv"), sep="\t")
+        self.table = pd.read_table(join(resources_dir, "test_net1.tsv"), sep="\t")
         self.network = pyviper.Interactome(name="net", net_table=self.table)
     
     def test_str(self):
@@ -31,7 +31,6 @@ class TestInteractome(unittest.TestCase):
         self.network.prune(max_targets=50, min_targets=5)
         self.assertTrue(self.network.targets_per_regulon().min() >= 5)
         self.assertTrue(self.network.targets_per_regulon().max() <= 50)
-
 
     def test_integrate(self):
         network1 = pyviper.Interactome(

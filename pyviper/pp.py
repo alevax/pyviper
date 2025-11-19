@@ -4,6 +4,9 @@ from ._corr_distance import corr_distance
 from ._rep_subsample_funcs import _representative_subsample_anndata
 from ._metacell_funcs import _representative_metacells_multiclusters
 from ._translate import translate
+from typing import Union, Optional, Tuple, Literal
+import pandas as pd
+import anndata as ad
 
 ### ---------- EXPORT LIST ----------
 __all__ = []
@@ -225,14 +228,15 @@ def spearman(adata,
                      copy)
 
 
-def viper_similarity(adata,
-                     nn = None,
-                     ws = [4, 2],
-                     alternative=['two-sided','greater','less'],
-                     layer=None,
-                     filter_by_feature_groups=None,
-                     key_added = 'viper_similarity',
-                     copy = False):
+def viper_similarity(
+        nes: Union[pd.DataFrame, ad.AnnData],
+        nn: Optional[int] = None,
+        ws: Tuple[float, ...] = (4.0, 2.0),
+        method: Literal['two-sided','greater','less'] = "two.sided",
+        random_state: int = 0,
+        store_in_adata: bool = False,
+        key_added: str = "viper_similarity"
+    ):
     """\
     Compute the similarity between the columns of a VIPER-predicted activity or
     gene expression matrix. While following the same concept as the two-tail
@@ -281,14 +285,13 @@ def viper_similarity(adata,
     [2] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H., & Califano, A. (2016). Functional characterization of somatic mutations in cancer using network-based inference of protein activity. Nature genetics, 48(8), 838-847.
     """
     return _viper_similarity(
-        adata,
-        nn,
-        ws,
-        alternative,
-        layer,
-        filter_by_feature_groups,
-        key_added,
-        copy
+        nes=nes,
+        nn=nn,
+        ws=ws,
+        method=method,
+        random_state=random_state,
+        store_in_adata=store_in_adata,
+        key_added=key_added
     )
 
 def aracne3_to_regulon(

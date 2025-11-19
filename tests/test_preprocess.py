@@ -9,11 +9,11 @@ from scipy.stats import rankdata
 import pyviper
 from pyviper.pp import rank_norm, _median, _mad_from_R
 
-rootdir = dirname(dirname(abspath(__file__)))
+resources_dir = join(dirname(abspath(__file__)), "resources")
 
 class TestRankNorm(unittest.TestCase):
     def setUp(self):
-        self.data = ad.read_text(join(rootdir, "test/unit_tests/test_2/test_2_inputs/LCRN1_gExpr_GES.tsv")).T    
+        self.data = ad.read_text(join(resources_dir, "LCRN1_gExpr_GES.tsv")).T    
         sc.pp.normalize_total(self.data, inplace=True,target_sum=1e6)
         sc.pp.log1p(self.data)
         sc.pp.highly_variable_genes(self.data, flavor="seurat", n_top_genes=2000, inplace=True)
@@ -45,9 +45,9 @@ class TestRankNorm(unittest.TestCase):
 
 class TestIntegrate(unittest.TestCase):
     def setUp(self):
-        self.data = ad.read_csv(join(rootdir, "test/unit_test_1/ges.csv")).T
-        table1 = pd.read_table(join(rootdir, "test/unit_test_1/test_net1.tsv"), sep="\t")
-        table2 = pd.read_table(join(rootdir, "test/unit_test_1/test_net2.tsv"), sep="\t")
+        self.data = ad.read_csv(join(resources_dir, "ges.csv")).T
+        table1 = pd.read_table(join(resources_dir, "test_net1.tsv"), sep="\t")
+        table2 = pd.read_table(join(resources_dir, "test_net2.tsv"), sep="\t")
         self.network1 = pyviper.Interactome(name="net1", net_table=table1)
         self.network2 = pyviper.Interactome(name="net2", net_table=table2)
         self.network1.filter_targets(self.data.var_names)
