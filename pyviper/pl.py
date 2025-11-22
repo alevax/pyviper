@@ -1232,6 +1232,29 @@ def vis_net(
     seed = 0,
     figsize=(15, 15)
 ):
+    """\
+    Creates an igraph to visualize the relationship between regulators and targets of an Interactome object.
+    
+    Parameters
+    ----------
+    net_Pruned
+        An object of class Interactome or a list of Interactome objects.
+    pax_data
+        Protein activity stored in an anndata object. Used to color the regulators.
+    gex_data
+        Gene expression stored in an anndata object. Used to color the targets.
+    mr_list
+        A list of proteins in net_Pruned to be visualized in the plot.
+    cluster_labels : default: None
+        Provide if you would like to create cluster-specific graphs.
+    layout_alg : default: 'davidson_harel'
+        Algorithm for the layout parameter from igraph.
+    seed : default: 0
+        Random seed for graph construction.
+    figsize: default: (15, 15)
+        figure dimensions for Matplotlib.
+    """
+    
     _vis_net(
         net_Pruned,
         pax_data,
