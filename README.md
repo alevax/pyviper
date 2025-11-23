@@ -9,7 +9,7 @@ This package enables network-based protein activity estimation on Python.
 It provides also interfaces for scanpy (single-cell RNASeq analysis in Python).
 Functions are partly transplanted from R package [viper](https://www.bioconductor.org/packages/release/bioc/html/viper.html) and the R package [NaRnEA](https://github.com/califano-lab/NaRnEA). 
 
-The user-friendly documentation is available at https://pyviper.readthedocs.io/en/latest.
+The user-friendly documentation is available [here](https://pyviper.readthedocs.io/en/latest).
 
 <div align="center">
     <img style="width: 80%;" alt="viper_visualized" src="https://github.com/user-attachments/assets/44d230cd-7eb3-4cc1-8e27-4cb9d49c269d">
@@ -19,11 +19,12 @@ The user-friendly documentation is available at https://pyviper.readthedocs.io/e
 ---
 
 ## Dependencies
-- `scanpy` for single cell pipeline
+- `scanpy` for single cell pipeline.
 - `pandas` and `anndata` for data computing and storage. 
-- `numpy` and `scipy`  for scientific computation.
-- `joblib` for parallel computing
-- `tqdm` show progress bar
+- `numpy`, `scipy` and `statsmodel` for scientific computation and statistical inference.
+- `joblib` for prallel computing
+- `loompy` and `pyarrow` for Loom file format support and efficient data serialization and I/O
+- `tqdm` for progress bar visualization
 
 If you are using a version of `scanpy` <1.9.3, it is also advisable to downgrade `pandas` to (>=1.3.0 & <2.0), due to `scanpy` incompatibility ([issue](https://github.com/scverse/scanpy/issues/2564))
 

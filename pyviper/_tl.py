@@ -132,7 +132,7 @@ def _oncomatch(pax_data_to_test,
                      interactome=interactome_cMRs,
                      enrichment=enrichment,
                      min_targets=0,
-                     output_as_anndata=False,
+                     return_as_df=True,
                      verbose=False)
         if enrichment == 'narnea': om_t = om_t['nes']
 
@@ -140,7 +140,7 @@ def _oncomatch(pax_data_to_test,
                      interactome=interactome_test,
                      enrichment=enrichment,
                      min_targets=0,
-                     output_as_anndata=False,
+                     return_as_df=True,
                      verbose=False)
         if enrichment == 'narnea': om_q = om_q['nes']
 
@@ -171,7 +171,7 @@ def _oncomatch(pax_data_to_test,
                    interactome=interactome_cMRs,
                    enrichment=enrichment,
                    min_targets=0,
-                   output_as_anndata=False,
+                   return_as_df=True,
                    verbose=False)
         if enrichment == 'narnea': om = om['nes']
 
@@ -230,7 +230,7 @@ def _find_top_mrs_from_sig(sig, N, both, rank):
 
 def _find_top_mrs(adata,
                   pca_slot = "X_pca",
-                  obs_column_name = None,
+                  groupby = None,
                   layer = None,
                   N = 50,
                   both = True,
@@ -247,7 +247,7 @@ def _find_top_mrs(adata,
     if copy: adata = adata.copy()
 
     sig = _sig_clusters_adata(adata,
-                              obs_column_name,
+                              groupby,
                               layer,
                               filter_by_feature_groups,
                               sig_method = method,
@@ -257,7 +257,7 @@ def _find_top_mrs(adata,
     result_df = _find_top_mrs_from_sig(sig, N, both, rank)
     result_df.columns.str.replace('_scores', '')
 
-    if obs_column_name is None:
+    if groupby is None:
         result_df.columns = [key_added]
     else:
         result_df.columns = key_added + "_" + result_df.columns
@@ -266,41 +266,45 @@ def _find_top_mrs(adata,
         adata._inplace_subset_var(adata.var[key_added].values.flatten()==True)
 
     if return_as_df:
-        mrs_df = result_df.apply(lambda col: result_df.index[col].tolist())
+        if rank is True:
+            mrs_df = result_df.apply(lambda col: col[col != 0].sort_values(ascending=False).index.tolist())
+        else:
+            mrs_df = result_df.apply(lambda col: result_df.index[col].tolist())
         return mrs_df
     elif copy:
         # adata.var = pd.concat([adata.var, result_df], axis=1, join='inner')
         for col in result_df.columns:
             adata.var[col] = result_df[col]
         return adata
+    else:
+        for col in result_df.columns:
+            adata.var[col] = result_df[col]
 
-def _path_enr(gex_data,
-             pathway_interactome,
-             layer=None,
-             eset_filter=True,
-             method=None,  # [None, "scale", "rank", "mad", "ttest"],
-             enrichment='aREA',  # [None, 'area','narnea'],
-             mvws=1,
-             njobs=1,
-             batch_size=10000,
-             verbose=True,
-             output_as_anndata=True,
-             transfer_obs=True,
-             store_input_data=True
-             ):
-    if isinstance(pathway_interactome, str):
-        collection = pathway_interactome.lower()
+def _path_enr(
+    adata,
+    interactome,
+    layer=None,
+    eset_filter=True,
+    method=None,  # [None, "scale", "rank", "mad", "ttest"],
+    enrichment='aREA',  # [None, 'area','narnea'],
+    mvws=1,
+    njobs=1,
+    batch_size=10000,
+    verbose=True
+):
+    if isinstance(interactome, str):
+        collection = interactome.lower()
         if collection in ["c2", "c5", "c6", "c7", "h"]:
-            pathway_interactome = msigdb_regulon(collection)
+            interactome = msigdb_regulon(collection)
         else:
             raise ValueError(
-                'pathway_interactome "' + str(pathway_interactome) + '" is not in "c2", "c5", "c6", "c7", "h".'
+                'interactome "' + str(interactome) + '" is not in "c2", "c5", "c6", "c7", "h".'
             )
 
-    pathway_interactome.filter_targets(gex_data.var_names)
-    return viper(
-        gex_data,
-        pathway_interactome,
+    interactome.filter_targets(adata.var_names)
+    enr_data = viper(
+        adata,
+        interactome,
         layer,
         eset_filter,
         method,
@@ -310,7 +314,18 @@ def _path_enr(gex_data,
         njobs,
         batch_size,
         verbose,
-        output_as_anndata,
-        transfer_obs,
-        store_input_data
-    )
+        return_as_df=True,
+        transfer_obs=False,
+        store_input_data=False
+    )['nes']
+
+    # First, update the existing columns in adata.obs
+    adata.obs.update(enr_data)
+
+    # Now, find the columns that are in enr_data but not in adata.obs
+    new_columns = enr_data.columns.difference(adata.obs.columns)
+
+    # Concatenate the new columns to adata.obs
+    adata.obs = pd.concat([adata.obs, enr_data[new_columns]], axis=1)
+
+    return adata

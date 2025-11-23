@@ -1,9 +1,12 @@
 ### ---------- IMPORT DEPENDENCIES ----------
-from ._pp import _rank_norm, _stouffer, _mwu, _spearman, _viper_similarity, _aracne3_to_regulon, _nes_to_pval, _mad_from_R, _median
+from ._pp import _rank_norm, _stouffer, _mwu, _spearman, _viper_similarity, _aracne3_to_regulon, _nes_to_pval, _mad_from_R, _median, _mean_diffs
 from ._corr_distance import corr_distance
 from ._rep_subsample_funcs import _representative_subsample_anndata
 from ._metacell_funcs import _representative_metacells_multiclusters
 from ._translate import translate
+from typing import Union, Optional, Tuple, Literal
+import pandas as pd
+import anndata as ad
 
 ### ---------- EXPORT LIST ----------
 __all__ = []
@@ -52,7 +55,7 @@ def rank_norm(
     )
 
 def stouffer(adata,
-             obs_column_name = None,
+             groupby = None,
              layer = None,
              filter_by_feature_groups = None,
              key_added = 'stouffer',
@@ -69,7 +72,7 @@ def stouffer(adata,
     adata
         Gene expression, protein activity or pathways stored in an anndata
         object, or a pandas dataframe containing input data.
-    obs_column_name
+    groupby
         The name of the column of observations in adata to use as clusters, or a
         cluster vector corresponding to observations.
     layer : default: None
@@ -98,7 +101,7 @@ def stouffer(adata,
     When return_as_df is False, adds the cluster stouffer signatures to adata.var[key_added]. When return_as_df is True, returns as pd.DataFrame.
     """
     return _stouffer(adata,
-                     obs_column_name,
+                     groupby,
                      layer,
                      filter_by_feature_groups,
                      key_added,
@@ -109,7 +112,7 @@ def stouffer(adata,
                      copy)
 
 def mwu(adata,
-        obs_column_name = None,
+        groupby = None,
         layer = None,
         filter_by_feature_groups = None,
         key_added = 'mwu',
@@ -126,7 +129,7 @@ def mwu(adata,
     adata
         Gene expression, protein activity or pathways stored in an anndata
         object, or a pandas dataframe containing input data.
-    obs_column_name
+    groupby
         The name of the column of observations in adata to use as clusters, or a
         cluster vector corresponding to observations.
     layer : default: None
@@ -152,7 +155,7 @@ def mwu(adata,
     When return_as_df is False, adds the cluster MWU signatures to adata.var[key_added]. When return_as_df is True, returns as pd.DataFrame.
     """
     return _mwu(adata,
-                obs_column_name,
+                groupby,
                 layer,
                 filter_by_feature_groups,
                 key_added,
@@ -163,10 +166,10 @@ def mwu(adata,
 
 def spearman(adata,
              pca_slot = "X_pca",
-             obs_column_name = None,
+             groupby = None,
              layer = None,
              filter_by_feature_groups = None,
-             key_added = 'stouffer',
+             key_added = 'spearman',
              compute_pvals = True,
              null_iters = 1000,
              verbose = True,
@@ -184,7 +187,7 @@ def spearman(adata,
         object, or a pandas dataframe containing input data.
     pca_slot
         The slot in adata.obsm where a PCA is stored.
-    obs_column_name
+    groupby
         The name of the column of observations in adata to use as clusters, or a
         cluster vector corresponding to observations.
     layer : default: None
@@ -214,7 +217,7 @@ def spearman(adata,
     """
     return _spearman(adata,
                      pca_slot,
-                     obs_column_name,
+                     groupby,
                      layer,
                      filter_by_feature_groups,
                      key_added,
@@ -225,14 +228,15 @@ def spearman(adata,
                      copy)
 
 
-def viper_similarity(adata,
-                     nn = None,
-                     ws = [4, 2],
-                     alternative=['two-sided','greater','less'],
-                     layer=None,
-                     filter_by_feature_groups=None,
-                     key_added = 'viper_similarity',
-                     copy = False):
+def viper_similarity(
+        nes: Union[pd.DataFrame, ad.AnnData],
+        nn: Optional[int] = None,
+        ws: Tuple[float, ...] = (4.0, 2.0),
+        method: Literal['two-sided','greater','less'] = "two.sided",
+        random_state: int = 0,
+        store_in_adata: bool = False,
+        key_added: str = "viper_similarity"
+    ):
     """\
     Compute the similarity between the columns of a VIPER-predicted activity or
     gene expression matrix. While following the same concept as the two-tail
@@ -244,51 +248,61 @@ def viper_similarity(adata,
 
     Parameters
     ----------
-    adata
-        An anndata.AnnData containing protein activity (NES), where rows are
-        observations/samples (e.g. cells or groups) and columns are features
-        (e.g. proteins or pathways).
-    nn : default: None
-        Optional number of top regulators to consider for computing the similarity
-    ws : default: [4, 2]
-        Number indicating the weighting exponent for the signature, or vector of
-        2 numbers indicating the inflection point and the value corresponding to
-        a weighting score of .1 for a sigmoid transformation, only used if nn is
-        ommited.
-    alternative : default: 'two-sided'
-        Character string indicating whether the most active (greater), less
-        active (less) or both tails (two.sided) of the signature should be used
-        for computing the similarity.
-    layer : default: None
-        The layer to use as input data to compute the signatures.
-    filter_by_feature_groups : default: None
-        The selected regulators, such that all other regulators are filtered out
-        from the input data. If None, all regulators will be included. Regulator
-        sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
-    key_added : default: "viper_similarity"
-        The name of the slot in the adata.obsp to store the output.
-    copy : default: False
-        Determines whether a copy of the input AnnData is returned.
+    nes : pandas.DataFrame or anndata.AnnData
+        Matrix of normalized enrichment scores (NES) from VIPER, where rows are
+        regulators (e.g., transcription factors) and columns are samples.
+        If an AnnData is provided, the `.to_df()` representation is used.
+    nn : int, optional
+        Number of top regulators to consider per sample. If provided, only the
+        `nn` most extreme regulators (according to `method`) are retained; all others
+        are set to zero. If None (default), continuous weighting is applied instead.
+    ws : tuple of float, default (4.0, 2.0)
+        Weighting parameters. If a single value is given, the exponent applied to
+        regulator weights. If two values are given, they define a symmetric sigmoid
+        weighting function where the first is the inflection point and the second
+        corresponds to the input value giving a weight ≈ 0.1.
+    method : {'two.sided', 'greater', 'less'}, default 'two.sided'
+        Specifies which tail(s) of the signature to use when computing similarity:
+        - `'greater'`: only positive regulators are used,
+        - `'less'`: only negative regulators are used,
+        - `'two.sided'`: both tails are used.
+        The alias `'two-sided'` is also accepted.
+    random_state : int, default 0
+        Random seed used for breaking ties in rank-based operations.
+    store_in_adata : bool, default False
+        If True and `nes` is an AnnData object, store the resulting similarity matrix
+        in `nes.obsp[key_added]`.
+    key_added : str, default "viper_similarity"
+        Key name under which to store the result in `AnnData.obsp` if `store_in_adata` is True.
 
     Returns
     -------
-    Saves a signature-based distance numpy.ndarray in adata.obsp[key_added].
+    pandas.DataFrame
+        A symmetric sample-by-sample similarity matrix where each element (i,j)
+        reflects the weighted concordance of regulator activity between samples i and j.
+
+    Notes
+    -----
+    This implementation mirrors the R `viperSimilarity` function and follows the
+    principles of the aREA (analytic rank-based enrichment analysis) algorithm used
+    in VIPER. It supports both continuous and discrete (top-N) similarity computation.
 
     References
     ----------
-    [1] Julio, M. K. -d. et al. Regulation of extra-embryonic endoderm stem cell differentiation by Nodal and Cripto signaling. Development 138, 3885-3895 (2011).
+    [1] Julio M. K.-d. et al. Regulation of extra-embryonic endoderm stem cell differentiation
+        by Nodal and Cripto signaling. *Development*, 138, 3885–3895 (2011).
 
-    [2] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H., & Califano, A. (2016). Functional characterization of somatic mutations in cancer using network-based inference of protein activity. Nature genetics, 48(8), 838-847.
+    [2] Alvarez M. J. et al. Functional characterization of somatic mutations in cancer using
+        network-based inference of protein activity. *Nature Genetics*, 48(8), 838–847 (2016).
     """
     return _viper_similarity(
-        adata,
-        nn,
-        ws,
-        alternative,
-        layer,
-        filter_by_feature_groups,
-        key_added,
-        copy
+        nes=nes,
+        nn=nn,
+        ws=ws,
+        method=method,
+        random_state=random_state,
+        store_in_adata=store_in_adata,
+        key_added=key_added
     )
 
 def aracne3_to_regulon(
@@ -332,29 +346,6 @@ def aracne3_to_regulon(
         normalize_MI_per_regulon
     )
 
-# def nes_to_neg_log(adata, layer = None, key_added = None):
-#     """\
-#     Transform VIPER-computed NES into -log10(p-value).
-#
-#     Parameters
-#     ----------
-#     adata
-#         Gene expression, protein activity or pathways stored in an anndata
-#         object, or a pandas dataframe containing input data, where rows are
-#         observations/samples (e.g. cells or groups) and columns are features
-#         (e.g. proteins or pathways).
-#     layer : (default: None)
-#         Entry of layers to tranform.
-#     key_added : (default: None)
-#         Name of layer to save result in a new layer instead of adata.X.
-#
-#     Returns
-#     -------
-#     Saves the input data as a transformed version. If key_added is specified,
-#     saves the results in adata.layers[key_added].
-#     """
-#     _nes_to_neg_log(adata, layer, key_added)
-
 def nes_to_pval(
     adata,
     layer = None,
@@ -363,6 +354,7 @@ def nes_to_pval(
     adjust=True,
     axs=1,
     neg_log = False,
+    pseudocount = 1e-300,
     copy = False
 ):
     """\
@@ -380,8 +372,9 @@ def nes_to_pval(
     key_added : default: None
         Name of layer to save result in a new layer instead of adata.X.
     lower_tail : default: True
-    	If `True` (default), probabilities are P(X <= x)
-    	If `False`, probabilities are P(X > x)
+    	If `True` (default), returns two-tailed p-values P(|X| > |x|)
+    	If `False`, returns upper-tail probabilities P(X > x)
+		Note: unlike R's `pnorm`, here lower_tail=True compute two-tailed probabilities.
     adjust : default: True
         If `True`, returns adjusted p values using FDR Benjamini-Hochberg procedure.
         If `False`, does not adjust p values
@@ -390,24 +383,36 @@ def nes_to_pval(
         Possible values are 0 or 1.
     neg_log : default: False
         Whether to transform VIPER-computed NES into -log10(p-value).
+    pseudocount : default: 1e-300
+        When neg_log is True, add a small value to pvals to avoid log(0).
     copy : default: False
         Determines whether a copy of the input AnnData is returned.
 
     Returns
     -------
-    Saves the input data as a transformed version. If key_added is specified, saves the results in adata.layers[key_added].
+    Saves the input data as a transformed version. If key_added is specified,
+    saves the results in adata.layers[key_added].
+
+    References
+    ----------
+    Benjamini, Y., & Hochberg, Y. (1995). Controlling the False Discovery Rate:
+    A Practical and Powerful Approach to Multiple Testing.
+        Journal of the Royal Statistical Society. Series B (Methodological),
+        57(1), 289–300. http://www.jstor.org/stable/2346101
     """
     return _nes_to_pval(adata, layer, key_added, lower_tail, adjust, axs, neg_log, copy)
 
-def repr_subsample(adata,
-                   pca_slot="X_pca",
-                   size=1000,
-                   seed=0,
-                   key_added = "repr_subsample",
-                   eliminate = False,
-                   verbose=True,
-                   njobs=1,
-                   copy = False):
+def repr_subsample(
+    adata,
+    pca_slot="X_pca",
+    size=1000,
+    seed=0,
+    key_added = "repr_subsample",
+    eliminate = False,
+    verbose=True,
+    njobs=1,
+    copy = False
+    ):
     """\
     A tool for create a subsample of the input data such it is well
     representative of all the populations within the input data rather than
@@ -469,6 +474,7 @@ def repr_metacells(
     clusters_slot = None,
     score_slot = None,
     score_min_thresh = None,
+    minimize_replacement = True,
     size = 500,
     n_cells_per_metacell = None,
     min_median_depth = 10000,
@@ -521,10 +527,14 @@ def repr_metacells(
         The score from adata.obs[score_slot] that a cell must have at minimum to
         be used for metacell construction (e.g. 0.25 is the rule of thumb for
         silhouette score).
+    minimize_replacement : default: True
+        If True, then identify a subsample that minimizes overlap between the
+        KNN of the metacells. If False, use an entirely random subsample, but
+        have faster runtime.
     size : default: 500
         A specific number of metacells to generate. If set to None,
-        perc_data_to_use or perc_incl_data_reused can be used to specify the size
-        when n_cells_per_metacell or min_median_depth is given.
+        perc_data_to_use or perc_incl_data_reused can be used to specify the
+        size when n_cells_per_metacell or min_median_depth is given.
     n_cells_per_metacell : default: None
         The number of cells that should be used to generate single metacell.
         Note that this parameter and min_median_depth cannot both be set as
@@ -545,9 +555,9 @@ def repr_metacells(
         higher perc_data_to_use leads to higher perc_incl_data_reused.
     perc_incl_data_reused : default: None
         The percent of samples that are included in the creation of metacells
-        that will be reused (i.e. used in more than one metacell). Note that this
-        parameter and perc_data_to_use cannot both be set as they directly relate:
-        e.g. higher perc_incl_data_reused leads to higher perc_data_to_use.
+        that will be reused (i.e. used in more than one metacell). Note that
+        this parameter and perc_data_to_use cannot both be set as they directly
+        relate: e.g. higher perc_incl_data_reused leads to higher perc_data_to_use.
     seed : default: 0
         The random seed used when taking samples of the data.
     key_added : default: "metacells"
@@ -617,6 +627,6 @@ def repr_metacells(
         key_added = key_added,
         verbose = verbose,
         njobs = njobs,
-        smart_sample = True,
+        smart_sample = minimize_replacement,
         copy = copy
     )

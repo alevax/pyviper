@@ -190,16 +190,29 @@ def NaRnEA_classic(gex_data,
                          str(n_targets_not_in_exp_genes) + " targets missing from gex_data.var.\n\t" +
                         "Please run interactome.filter_targets(gex_data.var_names) on your network to\n\t" +
                          "resolve this. It is highly recommend to do this on the unPruned network and\n\t"+
-                         "then prune to the pruned network contains a consistent number of targets per\n\t"
-                         "regulator, allow of which exist within gex_data.")
+                         "then prune. This way the Pruned network contains a consistent number of targets per\n\t"
+                         "regulator, all of which exist within gex_data.")
         interactome.filter_targets(gex_df.columns)
     int_table = interactome.net_table
     filtered_table = int_table
 
     # why I need to remove that, there is no filtered_table[filtered_table['mor'] == -1]
-    filtered_table['mor'].replace(1 ,0.999, inplace= True)
-    filtered_table['mor'].replace(-1 ,-0.999, inplace= True)
+    #filtered_table['mor'].replace(1 ,0.999, inplace= True) # inplace will be deprecated
+    #filtered_table['mor'].replace(-1 ,-0.999, inplace= True) # inplace will be deprecated
+    filtered_table['mor'] = filtered_table['mor'].replace(1 ,0.999)
+    filtered_table['mor'] = filtered_table['mor'].replace(-1 ,-0.999)    
     filtered_table['mor'] = filtered_table['mor'].apply(lambda x: replace_random(x, -0.001, 0.001))
+
+    # INT_TABLE DOESN'T WORK WITH DUPLICATE ENTIRES WITH NARNEA
+    n_duplicates = np.sum(filtered_table.duplicated(
+        subset=['regulator', 'target'], keep=False
+    ))
+    if n_duplicates > 1:
+        raise ValueError(
+            "There are " + str(n_duplicates) + " duplicate regulator" +\
+            "-target pairs in your Interactome" + interactome.name + "." +\
+            "Use Interactome.remove_duplicate_pairs() to resolve them."
+        )
 
     #filtered_table['mor'].replace(0 ,0.999, inplace= True)
     # why we cant have 0, 1 and -1?

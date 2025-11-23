@@ -1,4 +1,6 @@
+
 ### ---------- IMPORT DEPENDENCIES ----------
+import os
 import pandas as pd
 import numpy as np
 from .aREA import aREA
@@ -9,6 +11,9 @@ from multiprocessing import cpu_count
 from scipy.stats import rankdata
 from scipy.stats import ttest_1samp
 from anndata import AnnData
+from tqdm import tqdm
+from .pleiotropy import TableToInteractome, ShadowRegulon_py, areareg
+
 
 ### ---------- EXPORT LIST ----------
 __all__ = ['viper']
@@ -19,15 +24,15 @@ __all__ = ['viper']
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 def sample_ttest(i,array):
-    return ttest_1samp((array[i] - np.delete(array, i, 0)), 0).statistic
+    return ttest_1samp((array[i] - np.delete(array, i, 0)), popmean=0, axis=0, alternative="two-sided").statistic
 
 def apply_method_on_gex_df(gex_df, method = None, layer = None):
     if method is None:
         return gex_df
-    gesMat = gex_data.values
+    gesMat = gex_df.values
 
     if method == 'scale':
-        gesMat = (gesMat - np.mean(gesMat,axis=0))/np.std(gesMat,axis=0)
+        gesMat = (gesMat - np.mean(gesMat,axis=0))/np.std(gesMat,ddof=1,axis=0)
     elif method == 'rank':
         #gesMat = rankdata(gesMat,axis=0)*(np.random.random(gesMat.shape)*2/10-0.1)
         gesMat = rankdata(gesMat, axis=0)
@@ -35,13 +40,13 @@ def apply_method_on_gex_df(gex_df, method = None, layer = None):
         median = np.median(gesMat, axis=0)
         gesMat = (gesMat-median)/(np.median(np.abs(gesMat-median),axis=0)*1.4826)
     elif method == 'ttest':
-        gesMat = np.array([sample_ttest(i, gesMat.copy()) for i in range(gex_data.shape[0])])
+        gesMat = np.array([sample_ttest(i, gesMat.copy()) for i in range(gex_df.shape[0])])
     elif method == "doublerank":
         gesMat = rank_norm(gesMat)
     else:
         raise ValueError("Unsupported method:" + str(method))
     gex_df[:] = gesMat
-    return gex_data
+    return gex_df
 
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -50,7 +55,7 @@ def apply_method_on_gex_df(gex_df, method = None, layer = None):
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def viper(gex_data,
+def viper( gex_data,
           interactome,
           layer=None,
           eset_filter=True,
@@ -61,10 +66,12 @@ def viper(gex_data,
           njobs=1,
           batch_size=10000,
           verbose=True,
-          output_as_anndata=True,
+          return_as_df=False,
           transfer_obs=True,
-          store_input_data=True
+          store_input_data=True,
+          pleiotropy: bool = False
           ):
+         
     """\
     The VIPER (Virtual Inference of Protein-activity by Enriched Regulon
     analysis) algorithm[1] allows individuals to compute protein activity
@@ -86,8 +93,7 @@ def viper(gex_data,
     ----------
     gex_data
         Gene expression stored in an anndata object (e.g. from Scanpy).
-    interactome
-        An object of class Interactome or a list of Interactome objects.
+    interactome        An object of class Interactome or a list of Interactome objects.
     layer : default: None
         The layer in the anndata object to use as the gene expression input.
     eset_filter : default: False
@@ -129,23 +135,24 @@ def viper(gex_data,
     verbose : default: True
         Whether extended output about the progress of the algorithm should be
         given.
-    output_as_anndata : default: True
-        Way of delivering output.
+    return_as_df : default: False
+        Way of delivering output. If True, return as pd.DataFrame. If False,
+        return as anndata.AnnData.
     transfer_obs : default: True
         Whether to transfer the observation metadata from the input anndata to
-        the output anndata. Thus, not applicable when output_as_anndata==False.
+        the output anndata. Thus, not applicable when return_as_df==True.
     store_input_data : default: True
-        Whether to store the input anndata in an unstructured data slot (.uns) of
-        the output anndata. Thus, not applicable when output_as_anndata==False.
+        Whether to store the input anndata in an unstructured data slot (.uns)
+        of the output anndata. Thus, not applicable when return_as_df==True.
         If input anndata already contains 'gex_data' in .uns, the input will
         assumed to be protein activity and will be stored in .uns as 'pax_data'.
         Otherwise, the data will be stored as 'gex_data' in .uns.
 
     Returns
     -------
-    A dictionary containing :class:`~numpy.ndarray` containing NES values (key: 'nes') and PES values (key: 'pes') when output_as_anndata=False and enrichment = "NaRnEA".
-    A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values when output_as_anndata=False and enrichment = "aREA".
-    An anndata object containin NES values in .X when output_as_anndata=True (default). Will contain PES values in the layer 'pes' when enrichment = 'NaRnEA'. Will contain .gex_data and/or .pax_data in the unstructured data slot (.uns) when store_input_data = True. Will contain identical .obs to the input anndata when transfer_obs = True.
+    A dictionary containing :class:`~numpy.ndarray` containing NES values (key: 'nes') and PES values (key: 'pes') when return_as_df=True and enrichment = "NaRnEA".
+    A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values when return_as_df=True and enrichment = "aREA".
+    An anndata object containin NES values in .X when return_as_df=False (default). Will contain PES values in the layer 'pes' when enrichment = 'NaRnEA'. Will contain .gex_data and/or .pax_data in the unstructured data slot (.uns) when store_input_data = True. Will contain identical .obs to the input anndata when transfer_obs = True.
 
     References
     ----------
@@ -166,6 +173,7 @@ def viper(gex_data,
         gex_df = gex_data.to_df(layer)
     elif isinstance(gex_data, pd.DataFrame):
         gex_df = gex_data
+        gex_data = AnnData(gex_df)
     else:
         raise ValueError("gex_data is type: " + str(type(gex_data)) + ". Must be anndata.AnnData or pd.DataFrame.")
 
@@ -208,34 +216,71 @@ def viper(gex_data,
         if verbose: print("Computing regulons enrichment with aREA")
 
         if njobs==1:
-            preOp = aREA(
-                gex_df,
-                interactome, layer, eset_filter,
-                min_targets, mvws, verbose
-            )
+            if n_batches == 1:
+                preOp = aREA(
+                    gex_df,
+                    interactome, layer, eset_filter,
+                    min_targets, mvws, verbose
+                )
+            else:
+                results = []
+                for batch_i in tqdm(range(n_batches), desc="Batches") if verbose else range(n_batches):
+                    results.append(
+                        aREA(
+                            gex_df.iloc[
+                                batch_i*batch_size:batch_i*batch_size+batch_size
+                            ],
+                            interactome, layer, eset_filter,
+                            min_targets, mvws,
+                            verbose = False
+                        )
+                    )
+                preOp = pd.concat(results)
+
         else:
-            preOp = Parallel(njobs)(
+            results = Parallel(njobs)(
                 delayed(aREA)(
-                    gex_df.iloc[batch_i*batch_size:batch_i*batch_size+batch_size],
+                    gex_df.iloc[
+                        batch_i*batch_size:batch_i*batch_size+batch_size
+                    ],
                     interactome, layer, eset_filter,
                     min_targets, mvws, verbose
                 ) for batch_i in range(n_batches)
             )
-            preOp = pd.concat(preOp)
+            preOp = pd.concat(results)
 
     elif enrichment == 'narnea':
         if verbose: print("Computing regulons enrichment with NaRnEa")
 
         if njobs==1:
-            preOp = NaRnEA(
-                gex_df,
-                interactome, layer, eset_filter,
-                min_targets, verbose
-            )
+            if n_batches == 1:
+                preOp = NaRnEA(
+                    gex_df,
+                    interactome, layer, eset_filter,
+                    min_targets, verbose
+                )
+            else:
+                results = []
+                for batch_i in tqdm(range(n_batches), desc="Batches") if verbose else range(n_batches):
+                    results.append(
+                        NaRnEA(
+                            gex_df.iloc[
+                                batch_i*batch_size:batch_i*batch_size+batch_size
+                            ],
+                            interactome, layer, eset_filter,
+                            min_targets, verbose = False
+                        )
+                    )
+                preOp = {
+                    "nes": pd.concat([res["nes"] for res in results]),
+                    "pes": pd.concat([res["pes"] for res in results])
+                }
         else:
             results = Parallel(njobs)(
                 delayed(NaRnEA)(
-                    gex_df.iloc[batch_i*batch_size:batch_i*batch_size+batch_size],
+                    gex_df.iloc[
+                        batch_i*batch_size:batch_i*batch_size+batch_size
+                    ],
                     interactome, layer, eset_filter,
                     min_targets, verbose
                 ) for batch_i in range(n_batches)
@@ -248,9 +293,9 @@ def viper(gex_data,
     else:
         raise ValueError("Unsupported enrichment type:" + str(enrichment))
 
-    if output_as_anndata == False:
+    if return_as_df == True:
         op = preOp
-    else: #output_as_anndata == True:
+    else:
         if enrichment == 'area':
             op = AnnData(preOp)
         else: #enrichment == 'narnea':
@@ -267,4 +312,149 @@ def viper(gex_data,
                 op.uns['pax_data'] = gex_data
             else:
                 op.uns['gex_data'] = gex_data
-    return op #final result
+        # ---- Pleiotropy hook (placeholder) ----
+    if pleiotropy and verbose:
+        print("[pleiotropy] hook reached")   
+
+ # ---- Pleiotropy post-processing (TableToInteractome → ShadowRegulon_py → areareg) ----
+    if pleiotropy:
+
+        # progress bar (optional)
+        try:
+            from tqdm import tqdm
+            try:
+                # joblib integration
+                from tqdm.contrib import tqdm_joblib
+            except Exception:
+                tqdm_joblib = None
+        except Exception:
+            def tqdm(x, **kwargs):
+                return x
+            tqdm_joblib = None
+
+        # 0) require aREA (matches your notebook)
+        if str(enrichment).lower() != "area":
+            if verbose:
+                print("[pleiotropy] skipped (enrichment != 'area').")
+            return op
+
+        # 1) regulon from interactome table
+        if not (hasattr(interactome, "net_table") and isinstance(interactome.net_table, pd.DataFrame)):
+            raise ValueError("[pleiotropy] interactome must expose a .net_table DataFrame with regulator/target/likelihood/mor")
+        regulon = TableToInteractome(interactome.net_table)
+
+        # 2) Build ss: genes (rows) × samples (cols) from gex_data (AnnData expected)
+        if not hasattr(gex_data, "X"):
+            raise TypeError("[pleiotropy] gex_data must be AnnData (samples×genes).")
+        X = gex_data.X
+        try:
+            X = X.toarray() if hasattr(X, "toarray") else np.asarray(X)
+        except Exception:
+            X = np.asarray(X)
+        tt = pd.DataFrame(
+            X.T,
+            index=gex_data.var_names.astype(str),      # genes
+            columns=gex_data.obs_names.astype(str),    # samples
+        )
+        ss = tt.copy()
+        if verbose:
+            print("[pleiotropy] ss shape:", ss.shape)
+
+        # 3) Build NES0: TFs (rows) × samples (cols) from current output 'op'
+        if return_as_df:
+            if not isinstance(op, pd.DataFrame):
+                raise TypeError("[pleiotropy] expected DataFrame when return_as_df=True for aREA.")
+            NES0 = op.T.copy()
+        else:
+            NES0 = pd.DataFrame(op.X, index=op.obs_names, columns=op.var_names).T
+        NES0.index = NES0.index.astype(str)
+        NES0.columns = NES0.columns.astype(str)
+        if verbose:
+            print("[pleiotropy] NES0 shape (TFs×samples):", NES0.shape)
+
+        # knobs (like your notebook)
+        area_mode   = "global"
+        minsize     = 5
+        eset_filter = True
+        shadow_params = dict(regulators=0.05, shadow=0.05, targets=10, penalty=20.0, method="adaptive")
+
+        # 4) eset.filter: keep only regulon target genes in ss
+        if eset_filter:
+            all_targets = set().union(*[set(v["tfmode"].index.astype(str)) for v in regulon.values()]) if len(regulon) else set()
+            ss = ss.loc[ss.index.astype(str).isin(all_targets)].copy()
+
+        # 5) parallel worker (per sample)
+        req_workers = max(1, int(njobs))
+        cpu_env = int(os.environ.get("SLURM_CPUS_PER_TASK", "0")) or os.cpu_count() or 4
+        n_workers = max(1, min(req_workers, cpu_env))
+        if verbose:
+            print(f"[pleiotropy] workers: {n_workers}")
+
+        def _run_one(sample: str):
+            try:
+                ss_i  = ss.loc[:, sample]
+                nes_i = NES0.loc[:, sample]
+                sreg  = ShadowRegulon_py(ss=ss_i, nes=nes_i, regul=regulon, **shadow_params)
+                if not sreg:
+                    return sample, None, 0
+                nes_updated = areareg(ss_i, sreg, minsize=minsize, mode=area_mode)
+                tf_overlap = nes_updated.index.intersection(NES0.index.astype(str))
+                return sample, nes_updated.loc[tf_overlap], int(tf_overlap.size)
+            except Exception as e:
+                if verbose:
+                    print(f"[pleiotropy][warn] sample {sample} failed: {e}")
+                return sample, None, 0
+
+        samples = list(NES0.columns.astype(str))
+
+        # ---- Progress bar integration ----
+        results = None
+        if n_workers > 1:
+            try:
+                if verbose and tqdm_joblib is not None:
+                    with tqdm_joblib(tqdm(total=len(samples), desc="[pleiotropy] samples", unit="sample")):
+                        results = Parallel(n_jobs=n_workers, backend="loky", prefer="processes")(
+                            delayed(_run_one)(s) for s in samples
+                        )
+                else:
+                    results = Parallel(n_jobs=n_workers, backend="loky", prefer="processes")(
+                        delayed(_run_one)(s) for s in samples
+                    )
+            except Exception as e:
+                if verbose:
+                    print(f"[pleiotropy] parallel failed ({e}); running serial")
+                results = None
+
+        if results is None:
+            if verbose:
+                results = []
+                for s in tqdm(samples, desc="[pleiotropy] samples", unit="sample"):
+                    results.append(_run_one(s))
+            else:
+                results = [_run_one(s) for s in samples]
+
+        # 6) merge back into NES0
+        updates = {}
+        updated_samples = 0
+        for s, nes_u, n_upd in results:
+            updates[s] = n_upd
+            if nes_u is None or n_upd == 0:
+                continue
+            NES0.loc[nes_u.index, s] = pd.to_numeric(nes_u, errors="coerce").values
+            updated_samples += 1
+        if verbose:
+            med_upd = int(pd.Series(updates).median()) if len(updates) else 0
+            print(f"[pleiotropy] updated {updated_samples}/{len(samples)} samples (median TFs updated: {med_upd})")
+
+        # 7) write back to op preserving output type
+        if return_as_df:
+            op = NES0.T  # samples×TFs
+        else:
+            updated = NES0.T
+            op.X = updated.values
+            op.obs_names = updated.index
+            op.var_names = updated.columns
+    # ---- end pleiotropy ----
+
+
+    return op  # final result

@@ -10,6 +10,7 @@ from statsmodels.stats import multitest
 from ._filtering_funcs import _get_anndata_filtered_by_feature_group
 from tqdm.auto import tqdm
 import os
+from typing import Union, Optional, Tuple
 
 def norm_ppf(x):
     return ndtri(x)
@@ -33,7 +34,8 @@ def _mad_from_R(x, center=None, constant=1.4826, low=False, high=False):
             raise ValueError("'low' and 'high' cannot be both True")
         n2 = n // 2 + int(high)
         return constant * np.sort(np.abs(x - center))[n2]
-    return constant * np.median(np.abs(x - center))
+    abs_deviation = np.abs(x - center)
+    return constant * np.median(abs_deviation)
 
 # Function assumes features as rows and observations as columns
 # Numerator Functions:
@@ -44,7 +46,7 @@ def _mad_from_R(x, center=None, constant=1.4826, low=False, high=False):
     # Standard deviation - statistics.stdev
 def _rank_norm_df(x, NUM_FUN=np.median, DEM_FUN = _mad_from_R, verbose = False):
     rank = rankdata(x, axis=0)
-    median = NUM_FUN(rank, axis=1, keepdims=True)#np.median(rank, axis=1, keepdims=True)
+    median = NUM_FUN(rank, axis=1, keepdims=True)
     mad = np.apply_along_axis(DEM_FUN, 1, rank)
 
     x = ((rank - median)/mad[:, np.newaxis])
@@ -365,7 +367,7 @@ def _mwu_clusters_df(dat_df, cluster_vector, compute_pvals = True, verbose = Tru
     return result_df
 
 def _sig_clusters_adata(adata,
-                        obs_column_name = None,
+                        groupby = None,
                         layer = None,
                         filter_by_feature_groups = None,
                         sig_method = "stouffer",
@@ -382,12 +384,12 @@ def _sig_clusters_adata(adata,
         dat_df = pd.DataFrame(adata_filt.layers[layer],
                               index=adata_filt.obs_names,
                               columns=adata_filt.var_names)
-    if obs_column_name is None:
+    if groupby is None:
         cluster_vector = np.zeros(adata_filt.shape[0]).astype(int).astype(str)
-    elif isinstance(obs_column_name, str):
-        cluster_vector = adata.obs[obs_column_name]
+    elif isinstance(groupby, str):
+        cluster_vector = adata.obs[groupby]
     else:
-        cluster_vector = obs_column_name
+        cluster_vector = groupby
 
     if sig_method == "stouffer":
         result_df = _stouffer_clusters_df(dat_df, cluster_vector, compute_pvals, null_iters, verbose)
@@ -403,7 +405,7 @@ def _sig_clusters_adata(adata,
     return result_df
 
 def _sig_clusters(adata,
-                  obs_column_name = None,
+                  groupby = None,
                   layer = None,
                   filter_by_feature_groups = None,
                   key_added = 'stouffer',
@@ -425,7 +427,7 @@ def _sig_clusters(adata,
     if copy is True: adata = adata.copy()
 
     result_df = _sig_clusters_adata(adata,
-                                    obs_column_name,
+                                    groupby,
                                     layer,
                                     filter_by_feature_groups,
                                     sig_method,
@@ -445,7 +447,7 @@ def _sig_clusters(adata,
         return adata
 
 def _stouffer(adata,
-              obs_column_name = None,
+              groupby = None,
               layer = None,
               filter_by_feature_groups = None,
               key_added = 'stouffer',
@@ -456,7 +458,7 @@ def _stouffer(adata,
               copy = False):
     return _sig_clusters(
         adata,
-        obs_column_name,
+        groupby,
         layer,
         filter_by_feature_groups,
         key_added,
@@ -470,7 +472,7 @@ def _stouffer(adata,
     )
 
 def _mwu(adata,
-         obs_column_name = None,
+         groupby = None,
          layer = None,
          filter_by_feature_groups = None,
          key_added = 'mwu',
@@ -480,7 +482,7 @@ def _mwu(adata,
          copy = False):
     return _sig_clusters(
         adata,
-        obs_column_name,
+        groupby,
         layer,
         filter_by_feature_groups,
         key_added,
@@ -495,7 +497,7 @@ def _mwu(adata,
 
 def _spearman(adata,
               pca_slot = "X_pca",
-              obs_column_name = None,
+              groupby = None,
               layer = None,
               filter_by_feature_groups = None,
               key_added = 'spearman',
@@ -506,7 +508,7 @@ def _spearman(adata,
               copy = False):
     return _sig_clusters(
         adata,
-        obs_column_name,
+        groupby,
         layer,
         filter_by_feature_groups,
         key_added,
@@ -520,7 +522,7 @@ def _spearman(adata,
     )
 
 def _mean_diffs(adata,
-                obs_column_name = None,
+                groupby = None,
                 layer = None,
                 filter_by_feature_groups = None,
                 key_added = 'mean_diffs',
@@ -530,7 +532,7 @@ def _mean_diffs(adata,
                 copy = False):
     return _sig_clusters(
         adata,
-        obs_column_name,
+        groupby,
         layer,
         filter_by_feature_groups,
         key_added,
@@ -550,71 +552,168 @@ def _mean_diffs(adata,
 
 
 
+def _viper_similarity(
+    nes: Union[pd.DataFrame, "anndata.AnnData"],
+    nn: Optional[int] = None,
+    ws: Tuple[float, ...] = (4.0, 2.0),
+    method: str = "two.sided",   # also accepts 'two-sided'
+    random_state: int = 0,
+    store_in_adata: bool = False,
+    key_added: str = "viper_similarity"
+) -> pd.DataFrame:
+    # ---- inline helpers ----
+    def _prepare_input_matrix(nes_obj):
+        try:
+            import anndata as ad
+            if isinstance(nes_obj, ad.AnnData):
+                return nes_obj.to_df()  # samples x regulators
+        except Exception:
+            pass
+        if isinstance(nes_obj, pd.DataFrame):
+            return nes_obj
+        raise TypeError("nes must be a pandas.DataFrame or an AnnData.")
 
-def _viper_similarity(adata,
-                      nn=None,
-                      ws=[4, 2],
-                      alternative=['two-sided', 'greater', 'less'],
-                      layer=None,
-                      filter_by_feature_groups=None,
-                      key_added='viper_similarity',
-                      copy=False):
-    if copy: adata = adata.copy()
-    mat = _get_anndata_filtered_by_feature_group(adata, layer, filter_by_feature_groups).to_df()
+    def _sigT(x, k, x0):
+        # match R's sigT: 1/(1+exp(-k*(x-x0))) so that ws[2] maps to ~0.1
+        with np.errstate(over='ignore'):
+            return 1.0 / (1.0 + np.exp(-k * (x - x0)))
 
-    if np.min(mat.values.flatten())>=0:
-        mat = pd.DataFrame(rankdata(mat,axis=1), index = mat.index, columns = mat.columns)
-        row_sums = np.sum(~np.isnan(mat.values), axis=1).reshape(-1, 1)
-        mat = pd.DataFrame(norm_ppf(mat/(row_sums+1)), index = mat.index, columns = mat.columns)
+    def _rank_random_ties_series(s: pd.Series, rng: np.random.Generator) -> pd.Series:
+        perm = rng.permutation(len(s))
+        sp = s.values[perm]
+        order = np.argsort(sp, kind="mergesort")
+        ranks_perm = np.empty_like(order, dtype=float)
+        ranks_perm[order] = np.arange(1, len(s) + 1, dtype=float)
+        ranks = np.empty_like(ranks_perm)
+        ranks[perm] = ranks_perm
+        return pd.Series(ranks, index=s.index, dtype=float)
 
-    mat[mat.isna()] =0 # will this work?
+    # ---- 0) input as samples x regulators ----
+    mat_sr = _prepare_input_matrix(nes)
+    sample_names = mat_sr.index.to_list()
 
-    xw = mat
+    # ---- 1) transpose to R's shape: regulators x samples ----
+    X = mat_sr.T.copy().astype(float)
 
-    if nn == None:
-        if alternative == 'greater':
-            xw[xw < 0] = 0
-        elif alternative == 'less' :
-            xw[xw > 0] = 0
+    # ---- 2) if all non-negative: per-column ranks -> qnorm ----
+    if np.nanmin(X.values) >= 0:
+        ranks = X.rank(axis=0, method="average", na_option="keep")
+        non_na = X.notna().sum(axis=0)
+        Q = ranks.div(non_na + 1, axis=1)
+        X = pd.DataFrame(norm.ppf(Q), index=X.index, columns=X.columns)
+
+    X = X.fillna(0.0)
+    xw = X.copy()
+
+    # ---- method arg ----
+    if method == "two-sided":
+        method = "two.sided"
+    if method not in ("two.sided", "greater", "less"):
+        raise ValueError("method must be 'two.sided', 'greater', or 'less'.")
+
+    rng = np.random.default_rng(random_state)
+
+    # ---- 3) weighting paths ----
+    if nn is None:
+        # tail zeroing
+        if method == "greater":
+            xw = xw.mask(xw < 0.0, 0.0)
+        elif method == "less":
+            xw = xw.mask(xw > 0.0, 0.0)
 
         if len(ws) == 1:
-            xw = np.transpose(xw)/np.max(np.abs(mat), axis = 1)
-            xw = np.sign(xw) * np.abs(xw) ** ws
-
+            # denom per column (R: greater uses max(x); else max(|x|))
+            if method == "greater":
+                denom = X.max(axis=0)
+            else:
+                denom = X.abs().max(axis=0)
+            denom = denom.replace(0, np.nan)
+            xw = xw.div(denom, axis=1)
+            xw = np.sign(xw) * (xw.abs() ** float(ws[0]))
+            xw = xw.fillna(0.0)
         else:
-            ws[1] = 1/(ws[1] - ws[0]) * np.log(1/0.9 -1)
-            xw = np.sign(xw) *__sigT(np.abs(mat),ws[1],ws[0]) #why it's 1, 0 instead of 0,1
+            # sigmoid weighting (R's k transform)
+            x0 = float(ws[0])
+            k = 1.0 / (float(ws[1]) - x0) * np.log(1/0.9 - 1.0)
+            # tail zeroing already applied; now sigmoid on abs(xw)
+            xw = np.sign(xw) * _sigT(xw.abs(), k, x0)
 
     else:
-        if alternative == 'greater':
-            xw = rankdata(-mat,axis=1)
-            mat[xw > nn] = None
-        elif alternative == 'less' :
-            xw = rankdata(mat,axis=1)
-            mat[xw > nn] = None
-        else:
-            xw = rankdata(mat,axis=1)
-            mat[xw > nn/2 & xw <(len(xw) - nn/2 +1)] = None
+        # ---- nn path: replicate R exactly ----
+        if method == "two.sided":
+            half = int(np.round(nn / 2.0))
 
-    nes = np.sqrt(np.sum(xw**2, axis = 1))
-    xw = xw.transpose()/np.sum(np.abs(xw),axis = 1)
+        # build mask per column using random-tie ranks
+        keep = pd.DataFrame(False, index=X.index, columns=X.columns)
+        for c in X.columns:
+            col = X[c]
+            if method == "greater":
+                ranks = _rank_random_ties_series(-col, rng)  # rank(-x)
+                keep[c] = ranks <= nn
+            elif method == "less":
+                ranks = _rank_random_ties_series(col, rng)   # rank(x)
+                keep[c] = ranks <= nn
+            else:  # two.sided
+                ranks = _rank_random_ties_series(col, rng)   # rank(x)
+                n = len(col)
+                keep_top = ranks <= half
+                keep_bot = ranks >= (n - half + 1)
+                keep[c] = keep_top | keep_bot
 
-    t2 = norm_ppf(rankdata(xw.transpose(), axis = 1)/(mat.shape[1]+1))
-    vp = np.matmul(t2, xw)
+        # R does:
+        # xw <- apply(xw, ... )  # xw = original x with NA where not kept
+        # xw <- x/abs(xw)        # => sign(x) at kept positions; NA elsewhere
+        # xw[is.na(xw)] <- 0
+        xw = X.where(keep, np.nan)                 # mask by keep, keep original X where True
+        xw = X.divide(xw.abs())                    # x / abs(xw)
+        xw = xw.fillna(0.0)                        # NA -> 0
 
-    vp = vp * nes
+    # ---- 4) nes <- sqrt(colSums(xw^2)) ----
+    nes_vec = np.sqrt((xw ** 2).sum(axis=0))
 
-    tmp = np.array([vp.values[np.triu_indices(vp.shape[0], 1)],vp.T.values[np.triu_indices(vp.shape[0], 1)]])
-    tmp = np.sum(tmp * tmp ** 2, axis=0) / np.sum(tmp ** 2, axis=0)
+    # ---- 5) column scaling by colSums(abs(xw)) ----
+    col_abs_sum = xw.abs().sum(axis=0).replace(0, np.nan)
+    xw = xw.div(col_abs_sum, axis=1).fillna(0.0)
 
-    vp.values[np.triu_indices(vp.shape[0], 1)] = tmp
-    vp = vp.T
-    vp.values[np.triu_indices(vp.shape[0], 1)] = tmp
-    vp.columns = vp.index
+    # ---- 6) t2 from ranks of ORIGINAL X ----
+    ranks_X = X.rank(axis=0, method="average", na_option="keep")
+    t2 = pd.DataFrame(
+        norm.ppf(ranks_X / (X.shape[0] + 1.0)),
+        index=X.index, columns=X.columns
+    ).fillna(0.0)
 
-    adata.obsp[key_added] = vp
+    # ---- 7) vp <- t(xw) %*% t2  (samples x samples) ----
+    vp = xw.T @ t2
 
-    if copy: return adata
+    # ---- 8) vp <- vp * nes  (column-wise scale) ----
+    vp = vp.mul(nes_vec, axis=0)
+
+    # ---- 9) lower-triangle blend (identical to R) ----
+    vp_np = vp.values.copy()
+    n = vp_np.shape[0]
+    lt = np.tril_indices(n, k=-1)
+    pair = np.vstack([vp_np[lt], vp_np.T[lt]])
+    num = np.sum(pair * (pair ** 2), axis=0)
+    den = np.sum(pair ** 2, axis=0)
+    tmp = np.divide(num, den, out=np.zeros_like(num), where=den != 0)
+
+    vp_np[lt] = tmp
+    vp_np_T = vp_np.T
+    vp_np_T[lt] = tmp
+    vp_np = vp_np_T.T
+
+    out = pd.DataFrame(vp_np, index=X.columns, columns=X.columns)
+    out = out.loc[sample_names, sample_names]  # preserve input order
+
+    if store_in_adata:
+        try:
+            import anndata as ad
+            if isinstance(nes, ad.AnnData):
+                nes.obsp[key_added] = out
+        except Exception:
+            pass
+
+    return out
 
 def _aracne3_to_regulon(
     net_file,
@@ -671,57 +770,31 @@ def _adjust_p_values(p_values):
     _, corrected_p_values, _, _ = multitest.multipletests(p_values, method='fdr_bh')
     return corrected_p_values
 
-def _nes_to_pval_df(dat_df, lower_tail=True, adjust = True, axs = 1, neg_log = False):
-    """\
-    Compute (adjusted) p-value associated to the viper-computed NES in a pd.DataFrame.
-
-    Parameters
-    ----------
-    dat_df
-        A pd.Series or pd.DataFrame containing protein activity (NES), pathways (NES) data or
-        Stouffer-integrated NES data, where rows are observations/samples (e.g. cells or groups) and
-        columns are features (e.g. proteins or pathways).
-    lower_tail (default: True)
-        If `True` (default), probabilities are P(X <= x)
-        If `False`, probabilities are P(X > x)
-    adjust (default: True)
-        If `True`, returns adjusted p values using FDR Benjamini-Hochberg procedure.
-        If `False`, does not adjust p values
-    axs (default: 1)
-        axis along which to perform the p-value correction (Used only if the input is a pd.DataFrame).
-        Possible values are 0 or 1.
-
-    Returns
-    -------
-    A pd.Series or pd.DataFrame objects of (adjusted) p-values.
-
-    References
-    ----------
-    Benjamini, Y., & Hochberg, Y. (1995). Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing.
-        Journal of the Royal Statistical Society. Series B (Methodological), 57(1), 289–300.
-        http://www.jstor.org/stable/2346101
-    """
-
+def _nes_to_pval_df(
+    dat_df,
+    lower_tail=True,
+    adjust=True,
+    axs=1,
+    neg_log=False,
+    pseudocount=1e-300
+):
     if lower_tail == False:
         p_values_array = norm_sf(dat_df)
-
     elif lower_tail == True:
         p_values_array = 2 * norm_sf(np.abs(dat_df))
-
     else:
-    	raise ValueError("'lower_tail' must be either True or False.")
-
-
+        raise ValueError("'lower_tail' must be either True or False.")
+    
     if dat_df.ndim == 1:
-    # Calculate P values and corrected P values
-        if adjust==True:
+        # Calculate P values and corrected P values
+        if adjust == _aracne3_to_regulon:
             _, p_values_array, _, _ = multitest.multipletests(p_values_array, method='fdr_bh')
-            # Generate pd.DataFrames for (adjusted) p values
+        # Generate pd.DataFrames for (adjusted) p values
         p_values_df = pd.Series(p_values_array, index=dat_df.index)
 
     elif dat_df.ndim == 2:
-    # Calculate P values and corrected P values
-        if adjust==True:
+        # Calculate P values and corrected P values
+        if adjust == True:
             # correct p value
             p_values_array = np.apply_along_axis(_adjust_p_values, axis=axs, arr=p_values_array)
 
@@ -733,9 +806,11 @@ def _nes_to_pval_df(dat_df, lower_tail=True, adjust = True, axs = 1, neg_log = F
     else:
         raise ValueError("dat_df must have 1 or 2 dimensions.")
 
-    if neg_log: p_values_df = -1 * np.log10(norm_sf(p_values_df))
+    if neg_log:
+        p_values_df = -1 * np.log10(p_values_df + pseudocount)
 
     return p_values_df
+
 
 def _nes_to_pval(
     adata,
@@ -745,19 +820,34 @@ def _nes_to_pval(
     adjust = True,
     axs = 1,
     neg_log = False,
+    pseudocount = 1e-300,
     copy = False
 ):
     if copy: adata = adata.copy()
 
     if isinstance(adata, pd.DataFrame) or isinstance(adata, np.ndarray):
-        adata[:] = _nes_to_pval_df(adata, lower_tail, adjust, axs, neg_log)
+        adata[:] = _nes_to_pval_df(
+            adata,
+            lower_tail,
+            adjust,
+            axs,
+            neg_log,
+            pseudocount
+        )
     elif(isinstance(adata, anndata.AnnData) or isinstance(adata, anndata._core.anndata.AnnData)):
         if layer is None:
             input_array = adata.X
         else:
             input_array = adata.layers[layer]
 
-        transformed_array = _nes_to_pval_df(input_array, lower_tail, adjust, axs, neg_log)
+        transformed_array = _nes_to_pval_df(
+            input_array,
+            lower_tail,
+            adjust,
+            axs,
+            neg_log,
+            pseudocount
+        )
 
         if key_added is not None:
             adata.layers[key_added] = transformed_array

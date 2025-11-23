@@ -19,7 +19,7 @@ def __merge_dicts(dict1, dict2):
     res = {**dict1, **dict2}
     return res
 def __get_msigdb_reg_path(collection):
-    reg_path = __get_pyviper_dir() + "/data/regulons/msigdb-" + collection + "-as-regulon.tsv"
+    reg_path = __get_pyviper_dir() + "/data/regulons/msigdb-" + collection + "-as-regulon.parquet.gzip"
     return(reg_path)
 def __load_msigdb_from_tsv(collection):
     reg_path = __get_msigdb_reg_path(collection.lower())
