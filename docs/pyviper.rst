@@ -1,13 +1,13 @@
 pyviper package
 =================
 
-pyviper.aREA
+pyviper\.aREA
 --------------------
 
 .. autofunction:: pyviper.aREA
    :noindex:
 
-pyviper.NaRnEA
+pyviper\.NaRnEA
 --------------------
 
 .. autofunction:: pyviper.NaRnEA
@@ -26,7 +26,7 @@ pyviper\.config
 pyviper.Interactome
 -------------------------
 
-.. automodule:: pyviper.Interactome
+.. autoclass:: pyviper.Interactome
    :members:
    :undoc-members:
    :show-inheritance:
@@ -43,8 +43,8 @@ pyviper\.load
 .. autofunction:: pyviper.load.coTFs
 .. autofunction:: pyviper.load.human2mouse
 .. autofunction:: pyviper.load.msigdb_regulon
-.. autofunction:: pyviper.tl.sig
-.. autofunction:: pyviper.tl.surf
+.. autofunction:: pyviper.load.sig
+.. autofunction:: pyviper.load.surf
 
 
 pyviper\.pl

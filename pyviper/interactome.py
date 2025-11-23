@@ -324,12 +324,12 @@ class Interactome:
             # missing_pairs_set = all_pairs_set - single_pairs_set
             ## Convert the missing pairs back to a DataFrame
             # missing_pairs_df = pd.DataFrame(list(missing_pairs_set), columns=['regulator', 'target'])
-
+            
             # Using pd.merge avoids expensive set conversion operations
             single_pairs_set = pairs_in_single_df[reg_targ].drop_duplicates()
             mrg = all_pairs_df.merge(single_pairs_set, how='left', on=reg_targ, indicator=True)
             missing_pairs_df = mrg[mrg['_merge'] == 'left_only'][reg_targ]
-
+            
             # Check if regulators in missing_pairs_df are in net_df["regulator"]
             in_net_df = missing_pairs_df['regulator'].isin(net_df['regulator'])
             # Create two DataFrames based on the condition
