@@ -22,12 +22,6 @@ def __get_pax_params(kwargs, cmap_pax):
         pax_kwargs['vcenter'] = 0
     return pax_kwargs
 
-def __get_gex_param(kwargs):
-    if 'cmap' in kwargs:
-        cmap = kwargs['cmap']
-    else:
-        cmap = 'viridis'
-
 def __remove_missing_items(adata, kwargs):
     adata_vars = list(adata.var_names.values) + list(adata.obs.columns.values)
     kwargs = kwargs.copy()

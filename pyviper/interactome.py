@@ -258,7 +258,7 @@ class Interactome:
         when interactome objects have the same epigenetics (e.g. due to being
         made from different datasets of same celltype). MetaVIPER should be used
         instead when you have multiple interactomes with different epigenetics
-        (e.g. due to being made of data with different celltypes). 
+        (e.g. due to being made of data with different celltypes).
 
         Parameters
         ----------
@@ -310,13 +310,13 @@ class Interactome:
         # adding empty rows of 0s so they be all lined up together in a stack
         net_array_list = []
 
-        loop = (tqdm(range(0, n_networks), 'Standardizing network') 
+        loop = (tqdm(range(0, n_networks), 'Standardizing network')
                 if verbose else range(0, n_networks))
         for i in loop:
             # Get the missing pairs from a single dataframe
             net_df = network_list[i]
             pairs_in_single_df = net_df[reg_targ]
-            
+
             ## Convert the columns to sets for faster set operations
             # all_pairs_set = set(map(tuple, all_pairs_df[['regulator', 'target']].values)) # We can just use all_pairs_df which was already computed
             # single_pairs_set = set(map(tuple, pairs_in_single_df[['regulator', 'target']].values))  # We can just use drop_duplicates() again
@@ -324,12 +324,12 @@ class Interactome:
             # missing_pairs_set = all_pairs_set - single_pairs_set
             ## Convert the missing pairs back to a DataFrame
             # missing_pairs_df = pd.DataFrame(list(missing_pairs_set), columns=['regulator', 'target'])
-            
+
             # Using pd.merge avoids expensive set conversion operations
             single_pairs_set = pairs_in_single_df[reg_targ].drop_duplicates()
             mrg = all_pairs_df.merge(single_pairs_set, how='left', on=reg_targ, indicator=True)
             missing_pairs_df = mrg[mrg['_merge'] == 'left_only'][reg_targ]
-            
+
             # Check if regulators in missing_pairs_df are in net_df["regulator"]
             in_net_df = missing_pairs_df['regulator'].isin(net_df['regulator'])
             # Create two DataFrames based on the condition
