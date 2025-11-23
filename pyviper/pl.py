@@ -574,6 +574,7 @@ def draw_graph(adata,
                *,
                plot_pax=True,
                plot_gex=False,
+               cmap_pax="RdBu_r",
                **kwargs):
     """\
     A wrapper for the scanpy function sc.pl.draw_graph.
@@ -949,7 +950,7 @@ def stacked_violin(adata,
     A plot of :class:`~matplotlib.axes.Axes`.
     """
     if plot_pax:
-        pax_kwargs = __parse_var_names(adata, pax_kwargs)
+        pax_kwargs = __parse_var_names(adata, kwargs)
         sc.pl.stacked_violin(adata,**pax_kwargs)
     if plot_gex:
         __add_groupby_to_adata_gex_obs(adata, kwargs)
@@ -983,7 +984,7 @@ def matrixplot(adata,
     A plot of :class:`~matplotlib.axes.Axes`.
     """
     if plot_pax:
-        pax_kwargs = __parse_var_names(adata, pax_kwargs)
+        pax_kwargs = __parse_var_names(adata, kwargs)
         sc.pl.matrixplot(adata,**pax_kwargs)
     if plot_gex:
         __add_groupby_to_adata_gex_obs(adata, kwargs)
