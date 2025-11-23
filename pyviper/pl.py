@@ -46,6 +46,8 @@ def __parse_var_names(adata, kwargs):
             var_names = [v for v in var_names if v in adata_vars]
         elif isinstance(var_names, dict):
             for key in var_names:
+                if isinstance(var_names[key], str):
+                    var_names[key] = [var_names[key]]
                 var_names[key] = [v for v in var_names[key] if v in adata_vars]
         else:
             raise ValueError("var_names must be list or dict.")
@@ -1234,7 +1236,7 @@ def vis_net(
 ):
     """\
     Creates an igraph to visualize the relationship between regulators and targets of an Interactome object.
-    
+
     Parameters
     ----------
     net_Pruned
@@ -1254,7 +1256,7 @@ def vis_net(
     figsize: default: (15, 15)
         figure dimensions for Matplotlib.
     """
-    
+
     _vis_net(
         net_Pruned,
         pax_data,
