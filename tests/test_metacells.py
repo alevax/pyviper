@@ -7,13 +7,13 @@ import scanpy as sc
 
 import pyviper
 
-rootdir = dirname(dirname(abspath(__file__)))
+resources_dir = join(dirname(abspath(__file__)), "resources")
 
 class TestMetacells(unittest.TestCase):
     def setUp(self):
-        self.data = ad.read_text(join(rootdir, "test/unit_tests/test_2/test_2_inputs/LCRN1_gExpr_GES.tsv")).T
+        self.data = ad.read_text(join(resources_dir, "LCRN1_gExpr_GES.tsv")).T
         self.data.raw = self.data
-        sc.pp.calculate_qc_metrics(self.data, inplace=True)
+        sc.pp.calculate_qc_metrics(self.data, inplace=True) 
         sc.pp.normalize_total(self.data, inplace=True,target_sum=1e6)
         sc.pp.log1p(self.data)
         sc.pp.highly_variable_genes(self.data, flavor="seurat", n_top_genes=2000, inplace=True)

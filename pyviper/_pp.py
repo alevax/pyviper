@@ -773,31 +773,28 @@ def _adjust_p_values(p_values):
 def _nes_to_pval_df(
     dat_df,
     lower_tail=True,
-    adjust = True,
-    axs = 1,
-    neg_log = False,
-    pseudocount = 1e-300
+    adjust=True,
+    axs=1,
+    neg_log=False,
+    pseudocount=1e-300
 ):
     if lower_tail == False:
         p_values_array = norm_sf(dat_df)
-
     elif lower_tail == True:
         p_values_array = 2 * norm_sf(np.abs(dat_df))
-
     else:
-    	raise ValueError("'lower_tail' must be either True or False.")
-
-
+        raise ValueError("'lower_tail' must be either True or False.")
+    
     if dat_df.ndim == 1:
         # Calculate P values and corrected P values
-        if adjust==True:
+        if adjust == _aracne3_to_regulon:
             _, p_values_array, _, _ = multitest.multipletests(p_values_array, method='fdr_bh')
-            # Generate pd.DataFrames for (adjusted) p values
+        # Generate pd.DataFrames for (adjusted) p values
         p_values_df = pd.Series(p_values_array, index=dat_df.index)
 
     elif dat_df.ndim == 2:
-    # Calculate P values and corrected P values
-        if adjust==True:
+        # Calculate P values and corrected P values
+        if adjust == True:
             # correct p value
             p_values_array = np.apply_along_axis(_adjust_p_values, axis=axs, arr=p_values_array)
 
@@ -809,9 +806,11 @@ def _nes_to_pval_df(
     else:
         raise ValueError("dat_df must have 1 or 2 dimensions.")
 
-    if neg_log: p_values_df = -1 * np.log10(p_values_df + pseudocount)
+    if neg_log:
+        p_values_df = -1 * np.log10(p_values_df + pseudocount)
 
     return p_values_df
+
 
 def _nes_to_pval(
     adata,

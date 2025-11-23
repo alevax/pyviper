@@ -9,12 +9,12 @@ import scanpy as sc
 
 import pyviper
 
-rootdir = dirname(dirname(abspath(__file__)))
+resources_dir = join(dirname(abspath(__file__)), "resources")
 
 class TestPathwayEnrichment(unittest.TestCase):
     def setUp(self):
-        self.data = ad.read_csv(join(rootdir, "test/unit_test_1/ges.csv")).T
-        table = pd.read_table(join(rootdir, "test/unit_test_1/test_net1.tsv"), sep="\t")
+        self.data = ad.read_csv(join(resources_dir, "ges.csv")).T
+        table = pd.read_table(join(resources_dir, "test_net1.tsv"), sep="\t")
         self.network = pyviper.Interactome(name="network", net_table=table)
         self.network.filter_targets(self.data.var_names)
         

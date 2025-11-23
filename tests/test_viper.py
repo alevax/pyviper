@@ -11,13 +11,13 @@ import scanpy as sc
 
 import pyviper
 
-rootdir = dirname(dirname(abspath(__file__)))
+resources_dir = join(dirname(abspath(__file__)), "resources")
 
 class TestPyViper(unittest.TestCase):
     def setUp(self):
-        self.data = ad.read_csv(join(rootdir, "test/unit_test_1/ges.csv")).T
-        table1 = pd.read_table(join(rootdir, "test/unit_test_1/test_net1.tsv"), sep="\t")
-        table2 = pd.read_table(join(rootdir, "test/unit_test_1/test_net2.tsv"), sep="\t")
+        self.data = ad.read_csv(join(resources_dir, "ges.csv")).T
+        table1 = pd.read_table(join(resources_dir, "test_net1.tsv"), sep="\t")
+        table2 = pd.read_table(join(resources_dir, "test_net2.tsv"), sep="\t")
         self.network1 = pyviper.Interactome(name="net1", net_table=table1)
         self.network2 = pyviper.Interactome(name="net2", net_table=table2)
         self.network1.filter_targets(self.data.var_names)
@@ -30,7 +30,7 @@ class TestPyViper(unittest.TestCase):
             enrichment="area",
             eset_filter=True
         )
-        expected_activity = ad.read_csv(join(rootdir, "test/unit_test_1/viper_area_nes_R.csv")).T
+        expected_activity = ad.read_csv(join(resources_dir, "viper_area_nes_R.csv")).T
         compare_dataframes(activity.to_df(), expected_activity.to_df())
 
     def test_viper_narnea(self):
@@ -40,10 +40,10 @@ class TestPyViper(unittest.TestCase):
             enrichment="narnea",
             eset_filter=False
         )
-        activity_expected_nes = ad.read_csv(join(rootdir, "test/unit_test_1/viper_narnea_nes_R.csv")).T
+        activity_expected_nes = ad.read_csv(join(resources_dir, "viper_narnea_nes_R.csv")).T
         compare_dataframes(activity.to_df(), activity_expected_nes.to_df(), prefix="NaRnEA NES")
 
-        activity_expected_pes = ad.read_csv(join(rootdir, "test/unit_test_1/viper_narnea_pes_R.csv")).T
+        activity_expected_pes = ad.read_csv(join(resources_dir, "viper_narnea_pes_R.csv")).T
         compare_dataframes(activity.to_df(layer="pes"), activity_expected_pes.to_df(), prefix="NaRnEA PES")
 
     def test_viper_area_scale(self):
@@ -54,7 +54,7 @@ class TestPyViper(unittest.TestCase):
             enrichment="area",
             eset_filter=True
         )
-        expected_activity = ad.read_csv(join(rootdir, "test/unit_test_1/viper_area_nes_scale_R.csv")).T
+        expected_activity = ad.read_csv(join(resources_dir, "viper_area_nes_scale_R.csv")).T
         compare_dataframes(activity.to_df(), expected_activity.to_df(), max_tol=None, mean_tol=0.01, prefix="aREA NES, scale")
 
     def test_viper_area_rank(self):
@@ -65,7 +65,7 @@ class TestPyViper(unittest.TestCase):
             enrichment="area",
             eset_filter=True
         )
-        expected_activity = ad.read_csv(join(rootdir, "test/unit_test_1/viper_area_nes_rank_R.csv")).T
+        expected_activity = ad.read_csv(join(resources_dir, "viper_area_nes_rank_R.csv")).T
         compare_dataframes(activity.to_df(), expected_activity.to_df(), prefix="aREA NES, rank")
 
     def test_viper_area_mad(self):
@@ -76,7 +76,7 @@ class TestPyViper(unittest.TestCase):
             enrichment="area",
             eset_filter=True
         )
-        expected_activity = ad.read_csv(join(rootdir, "test/unit_test_1/viper_area_nes_mad_R.csv")).T
+        expected_activity = ad.read_csv(join(resources_dir, "viper_area_nes_mad_R.csv")).T
         compare_dataframes(activity.to_df(), expected_activity.to_df(), max_tol=None, mean_tol=0.01, prefix="aREA NES, mad")
 
     def test_viper_area_ttest(self):
@@ -87,8 +87,20 @@ class TestPyViper(unittest.TestCase):
             enrichment="area",
             eset_filter=True
         )
-        expected_activity = ad.read_csv(join(rootdir, "test/unit_test_1/viper_area_nes_ttest_R.csv")).T
+        expected_activity = ad.read_csv(join(resources_dir, "viper_area_nes_ttest_R.csv")).T
         compare_dataframes(activity.to_df(), expected_activity.to_df(), max_tol=None, mean_tol=0.01, prefix="aREA NES, ttest")
+
+    def test_pleiotropy_correction(self):
+        activity: ad.AnnData = pyviper.viper(
+            gex_data=self.data, 
+            interactome=self.network1,
+            enrichment="area",
+            eset_filter=True,
+            pleiotropy=True,
+            min_targets=0
+        )
+        expected_activity = ad.read_csv(join(resources_dir, "viper_nes_pleiotropy_corrected_R_output.csv")).T
+        compare_dataframes(activity.to_df(), expected_activity.to_df(), max_tol=None, mean_tol=0.01, prefix="aREA Pleiotropy")
 
 
 def compare_dataframes(df1, df2, max_tol=1e-2, mean_tol=1e-6, prefix=""):
