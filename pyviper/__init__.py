@@ -9,4 +9,4 @@ from pyviper.load import *
 from pyviper.pl import *
 from pyviper.tl import *
 
-__version__ = "1.0.8"
+__version__ = "2.0.0"
