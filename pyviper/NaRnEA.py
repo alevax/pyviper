@@ -12,7 +12,7 @@ def NaRnEA(gex_data, interactome, layer = None, eset_filter = False, min_targets
     The Interactome object must not contain any targets that are not in the
     features of gex_data. This can be accomplished by running:
         interactome.filter_targets(gex_data.var_names)
-    It is highly recommend to do this on the unPruned network and then prune to
+    It is highly recommended to do this on the unpruned network and then prune to
     ensure the pruned network contains a consistent number of targets per
     regulator, all of which exist within gex_data. A regulator that has more
     targets than others will have "boosted" NES scores, such that they cannot be

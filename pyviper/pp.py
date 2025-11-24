@@ -487,7 +487,7 @@ def repr_metacells(
     copy = False
 ):
     """\
-    A tool for create a representative selection of metacells from the data that
+    A tool to create a representative selection of metacells from the data that
     aims to maximize reusing samples from the data, while simultaneously
     ensuring that all neighbors are close to the metacell they construct.
     When using this function, exactly two of the following parameters must be

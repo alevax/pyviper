@@ -45,6 +45,9 @@ def dendrogram(adata,
     ----------
     adata
         Gene expression, protein activity or pathways stored in an anndata object.
+    groupby
+        The name of the column of observations in adata to use as clusters, or a
+        cluster vector corresponding to observations.
     key_added : default: None
         The key in adata.uns where the dendrogram should be stored.
     layer : default: None
@@ -236,7 +239,7 @@ def path_enrich(
         corresponds to msigdb regulons: "c2", "c5", "c6", "c7", "h".
     layer : default: None
         The layer in the anndata object to use as the gene expression input.
-    eset_filter : default: False
+    eset_filter : default: True
         Whether to filter out genes not present in the interactome (True) or to
         keep this biological context (False). This will affect gene rankings.
     method : default: None

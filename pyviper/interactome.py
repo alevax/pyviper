@@ -253,7 +253,7 @@ class Interactome:
 
     def integrate(self, network_list, network_weights = None, normalize_likelihoods = False, verbose=False):
         """\
-        Integrate this Interactome object with one or more other Interacome
+        Integrate this Interactome object with one or more other Interactome
         objects to create a consensus network. In general, this should be done
         when interactome objects have the same epigenetics (e.g. due to being
         made from different datasets of same celltype). MetaVIPER should be used
@@ -270,11 +270,11 @@ class Interactome:
             to those in the network list in order. If None, equal weights are
             used.
         normalize_likelihoods : default: False
-            An extra operation that can performed after the integration
+            An extra operation that can be performed after the integration
             operation where within each regulator, likelihood values are ranked
             and scaled from 0 to 1.
         verbose : default: False
-            If `True` prints progress message
+            If `True` prints progress messages
         """
         # self.net_table = pd.concat(self.net_table, net_table)
         if isinstance(network_list, Interactome):

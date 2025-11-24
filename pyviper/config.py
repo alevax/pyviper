@@ -37,7 +37,7 @@ def set_regulators_filepath(group, species, new_filepath):
     if not species in ["human", "mouse"]:
         raise ValueError("Unsupported species: " + str(species))
     if not group in ["tfs", "cotfs", "sig", "surf"]:
-        raise ValueError("Unsupported species: " + str(group))
+        raise ValueError("Unsupported group: " + str(group))
     config['regulators_filepaths'][species][group] = new_filepath
 
 def set_regulators_species_to_use(species):
