@@ -11,7 +11,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setuptools.setup(
     name="viper-in-python",
-    version="1.0.10",
+    version="2.0.0",
     author="Alexander L.E. Wang & Luca Zanella & Zizhao Lin",
     author_email="aw3436@cumc.columbia.edu",
     packages=setuptools.find_packages(),
