@@ -163,4 +163,5 @@ def _vis_net(
         g = _get_graph_from_cluster_data(
             net_table, pax_mean_clust_i, gex_mean_clust_i
         )
-        _plot_blobs(g, layout_alg, seed, figsize)
+        #_plot_blobs(g, layout_alg, seed, figsize)
+        _plot_blobs(g, layout_alg, figsize)
