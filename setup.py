@@ -24,7 +24,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/alevax/pyviper",
     project_urls = {
-    	'Documentation': 'https://alevax.github.io/pyviper/',
+    	'Documentation': 'https://pyviper.readthedocs.io/en/latest/',
     	'Source': 'https://github.com/alevax/pyviper',
     },
     license='Columbia University Non-Commercial Academic Evaluation License',
