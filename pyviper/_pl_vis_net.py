@@ -72,7 +72,7 @@ def _assign_colors_to_nodes(g, pax_mean, gex_mean):
         gex_colors_dict
     )
 
-def _get_graph_from_cluster_data(net_table, pax_mean_clust_i, gex_mean_clust_i):
+def _get_graph_from_cluster_data(net_table, pax_mean_clust_i, gex_mean_clust_i, size_target=2):
     regulators = list(set(net_table['regulator']))
     targets = list(set(net_table['target']))
 
@@ -86,7 +86,7 @@ def _get_graph_from_cluster_data(net_table, pax_mean_clust_i, gex_mean_clust_i):
 
     # Define colors and sizes for nodes
     size_ratio = 15/3.5
-    size_target = 2
+    #size_target = 2
     g.vs['size'] = [size_target*size_ratio if v['name'] in regulators else size_target for v in g.vs]
 
     # Assign colors based on activity/expression of regulators/targets
@@ -127,7 +127,8 @@ def _vis_net(
     cluster_labels = None,
     layout_alg='davidson_harel',
     seed = 0,
-    figsize=(15, 15)
+    figsize=(15, 15),
+    size_target=2
 ):
     random.seed(seed)
     # Filter net_table down to the regulators
@@ -161,7 +162,8 @@ def _vis_net(
         gex_mean_clust_i = gex_mean.loc[clust_i]
 
         g = _get_graph_from_cluster_data(
-            net_table, pax_mean_clust_i, gex_mean_clust_i
+            net_table, pax_mean_clust_i, gex_mean_clust_i,
+            size_target=size_target
         )
         #_plot_blobs(g, layout_alg, seed, figsize)
         _plot_blobs(g, layout_alg, figsize)

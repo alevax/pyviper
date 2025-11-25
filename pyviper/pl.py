@@ -1233,7 +1233,8 @@ def vis_net(
     cluster_labels = None,
     layout_alg='davidson_harel',
     seed = 0,
-    figsize=(15, 15)
+    figsize=(15, 15),
+    size_target=2
 ):
     """\
     Creates an igraph to visualize the relationship between regulators and targets of an Interactome object.
@@ -1256,6 +1257,8 @@ def vis_net(
         Random seed for graph construction.
     figsize: default: (15, 15)
         figure dimensions for Matplotlib.
+    size_target : default: 2
+        Scaling factor for target node sizes.
     """
 
     _vis_net(
@@ -1266,5 +1269,6 @@ def vis_net(
         cluster_labels,
         layout_alg,
         seed,
-        figsize
+        figsize,
+        size_target
     )
