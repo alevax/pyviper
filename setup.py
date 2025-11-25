@@ -27,7 +27,7 @@ setuptools.setup(
     	'Documentation': 'https://alevax.github.io/pyviper/',
     	'Source': 'https://github.com/alevax/pyviper',
     },
-    license='MIT',
+    license='Columbia University Non-Commercial Academic Evaluation License',
     python_requires='>=3.8',
     install_requires=[
         "scipy>=1.10.0",
