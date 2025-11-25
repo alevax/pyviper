@@ -254,7 +254,8 @@ class Interactome:
     def integrate(self, network_list, network_weights = None, normalize_likelihoods = False, verbose=False):
         """\
         Integrate this Interactome object with one or more other Interactome
-        objects to create a consensus network. In general, this should be done
+        objects to create a consensus network. This operation modifies the current 
+        Interactome in place; no new object is returned. In general, this should be done
         when interactome objects have the same epigenetics (e.g. due to being
         made from different datasets of same celltype). MetaVIPER should be used
         instead when you have multiple interactomes with different epigenetics
