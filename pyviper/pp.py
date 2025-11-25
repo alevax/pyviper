@@ -82,7 +82,7 @@ def stouffer(adata,
         from input data. If None, all regulators will be included. Regulator
         sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
     key_added : default: 'stouffer'
-        The slot in adata.uns to store the stouffer signatures.
+        The slot in adata.var to store the stouffer signatures.
     compute_pvals : default: True
         Whether to compute a p-value for each score to return in the results.
     null_iters : default: 1000
@@ -139,7 +139,7 @@ def mwu(adata,
         from input data. If None, all regulators will be included. Regulator
         sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
     key_added : default: 'mwu'
-        The slot in adata.uns to store the MWU signatures.
+        The slot in adata.var to store the MWU signatures.
     compute_pvals : default: True
         Whether to compute a p-value for each score to return in the results.
     verbose : default: True
@@ -197,7 +197,7 @@ def spearman(adata,
         from input data. If None, all regulators will be included. Regulator
         sets must be from one of the following: "tfs", "cotfs", "sig", "surf".
     key_added : default: 'spearman'
-        The slot in adata.uns to store the spearman correlation.
+        The slot in adata.var to store the spearman correlation.
     compute_pvals : default: True
         Whether to compute a p-value for each score to return in the results.
     null_iters : default: 1000
