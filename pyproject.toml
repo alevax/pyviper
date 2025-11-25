@@ -30,7 +30,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/alevax/pyviper"
-Documentation = "https://alevax.github.io/pyviper/"
+Documentation = "https://pyviper.readthedocs.io/en/latest/"
 Source = "https://github.com/alevax/pyviper"
 
 [tool.setuptools]
