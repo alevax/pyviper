@@ -105,7 +105,7 @@ For any other info or queries please write to Alessandro Vasciaveo (av2729@cumc.
 
 ## License
 > [!WARNING]  
-`pyviper` includes a Python-based implementation of the VIPER software. The VIPER software is distributed by Columbia University under a **non-commercial, academic-only evaluation license**, which restricts its use to **non-profit or not-for-profit organizations and prohibits any commercial use, redistribution, or sublicensing** without a separate commercial agreement with Columbia University’s Science and Technology Ventures office. All terms and conditions are specified in the accompanying **[LICENSE](https://github.com/alevax/pyviper/blob/main/LICENSE)** file.
+`pyviper` provides a Python-based implementation of the VIPER software. The VIPER software is distributed by Columbia University under a **non-commercial, academic-only evaluation license**, which restricts its use to **non-profit or not-for-profit organizations and prohibits any commercial use, redistribution, or sublicensing** without a separate commercial agreement with Columbia University’s Science and Technology Ventures office. All terms and conditions are specified in the accompanying **[LICENSE](https://github.com/alevax/pyviper/blob/main/LICENSE)** file.
 
 
 ## Citation
