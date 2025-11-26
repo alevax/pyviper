@@ -1,7 +1,7 @@
 from ._aREA.aREA_meta import aREA_meta
 
 def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets = 30, mvws = 1, verbose = True):
-    """\
+    """
     Allows the individual to infer normalized enrichment scores from gene
     expression data using the Analytical Ranked Enrichment Analysis (aREA)[1]
     function.
