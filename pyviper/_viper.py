@@ -72,7 +72,7 @@ def viper( gex_data,
           pleiotropy: bool = False
           ):
          
-    """\
+    """
     The VIPER (Virtual Inference of Protein-activity by Enriched Regulon
     analysis) algorithm[1] allows individuals to compute protein activity
     using a gene expression signature and an Interactome object that describes
