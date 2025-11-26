@@ -1,0 +1,7 @@
+Whenever you incude a new functionality into pyviper please also:
+1. check that the docstring can be appropriately rendered with Sphynx
+2. if new dependencies are included, please update
+   - pyproject.toml: under dependencies  
+   - setup.py: under install_requires
+   - docs/requirements.txt
+3. if the new function has to be displayed in the documentation, include it into the corresponding module in docs/pyviper.rst 
