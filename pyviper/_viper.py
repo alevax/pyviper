@@ -84,7 +84,9 @@ def viper( gex_data,
 
     The Interactome object must not contain any targets that are not in the
     features of gex_data. This can be accomplished by running:
+    
         interactome.filter_targets(gex_data.var_names)
+    
     It is highly recommend to do this on the unPruned network and then prune to
     ensure the pruned network contains a consistent number of targets per
     regulator, allow of which exist within gex_data.
@@ -159,9 +161,10 @@ def viper( gex_data,
 
     References
     ----------
-    [1] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H., & Califano, A. (2016). Functional characterization of somatic mutations in cancer using network-based inference of protein activity. Nature genetics, 48(8), 838-847.
-
-    [2] Griffin, A. T., Vlahos, L. J., Chiuzan, C., & Califano, A. (2023). NaRnEA: An Information Theoretic Framework for Gene Set Analysis. Entropy, 25(3), 542.
+    [1] Alvarez, M. J., et al. (2016). Functional characterization of somatic mutations in 
+        cancer using network-based inference of protein activity. Nature Genetics, 48(8), 838–847.
+    [2] Griffin, A. T., et al. (2023). NaRnEA: An Information Theoretic Framework for Gene Set 
+        Analysis. Entropy, 25(3), 542.
     """
 
     if njobs != 1 and isinstance(mvws, str):
