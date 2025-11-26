@@ -372,8 +372,8 @@ def nes_to_pval(
     key_added : default: None
         Name of layer to save result in a new layer instead of adata.X.
     lower_tail : default: True
-        If `True` (default), returns two-tailed p-values P(|X| > |x|)
-        If `False`, returns upper-tail probabilities P(X > x)
+        If `True` (default), returns two-tailed p-values `P(|X| > |x|)`.
+        If `False`, returns upper-tail probabilities `P(X > x)`.
         Note: unlike R's `pnorm`, here lower_tail=True compute two-tailed probabilities.
     adjust : default: True
         If `True`, returns adjusted p values using FDR Benjamini-Hochberg procedure.
