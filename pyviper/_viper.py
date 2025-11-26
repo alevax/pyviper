@@ -147,6 +147,9 @@ def viper( gex_data,
         If input anndata already contains 'gex_data' in .uns, the input will
         assumed to be protein activity and will be stored in .uns as 'pax_data'.
         Otherwise, the data will be stored as 'gex_data' in .uns.
+    pleiotropy : default: False
+        Whether to apply correction for pleiotropic regulation with aREA. This typically impacts
+        a small percentage of regulators.
 
     Returns
     -------
