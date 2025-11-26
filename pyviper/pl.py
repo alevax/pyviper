@@ -409,7 +409,7 @@ def pca(adata,
         cmap_gex="viridis",
         cmap_obs="inferno",
         **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.pca.
 
     Parameters
@@ -453,7 +453,7 @@ def umap(adata,
          cmap_gex="viridis",
          cmap_obs="inferno",
          **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.umap.
 
     Parameters
@@ -497,7 +497,7 @@ def tsne(adata,
          cmap_gex="viridis",
          cmap_obs="inferno",
          **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.tsne.
 
     Parameters
@@ -541,7 +541,7 @@ def diffmap(adata,
             cmap_gex="viridis",
             cmap_obs="inferno",
             **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.diffmap.
 
     Parameters
@@ -582,7 +582,7 @@ def draw_graph(adata,
                plot_gex=False,
                cmap_pax="RdBu_r",
                **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.draw_graph.
 
     Parameters
@@ -623,7 +623,7 @@ def spatial(adata,
             plot_pax=True,
             plot_gex=False,
             **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.spatial.
 
     Parameters
@@ -659,7 +659,7 @@ def embedding(adata,
               plot_pax=True,
               plot_gex=False,
               **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.embedding.
 
     Parameters
@@ -697,7 +697,7 @@ def embedding_density(adata,
                       plot_pax=True,
                       plot_gex=False,
                       **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.embedding_density.
 
     Parameters
@@ -730,7 +730,7 @@ def scatter(adata,
             plot_pax=True,
             plot_gex=False,
             **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.scatter.
 
     Parameters
@@ -763,7 +763,7 @@ def heatmap(adata,
             plot_pax=True,
             plot_gex=False,
             **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.heatmap.
 
     Parameters
@@ -799,7 +799,7 @@ def dotplot(adata,
             cmap_gex="Greens",
             spacing_factor = 1,
             **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.dotplot.
 
     Parameters
@@ -847,7 +847,7 @@ def tracksplot(adata,
                plot_pax=True,
                plot_gex=False,
                **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.tracksplot.
 
     Parameters
@@ -884,7 +884,7 @@ def violin(adata,
            w_spacing_factor=1,
            h_spacing_factor=1,
            **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.violin.
 
     Parameters
@@ -937,7 +937,7 @@ def stacked_violin(adata,
                    plot_pax=True,
                    plot_gex=False,
                    **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.stacked_violin.
 
     Parameters
@@ -971,7 +971,7 @@ def matrixplot(adata,
                plot_pax=True,
                plot_gex=False,
                **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.matrixplot.
 
     Parameters
@@ -1005,7 +1005,7 @@ def clustermap(adata,
                plot_pax=True,
                plot_gex=False,
                **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.clustermap.
 
     Parameters
@@ -1036,7 +1036,7 @@ def ranking(adata,
             plot_pax=True,
             plot_gex=False,
             **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.ranking.
 
     Parameters
@@ -1065,7 +1065,7 @@ def dendrogram(adata,
                plot_pax=True,
                plot_gex=False,
                **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.pl.dendrogram.
 
     Parameters
@@ -1103,7 +1103,7 @@ def ss_heatmap(
     h_clust_rows=True,
     h_clust_cols=False
 ):
-    """\
+    """
     A function to display VIPER and gExpr along with multiple rows of metadata with samples organized by silhouette score within each cluster.
 
     Parameters
@@ -1168,7 +1168,7 @@ def mrs(
     top_mrs_list=None,
     mr_col=None
 ):
-    """\
+    """
     A wrapper around pyviper.pl.ss_heatmap to visualize the top master regulators (MRs) from each cluster using the VIPER anndata object.
 
     Parameters
@@ -1236,7 +1236,7 @@ def vis_net(
     figsize=(15, 15),
     size_target=2
 ):
-    """\
+    """
     Creates an igraph to visualize the relationship between regulators and targets of an Interactome object.
 
     Parameters
