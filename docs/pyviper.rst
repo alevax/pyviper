@@ -63,6 +63,7 @@ pyviper\.pl
 .. autofunction:: pyviper.pl.spatial
 .. autofunction:: pyviper.pl.embedding
 .. autofunction:: pyviper.pl.embedding_density
+.. autofunction:: pyviper.pl.scatter
 .. autofunction:: pyviper.pl.heatmap
 .. autofunction:: pyviper.pl.dotplot
 .. autofunction:: pyviper.pl.tracksplot
@@ -72,6 +73,12 @@ pyviper\.pl
 .. autofunction:: pyviper.pl.clustermap
 .. autofunction:: pyviper.pl.ranking
 .. autofunction:: pyviper.pl.dendrogram
+.. autofunction:: pyviper.pl.ss_heatmap
+.. autofunction:: pyviper.pl.mrs
+.. autofunction:: pyviper.pl.vis_net
+
+
+
 
 pyviper\.pp
 ----------------
@@ -101,7 +108,7 @@ pyviper\.tl
 .. autofunction:: pyviper.tl.dendrogram
 .. autofunction:: pyviper.tl.oncomatch
 .. autofunction:: pyviper.tl.find_top_mrs
-.. autofunction:: pyviper.tl.path_enr
+.. autofunction:: pyviper.tl.path_enrich
 
 pyviper.viper
 --------------------
