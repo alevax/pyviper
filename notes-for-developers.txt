@@ -5,3 +5,10 @@ Whenever you incude a new functionality into pyviper please also:
    - setup.py: under install_requires
    - docs/requirements.txt
 3. if the new function has to be displayed in the documentation, include it into the corresponding module in docs/pyviper.rst 
+4. You can test locally whether the documentation is appropriately rendered following: https://gamifyit-docs.readthedocs.io/en/latest/dev-manuals/readthedocs/test-locally.html.
+   The main steps after setting up the environment as described in the link, from the pyviper folder include running:
+      cd docs
+      pip install -r requirements.txt  
+      make html             
+      cd ..
+   
