@@ -1,7 +1,7 @@
 from ._NaRnEA.NaRnEA_meta import NaRnEA_meta
 
 def NaRnEA(gex_data, interactome, layer = None, eset_filter = False, min_targets = 30, verbose = True):
-    """\
+    """
     Allows the individual to infer normalized enrichment scores and proportional
     enrichment scores from gene expression data using the Nonparametric
     Analytical Rank-based Enrichment Analysis (NaRnEA)[1] function.
