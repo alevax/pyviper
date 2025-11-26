@@ -11,3 +11,6 @@ numpy
 joblib
 statsmodels
 loompy
+leidenalg
+pyarrow
+matplotlib
