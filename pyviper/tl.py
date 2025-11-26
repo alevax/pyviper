@@ -10,7 +10,7 @@ def pca(adata,
         layer=None,
         filter_by_feature_groups=None, # ["tfs", "cotfs", "sig", "surf"],
         **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.tl.pca.
 
     Parameters
@@ -38,7 +38,7 @@ def dendrogram(adata,
                layer=None,
                filter_by_feature_groups=None, # ["tfs", "cotfs", "sig", "surf"],
                **kwargs):
-    """\
+    """
     A wrapper for the scanpy function sc.tl.dendrogram.
 
     Parameters
@@ -76,7 +76,7 @@ def oncomatch(pax_data_to_test,
                key_added = 'om',
                return_as_df = False,
                copy = False):
-    """\
+    """
     The OncoMatch algorithm[1] assesses the overlap in differentially active MR
     proteins between two sets of samples (e.g. to validate GEMMs as effective
     models of human tumor samples). It does so by computing -log10 p-values for
@@ -147,7 +147,7 @@ def find_top_mrs(adata,
                  return_as_df = False,
                  copy = False,
                  verbose = True):
-    """\
+    """
     Identify the top N master regulator proteins in a VIPER AnnData object
 
     Parameters
@@ -226,7 +226,7 @@ def path_enrich(
     batch_size=10000,
     verbose=True
 ):
-    """\
+    """
     Run the variation of VIPER that is specific to pathway enrichment analysis:
     a single interactome and min_targets is set to 0.
 
