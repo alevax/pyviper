@@ -5,13 +5,15 @@ def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets =
     Allows the individual to infer normalized enrichment scores from gene
     expression data using the Analytical Ranked Enrichment Analysis (aREA)[1]
     function.
-
+    
     It is the original basis of the VIPER (Virtual Inference of Protein-activity
     by Enriched Regulon analysis) algorithm.
 
     The Interactome object must not contain any targets that are not in the
     features of gex_data. This can be accomplished by running:
+
         interactome.filter_targets(gex_data.var_names)
+    
     It is highly recommended to do this on the unPruned network and then prune
     to ensure the pruned network contains a consistent number of targets per
     regulator, all of which exist within gex_data. A consistent number of
