@@ -357,7 +357,7 @@ def nes_to_pval(
     pseudocount = 1e-300,
     copy = False
 ):
-    """\
+    """
     Transform VIPER-computed NES into p-values.
 
     Parameters
@@ -372,9 +372,9 @@ def nes_to_pval(
     key_added : default: None
         Name of layer to save result in a new layer instead of adata.X.
     lower_tail : default: True
-    	If `True` (default), returns two-tailed p-values P(|X| > |x|)
-    	If `False`, returns upper-tail probabilities P(X > x)
-		Note: unlike R's `pnorm`, here lower_tail=True compute two-tailed probabilities.
+        If `True` (default), returns two-tailed p-values P(|X| > |x|)
+        If `False`, returns upper-tail probabilities P(X > x)
+        Note: unlike R's `pnorm`, here lower_tail=True compute two-tailed probabilities.
     adjust : default: True
         If `True`, returns adjusted p values using FDR Benjamini-Hochberg procedure.
         If `False`, does not adjust p values
@@ -390,15 +390,15 @@ def nes_to_pval(
 
     Returns
     -------
-    Saves the input data as a transformed version. If key_added is specified,
+    Saves the input data as a transformed version. If key_added is specified, 
     saves the results in adata.layers[key_added].
 
     References
     ----------
     Benjamini, Y., & Hochberg, Y. (1995). Controlling the False Discovery Rate:
     A Practical and Powerful Approach to Multiple Testing.
-        Journal of the Royal Statistical Society. Series B (Methodological),
-        57(1), 289–300. http://www.jstor.org/stable/2346101
+    Journal of the Royal Statistical Society. Series B (Methodological),
+    57(1), 289–300. http://www.jstor.org/stable/2346101
     """
     return _nes_to_pval(adata, layer, key_added, lower_tail, adjust, axs, neg_log, copy)
 

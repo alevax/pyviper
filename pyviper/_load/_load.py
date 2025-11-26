@@ -104,29 +104,30 @@ def surf(species = None, path_to_surf = None):
     return load_surf(species, path_to_surf)
 
 def msigdb_regulon(collection):
-    """\
+    """
     Retrieves an object or a list of objects of class Interactome from pyviper's
     data folder containing a set of pathways from the Molecular Signatures
     Database (MSigDB), downloaded from https://www.gsea-msigdb.org/gsea/msigdb.
-    These collections can be from one of the following:
-        'h' for Hallmark gene sets. Coherently expressed signatures derived by
-        aggregating many MSigDB gene sets to represent well-defined biological
-        states or processes.
-        'c2' for curated gene sets. From online pathway databases, publications
-        in PubMed, and knowledge of domain experts.
-        'c5' for ontology gene sets. Consists of genes annotated by the same
-        ontology term.
-        'c6' for oncogenic signature gene sets. Defined directly from microarray
-        gene expression data from cancer gene perturbations.
-        'c7' for immunologic signature gene sets. Represents cell states and
+    
+    Collections can be one of the following:
+
+    - 'h' for Hallmark gene sets. Coherently expressed signatures derived by
+       aggregating many MSigDB gene sets to represent well-defined biological
+       states or processes.
+    - 'c2' for curated gene sets. From online pathway databases, publications
+       in PubMed, and knowledge of domain experts.
+    - 'c5' for ontology gene sets. Consists of genes annotated by the same
+       ontology term.
+    - 'c6' for oncogenic signature gene sets. Defined directly from microarray
+       gene expression data from cancer gene perturbations.
+    - 'c7' for immunologic signature gene sets. Represents cell states and
         perturbations within the immune system.
 
     Parameters
     ----------
-    collection
+    collection : str or list of str
         A individual string or a list of strings containing the following:
-        ["h", "c2", "c5", "c6", "c7"]
-        corresponding to the collections above.
+        ["h", "c2", "c5", "c6", "c7"], corresponding to the collections above.
 
     Returns
     -------

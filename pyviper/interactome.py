@@ -17,36 +17,37 @@ class Interactome:
     # class initialization
     """
     Create an Interactome object to contain the results of ARACNe.
-    This object describes the relationship between regulator proteins (e.g.
+    This object describes the relationship between regulator proteins (e.g.,
     TFs and CoTFs) and their downstream target genes with mor (Mode Of
-    Regulation, e.g. spearman correlation) indicating directionality and
-    likelihood (e.g. mutual information) indicating weight of association.
+    Regulation, e.g., spearman correlation) indicating directionality and
+    likelihood (e.g., mutual information) indicating weight of association.
     An Interactome object can be given to pyviper.viper along with a gene
     expression signature to generate a protein activity matrix with the
     VIPER (Virtual Inference of Protein-activity by Enriched Regulon
-    analysis) algorithm[1].
+    analysis) algorithm [1].
 
     Parameters
     ----------
-    name
-        A filepath to one's disk to store the Interactome.
-    net_table : default: None
-        Either
-        (1) a pd.DataFrame containing four columns in this order:
-            "regulator", "target", "mor", "likelihood"
-        (2) a filepath to this pd.DataFrame stored either as a .csv,
-        .tsv, .parquet, .parquet.gzip, .pkl, or .loom.
-        (3) a filepath to an Interactome object stored as a .pkl.
-    input_type : default: None
+    name : str
+        A filepath on disk to store the Interactome.
+    net_table : pd.DataFrame or str, default: None
+        Either:
+        1. A pd.DataFrame containing four columns in this order:
+           "regulator", "target", "mor", "likelihood".
+        2. A filepath to this pd.DataFrame stored as .csv, .tsv, .parquet, 
+           .parquet.gzip, .pkl, or .loom.
+        3. A filepath to an Interactome object stored as a .pkl.
+    input_type : str, default: None
         Only relevant when net_table is a filepath. If None, the input_type
-        will be inferred from the net_table. Otherwise, specify "csv", "tsv"
-        or "pkl".
+        will be inferred from net_table. Otherwise, specify "csv", "tsv", or
+        "pkl".
 
     References
     ----------
-    [1] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., Ye, B. H., & Califano, A. (2016). Functional characterization of somatic
-    mutations in cancer using network-based inference of protein activity.
-    Nature genetics, 48(8), 838-847.
+    [1] Alvarez, M. J., Shen, Y., Giorgi, F. M., Lachmann, A., Ding, B. B., 
+        Ye, B. H., & Califano, A. (2016). Functional characterization of 
+        somatic mutations in cancer using network-based inference of protein 
+        activity. Nature Genetics, 48(8), 838-847.
     """
     def __init__(self, name, net_table=None, input_type=None):
 
@@ -578,29 +579,31 @@ class Interactome:
         verbose = True
     ):
         """
-        Filter targets by choosing by name which ones you intend to keep and
-        which ones you intend remove from this Interactome.
+        Filter targets by specifying which ones to keep or remove from this Interactome.
 
         When working with an anndata object or a gene expression array, it is
         highly recommended to filter the unPruned network before pruning. This
-        is to ensure the pruned network contains a consistent number of targets
-        per regulator regulator, all of which exist within gex_data. A regulator
-        that has more targets than others will have "boosted" NES scores, such
-        that they cannot be compared to those with fewer targets.
-        For example, with an anndata object named gex_data, one may is suggested
-        to do:
+        ensures the pruned network contains a consistent number of targets per
+        regulator, all of which exist within gex_data. A regulator with more
+        targets than others will have "boosted" NES scores that cannot be compared
+        to regulators with fewer targets.
+
+        For example, with an anndata object named `gex_data`, it is suggested to do:
+
+        .. code-block:: python
+
             interactome.filter_targets(gex_data.var_names)
 
         Parameters
         ----------
-        targets_keep : default: None
-            An array containing the names of targets you wish to keep in the
-            network. When left as None, this parameter is not used to filter.
-        targets_remove : default: None
-            An array containing the names of targets you wish to remove from the
-            network. When left as None, this parameter is not used to filter.
-        verbose : default: True
-            Report the number of targets removed during filtering
+        targets_keep : array-like, default: None
+            Names of targets to keep in the network. If None, no targets are kept
+            explicitly.
+        targets_remove : array-like, default: None
+            Names of targets to remove from the network. If None, no targets are
+            removed explicitly.
+        verbose : bool, default: True
+            Report the number of targets removed during filtering.
         """
 
         # Get the number of targets before filtering
@@ -740,14 +743,20 @@ class Interactome:
         """
         Translate the regulators of the Interactome. The current name format of
         the regulators should be one of the following:
-            mouse_symbol, mouse_ensembl, mouse_entrez, human_symbol, human_ensembl or human_entrez
+            
+        - mouse_symbol 
+        - mouse_ensembl 
+        - mouse_entrez 
+        - human_symbol 
+        - human_ensembl 
+        - human_entrez
 
         Parameters
         ----------
-        desired_format
+        desired_format : str
             Desired format can be one of four strings: "mouse_symbol",
             "mouse_ensembl", "mouse_entrez", "human_symbol", "human_ensembl" or "human_entrez".
-        verbose : default: True
+        verbose : bool, default: True
             Report the number of regulators successfully and unsucessfully translated
         """
         # Get the number of regulators before translation
