@@ -45,6 +45,7 @@ pyviper\.load
 .. autofunction:: pyviper.load.msigdb_regulon
 .. autofunction:: pyviper.load.sig
 .. autofunction:: pyviper.load.surf
+.. autofunction:: pyviper.load.pisces_network
 
 
 pyviper\.pl
