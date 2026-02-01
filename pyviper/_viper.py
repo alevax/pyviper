@@ -71,7 +71,7 @@ def viper( gex_data,
           store_input_data=True,
           pleiotropy: bool = False
           ):
-         
+
     """
     The VIPER (Virtual Inference of Protein-activity by Enriched Regulon
     analysis) algorithm[1] allows individuals to compute protein activity
@@ -84,9 +84,9 @@ def viper( gex_data,
 
     The Interactome object must not contain any targets that are not in the
     features of gex_data. This can be accomplished by running:
-    
+
         interactome.filter_targets(gex_data.var_names)
-    
+
     It is highly recommend to do this on the unPruned network and then prune to
     ensure the pruned network contains a consistent number of targets per
     regulator, allow of which exist within gex_data.
@@ -161,9 +161,9 @@ def viper( gex_data,
 
     References
     ----------
-    [1] Alvarez, M. J., et al. (2016). Functional characterization of somatic mutations in 
+    [1] Alvarez, M. J., et al. (2016). Functional characterization of somatic mutations in
         cancer using network-based inference of protein activity. Nature Genetics, 48(8), 838–847.
-    [2] Griffin, A. T., et al. (2023). NaRnEA: An Information Theoretic Framework for Gene Set 
+    [2] Griffin, A. T., et al. (2023). NaRnEA: An Information Theoretic Framework for Gene Set
         Analysis. Entropy, 25(3), 542.
     """
 
@@ -320,21 +320,21 @@ def viper( gex_data,
                 op.uns['gex_data'] = gex_data
         # ---- Pleiotropy hook (placeholder) ----
     if pleiotropy and verbose:
-        print("[pleiotropy] hook reached")   
+        print("[pleiotropy] hook reached")
 
  # ---- Pleiotropy post-processing (TableToInteractome → ShadowRegulon_py → areareg) ----
     if pleiotropy:
 
         # progress bar (optional)
         try:
-            from tqdm import tqdm
+            from tqdm import tqdm as tqdm_pleiotropy
             try:
                 # joblib integration
                 from tqdm.contrib import tqdm_joblib
             except Exception:
                 tqdm_joblib = None
         except Exception:
-            def tqdm(x, **kwargs):
+            def tqdm_pleiotropy(x, **kwargs):
                 return x
             tqdm_joblib = None
 
@@ -418,7 +418,7 @@ def viper( gex_data,
         if n_workers > 1:
             try:
                 if verbose and tqdm_joblib is not None:
-                    with tqdm_joblib(tqdm(total=len(samples), desc="[pleiotropy] samples", unit="sample")):
+                    with tqdm_joblib(tqdm_pleiotropy(total=len(samples), desc="[pleiotropy] samples", unit="sample")):
                         results = Parallel(n_jobs=n_workers, backend="loky", prefer="processes")(
                             delayed(_run_one)(s) for s in samples
                         )
@@ -434,7 +434,7 @@ def viper( gex_data,
         if results is None:
             if verbose:
                 results = []
-                for s in tqdm(samples, desc="[pleiotropy] samples", unit="sample"):
+                for s in tqdm_pleiotropy(samples, desc="[pleiotropy] samples", unit="sample"):
                     results.append(_run_one(s))
             else:
                 results = [_run_one(s) for s in samples]
