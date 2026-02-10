@@ -12,3 +12,7 @@ Whenever you incude a new functionality into pyviper please also:
       make html             
       cd ..
    
+Whenever you are about to release I new version, make sure to update:
+-setup.py to the new version tag
+-pyproject.toml to the new version tag
+-pyviper/__init__.py to the new version tag
