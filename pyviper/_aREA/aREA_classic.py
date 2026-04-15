@@ -24,86 +24,55 @@ def norm_ppf(x):
 def sigT(x, slope = 20, inflection = 0.5):
     return (1 - 1/(1 + np.exp(slope * (x - inflection))))
 
-def rankdata_torch_ordinal(x, device=None, fallback_to_scipy=True, verbose=False):
-    if device is None:
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+def rankdata_torch_ordinal(x, device=None, verbose=False):
 
-    print(f"using device {device}")
-    try:
-        if verbose:
-            print(f"[rankdata_torch] using device={device}")
+    if verbose:
+        print(f"[rankdata_torch] using device={device}")
 
+    with torch.inference_mode():
+        # Move the input matrix to torch
         xt = torch.as_tensor(x, device=device)
+
+        # Rank each row using the double-argsort trick
         order = torch.argsort(xt, dim=1)
-        ranks0 = torch.argsort(order, dim=1)
-        ranks1 = ranks0 + 1
+        ranks = torch.argsort(order, dim=1) + 1
 
-        return ranks1.detach().cpu().numpy().astype(np.float64)
-
-    except Exception as e:
-        if fallback_to_scipy:
-            print(f"[rankdata_torch] failed, falling back to scipy: {e}")
-            return rankdata(x, axis=1)
-        raise
+    # Return ranks on CPU as float64 to match the rest of the code
+    return ranks.detach().cpu().numpy().astype(np.float64)
 
 def tail_prep_and_ndtri_torch(rankMat, gesInds, device=None, verbose=False):
-    
-    if device is None:
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"ndi using device {device}")
 
-    try:
-        if verbose:
-            print(f"[tail_prep_torch] using device={device}")
+    if verbose:
+        print(f"[tail_prep_torch] using device={device}")
 
-        rt = torch.as_tensor(rankMat, device=device, dtype=torch.float64)
+    with torch.inference_mode():
+        # Move the rank matrix and selected gene indices to torch
+        rank_t = torch.as_tensor(rankMat, device=device, dtype=torch.float64)
         gesInds_t = torch.as_tensor(gesInds, device=device, dtype=torch.long)
 
-        # Build 2-tail matrix
-        ges2T = rt / (rt.shape[1] + 1)
-
-        # Build 1-tail matrix
+        # Build the 2-tailed and 1-tailed matrices
+        ges2T = rank_t / (rank_t.shape[1] + 1)
         ges1T = torch.abs(ges2T - 0.5) * 2
         ges1T = ges1T + (1 - torch.max(ges1T)) / 2
 
-        # Slice only intersecting genes before icdf
-        ges2T_sub = ges2T[:, gesInds_t]
-        ges1T_sub = ges1T[:, gesInds_t]
+        # Keep only the intersecting genes
+        ges2T = ges2T[:, gesInds_t]
+        ges1T = ges1T[:, gesInds_t]
 
-        # Avoid exact 0 or 1, which can produce inf in icdf. Just clamp the vals
-        eps = torch.finfo(ges2T_sub.dtype).eps
-        needs_clamp_2 = (ges2T_sub <= 0) | (ges2T_sub >= 1)
-        needs_clamp_1 = (ges1T_sub <= 0) | (ges1T_sub >= 1)
+        # Clamp values away from 0 and 1 so icdf does not produce infinities
+        eps = torch.finfo(torch.float64).eps
+        ges2T = torch.clamp(ges2T, eps, 1 - eps)
+        ges1T = torch.clamp(ges1T, eps, 1 - eps)
 
-        if torch.any(needs_clamp_2):
-            ges2T_sub = torch.clamp(ges2T_sub, eps, 1 - eps)
-        if torch.any(needs_clamp_1):
-            ges1T_sub = torch.clamp(ges1T_sub, eps, 1 - eps)
-
+        # Convert probabilities to z-scores with the inverse normal CDF
         normal = torch.distributions.Normal(
-            torch.tensor(0.0, device=device),
-            torch.tensor(1.0, device=device)
+            torch.tensor(0.0, device=device, dtype=torch.float64),
+            torch.tensor(1.0, device=device, dtype=torch.float64),
         )
+        ges2TQ = normal.icdf(ges2T)
+        ges1TQ = normal.icdf(ges1T)
 
-        ges2TQ = normal.icdf(ges2T_sub)
-        ges1TQ = normal.icdf(ges1T_sub)
-
-        return (
-            ges2TQ.detach().cpu().numpy(),
-            ges1TQ.detach().cpu().numpy(),
-        )
-
-    except Exception as e:
-        print(f"[tail_prep_torch] failed, falling back to numpy/scipy: {e}")
-
-        ges2T = rankMat / (rankMat.shape[1] + 1)
-        ges1T = abs(ges2T - 0.5) * 2
-        ges1T = ges1T + (1 - np.max(ges1T)) / 2
-
-        ges2TQ = norm_ppf(ges2T[:, gesInds])
-        ges1TQ = norm_ppf(ges1T[:, gesInds])
-
-        return ges2TQ, ges1TQ
+    return ges2TQ, ges1TQ
     
 def enrichment_dots_torch_same_output(
     ic_mat,
@@ -113,42 +82,13 @@ def enrichment_dots_torch_same_output(
     samplesIndex,
     device=None,
     verbose=False,
-    fallback_to_cpu=True,
 ):
-    """
-    Compute directed and undirected enrichment using PyTorch while preserving
-    the same output structure as the pandas/numpy implementation.
 
-    Parameters
-    ----------
-    ic_mat : pd.DataFrame
-        targets x regulators
-    mor_mat : pd.DataFrame
-        targets x regulators
-    ges2TQ : torch.Tensor or np.ndarray
-        cells x intersect_genes
-    ges1TQ : torch.Tensor or np.ndarray
-        cells x intersect_genes
-    samplesIndex : pd.Index or list
-        Names of samples/cells
-    device : str or None
-        "cuda", "cpu", or None
-    verbose : bool
-    fallback_to_cpu : bool
+    if verbose:
+        print(f"[enrichment_dots_torch] using device={device}")
 
-    Returns
-    -------
-    dES, uES : pd.DataFrame, pd.DataFrame
-        regulators x cells
-    """
-    if device is None:
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-
-    try:
-        if verbose:
-            print(f"[enrichment_dots_torch] using device={device}")
-
-        # Convert regulon matrices to float64 tensors
+    with torch.inference_mode():
+        # Move interaction confidence and mode of regulation to a tensor
         ic_t = torch.as_tensor(
             ic_mat.to_numpy(dtype=np.float64, copy=False),
             device=device,
@@ -160,58 +100,33 @@ def enrichment_dots_torch_same_output(
             dtype=torch.float64,
         )
 
-        # Make sure ges2TQ / ges1TQ are torch tensors on the same device in float64
-        if not isinstance(ges2TQ, torch.Tensor):
-            ges2TQ = torch.as_tensor(ges2TQ, device=device, dtype=torch.float64)
-        else:
-            ges2TQ = ges2TQ.to(device=device, dtype=torch.float64)
+        # Convert the directional and undirectional z scored to tensor
+        ges2TQ = torch.as_tensor(ges2TQ, device=device, dtype=torch.float64)
+        ges1TQ = torch.as_tensor(ges1TQ, device=device, dtype=torch.float64)
 
-        if not isinstance(ges1TQ, torch.Tensor):
-            ges1TQ = torch.as_tensor(ges1TQ, device=device, dtype=torch.float64)
-        else:
-            ges1TQ = ges1TQ.to(device=device, dtype=torch.float64)
+        # Directed enrichment: (IC * MoR)^T @ ges2TQ^T
+        # Basically dES = sum ocer target genes if ic x mor x directional gene scores
+        d_weights = (ic_t * mor_t).transpose(0, 1)
+        d_scores = torch.matmul(d_weights, ges2TQ.transpose(0, 1))
 
-        # Same math as current code:
-        # dES = (ic_mat * mor_mat).T dot ges2TQ.T
-        d_weights = (ic_t * mor_t).transpose(0, 1)                 # regulators x genes
-        d_scores = torch.matmul(d_weights, ges2TQ.transpose(0, 1)) # regulators x cells
-
-        # uES = ((1 - abs(mor_mat)) * ic_mat).T dot ges1TQ.T
+        # Undirected enrichment: ((1 - abs(MoR)) * IC)^T @ ges1TQ^T
+        # Basically uES = sum over target genes if ic x non-directional weight x extremeness
         u_weights = ((1.0 - torch.abs(mor_t)) * ic_t).transpose(0, 1)
-        u_scores = torch.matmul(u_weights, ges1TQ.transpose(0, 1)) # regulators x cells
+        u_scores = torch.matmul(u_weights, ges1TQ.transpose(0, 1))
 
-        # Convert back to pandas with same labels
-        dES = pd.DataFrame(
-            d_scores.detach().cpu().numpy(),
-            index=ic_mat.columns,
-            columns=samplesIndex,
-        )
-        uES = pd.DataFrame(
-            u_scores.detach().cpu().numpy(),
-            index=ic_mat.columns,
-            columns=samplesIndex,
-        )
+    # Convert back to pandas with the same labels as before
+    dES = pd.DataFrame(
+        d_scores.detach().cpu().numpy(),
+        index=ic_mat.columns,
+        columns=samplesIndex,
+    )
+    uES = pd.DataFrame(
+        u_scores.detach().cpu().numpy(),
+        index=ic_mat.columns,
+        columns=samplesIndex,
+    )
 
-        return dES, uES
-
-    except Exception as e:
-        if not fallback_to_cpu:
-            raise
-
-        print(f"[enrichment_dots_torch] failed, falling back to pandas/numpy: {e}")
-
-        # Fall back to the original logic
-        dES = pd.DataFrame.transpose(pd.DataFrame.mul(ic_mat, mor_mat))
-        dES = dES.dot(np.transpose(
-            ges2TQ.detach().cpu().numpy() if isinstance(ges2TQ, torch.Tensor) else ges2TQ
-        ))
-
-        uES = pd.DataFrame.transpose(pd.DataFrame.mul(1 - abs(mor_mat), ic_mat))
-        uES = uES.dot(np.transpose(
-            ges1TQ.detach().cpu().numpy() if isinstance(ges1TQ, torch.Tensor) else ges1TQ
-        ))
-
-        return dES, uES
+    return dES, uES
 
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 # -----------------------------------------------------------------------------
@@ -219,7 +134,7 @@ def enrichment_dots_torch_same_output(
 # -----------------------------------------------------------------------------
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_targets=30, verbose = True, verbose_timing=True):
+def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_targets=30, device="cpu", rank_ordinal=False, verbose=False, verbose_timing=False):
     """\
     Allows the individual to infer normalized enrichment scores from gene
     expression data using the analytical ranked enrichment analysis (aREA)
@@ -243,7 +158,16 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values.
     """
 
-    device = "cpu"
+    if(verbose): print(f"Using {device} for aREA calculations")
+
+    if device is None:
+        if torch.cuda.is_available():
+            device = "cuda"
+        elif torch.backends.mps.is_available():
+            device = "mps"
+        else:
+            device = "cpu"
+
     # Set the timing variables/functions
     timings = {}
     t_total = time.perf_counter()
@@ -332,8 +256,12 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
 
     # rank transform the GES using the rankdata function from scipy.stats
     if(verbose): print("Rank transforming the data")
-    # rankMat = rankdata(ges_arr, axis = 1)
-    rankMat = rankdata_torch_ordinal(ges_arr, device=device, verbose=verbose)
+    if rank_ordinal:
+        if(verbose): print("Rank transforming the data with ordinal ranking")
+        rankMat = rankdata_torch_ordinal(ges_arr, device=device, verbose=verbose)
+    else:
+        if(verbose): print("Rank transforming the data with averaged ranking")
+        rankMat = rankdata(ges_arr, axis = 1)
 
     # mark the time for ranking and reset the counter
     mark("rankdata", t0)

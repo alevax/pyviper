@@ -1,6 +1,6 @@
 from ._aREA.aREA_meta import aREA_meta
 
-def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets = 30, mvws = 1, verbose = True):
+def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets = 30, mvws = 1, device='cpu', rank_ordinal=False, verbose = True):
     """
     Allows the individual to infer normalized enrichment scores from gene
     expression data using the Analytical Ranked Enrichment Analysis (aREA)[1]
@@ -70,5 +70,7 @@ def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets =
         eset_filter,
         min_targets,
         mvws,
-        verbose
+        device=device,
+        rank_ordinal=rank_ordinal, 
+        verbose=verbose
     )

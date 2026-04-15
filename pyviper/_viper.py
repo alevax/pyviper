@@ -69,6 +69,8 @@ def viper( gex_data,
           return_as_df=False,
           transfer_obs=True,
           store_input_data=True,
+          device='cpu',
+          rank_ordinal=False, 
           pleiotropy: bool = False
           ):
 
@@ -149,6 +151,16 @@ def viper( gex_data,
         If input anndata already contains 'gex_data' in .uns, the input will
         assumed to be protein activity and will be stored in .uns as 'pax_data'.
         Otherwise, the data will be stored as 'gex_data' in .uns.
+    device : default: 'cpu'
+        Whether to use the cpu or gpu on your device for the calculation of the aREA function. Using
+        a gpu can improve the speed of the function.
+    rank_ordinal : default: False
+        (A) Whether to use ordinal ranking from PyTorch instead of averaged ranking from Scipy. Setting to
+        False will use averaged ranking, which is slower but more stable/consistent. 
+        (B) Using the ranks, it then assigns each gene a score based off of the inverse CDF for a 
+        standard distribution (z-like score), so some genes can receive different value. The sign 
+        of the NES is based soley off of the sign of the dES. Therefore, if the dES was already close 
+        to 0, this small difference can have the effect of flipping the sign of some protein NES scores.
     pleiotropy : default: False
         Whether to apply correction for pleiotropic regulation with aREA. This typically impacts
         a small percentage of regulators.
@@ -226,7 +238,7 @@ def viper( gex_data,
                 preOp = aREA(
                     gex_df,
                     interactome, layer, eset_filter,
-                    min_targets, mvws, verbose
+                    min_targets, mvws, device = device, verbose = True
                 )
             else:
                 results = []
@@ -237,7 +249,7 @@ def viper( gex_data,
                                 batch_i*batch_size:batch_i*batch_size+batch_size
                             ],
                             interactome, layer, eset_filter,
-                            min_targets, mvws,
+                            min_targets, mvws, device = device,
                             verbose = False
                         )
                     )
@@ -250,7 +262,7 @@ def viper( gex_data,
                         batch_i*batch_size:batch_i*batch_size+batch_size
                     ],
                     interactome, layer, eset_filter,
-                    min_targets, mvws, verbose
+                    min_targets, mvws, device=device, rank_ordinal=rank_ordinal, verbose=verbose
                 ) for batch_i in range(n_batches)
             )
             preOp = pd.concat(results)
