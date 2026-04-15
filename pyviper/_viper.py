@@ -238,7 +238,7 @@ def viper( gex_data,
                 preOp = aREA(
                     gex_df,
                     interactome, layer, eset_filter,
-                    min_targets, mvws, device = device, verbose = True
+                    min_targets, mvws, device = device, rank_ordinal=rank_ordinal, verbose = True
                 )
             else:
                 results = []
@@ -249,7 +249,7 @@ def viper( gex_data,
                                 batch_i*batch_size:batch_i*batch_size+batch_size
                             ],
                             interactome, layer, eset_filter,
-                            min_targets, mvws, device = device,
+                            min_targets, mvws, device = device, rank_ordinal=rank_ordinal,
                             verbose = False
                         )
                     )
