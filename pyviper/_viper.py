@@ -181,6 +181,9 @@ def viper( gex_data,
 
     if njobs != 1 and isinstance(mvws, str):
         raise ValueError("Manual network assignment can only done with 1 core.")
+    
+    if njobs != 1 and device != 'cpu':
+        raise ValueError("GPU can only be run with 1 core.")
 
     n_max_cores = cpu_count()
     if njobs > n_max_cores:
