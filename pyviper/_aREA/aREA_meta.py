@@ -108,7 +108,7 @@ def consolidate_meta_aREA_results_by_network_matching(netMats):
 # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 
-def aREA_meta(gex_data, interactome, layer = None, eset_filter = False, min_targets = 30, mvws = 1, verbose = True):
+def aREA_meta(gex_data, interactome, layer = None, eset_filter = False, min_targets = 30, mvws = 1, device="cpu", rank_ordinal=False, verbose = True):
     if not isinstance(gex_data, AnnData) and not isinstance(gex_data, pd.DataFrame):
         raise ValueError("gex_data is type: " + str(type(gex_data)) + ". Must be anndata.AnnData or pd.DataFrame.")
 
@@ -144,7 +144,7 @@ def aREA_meta(gex_data, interactome, layer = None, eset_filter = False, min_targ
                 gex_data_subset = gex_data.iloc[net_index_assignments==i,]
 
             if gex_data_subset.shape[0] == 0: continue # for multi-core
-            netMats.append(aREA_classic(gex_data_subset, iObj, layer, eset_filter, min_targets, verbose))
+            netMats.append(aREA_classic(gex_data_subset, iObj, layer, eset_filter, min_targets, device=device, rank_ordinal=rank_ordinal, verbose=verbose))
             n_completed_nets = n_completed_nets + 1
             if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
 
@@ -155,9 +155,9 @@ def aREA_meta(gex_data, interactome, layer = None, eset_filter = False, min_targ
             raise ValueError('mvws must be "auto", an int, or a vector of manual assignments.')
 
         if isinstance(interactome, Interactome):
-            preOp = aREA_classic(gex_data, interactome, layer, eset_filter, min_targets, verbose)
+            preOp = aREA_classic(gex_data, interactome, layer, eset_filter, min_targets, device=device, rank_ordinal=rank_ordinal, verbose=verbose)
         elif len(interactome) == 1:
-            preOp = aREA_classic(gex_data, interactome[0], layer, eset_filter, min_targets, verbose)
+            preOp = aREA_classic(gex_data, interactome[0], layer, eset_filter, min_targets, device=device, rank_ordinal=rank_ordinal, verbose=verbose)
         else:
             # netMats = [aREA(gex_data, iObj, eset_filter, layer) for iObj in interactome]
             netMats = []
@@ -165,7 +165,7 @@ def aREA_meta(gex_data, interactome, layer = None, eset_filter = False, min_targ
             n_completed_nets = 0
             if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
             for iObj in interactome:
-                netMats.append(aREA_classic(gex_data, iObj, layer, eset_filter, min_targets, verbose))
+                netMats.append(aREA_classic(gex_data, iObj, layer, eset_filter, min_targets, device=device, rank_ordinal=rank_ordinal, verbose=verbose))
                 n_completed_nets = n_completed_nets + 1
                 if verbose: print(str(n_completed_nets) + "/" + str(tot_nets) + " networks complete.")
             # Consolidate the data together
