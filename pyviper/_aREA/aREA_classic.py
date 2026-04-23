@@ -73,7 +73,7 @@ def tail_prep_and_ndtri_torch(rankMat, gesInds, device=None, verbose=False):
         ges1TQ = normal.icdf(ges1T)
 
     return ges2TQ, ges1TQ
-    
+
 def enrichment_dots_torch_same_output(
     ic_mat,
     mor_mat,
@@ -191,7 +191,7 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     if (eset_filter):
         # This will affect the rankings of genes by eliminating those not present in the interactome
         tmp = np.unique(np.concatenate((
-            interactome.get_target_names().astype(str), 
+            interactome.get_target_names().astype(str),
             interactome.get_reg_names().astype(str)
         )))
         gex_df = gex_df.iloc[:,gex_df.columns.isin(pd.Series(tmp))]
@@ -238,9 +238,9 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
 
     # rank transform the GES using either the rankdata function from scipy.stats for averaged ranking
     # or pytorch ranking for ordinal, which can be less stable/consistent but faster.
-    # Using the ranks, it then assigns each gene a score based off of the inverse CDF for a 
-    # standard distribution (z-like score), so some genes can receive different value. The sign 
-    # of the NES is based soley off of the sign of the dES. Therefore, if the dES was already close 
+    # Using the ranks, it then assigns each gene a score based off of the inverse CDF for a
+    # standard distribution (z-like score), so some genes can receive different value. The sign
+    # of the NES is based soley off of the sign of the dES. Therefore, if the dES was already close
     # to 0, this small difference can have the effect of flipping the sign of some protein NES scores.
     if rank_ordinal:
         if(verbose): print("Rank transforming the data with ordinal ranking")
@@ -257,7 +257,7 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     # gesInds is a series of indices - the index of every target in the gExpr signature matrix
     # for each of the intersecting genes.
     # To get the one tailed and two tailed matrices, we normalize our rank values between 0 and 1
-    # across each sample, thereby scaling our data across each sample. To do this, we divide each 
+    # across each sample, thereby scaling our data across each sample. To do this, we divide each
     # row of the rankMat by the number of genes plus 1 to get the 2-tailed matrix.
     # For a one tailed test:
     #     (1) since each sample has a range of 0 to 1, we recenter our values at 0 for each
@@ -266,8 +266,8 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     #     (3) return the range of data from 0 to 0.5 to 0 to 1 by multiplying by 2
     # If the maximum value is less than 1, then we add half the difference between 1 and the max
     # value in the matrix to keep all values in the desired range of 0 to 1. This is an extra
-    # normalization procedure. Finally, we apply the inverse CDF of the standard normal distribution 
-    # to obtain the z-like score matrices ges2TQ and ges1TQ. These steps arehandled by the 
+    # normalization procedure. Finally, we apply the inverse CDF of the standard normal distribution
+    # to obtain the z-like score matrices ges2TQ and ges1TQ. These steps arehandled by the
     # helper function tail_prep_and_ndtri_torch().
 
     if(verbose): print("Preparing the 1-tailed / 2-tailed matrices")
@@ -307,12 +307,12 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     # and the tfmode matrix (mor_mat) to get directional weights of the targets in
     # each regulon. We then perform a dot product of these weights with the genes in
     # our 2-tailed z-score matrix ges2TQ to obtain the directed enrichment scores dES.
-    
+
     # For undirected enrichment, we multiply the interaction confidence matrix by
     # (1 - abs(mor_mat)) to get non-directional weights of the targets in each regulon.
     # We then perform a dot product of these weights with the genes in our 1-tailed
     # z-score matrix ges1TQ to obtain the undirected enrichment scores uES.
-    
+
     # These same calculations are now handled in PyTorch by the helper function
     # enrichment_dots_torch_same_output(), which returns the results in the same
     # pandas DataFrame format as before.
