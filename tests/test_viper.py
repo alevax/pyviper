@@ -8,7 +8,6 @@ from os.path import dirname, abspath, join
 import unittest
 import anndata as ad
 import scanpy as sc
-import torch
 
 import pyviper
 

@@ -5,7 +5,6 @@ from os.path import join, dirname, abspath
 import anndata as ad
 import scanpy as sc
 from scipy.stats import rankdata
-import torch
 
 import pyviper
 from pyviper.pp import rank_norm, _median, _mad_from_R

@@ -5,7 +5,6 @@ import unittest
 import anndata as ad
 import scanpy as sc
 import pandas as pd
-import torch
 
 import pyviper
 
