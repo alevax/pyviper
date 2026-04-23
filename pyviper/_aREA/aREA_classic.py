@@ -25,7 +25,6 @@ def sigT(x, slope = 20, inflection = 0.5):
     return (1 - 1/(1 + np.exp(slope * (x - inflection))))
 
 def rankdata_torch_ordinal(x, device=None, verbose=False):
-
     if verbose:
         print(f"[rankdata_torch] using device={device}")
 
@@ -37,8 +36,9 @@ def rankdata_torch_ordinal(x, device=None, verbose=False):
         order = torch.argsort(xt, dim=1)
         ranks = torch.argsort(order, dim=1) + 1
 
-    # Return ranks on CPU as float64 to match the rest of the code
-    return ranks.detach().cpu().numpy().astype(np.float64)
+    dtype = np.float32 if device=="mps" else np.float64
+    # Return ranks on CPU as float64 to match the rest of the code unless MPS
+    return ranks.detach().cpu().numpy().astype(dtype)
 
 def tail_prep_and_ndtri_torch(rankMat, gesInds, device=None, verbose=False):
 
@@ -46,8 +46,10 @@ def tail_prep_and_ndtri_torch(rankMat, gesInds, device=None, verbose=False):
         print(f"[tail_prep_torch] using device={device}")
 
     with torch.inference_mode():
+        dtype = torch.float32 if device == "mps" else torch.float64
+
         # Move the rank matrix and selected gene indices to torch
-        rank_t = torch.as_tensor(rankMat, device=device, dtype=torch.float64)
+        rank_t = torch.as_tensor(rankMat, device=device, dtype=dtype)
         gesInds_t = torch.as_tensor(gesInds, device=device, dtype=torch.long)
 
         # Build the 2-tailed and 1-tailed matrices
@@ -60,17 +62,32 @@ def tail_prep_and_ndtri_torch(rankMat, gesInds, device=None, verbose=False):
         ges1T = ges1T[:, gesInds_t]
 
         # Clamp values away from 0 and 1 so icdf does not produce infinities
-        eps = torch.finfo(torch.float64).eps
+        eps = torch.finfo(dtype).eps
         ges2T = torch.clamp(ges2T, eps, 1 - eps)
         ges1T = torch.clamp(ges1T, eps, 1 - eps)
 
-        # Convert probabilities to z-scores with the inverse normal CDF
-        normal = torch.distributions.Normal(
-            torch.tensor(0.0, device=device, dtype=torch.float64),
-            torch.tensor(1.0, device=device, dtype=torch.float64),
-        )
-        ges2TQ = normal.icdf(ges2T)
-        ges1TQ = normal.icdf(ges1T)
+
+        # Handle the ICDF calculation (The problematic part for MPS)
+        if device == "mps":
+            # Move to CPU for icdf calculation
+            ges2T_cpu = ges2T.cpu()
+            ges1T_cpu = ges1T.cpu()
+
+            normal = torch.distributions.Normal(
+                torch.tensor(0.0, dtype=dtype), # Defaults to CPU
+                torch.tensor(1.0, dtype=dtype)
+            )
+
+            ges2TQ = normal.icdf(ges2T_cpu).to(device)
+            ges1TQ = normal.icdf(ges1T_cpu).to(device)
+        else:
+            # Convert probabilities to z-scores with the inverse normal CDF
+            normal = torch.distributions.Normal(
+                torch.tensor(0.0, device=device, dtype=dtype),
+                torch.tensor(1.0, device=device, dtype=dtype),
+            )
+            ges2TQ = normal.icdf(ges2T)
+            ges1TQ = normal.icdf(ges1T)
 
     return ges2TQ, ges1TQ
 
@@ -88,21 +105,24 @@ def enrichment_dots_torch_same_output(
         print(f"[enrichment_dots_torch] using device={device}")
 
     with torch.inference_mode():
+        cpu_type = np.float32 if device == "mps" else np.float64
+        torch_type = torch.float32 if device == "mps" else torch.float64
+
         # Move interaction confidence and mode of regulation to a tensor
         ic_t = torch.as_tensor(
-            ic_mat.to_numpy(dtype=np.float64, copy=False),
+            ic_mat.to_numpy(dtype=cpu_type, copy=False),
             device=device,
-            dtype=torch.float64,
+            dtype=torch_type,
         )
         mor_t = torch.as_tensor(
-            mor_mat.to_numpy(dtype=np.float64, copy=False),
+            mor_mat.to_numpy(dtype=cpu_type, copy=False),
             device=device,
-            dtype=torch.float64,
+            dtype=torch_type,
         )
 
         # Convert the directional and undirectional z scored to tensor
-        ges2TQ = torch.as_tensor(ges2TQ, device=device, dtype=torch.float64)
-        ges1TQ = torch.as_tensor(ges1TQ, device=device, dtype=torch.float64)
+        ges2TQ = torch.as_tensor(ges2TQ, device=device, dtype=torch_type)
+        ges1TQ = torch.as_tensor(ges1TQ, device=device, dtype=torch_type)
 
         # Directed enrichment: (IC * MoR)^T @ ges2TQ^T
         # Basically dES = sum ocer target genes if ic x mor x directional gene scores
