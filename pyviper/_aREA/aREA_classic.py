@@ -26,7 +26,7 @@ def sigT(x, slope = 20, inflection = 0.5):
 
 def rankdata_torch_ordinal(x, device=None, verbose=False):
     if verbose:
-        print(f"[rankdata_torch] using device={device}")
+        print(f"Rankdata using device={device}")
 
     with torch.inference_mode():
         # Move the input matrix to torch
@@ -43,7 +43,7 @@ def rankdata_torch_ordinal(x, device=None, verbose=False):
 def tail_prep_and_ndtri_torch(rankMat, gesInds, device=None, verbose=False):
 
     if verbose:
-        print(f"[tail_prep_torch] using device={device}")
+        print(f"Tail prep using device={device}")
 
     with torch.inference_mode():
         dtype = torch.float32 if device == "mps" else torch.float64
@@ -102,7 +102,7 @@ def enrichment_dots_torch_same_output(
 ):
 
     if verbose:
-        print(f"[enrichment_dots_torch] using device={device}")
+        print(f"Enrichment using device={device}")
 
     with torch.inference_mode():
         cpu_type = np.float32 if device == "mps" else np.float64
@@ -178,7 +178,7 @@ def aREA_classic(gex_data, interactome, layer = None, eset_filter = False, min_t
     A dataframe of :class:`~pandas.core.frame.DataFrame` containing NES values.
     """
 
-    if(verbose): print(f"Using {device} for aREA calculations")
+    if verbose: print(f"Using {device} for aREA calculations")
 
     # If device is none, check if cuda is available. Otherwise, use cpu
     if device is None:
