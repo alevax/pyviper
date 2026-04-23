@@ -152,8 +152,10 @@ def viper( gex_data,
         assumed to be protein activity and will be stored in .uns as 'pax_data'.
         Otherwise, the data will be stored as 'gex_data' in .uns.
     device : default: 'cpu'
-        Whether to use the cpu or gpu on your device for the calculation of the aREA function. Using
-        a gpu can improve the speed of the function.
+        Whether to use the cpu or gpu on your device for the calculation of the
+        aREA function. Using a gpu can improve the speed of the function. Using
+        'mps' may producte slightly differences (~1E-6) due to rounding given
+        it only processes float.32 and int.32, not float.64 and int64.
     rank_ordinal : default: False
         (A) Whether to use ordinal ranking from PyTorch instead of averaged ranking from Scipy. Setting to
         False will use averaged ranking, which is slower but more stable/consistent.
