@@ -5,6 +5,7 @@ from os.path import join, dirname, abspath
 import anndata as ad
 import scanpy as sc
 from scipy.stats import rankdata
+import torch
 
 import pyviper
 from pyviper.pp import rank_norm, _median, _mad_from_R
@@ -13,7 +14,7 @@ resources_dir = join(dirname(abspath(__file__)), "resources")
 
 class TestRankNorm(unittest.TestCase):
     def setUp(self):
-        self.data = ad.read_text(join(resources_dir, "LCRN1_gExpr_GES.tsv")).T    
+        self.data = ad.read_text(join(resources_dir, "LCRN1_gExpr_GES.tsv")).T
         sc.pp.normalize_total(self.data, inplace=True,target_sum=1e6)
         sc.pp.log1p(self.data)
         sc.pp.highly_variable_genes(self.data, flavor="seurat", n_top_genes=2000, inplace=True)
@@ -54,7 +55,7 @@ class TestIntegrate(unittest.TestCase):
         self.network2.filter_targets(self.data.var_names)
 
         self.activity: ad.AnnData = pyviper.viper(
-            gex_data=self.data, 
+            gex_data=self.data,
             interactome=[self.network1, self.network2],
             enrichment="area",
             eset_filter=True
@@ -62,7 +63,7 @@ class TestIntegrate(unittest.TestCase):
         pyviper.tl.pca(self.activity, filter_by_feature_groups=["tfs","cotfs"], zero_center=True,  svd_solver='arpack', random_state=0)
         sc.pp.neighbors(self.activity, metric="correlation", n_neighbors=20, n_pcs=50, random_state=0)
         sc.tl.leiden(self.activity, resolution=0.1, n_iterations=-1, random_state=0)
-    
+
     def test_stouffer(self):
         integrated = pyviper.pp.stouffer(self.activity, "leiden", filter_by_feature_groups=["tfs","cotfs"], compute_pvals=True, return_as_df=True)
         pvals = integrated.filter(like="pval", axis=0)
@@ -85,12 +86,12 @@ class TestIntegrate(unittest.TestCase):
         stats = integrated.loc[integrated.index.isin(pvals.index), :]
         self.assertTrue(np.all((0 <= pvals.values) & (pvals.values <= 1)))
         self.assertTrue(np.all((-1 <= stats.values) & (stats.values <= 1)))
-        
+
     def test_mean_diffs(self):
-        pyviper.pp._mean_diffs(self.activity, "leiden", filter_by_feature_groups=["tfs","cotfs"], return_as_df=False) 
+        pyviper.pp._mean_diffs(self.activity, "leiden", filter_by_feature_groups=["tfs","cotfs"], return_as_df=False)
         integrated = pyviper.pp._mean_diffs(self.activity, "leiden", filter_by_feature_groups=["tfs","cotfs"], return_as_df=True)
         self.assertAlmostEqual(np.abs((integrated.values - self.activity.var.T.values)).mean(), 0, places=1)
-    
-        
+
+
 if __name__ == '__main__':
     unittest.main()

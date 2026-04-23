@@ -8,6 +8,7 @@ from os.path import dirname, abspath, join
 import unittest
 import anndata as ad
 import scanpy as sc
+import torch
 
 import pyviper
 from test_viper import compare_dataframes
@@ -31,15 +32,15 @@ class TestPyViper(unittest.TestCase):
         )
         self.expected_activity = pd.read_csv(join(resources_dir, "viper_nes_R_output_RVIPER.csv"), index_col=0).T
         compare_dataframes(self.activity.to_df(), self.expected_activity, max_tol=None, mean_tol=0.01, prefix="aREA NES, ttest")
-    
+
     def test_viper_similarity_two_sided(self):
         similarity = pyviper.pp.viper_similarity(
-            nes=self.activity, 
+            nes=self.activity,
             nn=None,
-            ws=(4.0, 2.0), 
+            ws=(4.0, 2.0),
             method="two.sided",
-            random_state=0, 
-            store_in_adata=True, 
+            random_state=0,
+            store_in_adata=True,
             key_added="viper_similarity"
         )
         expected_similarity = pd.read_csv(join(resources_dir, "viper_similarity_R_output_two_sided.csv"), index_col=0).T
@@ -47,12 +48,12 @@ class TestPyViper(unittest.TestCase):
 
     def test_viper_similarity_greater_than(self):
         similarity = pyviper.pp.viper_similarity(
-            nes=self.activity, 
+            nes=self.activity,
             nn=None,
-            ws=(4.0, 2.0), 
+            ws=(4.0, 2.0),
             method="greater",
-            random_state=0, 
-            store_in_adata=True, 
+            random_state=0,
+            store_in_adata=True,
             key_added="viper_similarity"
         )
         expected_similarity = pd.read_csv(join(resources_dir, "viper_similarity_R_output_greater.csv"), index_col=0).T
@@ -60,12 +61,12 @@ class TestPyViper(unittest.TestCase):
 
     def test_viper_similarity_less_than(self):
         similarity = pyviper.pp.viper_similarity(
-            nes=self.activity, 
+            nes=self.activity,
             nn=None,
-            ws=(4.0, 2.0), 
+            ws=(4.0, 2.0),
             method="less",
-            random_state=0, 
-            store_in_adata=True, 
+            random_state=0,
+            store_in_adata=True,
             key_added="viper_similarity"
         )
         expected_similarity = pd.read_csv(join(resources_dir, "viper_similarity_R_output_less.csv"), index_col=0).T
@@ -73,12 +74,12 @@ class TestPyViper(unittest.TestCase):
 
     def test_viper_similarity_50_regulators(self):
         similarity = pyviper.pp.viper_similarity(
-            nes=self.activity, 
+            nes=self.activity,
             nn=50,
-            ws=(4.0, 2.0), 
+            ws=(4.0, 2.0),
             method="less",
-            random_state=0, 
-            store_in_adata=True, 
+            random_state=0,
+            store_in_adata=True,
             key_added="viper_similarity"
         )
         expected_similarity = pd.read_csv(join(resources_dir, "viper_similarity_R_output_50.csv"), index_col=0).T

@@ -8,6 +8,7 @@ from os.path import dirname, abspath, join
 import unittest
 import anndata as ad
 import scanpy as sc
+import torch
 
 import pyviper
 
@@ -22,10 +23,10 @@ class TestPyViper(unittest.TestCase):
         self.network2 = pyviper.Interactome(name="net2", net_table=table2)
         self.network1.filter_targets(self.data.var_names)
         self.network2.filter_targets(self.data.var_names)
-    
+
     def test_viper_area(self):
         activity: ad.AnnData = pyviper.viper(
-            gex_data=self.data, 
+            gex_data=self.data,
             interactome=[self.network1, self.network2],
             enrichment="area",
             eset_filter=True
@@ -35,7 +36,7 @@ class TestPyViper(unittest.TestCase):
 
     def test_viper_narnea(self):
         activity: ad.AnnData = pyviper.viper(
-            gex_data=self.data, 
+            gex_data=self.data,
             interactome=[self.network1, self.network2],
             enrichment="narnea",
             eset_filter=False
@@ -48,7 +49,7 @@ class TestPyViper(unittest.TestCase):
 
     def test_viper_area_scale(self):
         activity: ad.AnnData = pyviper.viper(
-            gex_data=self.data, 
+            gex_data=self.data,
             interactome=[self.network1, self.network2],
             method="scale",
             enrichment="area",
@@ -59,7 +60,7 @@ class TestPyViper(unittest.TestCase):
 
     def test_viper_area_rank(self):
         activity: ad.AnnData = pyviper.viper(
-            gex_data=self.data, 
+            gex_data=self.data,
             interactome=[self.network1, self.network2],
             method="rank",
             enrichment="area",
@@ -70,7 +71,7 @@ class TestPyViper(unittest.TestCase):
 
     def test_viper_area_mad(self):
         activity: ad.AnnData = pyviper.viper(
-            gex_data=self.data, 
+            gex_data=self.data,
             interactome=[self.network1, self.network2],
             method="mad",
             enrichment="area",
@@ -81,7 +82,7 @@ class TestPyViper(unittest.TestCase):
 
     def test_viper_area_ttest(self):
         activity: ad.AnnData = pyviper.viper(
-            gex_data=self.data, 
+            gex_data=self.data,
             interactome=[self.network1, self.network2],
             method="ttest",
             enrichment="area",
@@ -92,7 +93,7 @@ class TestPyViper(unittest.TestCase):
 
     def test_pleiotropy_correction(self):
         activity: ad.AnnData = pyviper.viper(
-            gex_data=self.data, 
+            gex_data=self.data,
             interactome=self.network1,
             enrichment="area",
             eset_filter=True,
@@ -107,19 +108,19 @@ def compare_dataframes(df1, df2, max_tol=1e-2, mean_tol=1e-6, prefix=""):
     # Check if the index sets are the same
     if set(df1.index) != set(df2.index):
         raise ValueError("The index sets of the two DataFrames are not the same.")
-    
+
     # Check if the column sets are the same
     if set(df1.columns) != set(df2.columns):
         raise ValueError("The column sets of the two DataFrames are not the same.")
-    
+
     # Align df2 to the order of df1
     df2 = df2.loc[df1.index, df1.columns]
-    
+
     # Compute discrepancies
     abs_discrepancies = np.abs(df1.values - df2.values)
     mean_discrepancy = abs_discrepancies.mean()
     max_discrepancy = abs_discrepancies.max()
-     
+
     with np.errstate(divide='ignore', invalid='ignore'):
         relative_discrepancies = np.where(
             np.abs(df1.values) == 0,
@@ -133,7 +134,7 @@ def compare_dataframes(df1, df2, max_tol=1e-2, mean_tol=1e-6, prefix=""):
     print(pd.Series(abs_discrepancies.flatten().round(4)).quantile(q=[0.0, 0.25, 0.5, 0.75, 0.95, 0.99, 0.995, 0.999, 1.0]))
     print(f"Relative Discrepancy: {prefix}")
     print(pd.Series(relative_discrepancies.flatten().round(4)).quantile(q=[0.0, 0.25, 0.5, 0.75, 0.95, 0.99, 0.995, 0.999, 1.0]))
-    
+
     # Report discrepancies
     print(f"Mean absolute discrepancy: {mean_discrepancy}")
     print(f"Maximum absolute (MA) discrepancy: {max_discrepancy}")

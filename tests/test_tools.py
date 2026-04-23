@@ -6,6 +6,7 @@ from os.path import dirname, abspath, join
 import unittest
 import anndata as ad
 import scanpy as sc
+import torch
 
 import pyviper
 
@@ -17,18 +18,18 @@ class TestPathwayEnrichment(unittest.TestCase):
         table = pd.read_table(join(resources_dir, "test_net1.tsv"), sep="\t")
         self.network = pyviper.Interactome(name="network", net_table=table)
         self.network.filter_targets(self.data.var_names)
-        
+
     def test_path_enr(self):
         enrichment = pyviper.tl.path_enrich(
-            self.data, 
-            interactome=self.network, 
-            enrichment="narnea", 
+            self.data,
+            interactome=self.network,
+            enrichment="narnea",
             verbose=False,
             method="ttest"
         )
         pvalues = pyviper._pp._nes_to_pval_df(
-            enrichment.to_df().mean(axis=0), 
-            lower_tail=False, 
+            enrichment.to_df().mean(axis=0),
+            lower_tail=False,
             adjust=True
         )
         self.assertTrue((pvalues.between(0,1).all()))
@@ -49,7 +50,7 @@ class TestOncoMatch(unittest.TestCase):
         # check that each sample is the strongest match for itself
         match = pyviper.tl.oncomatch(pax_data_to_test, pax_data_to_test, return_as_df=True)
         self.assertTrue(np.all(np.diag(match.values) == np.max(match.values, axis=1)))
-    
+
 
 if __name__ == "__main__":
     unittest.main()

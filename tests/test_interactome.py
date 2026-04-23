@@ -5,6 +5,7 @@ import unittest
 import anndata as ad
 import scanpy as sc
 import pandas as pd
+import torch
 
 import pyviper
 
@@ -14,7 +15,7 @@ class TestInteractome(unittest.TestCase):
     def setUp(self):
         self.table = pd.read_table(join(resources_dir, "test_net1.tsv"), sep="\t")
         self.network = pyviper.Interactome(name="net", net_table=self.table)
-    
+
     def test_str(self):
         print(str(self.network))
 
@@ -34,20 +35,20 @@ class TestInteractome(unittest.TestCase):
 
     def test_integrate(self):
         network1 = pyviper.Interactome(
-            name="net1", 
+            name="net1",
             net_table=pd.DataFrame({
-                'regulator': ['reg1', 'reg2'], 
-                'target': ['t1', 't2'], 
-                'mor': [0.5, 0.6], 
+                'regulator': ['reg1', 'reg2'],
+                'target': ['t1', 't2'],
+                'mor': [0.5, 0.6],
                 'likelihood': [0.7, 0.8]
             })
         )
         network2 = pyviper.Interactome(
             name="net2",
             net_table=pd.DataFrame({
-                'regulator': ['reg1', 'reg3'], 
-                'target': ['t1', 't3'], 
-                'mor': [0.5, 0.6], 
+                'regulator': ['reg1', 'reg3'],
+                'target': ['t1', 't3'],
+                'mor': [0.5, 0.6],
                 'likelihood': [0.7, 0.8]
             })
         )
