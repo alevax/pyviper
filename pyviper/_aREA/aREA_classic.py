@@ -30,7 +30,8 @@ def rankdata_torch_ordinal(x, device=None, verbose=False):
 
     with torch.inference_mode():
         # Move the input matrix to torch
-        xt = torch.as_tensor(x, device=device)
+        dtype_torch = torch.float32 if device == "mps" else torch.float64
+        xt = torch.as_tensor(x, device=device, dtype=dtype_torch)
 
         # Rank each row using the double-argsort trick
         order = torch.argsort(xt, dim=1)
