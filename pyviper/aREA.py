@@ -5,7 +5,7 @@ def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets =
     Allows the individual to infer normalized enrichment scores from gene
     expression data using the Analytical Ranked Enrichment Analysis (aREA)[1]
     function.
-    
+
     It is the original basis of the VIPER (Virtual Inference of Protein-activity
     by Enriched Regulon analysis) algorithm.
 
@@ -13,7 +13,7 @@ def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets =
     features of gex_data. This can be accomplished by running:
 
         interactome.filter_targets(gex_data.var_names)
-    
+
     It is highly recommended to do this on the unPruned network and then prune
     to ensure the pruned network contains a consistent number of targets per
     regulator, all of which exist within gex_data. A consistent number of
@@ -51,6 +51,23 @@ def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets =
         of samples to networks using list position or network names.
         (C) "auto": assign samples to networks based on how well each
         network allows for sample enrichment.
+    device : default: 'cpu'
+        Whether to use the cpu or gpu on your device for the calculation of the
+        aREA function. Using a gpu can improve the speed of the function. Using
+        'mps' or 'cuda' will producte slight differences (mean difference in
+        NES around 1E-6), while Pearson and Spearman correlation remain >0.999.
+    rank_ordinal : default: False
+        (A) Whether to use ordinal ranking from PyTorch instead of averaged
+        ranking from Scipy. Setting to False will use averaged ranking, which
+        is slower but more stable/consistent.
+        (B) Using the ranks, it then assigns each gene a score based off of the
+        inverse CDF for a standard distribution (z-like score), so some genes
+        can receive different value. The sign of the NES is based soley off of
+        the sign of the dES. Therefore, if the dES was already close to 0, this
+        small difference can have the effect of flipping the sign of some
+        protein NES scores (around every 1 out of 1.5 million NES scores). Mean
+        difference in NES from averaged ranking are magnitude around 1E-6, with
+        Pearson and Spearman correlation remaining >0.999.
     verbose : default: True
         Whether extended output about the progress of the algorithm should be
         given.
@@ -71,6 +88,6 @@ def aREA(gex_data, interactome, layer = None, eset_filter = False, min_targets =
         min_targets,
         mvws,
         device=device,
-        rank_ordinal=rank_ordinal, 
+        rank_ordinal=rank_ordinal,
         verbose=verbose
     )
