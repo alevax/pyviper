@@ -12,7 +12,7 @@ sys.path.insert(0, pathlib.Path(__file__).parents[1].resolve().as_posix())
 project = 'pyviper'
 copyright = '2023'
 author = 'Califano Lab'
-release = '1.0.6'
+release = '2.1.3'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -28,7 +28,6 @@ extensions = [
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store','.ipynb_checkpoints']
-
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
