@@ -238,7 +238,7 @@ def viper_similarity(
         key_added: str = "viper_similarity"
     ):
     """\
-    Compute the similarity between the columns of a VIPER-predicted activity or
+    Compute the similarity between the rows of a VIPER-predicted activity or
     gene expression matrix. While following the same concept as the two-tail
     Gene Set Enrichment Analysis (GSEA)[1], it is based on the aREA algorithm[2].
 
