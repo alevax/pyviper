@@ -730,14 +730,15 @@ def _aracne3_to_regulon(
         net = net_df.copy()
 
     if anno is not None:
-        if anno.shape[1] != 2 or not isinstance(anno, (pd.DataFrame, pd.Series, pd.Matrix)):
+        if anno.shape[1] != 2 or not isinstance(anno, (pd.DataFrame, pd.Series)):
             raise ValueError("anno should contain two columns: 1-original symbol, 2-new symbol")
 
         anno.columns = ["old", "new"]
 
         ## Convert gene symbols:
-        net['regulator.values'] = anno.set_index('old').loc[net['regulator.values'], 'new'].values
-        net['target.values'] = anno.set_index('old').loc[net['target.values'], 'new'].values
+        gene_map = anno.drop_duplicates('old').set_index('old')['new']
+        net['regulator.values'] = net['regulator.values'].map(gene_map)
+        net['target.values'] = net['target.values'].map(gene_map)
 
     ## Network filtering
     net = net[net['mi.values'] > MI_thres]
